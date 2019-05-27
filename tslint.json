@@ -13,6 +13,7 @@
         "no-floating-promises": true,
         "no-unused-variable": [true, {"ignore-pattern": "^_"}],
         "prefer-object-spread": false,
-        "ter-prefer-arrow-callback": [true, {"allowNamedFunctions": true}]
+        "ter-prefer-arrow-callback": [true, {"allowNamedFunctions": true}],
+        "no-parameter-properties": true
     }
 }

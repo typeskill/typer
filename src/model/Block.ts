@@ -11,12 +11,14 @@ export function setInstanceNumber(num: number) {
 
 abstract class Block<T extends string = any> {
   private instanceNumber: number
+  protected blockInterface: Document.BlockInterface<T>
 
   constructor(
-     protected blockInterface: Document.BlockInterface<T>
+     blockInterface: Document.BlockInterface<T>
   ) {
     // tslint:disable-next-line:no-increment-decrement
     this.instanceNumber = lastInstanceNumber++
+    this.blockInterface = blockInterface
   }
 
   protected updateDelta(diffDelta: DocumentDelta) {
