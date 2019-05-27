@@ -1,6 +1,6 @@
 {
   "name": "react-native-typewriter",
-  "version": "0.10.0-alpha.0",
+  "version": "0.10.0-alpha.1",
   "repository": "git@github.com:jsamr/react-native-typewriter.git",
   "description": "High quality, delta-based React Native rich text editor",
   "author": "Jules Randolph <jules.sam.randolph@gmail.com>",
