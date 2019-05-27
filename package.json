@@ -1,0 +1,87 @@
+{
+  "name": "react-native-typewriter",
+  "version": "0.10.0-alpha.0",
+  "repository": "git@github.com:jsamr/react-native-typewriter.git",
+  "description": "High quality, delta-based React Native rich text editor",
+  "author": "Jules Randolph <jules.sam.randolph@gmail.com>",
+  "private": false,
+  "license": "MIT",
+  "scripts": {
+    "build": "rimraf lib; ttsc --project ./tsconfig-build.json",
+    "prepare": "npm run build",
+    "test": "jest",
+    "lint": "tslint 'src/**/*?(.d).ts?(x)' --fix",
+    "release": "standard-version"
+  },
+  "files": [
+    "lib/**/*"
+  ],
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "keywords": [
+    "react native",
+    "rich text",
+    "editor",
+    "redactor",
+    "text",
+    "typewriter",
+    "quilljs",
+    "delta"
+  ],
+  "dependencies": {
+    "@types/diff": "^4.0.2",
+    "@types/invariant": "^2.2.29",
+    "@types/ramda": "^0.26.5",
+    "autobind-decorator": "^2.4.0",
+    "diff": "^4.0.1",
+    "eventemitter3": "^3.1.0",
+    "invariant": "^2.2.4",
+    "quill-delta": "4.2.1",
+    "ramda": "^0.26.1"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.4.4",
+    "@babel/plugin-proposal-decorators": "^7.4.0",
+    "@babel/runtime": "^7.4.4",
+    "@commitlint/cli": "^7.6.1",
+    "@commitlint/config-conventional": "^7.6.0",
+    "@react-native-community/eslint-config": "^0.0.3",
+    "@types/jest": "^24.0.11",
+    "@types/react": "^16.8.8",
+    "@types/react-native": "^0.57.41",
+    "@types/react-native-vector-icons": "^4.6.4",
+    "@types/react-test-renderer": "^16.8.1",
+    "@zerollup/ts-transform-paths": "^1.7.1",
+    "babel-jest": "^24.5.0",
+    "eslint": "^5.15.3",
+    "husky": "^2.3.0",
+    "jest": "^24.5.0",
+    "metro-react-native-babel-preset": "^0.53.1",
+    "react": "^16.8.6",
+    "react-native": "^0.59.8",
+    "react-native-vector-icons": "^6.4.2",
+    "react-test-renderer": "^16.8.6",
+    "rimraf": "^2.6.3",
+    "standard-version": "^6.0.1",
+    "tslint": "^5.14.0",
+    "tslint-config-airbnb": "^5.11.1",
+    "tslint-eslint-rules": "^5.4.0",
+    "tslint-plugin-prettier": "^2.0.1",
+    "tslint-react": "^3.6.0",
+    "tslint-react-recommended": "^1.0.15",
+    "ttypescript": "^1.5.6",
+    "typescript": "^3.3.4000"
+  },
+  "peerDependencies": {
+    "react": "*",
+    "react-native": "*"
+  },
+  "jest": {
+    "preset": "react-native"
+  },
+  "husky": {
+    "hooks": {
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
+    }  
+  }
+}

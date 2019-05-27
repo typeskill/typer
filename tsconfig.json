@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "module": "commonjs",
+    "experimentalDecorators": true,
+    "allowJs": true,
+    "allowSyntheticDefaultImports": true,
+    "downlevelIteration": true,
+    "esModuleInterop": false,
+    "isolatedModules": false,
+    "outDir": "./lib",
+    "jsx": "react",
+    "lib": ["es6"],
+    "baseUrl": "./src",
+    "paths": {
+      "@components/*": ["components/*"],
+      "@core/*": ["core/*"],
+      "@delta/*": ["delta/*"],
+      "@model/*": ["model/*"]
+    },
+    "noEmit": true,
+    "strict": true
+  },
+  "include": ["src"],
+  "exclude": ["node_modules"]
+}
