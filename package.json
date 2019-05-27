@@ -11,7 +11,8 @@
     "prepare": "npm run build",
     "test": "jest",
     "lint": "tslint 'src/**/*?(.d).ts?(x)' --fix",
-    "release": "standard-version"
+    "release": "standard-version",
+    "semantic-release": "semantic-release"
   },
   "files": [
     "lib/**/*"
@@ -46,6 +47,11 @@
     "@commitlint/cli": "^7.6.1",
     "@commitlint/config-conventional": "^7.6.0",
     "@react-native-community/eslint-config": "^0.0.3",
+    "@semantic-release/changelog": "^3.0.2",
+    "@semantic-release/commit-analyzer": "^6.1.0",
+    "@semantic-release/github": "^5.2.10",
+    "@semantic-release/npm": "^5.1.7",
+    "@semantic-release/release-notes-generator": "^7.1.4",
     "@types/jest": "^24.0.11",
     "@types/react": "^16.8.8",
     "@types/react-native": "^0.57.41",
@@ -62,6 +68,7 @@
     "react-native-vector-icons": "^6.4.2",
     "react-test-renderer": "^16.8.6",
     "rimraf": "^2.6.3",
+    "semantic-release": "^15.13.12",
     "standard-version": "^6.0.1",
     "tslint": "^5.14.0",
     "tslint-config-airbnb": "^5.11.1",
@@ -82,6 +89,6 @@
   "husky": {
     "hooks": {
       "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
-    }  
+    }
   }
 }
