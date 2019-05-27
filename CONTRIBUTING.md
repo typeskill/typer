@@ -48,7 +48,7 @@ npm run release
 Prereleases:
 
 ```bash
-npm run release -- --prerelease alpha
+npm run release -- --skip.changelog=true --prerelease alpha
 ```
 
 ## Reporting issues
