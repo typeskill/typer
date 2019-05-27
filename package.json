@@ -7,10 +7,13 @@
   "private": false,
   "license": "MIT",
   "scripts": {
+    "autolint": "tslint 'src/**/*?(.d).ts?(x)' --fix",
     "build": "rimraf lib; ttsc --project ./tsconfig-build.json",
     "prepare": "npm run build",
-    "test": "jest",
-    "lint": "tslint 'src/**/*?(.d).ts?(x)' --fix",
+    "test": "npm run validate:typescript && npm run validate:tslint && npm run test:jest",
+    "test:jest":"jest",
+    "validate:typescript": "tsc --project ./ --noEmit",
+    "validate:tslint": "tslint --project ./",
     "release": "standard-version",
     "semantic-release": "semantic-release"
   },
