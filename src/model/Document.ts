@@ -50,7 +50,7 @@ class Document<T extends string> {
   }
 
   private newBlock(BlockKind: Block.Class<T>, initDelta?: DocumentDelta) {
-    invariant(this.consumer != null, 'A document consumer must be registered to create a block')
+    invariant(this.consumer !== null, 'A document consumer must be registered to create a block')
     if (this.consumer) {
       const blockIface: Document.BlockInterface<T> = Object.freeze({
         orchestrator: this.orchestrator,
