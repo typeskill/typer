@@ -9,8 +9,8 @@ import { BaseTextTransformAttribute } from '@delta/transforms'
 import Document from '@model/Document'
 import Bridge from '@core/Bridge'
 import TextBlock from '@model/TextBlock'
-import { flattenTextChild } from './utils'
 import RichText from '@components/RichText'
+import { mockSelectionChangeEvent, flattenTextChild } from '@mock/vdom'
 
 function buildDocumentConsumer() {
   const bridge = new Bridge()
@@ -53,7 +53,7 @@ describe('@components/<TextBlockController>', () => {
     expect(() => {
       const delta = new DocumentDelta()
       renderer.create(<TextBlockController documentDelta={delta} textBlock={undefined as any} />)
-    }).toThrowError('model prop must be given at construction')
+    }).toThrowError('textBlock prop must be given at construction')
   })
   it('renders without crashing', () => {
     const textInput = renderer.create(<TextBlockController {...getTextInputDefaultProps()} />)
@@ -105,22 +105,23 @@ describe('@components/<TextBlockController>', () => {
     const textBlockController = wrapper.getInstance() as unknown as TextBlockController<any>
     expect(textBlockController).toBeInstanceOf(TextBlockController)
     textBlockController['handleOnTextChanged']('This is nu text')
+    textBlockController['handleOnSelectionChange'](mockSelectionChangeEvent(15, 15))
     expect(getDelta().ops).toEqual([
       { insert: 'This is nu text\n' }
     ])
   })
-  it('should stay in sync with model', () => {
+  it('should stay in sync with textBlock', () => {
     const { document, docConsumer, getDelta } = buildDocumentConsumer()
     document.registerConsumer(docConsumer)
     const block = document.getActiveBlock() as TextBlock<any>
     const wrapper = renderer.create(<TextBlockController textBlock={block} documentDelta={getDelta()} />)
     const textBlockController = wrapper.getInstance() as unknown as TextBlockController<any>
     expect(textBlockController).toBeInstanceOf(TextBlockController)
-    textBlockController['handleOnTextChanged']('This is nu text\n')
-    textBlockController['handleOnTextChanged']('This is nu text\n\n')
+    textBlockController['handleOnTextChanged']('This is nu text\nBlah')
+    textBlockController['handleOnSelectionChange'](mockSelectionChangeEvent(20, 20))
     wrapper.update(<TextBlockController textBlock={block} documentDelta={getDelta()} />)
     const richText = wrapper.root.findByType(RichText)
     const text = flattenTextChild(richText)
-    expect(text.join('')).toEqual('This is nu text\n')
+    expect(text.join('')).toEqual('This is nu text\nBlah')
   })
 })

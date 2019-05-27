@@ -1,4 +1,9 @@
+import { NativeSyntheticEvent, TextInputSelectionChangeEventData } from 'react-native'
 import { ReactTestInstance } from 'react-test-renderer'
+
+export function mockSelectionChangeEvent(start: number, end: number): NativeSyntheticEvent<TextInputSelectionChangeEventData> {
+  return { nativeEvent: { selection: { start, end } } } as NativeSyntheticEvent<TextInputSelectionChangeEventData>
+}
 
 export function flattenTextChild(instance: ReactTestInstance): string[] {
   const children: string[] = []
@@ -10,6 +15,8 @@ export function flattenTextChild(instance: ReactTestInstance): string[] {
         children.push(inst)
       }
     }
+  } else {
+    console.info('NOT CHILDREN')
   }
   return children
 }
