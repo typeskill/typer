@@ -1,9 +1,10 @@
 import Block from './Block'
-import { TextAttributesMap, BlockAttributesMap } from '@delta/attributes'
+import Document from './Document'
+import { TextAttributesMap } from '@delta/attributes'
 import { boundMethod } from 'autobind-decorator'
 import { Selection } from '@delta/selection'
 import TextTransformsRegistry from '@core/TextTransformsRegistry'
-import { DeltaChangeContext } from '@delta/DocumentDelta';
+import { DeltaChangeContext } from '@delta/DocumentDelta'
 
 export default class TextBlock<T extends string> extends Block<T> {
 
@@ -13,6 +14,12 @@ export default class TextBlock<T extends string> extends Block<T> {
     end: 0
   }
   private length: number = 0
+
+  constructor(
+    blockInterface: Document.BlockInterface<T>
+  ) {
+    super(blockInterface)
+  }
 
   getSelection(): Selection {
     // TODO inspect dependencies and refactor
@@ -43,7 +50,6 @@ export default class TextBlock<T extends string> extends Block<T> {
 
   @boundMethod
   handleOnTextChange(newText: string, context: DeltaChangeContext): void {
-    // Sanitize newText here
     const updatedDelta = this.getDelta().applyTextDiff(newText, context)
     this.updateDelta(updatedDelta)
     this.length = newText.length
