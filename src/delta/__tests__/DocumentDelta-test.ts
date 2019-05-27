@@ -3,7 +3,7 @@ import DocumentDelta, { GenericDelta, getHeadingCharactersFromType, extractTextF
 import { TextAttributesMap } from '@delta/attributes'
 import { Selection } from '@delta/selection'
 import { TextLineType } from '@delta/transforms'
-import { mockDeltaChangeContext } from 'test/delta'
+import { mockDeltaChangeContext } from '@test/delta'
 
 describe('@delta/DocumentDelta', () => {
   // The idea is to expose operations on different kind of blocks
