@@ -1,7 +1,12 @@
 module.exports = {
-    "presets": ["module:metro-react-native-babel-preset"],
+    presets: [
+      "@babel/preset-env",
+      "@babel/preset-typescript"
+    ],
     plugins: [
-      ["@babel/plugin-proposal-decorators", { legacy: true }]
+      ["@babel/plugin-proposal-decorators", { legacy: true }],
+      '@babel/plugin-proposal-class-properties',
+      '@babel/plugin-proposal-object-rest-spread'
     ]
 }
   
