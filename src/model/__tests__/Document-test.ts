@@ -1,6 +1,8 @@
 import Document from '@model/Document'
 import TextBlock from '@model/TextBlock'
 import Bridge from '@core/Bridge'
+import { mockDeltaChangeContext } from '@mock/delta'
+import { getHeadingCharactersFromType, extractTextFromDelta } from '@delta/DocumentDelta';
 
 function newConsumer() {
   const bridge = new Bridge<any>()
@@ -20,51 +22,60 @@ describe('@model/Document', () => {
     })
   })
   describe('document operations', () => {
-    it('should pass scenari 1: alternating between two blocks', () => {
-      const document = new Document()
-      document.registerConsumer(newConsumer())
-      let block0 = document.getActiveBlock() as TextBlock<any>
-      block0.handleOnTextChange('First line')
-      block0.handleOnSubmitEditing() // return new line
-      let block1 = document.getActiveBlock()
-      block1.handleOnKeyPress('Backspace')
-      block0 = document.getActiveBlock() as TextBlock<any>
-      block0.handleOnSubmitEditing()
-      block1 = document.getActiveBlock()
-      block1.handleOnKeyPress('Backspace')
-      expect(document.getActiveBlock().getDelta().ops).toEqual([
-        { insert: 'First line\n' }
-      ])
-    })
-    it('should pass scenari 2: applying type to multiple lines and adding newline', () => {
+    it('setting a line to ol type should add prefix', () => {
       const consumer = newConsumer()
       const outerInterface = consumer.bridgeOuterInterface
       const document = new Document()
       document.registerConsumer(consumer)
       const block0 = document.getActiveBlock() as TextBlock<any>
-      block0.handleOnTextChange('First\nSecond')
-      block0.handleOnSelectionChange({ start: 0, end: 12 })
+      block0.handleOnTextChange('First\n', mockDeltaChangeContext(0, 5))
+      block0.handleOnSelectionChange({ start: 5, end: 5 })
       outerInterface.applyLineTransformToSelection('ol')
-      block0.handleOnTextChange('First\nSecond\n')
       expect(block0.getDelta().ops).toEqual([
-        { insert: 'First' },
+        { insert: getHeadingCharactersFromType('ol', 0) + 'First' },
+        { insert: '\n', attributes: { $type: 'ol' } }
+      ])
+    })
+    it('applying type to multiple lines and adding newline', () => {
+      const consumer = newConsumer()
+      const outerInterface = consumer.bridgeOuterInterface
+      const document = new Document()
+      document.registerConsumer(consumer)
+      const block0 = document.getActiveBlock() as TextBlock<any>
+      const firstLine = getHeadingCharactersFromType('ol', 0) + 'First'
+      const fullText = firstLine + '\n'
+      block0.handleOnTextChange(fullText, mockDeltaChangeContext(0, fullText.length - 1))
+      block0.handleOnSelectionChange({ start: firstLine.length - 1, end: firstLine.length - 1 })
+      outerInterface.applyLineTransformToSelection('ol')
+      block0.handleOnTextChange(fullText, mockDeltaChangeContext(fullText.length - 1, fullText.length))
+      expect(block0.getDelta().ops).toEqual([
+        { insert: getHeadingCharactersFromType('ol', 0) + 'First' },
         { insert: '\n', attributes: { $type: 'ol' } },
-        { insert: 'Second' },
+        { insert: getHeadingCharactersFromType('ol', 1) },
         { insert: '\n', attributes: { $type: 'ol' } }
       ])
     })
-    it('should pass scenari 3: deleting an ol prefix manually should remove ol type', () => {
+    it('deleting an ol prefix manually should remove ol type', () => {
       const consumer = newConsumer()
       const outerInterface = consumer.bridgeOuterInterface
       const document = new Document()
       document.registerConsumer(consumer)
       const block0 = document.getActiveBlock() as TextBlock<any>
-      block0.handleOnTextChange('First')
-      block0.handleOnSelectionChange({ start: 0, end: 5 })
+      const initialLine = 'First\n'
+      block0.handleOnTextChange(initialLine, mockDeltaChangeContext(0, 5))
+      block0.handleOnSelectionChange({ start: 5, end: 5 })
       outerInterface.applyLineTransformToSelection('ol')
+      const header = getHeadingCharactersFromType('ol', 0)
+      const transformedLine = header + 'First'
+      const slicedLine = header.slice(0, 1) + header.slice(2) + initialLine
       expect(block0.getDelta().ops).toEqual([
-        { insert: 'First' },
+        { insert: transformedLine },
         { insert: '\n', attributes: { $type: 'ol' } }
+      ])
+      block0.handleOnSelectionChange({ start: 2, end: 2 })
+      block0.handleOnTextChange(slicedLine, mockDeltaChangeContext(2, 1))
+      expect(block0.getDelta().ops).toEqual([
+        { insert: initialLine }
       ])
     })
   })
