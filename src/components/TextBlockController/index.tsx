@@ -59,7 +59,7 @@ export default class TextBlockController<T extends string> extends Component<Tex
 
   constructor(props: TextBlockControllerProps<T>) {
     super(props)
-    invariant(props.textBlock !== null, 'textBlock prop must be given at construction')
+    invariant(props.textBlock != null, 'textBlock prop must be given at construction')
     this.blockControllerInterface = props.textBlock.getControllerInterface()
   }
 
