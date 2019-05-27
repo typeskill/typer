@@ -1,9 +1,9 @@
 
-# Contributing to React Native Typewriter
+# Contributing to React Native Typeskill
 
 ## Development Process
 
-All work on React Native Typewriter happens directly on GitHub. Contributors send pull requests which go through a review process.
+All work on React Native Typeskill happens directly on GitHub. Contributors send pull requests which go through a review process.
 
 > **Working on your first pull request?** You can learn how from this *free* series: [How to Contribute to an Open Source Project on GitHub](https://egghead.io/series/how-to-contribute-to-an-open-source-project-on-github).
 
@@ -53,7 +53,7 @@ npm run release -- --skip.changelog=true --prerelease alpha
 
 ## Reporting issues
 
-You can report issues on our [bug tracker](https://github.com/jsamr/react-native-typewriter/issues). Please search for existing issues and follow the issue template when opening an issue.
+You can report issues on our [bug tracker](https://github.com/jsamr/react-native-Typeskill/issues). Please search for existing issues and follow the issue template when opening an issue.
 
 ## License
 

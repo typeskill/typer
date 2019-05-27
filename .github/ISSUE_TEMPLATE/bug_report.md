@@ -16,7 +16,7 @@ labels: 'bug'
 <!-- Please add the used versions/branches -->
 - Android:
 - iOS:
-- react-native-typewriter:
+- react-native-typeskill:
 - react-native:
 - react:
 
