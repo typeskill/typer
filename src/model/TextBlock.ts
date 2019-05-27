@@ -1,4 +1,5 @@
 import Block from './Block'
+import Document from './Document'
 import { TextAttributesMap } from '@delta/attributes'
 import { boundMethod } from 'autobind-decorator'
 import { Selection } from '@delta/selection'
@@ -13,6 +14,10 @@ export default class TextBlock<T extends string> extends Block<T> {
     end: 0
   }
   private length: number = 0
+
+  constructor(blockInterface: Document.BlockInterface<T>) {
+    super(blockInterface)
+  }
 
   getSelection(): Selection {
     // TODO inspect dependencies and refactor
