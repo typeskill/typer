@@ -78,9 +78,13 @@ describe('@model/Store', () => {
       setBlockInstanceNumber(1)
       store.appendBlock(newTextBlock())
       expect(store['state'].blockOrders).toEqual([0, 1])
-      expect(store['state'].deltas).toEqual({
-        0: delta0,
-        1: delta1
+      expect(store['state'].deltas).toMatchObject({
+        0: {
+          ops: delta0.ops
+        },
+        1: {
+          ops: delta1.ops
+        }
       })
       expect(store['state'].selectedBlockInstanceNumber).toEqual(1)
     })

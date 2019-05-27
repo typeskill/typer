@@ -62,7 +62,7 @@ class Store<T extends string = any> {
       selectedBlockInstanceNumber: block.getInstanceNumber(),
       blockOrders: concat(this.state.blockOrders, [block.getInstanceNumber()]),
       deltas: mergeRight(this.state.deltas, {
-        [block.getInstanceNumber()]: initDelta || new DocumentDelta([{ insert: '\n' }])
+        [block.getInstanceNumber()]: initDelta || new DocumentDelta([])
       })
     }
   }
