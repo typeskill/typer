@@ -4,13 +4,13 @@ import React from 'react'
 // Test renderer must be required after react-native.
 import renderer from 'react-test-renderer'
 import DocumentDelta from '@delta/DocumentDelta'
-import TextBlockController, { TextBlockControllerProps, normalizeText } from '@components/TextBlockController'
-import { BaseTextTransformAttribute, TextLineType } from '@delta/transforms'
+import TextBlockController, { TextBlockControllerProps } from '@components/TextBlockController'
+import { BaseTextTransformAttribute } from '@delta/transforms'
 import Document from '@model/Document'
 import Bridge from '@core/Bridge'
 import TextBlock from '@model/TextBlock'
 import { flattenTextChild } from './utils'
-import RichText, { getHeadingCharactersFromType } from '@components/RichText'
+import RichText from '@components/RichText'
 
 function buildDocumentConsumer() {
   const bridge = new Bridge()
@@ -122,76 +122,5 @@ describe('@components/<TextBlockController>', () => {
     const richText = wrapper.root.findByType(RichText)
     const text = flattenTextChild(richText)
     expect(text.join('')).toEqual('This is nu text\n')
-  })
-})
-
-describe('normalizeText', () => {
-  it('should preserve text which lines in DocumentDelta are of type "normal"', () => {
-    const text = 'eheh\nahah\nohoh\n'
-    const delta = new DocumentDelta([
-      { insert: 'eheh' },
-      { insert: '\n', attributes: { $type: 'normal' } },
-      { insert: 'ahah' },
-      { insert: '\n', attributes: { $type: 'normal' } },
-      { insert: 'ohoh\n' }
-    ])
-    const result = normalizeText(text, delta)
-    expect(result).toEqual(text)
-  })
-  it('should trim prefixes of lines of "ol" type', () => {
-    const deltaText = 'eheh\nahah\nohoh\n'
-    const type: TextLineType = 'ol'
-    const textInputText = `eheh\n${getHeadingCharactersFromType(type, 0)}ahah\n${getHeadingCharactersFromType(type, 1)}ohoh\n`
-    const delta = new DocumentDelta([
-      { insert: 'eheh\n' },
-      { insert: 'ahah' },
-      { insert: '\n', attributes: { $type: type } },
-      { insert: 'ohoh' },
-      { insert: '\n', attributes: { $type: type } }
-    ])
-    expect(delta['getText']()).toEqual(deltaText)
-    const result = normalizeText(textInputText, delta)
-    expect(result).toEqual(deltaText)
-  })
-  it('should trim prefixes of lines of "quoted" type', () => {
-    const deltaText = 'eheh\nahah\n\ohoh\n'
-    const type: TextLineType = 'quoted'
-    const textInputText = `eheh\n${getHeadingCharactersFromType(type, 0)}ahah\n${getHeadingCharactersFromType(type, 1)}ohoh\n`
-    const delta = new DocumentDelta([
-      { insert: 'eheh\n' },
-      { insert: 'ahah' },
-      { insert: '\n', attributes: { $type: type } },
-      { insert: 'ohoh' },
-      { insert: '\n', attributes: { $type: type } }
-    ])
-    expect(delta['getText']()).toEqual(deltaText)
-    expect(normalizeText(textInputText, delta)).toEqual(deltaText)
-  })
-  it('should trim prefixes of lines of "ul" type', () => {
-    const deltaText = 'eheh\nahah\n\ohoh\n'
-    const type: TextLineType = 'ul'
-    const textInputText = `eheh\n${getHeadingCharactersFromType(type, 0)}ahah\n${getHeadingCharactersFromType(type, 1)}ohoh\n`
-    const delta = new DocumentDelta([
-      { insert: 'eheh\n' },
-      { insert: 'ahah' },
-      { insert: '\n', attributes: { $type: type } },
-      { insert: 'ohoh' },
-      { insert: '\n', attributes: { $type: type } }
-    ])
-    expect(delta['getText']()).toEqual(deltaText)
-    expect(normalizeText(textInputText, delta)).toEqual(deltaText)
-  })
-  it('should handle lines length differences', () => {
-    const deltaText = 'eheh\nahah\n\ohoh\n'
-    const type: TextLineType = 'ul'
-    const textInputText = `eheh\n${getHeadingCharactersFromType(type, 0)}ahah\n${getHeadingCharactersFromType(type, 1)}ohoh\n`
-    const delta = new DocumentDelta([
-      { insert: 'eheh\n' },
-      { insert: 'ahah' },
-      { insert: '\n', attributes: { $type: type } },
-      { insert: 'ohoh' },
-      { insert: '\n', attributes: { $type: type } }
-    ])
-    expect(normalizeText(textInputText, delta)).toEqual(deltaText)
   })
 })
