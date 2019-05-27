@@ -57,4 +57,4 @@ You can report issues on our [bug tracker](https://github.com/jsamr/react-native
 
 ## License
 
-By contributing to React Native NetInfo, you agree that your contributions will be licensed under the **MIT** license.
+By contributing to React Native Typeskill, you agree that your contributions will be licensed under the **MIT** license.
