@@ -1,4 +1,5 @@
 // tslint:disable:no-string-literal
+// tslint:disable:no-unused-variable
 import Store from '@model/Store'
 import DocumentDelta from '@delta/DocumentDelta'
 import TextBlock from '@model/TextBlock'

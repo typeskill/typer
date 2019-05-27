@@ -1,8 +1,8 @@
 // tslint:disable: no-string-literal
-import DocumentDelta, { GenericDelta, DeltaChangeContext, getHeadingCharactersFromType, extractTextFromDelta, isLineInSelection } from '@delta/DocumentDelta'
+import DocumentDelta, { GenericDelta, getHeadingCharactersFromType, extractTextFromDelta, isLineInSelection } from '@delta/DocumentDelta'
 import { TextAttributesMap } from '@delta/attributes'
 import { Selection } from '@delta/selection'
-import { TextLineType } from '@delta/transforms';
+import { TextLineType } from '@delta/transforms'
 import { mockDeltaChangeContext } from 'test/delta'
 
 describe('@delta/DocumentDelta', () => {
@@ -665,9 +665,6 @@ describe('@delta/DocumentDelta', () => {
           { insert: '\n', attributes: { $type: 'ol' } }
         ])
       })
-    })
-    describe('when applied with "ul" type', () => {
-
     })
   })
 })

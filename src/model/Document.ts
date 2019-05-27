@@ -43,7 +43,7 @@ class Document<T extends string> {
   }
 
   private handleOnPressEnterFromBlock(block: Block) {
-    const selection = block.getSelection()
+    // const selection = block.getSelection()
     // TODO implement
     // console.info('Hey, pressing enter from selection', selection.start, selection.end)
     this.insertBlock(TextBlock)

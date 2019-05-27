@@ -1,5 +1,4 @@
 // tslint:disable:no-string-literal
-import { TextInput } from 'react-native'
 import React from 'react'
 // Test renderer must be required after react-native.
 import renderer from 'react-test-renderer'

@@ -4,7 +4,6 @@ import { StyleProp, TextStyle } from 'react-native'
 import invariant from 'invariant'
 import { BaseTextTransformAttribute, TextTransformsDictionnary, TextTransformSpec } from '@delta/transforms'
 import { TextOp } from '@delta/operations'
-import { TextAttributesMap } from '@delta/attributes'
 
 export function textTransformListToDict<T extends string = BaseTextTransformAttribute>(list: TextTransformSpec<T, any>[]): TextTransformsDictionnary<T> {
   const attributeNameGetter = prop('attributeName') as (t: TextTransformSpec<T, any>) => string

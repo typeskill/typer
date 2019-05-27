@@ -1,14 +1,12 @@
 import DocumentDelta from '@delta/DocumentDelta'
 import React, { Component } from 'react'
 import invariant from 'invariant'
-import { View, Text, TextInput, NativeSyntheticEvent, TextInputSelectionChangeEventData, TextInputKeyPressEventData, StyleSheet, StyleProp, TextStyle, TextInputProps } from 'react-native'
+import { View, TextInput, NativeSyntheticEvent, TextInputSelectionChangeEventData, TextInputKeyPressEventData, StyleSheet, StyleProp, TextStyle, TextInputProps } from 'react-native'
 import RichText, { richTextStyles } from '@components/RichText'
 import { Selection } from '@delta/selection'
 import Orchestrator from '@model/Orchestrator'
 import { boundMethod } from 'autobind-decorator'
 import TextBlock from '@model/TextBlock'
-import slice from 'ramda/es/slice'
-import concat from 'ramda/es/concat'
 import { TextChangeSession } from './TextChangeSession'
 
 export interface TextBlockControllerProps<T extends string> {
@@ -84,11 +82,6 @@ export default class TextBlockController<T extends string> extends Component<Tex
   @boundMethod
   private handleOnKeyPressed({ nativeEvent: { key } }: NativeSyntheticEvent<TextInputKeyPressEventData>) {
     this.props.textBlock.handleOnKeyPress(key)
-  }
-
-  @boundMethod
-  private handleOnSubmitEditing() {
-    this.props.textBlock.handleOnSubmitEditing()
   }
 
   /**

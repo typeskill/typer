@@ -98,7 +98,7 @@ describe('@components/<TextBlockController>', () => {
     expect(spy).toHaveBeenCalledTimes(1)
   })
   it('should comply with DocumentDelta when text updates', () => {
-    const { document, bridge, docConsumer, getDelta } = buildDocumentConsumer()
+    const { document, docConsumer, getDelta } = buildDocumentConsumer()
     document.registerConsumer(docConsumer)
     const block = document.getActiveBlock() as TextBlock<any>
     const wrapper = renderer.create(<TextBlockController textBlock={block} documentDelta={getDelta()} />)
