@@ -2,22 +2,8 @@
 import DocumentDelta, { GenericDelta, DeltaChangeContext, getHeadingCharactersFromType, extractTextFromDelta, isLineInSelection } from '@delta/DocumentDelta'
 import { TextAttributesMap } from '@delta/attributes'
 import { Selection } from '@delta/selection'
-import invariant from 'invariant'
 import { TextLineType } from '@delta/transforms';
-
-function createDeltaChangeContext(beforeStart: number, afterStart: number, beforeEnd?: number): DeltaChangeContext {
-  invariant(beforeEnd === undefined || beforeEnd > beforeStart, '')
-  return {
-    selectionBeforeChange: {
-      start: beforeStart,
-      end: beforeEnd !== undefined ? beforeEnd : beforeStart
-    },
-    selectionAfterChange: {
-      start: afterStart,
-      end: afterStart
-    }
-  }
-}
+import { mockDeltaChangeContext } from '@mock/delta'
 
 describe('@delta/DocumentDelta', () => {
   // The idea is to expose operations on different kind of blocks
@@ -57,7 +43,7 @@ describe('@delta/DocumentDelta', () => {
       const originalDelta = new DocumentDelta([
         { insert: 'Hello world\n' }
       ])
-      const changeContext = createDeltaChangeContext(11, 10)
+      const changeContext = mockDeltaChangeContext(11, 10)
       const nextDelta = originalDelta.applyTextDiff(newText, changeContext)
       expect(nextDelta.ops).toEqual([
         { insert: newText }
@@ -68,7 +54,7 @@ describe('@delta/DocumentDelta', () => {
       const originalDelta = new DocumentDelta([
         { insert: 'Hello world\n' }
       ])
-      const changeContext = createDeltaChangeContext(6, 6, 11)
+      const changeContext = mockDeltaChangeContext(6, 6, 11)
       const nextDelta = originalDelta.applyTextDiff(newText, changeContext)
       expect(nextDelta.ops).toEqual([
         { insert: newText }
@@ -79,7 +65,7 @@ describe('@delta/DocumentDelta', () => {
       const originalDelta = new DocumentDelta([
         { insert: 'Hello worl\n' }
       ])
-      const changeContext = createDeltaChangeContext(10, 11)
+      const changeContext = mockDeltaChangeContext(10, 11)
       const nextDelta = originalDelta.applyTextDiff(newText, changeContext)
       expect(nextDelta.ops[0].insert).toBe(newText)
     })
@@ -88,7 +74,7 @@ describe('@delta/DocumentDelta', () => {
       const originalDelta = new DocumentDelta([
         { insert: 'Hello \n' }
       ])
-      const changeContext = createDeltaChangeContext(6, 11)
+      const changeContext = mockDeltaChangeContext(6, 11)
       const nextDelta = originalDelta.applyTextDiff(newText, changeContext)
       expect(nextDelta.ops).toEqual([
         { insert: newText }
@@ -99,7 +85,7 @@ describe('@delta/DocumentDelta', () => {
       const originalDelta = new DocumentDelta([
         { insert: 'Hello world\n' }
       ])
-      const changeContext = createDeltaChangeContext(10, 11, 11)
+      const changeContext = mockDeltaChangeContext(10, 11, 11)
       const nextDelta = originalDelta.applyTextDiff(newText, changeContext)
       expect(nextDelta.ops).toEqual([
         { insert: newText }
@@ -110,7 +96,7 @@ describe('@delta/DocumentDelta', () => {
       const originalDelta = new DocumentDelta([
         { insert: 'Hello world\n' }
       ])
-      const changeContext = createDeltaChangeContext(6, 9, 11)
+      const changeContext = mockDeltaChangeContext(6, 9, 11)
       const nextDelta = originalDelta.applyTextDiff(newText, changeContext)
       expect(nextDelta.ops).toEqual([
         { insert: newText }
@@ -118,7 +104,7 @@ describe('@delta/DocumentDelta', () => {
     })
     it('should append a newline character to delta after inserting a character at the begening of a newline', () => {
       const newText = 'Hello world\nH'
-      const changeContext = createDeltaChangeContext(12, 13)
+      const changeContext = mockDeltaChangeContext(12, 13)
       const originalDelta = new DocumentDelta([
         { insert: 'Hello world\n' }
       ])
@@ -129,7 +115,7 @@ describe('@delta/DocumentDelta', () => {
     })
     it('should retain newline character after inserting a newline character to keep the current linetype, if that line type is not propagable', () => {
       const newText = 'Hello world\n'
-      const changeContext = createDeltaChangeContext(11, 12)
+      const changeContext = mockDeltaChangeContext(11, 12)
       const originalDelta = new DocumentDelta([
         { insert: 'Hello world' },
         { insert: '\n', attributes: { $type: 'misc' } }
@@ -143,7 +129,7 @@ describe('@delta/DocumentDelta', () => {
     })
     it('should not propagate the previous line type to the newline after replacing a newline character, if that line type is not propagable', () => {
       const newText = 'Hello worl\n'
-      const changeContext = createDeltaChangeContext(10, 11, 11)
+      const changeContext = mockDeltaChangeContext(10, 11, 11)
       const originalDelta = new DocumentDelta([
         { insert: 'Hello world' },
         { insert: '\n', attributes: { $type: 'misc' } }
@@ -158,7 +144,7 @@ describe('@delta/DocumentDelta', () => {
     it('should propagate the previous line type to the newline after inserting a newline character and prepend the appropriate prefix, if that line type is propagable', () => {
       const head = getHeadingCharactersFromType('ul', 0)
       const newText = head + 'Hello world\n'
-      const changeContext = createDeltaChangeContext(head.length + 11, head.length + 12)
+      const changeContext = mockDeltaChangeContext(head.length + 11, head.length + 12)
       const originalDelta = new DocumentDelta([
         { insert: getHeadingCharactersFromType('ul', 0) + 'Hello world' },
         { insert: '\n', attributes: { $type: 'ul' } }
@@ -174,7 +160,7 @@ describe('@delta/DocumentDelta', () => {
     it('should propagate the previous line type to the newline after replacing a newline character and prepend the appropriate prefix, if that line type is propagable', () => {
       const head = getHeadingCharactersFromType('ul', 0)
       const newText = head + 'Hello worl\n'
-      const changeContext = createDeltaChangeContext(head.length + 10, head.length + 11, head.length + 11)
+      const changeContext = mockDeltaChangeContext(head.length + 10, head.length + 11, head.length + 11)
       const originalDelta = new DocumentDelta([
         { insert: getHeadingCharactersFromType('ul', 0) + 'Hello world' },
         { insert: '\n', attributes: { $type: 'ul' } }
@@ -188,7 +174,7 @@ describe('@delta/DocumentDelta', () => {
       ])
     })
     it('should not remove newline character when reaching the beginning of any but last line', () => {
-      const changeContext = createDeltaChangeContext(3, 2)
+      const changeContext = mockDeltaChangeContext(3, 2)
       const newText = 'A\n\nC\n'
       const originalDelta = new DocumentDelta([
         { insert: 'A\nB\nC\n' }
