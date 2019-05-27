@@ -10,7 +10,7 @@ import Document from '@model/Document'
 import Bridge from '@core/Bridge'
 import TextBlock from '@model/TextBlock'
 import RichText from '@components/RichText'
-import { mockSelectionChangeEvent, flattenTextChild } from '@mock/vdom'
+import { mockSelectionChangeEvent, flattenTextChild } from 'test/vdom'
 
 function buildDocumentConsumer() {
   const bridge = new Bridge()

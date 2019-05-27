@@ -5,7 +5,7 @@ import RichText from '@components/RichText'
 import DocumentDelta from '@delta/DocumentDelta'
 import TextTransformsRegistry from '@core/TextTransformsRegistry'
 import { defaultTextTransforms } from '@delta/transforms'
-import { flattenTextChild } from '@mock/vdom'
+import { flattenTextChild } from 'test/vdom'
 
 describe('@components/<RichText>', () => {
   it('should renders without crashing', () => {

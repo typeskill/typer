@@ -11,7 +11,7 @@ module.exports = {
       '^@core/(.*)$' : '<rootDir>/src/core/$1',
       '^@delta/(.*)$' : '<rootDir>/src/delta/$1',
       '^@model/(.*)$' : '<rootDir>/src/model/$1',
-      '^@mock/(.*)$' : '<rootDir>/src/mock/$1'
+      '^@test/(.*)$' : '<rootDir>/src/test/$1'
     },
     transformIgnorePatterns: [
       "node_modules/?!(ramda)"

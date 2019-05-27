@@ -17,7 +17,7 @@
       "@core/*": ["core/*"],
       "@delta/*": ["delta/*"],
       "@model/*": ["model/*"],
-      "@mock/*": ["mock/*"]
+      "@test/*": ["test/*"]
     },
     "noEmit": true,
     "strict": true

@@ -1,7 +1,7 @@
 import Document from '@model/Document'
 import TextBlock from '@model/TextBlock'
 import Bridge from '@core/Bridge'
-import { mockDeltaChangeContext } from '@mock/delta'
+import { mockDeltaChangeContext } from 'test/delta'
 import { getHeadingCharactersFromType, extractTextFromDelta } from '@delta/DocumentDelta';
 
 function newConsumer() {
