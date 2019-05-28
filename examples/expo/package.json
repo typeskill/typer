@@ -12,12 +12,14 @@
     "invariant": "^2.2.4",
     "react": "16.5.0",
     "react-native": "https://github.com/expo/react-native/archive/sdk-32.0.0.tar.gz",
-    "react-native-typeskill": "^0.10.0-alpha.3"
+    "react-native-typeskill": "^0.10.0-alpha.4",
+    "whatwg-fetch": "^2.0.4"
   },
   "devDependencies": {
     "@types/expo": "^32.0.13",
     "@types/react": "^16.8.18",
     "@types/react-native": "^0.57.60",
+    "babel-plugin-transform-es2015-modules-commonjs": "^6.26.2",
     "babel-preset-expo": "^5.0.0",
     "tslint": "^5.16.0",
     "tslint-config-airbnb": "^5.11.1",
