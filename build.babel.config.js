@@ -8,11 +8,11 @@ module.exports = {
         "extensions": [".js", ".jsx", ".ts", ".tsx"],
         "root": ["./src"],
         "alias": {
-          "@delta": "./delta",
-          "@test": "./test",
-          "@core": "./core",
-          "@model": "./model",
-          "@components": "./components"
+          "@delta": "./src/delta",
+          "@test": "./src/test",
+          "@core": "./src/core",
+          "@model": "./src/model",
+          "@components": "./src/components"
         }
       }],
       ["@babel/plugin-proposal-decorators", { legacy: true }],
@@ -20,8 +20,7 @@ module.exports = {
       '@babel/plugin-proposal-object-rest-spread'
     ],
     "ignore": [
-      "**/*.test.ts",
-      "**/*.test.tsx"
+      "**/__tests__/**"
     ]
 }
   

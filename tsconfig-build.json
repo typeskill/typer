@@ -1,0 +1,16 @@
+{
+  "extends": "./tsconfig.json",
+  "exclude": ["node_modules", "**/__tests__/**", "src/test"],
+  "compilerOptions": {
+      "plugins": [
+          {
+              "transform": "@zerollup/ts-transform-paths",
+              "exclude": ["*"]
+          }
+      ],
+      "noEmit": false,
+      "allowJs": false,
+      "declaration": true,
+      "emitDeclarationOnly": true
+  }
+}
