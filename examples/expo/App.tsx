@@ -27,9 +27,9 @@ export default class App extends Component<Props> {
     return (
       <SafeAreaView style={{ flex: 1 }}>
         <View style={styles.container} >
-          <KeyboardAvoidingView style={{ flex: 1 }} keyboardVerticalOffset={Constants.statusBarHeight + 10} enabled>
+          <KeyboardAvoidingView style={{ flex: 1 }} enabled>
             <Sheet bridgeInnerInterface={innerInterface} />
-            <Toolbar bridgeOuterInferface={outerInterface} />
+            <Toolbar contentContainerStyle={{ backgroundColor: '#eaf0fc', elevation: 100 }} bridgeOuterInferface={outerInterface} />
           </KeyboardAvoidingView>
         </View>
       </SafeAreaView>
