@@ -1,9 +1,12 @@
 
 import React, { Component } from 'react'
-import { StyleSheet, View, KeyboardAvoidingView, SafeAreaView, Platform, StatusBar } from 'react-native'
+import { StyleSheet, View, KeyboardAvoidingView, SafeAreaView, Text } from 'react-native'
 import Toolbar from './src/Toolbar'
 import { Bridge, Sheet } from 'react-native-typeskill'
 import { Constants } from 'expo'
+
+// tslint:disable-next-line:no-require-imports
+const version = (require('./package.json') as any).dependencies['react-native-typeskill'] as string
 
 interface Props {}
 
@@ -28,6 +31,12 @@ export default class App extends Component<Props> {
       <SafeAreaView style={{ flex: 1 }}>
         <View style={styles.container} >
           <KeyboardAvoidingView style={{ flex: 1 }} enabled>
+            <View>
+              <Text style={{ fontFamily: 'monospace', fontSize: 8, textAlign: 'center' }}>
+                <Text style={{ fontWeight: 'bold', fontSize: 12 }}>react-native-typeskill@{version}</Text> {'\n'}
+                ⚠️ This library is in early development and subject to fast changes.
+              </Text>
+            </View>
             <Sheet bridgeInnerInterface={innerInterface} />
             <Toolbar contentContainerStyle={{ backgroundColor: '#eaf0fc', elevation: 100 }} bridgeOuterInferface={outerInterface} />
           </KeyboardAvoidingView>
