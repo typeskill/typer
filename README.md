@@ -1,6 +1,6 @@
 # `react-native-typeskill`
 
-> ⚠️ This library is in early development and subject to fast change. Do not use in production.
+> ⚠️ This library is in early development and subject to fast changes. Do not use in production. Also, pull requests are closed prior reaching 1.0.
 
 ![Npm Version](https://img.shields.io/npm/v/react-native-typeskill.svg)
 [![CircleCI](https://circleci.com/gh/jsamr/react-native-typeskill.svg?style=shield)](https://circleci.com/gh/jsamr/react-native-typeskill)
