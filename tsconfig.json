@@ -19,10 +19,7 @@
       "@model/*": ["model/*"],
       "@test/*": ["test/*"]
     },
-    "noEmit": false,
-    "allowJs": false,
-    "declaration": true,
-    "emitDeclarationOnly": true
+    "noEmit": true
   },
   "include": ["src"],
   "exclude": ["node_modules", "examples"]
