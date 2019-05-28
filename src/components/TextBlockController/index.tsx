@@ -144,7 +144,7 @@ export default class TextBlockController<T extends string> extends Component<Tex
     return (
       <View style={[grow ? styles.grow : undefined]}>
         <TextInput selection={isControlingState ? this.selection : undefined}
-                   style={[grow ? styles.grow : undefined, styles.textInput, richTextStyles.defaultText, { backgroundColor: 'rgb(240,240,240)' }]}
+                   style={[grow ? styles.grow : undefined, styles.textInput, richTextStyles.defaultText]}
                    onKeyPress={this.handleOnKeyPressed}
                    onSelectionChange={this.handleOnSelectionChange}
                    onChangeText={this.handleOnTextChanged}

@@ -19,16 +19,15 @@ function getLineStyle(lineType: TextLineType): StyleProp<TextStyle> {
   // TODO test
   switch (lineType) {
   case 'normal': return null
-  case 'ol': return { color: 'red', paddingLeft: 20 }
+  case 'ol': return { paddingLeft: 20 }
   case 'quoted': return { borderLeftWidth: 3, borderLeftColor: 'black' }
-  case 'ul': return { color: 'blue', paddingLeft: 20 }
+  case 'ul': return { paddingLeft: 20 }
   }
 }
 
 export const richTextStyles = StyleSheet.create({
   defaultText: {
-    fontSize: 20,
-    fontFamily: 'monospace'
+    fontSize: 18
   },
   grow: {
     flexGrow: 1

@@ -22,7 +22,7 @@ interface SheetProps<T extends string> {
    */
   bridgeInnerInterface: Bridge.InnerInterface<T>
   textStyle?: StyleProp<TextStyle>
-  contentContainerStyle: StyleProp<ViewStyle>
+  contentContainerStyle?: StyleProp<ViewStyle>
 }
 
 export default class Sheet<T extends string> extends PureComponent<SheetProps<T>, Store.State> {
