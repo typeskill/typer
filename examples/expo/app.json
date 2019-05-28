@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Typeskill",
-    "slug": "expo",
+    "slug": "typeskill",
     "privacy": "public",
     "sdkVersion": "32.0.0",
     "platforms": [
@@ -11,6 +11,7 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
+    "description": "Operational-Transform Based (React) Native Rich Text Editor",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
