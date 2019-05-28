@@ -16,7 +16,8 @@ module.exports = {
     modulePathIgnorePatterns: [
       "npm-cache",
       ".npm",
-      "examples"
+      "examples",
+      "lib"
     ],
     transformIgnorePatterns: [
       "node_modules/?!(ramda)"

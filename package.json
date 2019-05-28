@@ -8,7 +8,10 @@
   "license": "MIT",
   "scripts": {
     "autolint": "tslint 'src/**/*?(.d).ts?(x)' --fix",
-    "build": "rimraf lib; ttsc --project ./tsconfig-build.json",
+    "build": "npm run build:clean; npm run build:types && npm run build:js",
+    "build:clean": "rimraf lib",
+    "build:types": "tsc --project ./",
+    "build:js": "babel src --config-file ./build.babel.config.js --out-dir lib --extensions \".ts,.tsx\" --source-maps inline",
     "prepare": "npm run build",
     "test": "npm run validate:typescript && npm run validate:tslint && npm run test:jest",
     "test:jest": "jest",
@@ -43,6 +46,7 @@
     "ramda": "^0.26.1"
   },
   "devDependencies": {
+    "@babel/cli": "^7.4.4",
     "@babel/core": "^7.4.5",
     "@babel/plugin-proposal-class-properties": "^7.4.4",
     "@babel/plugin-proposal-decorators": "^7.4.4",
@@ -70,8 +74,8 @@
     "@types/react": "^16.8.18",
     "@types/react-native": "^0.57.60",
     "@types/react-test-renderer": "^16.8.1",
-    "@zerollup/ts-transform-paths": "^1.7.1",
     "babel-jest": "^24.8.0",
+    "babel-plugin-module-resolver": "^3.2.0",
     "babel-preset-jest": "^24.6.0",
     "codecov": "^3.5.0",
     "eslint": "^5.16.0",
