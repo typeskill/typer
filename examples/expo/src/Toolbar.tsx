@@ -1,7 +1,7 @@
 import React, { PureComponent, SFC } from 'react'
 import { View, TouchableOpacity } from 'react-native'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
-import * as invariant from 'invariant'
+import invariant from 'invariant'
 import { Bridge, TextAttributesMap, BaseTextTransformAttribute, TextLineType } from 'react-native-typeskill'
 
 export interface ToolbarProps {

@@ -1,9 +1,15 @@
+
 import React, { Component } from 'react'
 import { StyleSheet, View, KeyboardAvoidingView } from 'react-native'
 import Toolbar from './src/Toolbar'
 import { Bridge, Sheet } from 'react-native-typeskill'
 
 interface Props {}
+
+// @see: https://github.com/facebook/react-native/issues/9599
+if (typeof (global as any).self === 'undefined') {
+  (global as any).self = global
+}
 
 export default class App extends Component<Props> {
   private bridge: Bridge
@@ -20,7 +26,7 @@ export default class App extends Component<Props> {
         <Sheet bridgeInnerInterface={innerInterface} />
         <KeyboardAvoidingView>
           <Toolbar bridgeOuterInferface={outerInterface} />
-        </KeyboardAvoidingView>
+        </KeyboardAvoidingView>}
       </View>
     )
   }
