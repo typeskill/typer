@@ -33,7 +33,8 @@
     "text",
     "typeskill",
     "quilljs",
-    "delta"
+    "delta",
+    "expo"
   ],
   "dependencies": {
     "@types/diff": "^4.0.2",
