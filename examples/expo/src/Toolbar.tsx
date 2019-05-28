@@ -3,9 +3,14 @@ import { View, TouchableOpacity } from 'react-native'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import invariant from 'invariant'
 import { Bridge, TextAttributesMap, BaseTextTransformAttribute, TextLineType } from 'react-native-typeskill'
+import PropTypes from 'prop-types'
 
 export interface ToolbarProps {
   bridgeOuterInferface: Bridge.OuterInterface<BaseTextTransformAttribute>
+  defaultButtonBackgroundColor?: string
+  defaultButtonColor?: string
+  selectedButtonBackgroundColor?: string
+  selectedButtonColor?: string
 }
 
 interface ToolbarState {
@@ -14,15 +19,24 @@ interface ToolbarState {
 }
 
 const ITEM_SIZE = 32
+class Toolbar extends PureComponent<ToolbarProps, ToolbarState> {
+  static propTypes = {
+    bridgeOuterInferface: PropTypes.object.isRequired,
+    defaultButtonBackgroundColor: PropTypes.string,
+    defaultButtonColor: PropTypes.string,
+    selectedButtonBackgroundColor: PropTypes.string,
+    selectedButtonColor: PropTypes.string
+  }
 
-const MaterialIconButton: SFC<{ name: string, onPress?: () => void, selected: boolean }> = ({ name, onPress, selected }) => (
-  <TouchableOpacity onPress={onPress} style={selected ? { backgroundColor: 'yellow' } : undefined}>
-    <MaterialCommunityIcons size={ITEM_SIZE} name={name} />
-  </TouchableOpacity>
-)
+  static defaultProps = {
+    defaultButtonBackgroundColor: 'transparent',
+    defaultButtonColor: '#292d35',
+    selectedButtonBackgroundColor: 'transparent',
+    selectedButtonColor: '#4286f4'
+  }
 
-export default class Toolbar extends PureComponent<ToolbarProps, ToolbarState> {
   private outerInterface: Bridge.OuterInterface<BaseTextTransformAttribute>
+
   state: ToolbarState = {
     selectedAttributes: {},
     selectedLineType: 'normal'
@@ -32,6 +46,29 @@ export default class Toolbar extends PureComponent<ToolbarProps, ToolbarState> {
     super(props)
     this.outerInterface = props.bridgeOuterInferface
     invariant(props.bridgeOuterInferface != null, 'bridgeOuterInferface prop is required')
+  }
+
+  private MaterialIconButton: SFC<{ name: string, onPress?: () => void, selected: boolean }> = ({ name, onPress, selected }) => {
+    const style = selected ? this.getSelectedButtonStyle() : this.getDefaultButtonStyle()
+    return (
+      <TouchableOpacity onPress={onPress} style={style}>
+        <MaterialCommunityIcons color={style.color} size={ITEM_SIZE} name={name} />
+      </TouchableOpacity>
+    )
+  }
+
+  private getDefaultButtonStyle() {
+    return {
+      color: this.props.defaultButtonColor,
+      backgroundColor: this.props.defaultButtonBackgroundColor
+    }
+  }
+
+  private getSelectedButtonStyle() {
+    return {
+      color: this.props.selectedButtonColor,
+      backgroundColor: this.props.selectedButtonBackgroundColor
+    }
   }
 
   private applyTextTransformToSelection(attributeName: BaseTextTransformAttribute, attributeValue: any) {
@@ -48,6 +85,7 @@ export default class Toolbar extends PureComponent<ToolbarProps, ToolbarState> {
 
   private renderTextTransformController(attributeName: BaseTextTransformAttribute, attributeValue: any, iconName: string) {
     const { selectedAttributes } = this.state
+    const MaterialIconButton = this.MaterialIconButton
     return (
       <MaterialIconButton selected={selectedAttributes[attributeName] === attributeValue}
                           onPress={this.applyTextTransformToSelection(attributeName, attributeValue)} name={iconName} />
@@ -57,6 +95,7 @@ export default class Toolbar extends PureComponent<ToolbarProps, ToolbarState> {
 
   private renderLineTransformController(lineType: TextLineType, iconName: string) {
     const { selectedLineType } = this.state
+    const MaterialIconButton = this.MaterialIconButton
     return <MaterialIconButton selected={selectedLineType === lineType}
                                onPress={this.applyLineTransformToSelection(lineType)} name={iconName} />
   }
@@ -95,3 +134,5 @@ export default class Toolbar extends PureComponent<ToolbarProps, ToolbarState> {
     )
   }
 }
+
+export default Toolbar

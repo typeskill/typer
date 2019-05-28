@@ -1,8 +1,9 @@
 
 import React, { Component } from 'react'
-import { StyleSheet, View, KeyboardAvoidingView } from 'react-native'
+import { StyleSheet, View, KeyboardAvoidingView, SafeAreaView, Platform, StatusBar } from 'react-native'
 import Toolbar from './src/Toolbar'
 import { Bridge, Sheet } from 'react-native-typeskill'
+import { Constants } from 'expo'
 
 interface Props {}
 
@@ -10,6 +11,8 @@ interface Props {}
 if (typeof (global as any).self === 'undefined') {
   (global as any).self = global
 }
+
+const themeColor = '#ffffff'
 
 export default class App extends Component<Props> {
   private bridge: Bridge
@@ -22,12 +25,14 @@ export default class App extends Component<Props> {
     const innerInterface = this.bridge.getInnerInterface()
     const outerInterface = this.bridge.getOuterInterface()
     return (
-      <View style={styles.container}>
-        <Sheet bridgeInnerInterface={innerInterface} />
-        <KeyboardAvoidingView>
-          <Toolbar bridgeOuterInferface={outerInterface} />
-        </KeyboardAvoidingView>}
-      </View>
+      <SafeAreaView style={{ flex: 1 }}>
+        <View style={styles.container} >
+          <KeyboardAvoidingView style={{ flex: 1 }} keyboardVerticalOffset={Constants.statusBarHeight + 10} enabled>
+            <Sheet bridgeInnerInterface={innerInterface} />
+            <Toolbar bridgeOuterInferface={outerInterface} />
+          </KeyboardAvoidingView>
+        </View>
+      </SafeAreaView>
     )
   }
 }
@@ -37,16 +42,10 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'stretch',
-    backgroundColor: '#F5FCFF'
+    backgroundColor: themeColor,
+    position: 'relative'
   },
-  welcome: {
-    fontSize: 20,
-    textAlign: 'center',
-    margin: 10
-  },
-  instructions: {
-    textAlign: 'center',
-    color: '#333333',
-    marginBottom: 5
+  statusBar: {
+    height: Constants.statusBarHeight
   }
 })

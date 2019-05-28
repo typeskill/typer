@@ -10,12 +10,15 @@
     "@expo/vector-icons": "^10.0.1",
     "expo": "^32.0.0",
     "invariant": "^2.2.4",
+    "prop-types": "^15.7.2",
     "react": "16.5.0",
     "react-native": "https://github.com/expo/react-native/archive/sdk-32.0.0.tar.gz",
-    "react-native-typeskill": "^0.10.0-alpha.6",
+    "react-native-typeskill": "^0.10.0-alpha.7",
     "whatwg-fetch": "^2.0.4"
   },
   "devDependencies": {
+    "@babel/plugin-proposal-class-properties": "^7.4.4",
+    "@babel/plugin-proposal-object-rest-spread": "^7.4.4",
     "@types/expo": "^32.0.13",
     "@types/react": "^16.8.18",
     "@types/react-native": "^0.57.60",
