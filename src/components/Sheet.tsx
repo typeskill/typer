@@ -1,6 +1,6 @@
 import invariant from 'invariant'
 import React, { PureComponent } from 'react'
-import { View, StyleSheet, StyleProp, TextStyle } from 'react-native'
+import { View, StyleSheet, StyleProp, TextStyle, ViewStyle } from 'react-native'
 import TextBlockController from '@components/TextBlockController'
 import Bridge from '@core/Bridge'
 import Document from '@model/Document'
@@ -11,7 +11,6 @@ import Store, { getStoreInitialState } from '@model/Store'
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: 'rgb(251,251,251)',
     alignSelf: 'stretch',
     padding: 10
   }
@@ -23,6 +22,7 @@ interface SheetProps<T extends string> {
    */
   bridgeInnerInterface: Bridge.InnerInterface<T>
   textStyle?: StyleProp<TextStyle>
+  contentContainerStyle: StyleProp<ViewStyle>
 }
 
 export default class Sheet<T extends string> extends PureComponent<SheetProps<T>, Store.State> {
@@ -76,7 +76,7 @@ export default class Sheet<T extends string> extends PureComponent<SheetProps<T>
 
   render() {
     return (
-      <View style={styles.root}>
+      <View style={[styles.root, this.props.contentContainerStyle]}>
         {this.state.blockOrders.map((instanceNumber, index) => this.renderTextBlockController(instanceNumber, index))}
       </View>
     )
