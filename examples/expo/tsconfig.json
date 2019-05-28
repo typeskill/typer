@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "module": "commonjs",
+    "allowJs": false,
+    "allowSyntheticDefaultImports": true,
+    "downlevelIteration": true,
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    "moduleResolution": "node",
+    "outDir": "./lib",
+    "jsx": "react",
+    "lib": ["es6"],
+    "noEmit": true,
+    "strict": true
+  },
+  "include": ["src", "App.tsx"],
+  "exclude": ["node_modules"]
+}

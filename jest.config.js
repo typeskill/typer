@@ -13,6 +13,11 @@ module.exports = {
       '^@model/(.*)$' : '<rootDir>/src/model/$1',
       '^@test/(.*)$' : '<rootDir>/src/test/$1'
     },
+    modulePathIgnorePatterns: [
+      "npm-cache",
+      ".npm",
+      "examples"
+    ],
     transformIgnorePatterns: [
       "node_modules/?!(ramda)"
     ],
