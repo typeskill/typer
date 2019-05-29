@@ -25,13 +25,19 @@
     </a>
 </p>
 
+<p align="center">
+<a href="https://expo.io/@jsamr/typeskill">
+    <strong>Give it a try on Expo</strong>
+</a>
+<br/><br/>
+<img src="images/qr.png" alt="Expo QR code">
+<br/>
+<a href="examples/expo">
+<code>examples/expo</code>
+</a>
+</p>
+
 > ⚠️ This library is in early development and subject to fast changes. Do not use in production. Also, pull requests are closed prior to reaching 1.0.
-
-## Give it a try on Expo
-
-![Expo QR code](images/qr.png)
-
-[Expo page](https://expo.io/@jsamr/typeskill)
 
 ## Features & design principles
 
