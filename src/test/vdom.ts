@@ -15,8 +15,6 @@ export function flattenTextChild(instance: ReactTestInstance): string[] {
         children.push(inst)
       }
     }
-  } else {
-    console.info('NOT CHILDREN')
   }
   return children
 }

@@ -1,5 +1,4 @@
 import EventEmitter, { ListenerFn } from 'eventemitter3'
-import invariant from 'invariant'
 
 declare namespace Orchestrator {
   export interface BlockControllerInterface {
@@ -47,7 +46,6 @@ class Orchestrator {
 
   emitToBlockController(inputControllerInstance: number, eventType: Orchestrator.SheetControllerEvent, ...payload: any[]): void {
     const controller = this.controllersEmitters.get(inputControllerInstance)
-    invariant(controller != null, `Could not find an input controller with instance number ${inputControllerInstance}`)
     if (controller) {
       controller.emit(eventType, ...payload)
     }

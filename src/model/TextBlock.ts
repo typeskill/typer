@@ -19,15 +19,18 @@ export default class TextBlock<T extends string> extends Block<T> {
     super(blockInterface)
   }
 
+  private updateTextAttributes(selection: Selection): void {
+    const textAttributes = this.getDelta().getSelectedTextAttributes(selection)
+    this.blockInterface.bridgeInnerInterface.setSelectedTextAttributes(textAttributes)
+  }
+
   getSelection(): Selection {
-    // TODO inspect dependencies and refactor
     return this.selection
   }
 
   handleOnSelectionChange(selection: Selection): void {
     this.selection = selection
-    const textAttributes = this.getDelta().getSelectedTextAttributes(selection)
-    this.blockInterface.bridgeInnerInterface.setSelectedTextAttributes(textAttributes)
+    this.updateTextAttributes(selection)
   }
 
   getLength(): number {
@@ -48,8 +51,9 @@ export default class TextBlock<T extends string> extends Block<T> {
 
   @boundMethod
   handleOnTextChange(newText: string, context: DeltaChangeContext): void {
-    const updatedDelta = this.getDelta().applyTextDiff(newText, context)
+    const updatedDelta = this.getDelta().applyTextDiff(newText, context, this.cursorTextAttributes)
     this.updateDelta(updatedDelta)
     this.length = newText.length
+    this.updateTextAttributes(context.selectionAfterChange)
   }
 }

@@ -1,5 +1,5 @@
 import Delta from 'quill-delta'
-import { BlockAttributesMap, TextAttributesMap } from './attributes'
+import { BlockAttributesMap, TextAttributesMap, mergeAttributesRight } from './attributes'
 import { Selection } from './selection'
 import { GenericOp, getOperationLength } from './operations'
 import find from 'ramda/es/find'
@@ -190,8 +190,10 @@ export default class DocumentDelta<T extends string = any> implements GenericDel
     return newSelection
   }
 
-  private getDeltasFromTextDiff(oldText: string, newText: string, context: DeltaChangeContext): { delta: Delta, directive?: NormalizeDirective } {
-    const textAttributes =this.getSelectedTextAttributes(context.selectionBeforeChange)
+  private getDeltasFromTextDiff(oldText: string, newText: string, context: DeltaChangeContext, cursorTextAttributes: TextAttributesMap<T>): { delta: Delta, directive?: NormalizeDirective } {
+    const selectionBeforeChangeLength = context.selectionBeforeChange.end - context.selectionBeforeChange.start
+    const selectedTextAttributes = this.getSelectedTextAttributes(context.selectionBeforeChange)
+    const textAttributes = selectionBeforeChangeLength ? selectedTextAttributes : mergeAttributesRight(selectedTextAttributes, cursorTextAttributes)
     const lineTypeBeforeChange = this.getLineTypeInSelection(context.selectionBeforeChange)
     const lineAttributes = lineTypeBeforeChange === 'normal' ? {} : { $type: lineTypeBeforeChange }
     const isOperationDelete = context.selectionBeforeChange.start > context.selectionAfterChange.end
@@ -278,34 +280,46 @@ export default class DocumentDelta<T extends string = any> implements GenericDel
   }
 
   /**
-   * Compute a diff between this document delta text and return the result of applying this diff
-   * to this DocumentDelta.
+   * Compute a diff between this document delta text and return the result of
+   * composing the diff delta with `this` instance.
    * 
-   * @param nuText 
+   * @remarks
+   * 
+   * `cursorTextAttributes` will by applied to inserted characters if and only if `deltaChangeContext.selectionBeforeChange` is of length 0.
+   * 
+   * @param newText - The changed text.
+   * @param deltaChangeContext - The context in which the change occurred.
+   * @param cursorTextAttributes - Text attributes at cursor.
+   * @returns The result of composing the diff delta with `this` instance.
    */
-  applyTextDiff(nuText: string, deltaChangeContext: DeltaChangeContext): DocumentDelta {
+  applyTextDiff(newText: string, deltaChangeContext: DeltaChangeContext, cursorTextAttributes: TextAttributesMap<T> = {}): DocumentDelta {
     const originalText = this.getText()
-    const { delta, directive } = this.getDeltasFromTextDiff(originalText, nuText, deltaChangeContext)
+    const { delta, directive } = this.getDeltasFromTextDiff(originalText, newText, deltaChangeContext, cursorTextAttributes)
     const nuDelta = this.compose(delta).normalize(directive)
     return nuDelta
   }
 
   /**
+   * @param selection
    * @returns The DocumentDelta representing selection
    * 
-   * @param selection 
    */
   getSelected(selection: Selection): DocumentDelta {
     return this.slice(selection.start, selection.end)
   }
 
   /**
-   * @returns the line type encompassing the whole selection.
+   * Determine the line type of given selection.
+   * 
+   * @remarks
    * 
    * **Pass algorithm**:
    * 
    * If each and every line has its `$type` set to one peculiar value, return this value.
    * Otherwise, return `"normal"`.
+   * 
+   * @param selection - the selection to which line type should be inferred.
+   * @returns the line type encompassing the whole selection.
    */
   getLineTypeInSelection(selection: Selection): TextLineType {
     const selected = this.getSelected(this.getSelectionEncompassingLines(selection))
@@ -327,7 +341,10 @@ export default class DocumentDelta<T extends string = any> implements GenericDel
   }
 
   /**
-   * Returns the attributes encompassing the given selection. This attribute should be used for user feedback.
+   * Returns the attributes encompassing the given selection.
+   * This attribute should be used for user feedback after selection change.
+   * 
+   * @remarks
    * 
    * The returned attributes depend on the selection size:
    * 
@@ -336,11 +353,13 @@ export default class DocumentDelta<T extends string = any> implements GenericDel
    * 
    * **Merge algorithm**:
    * 
-   * - For an attribute to be merged in the remaining object, it must be present in every operation traversed by selection
-   * - If one attribute name has conflicting values within the selection, none of those values should be picked in the remaining object
-   * - Any attribute name with a nil value (`null` nor `undefined`) should be ignored in the remaining object
+   * - for an attribute to be merged in the remaining object, it must be present in every operation traversed by selection;
+   * - operations consisting of one newline character insert should be ignored during the traversal, and thus line attributes ignored;
+   * - if one attribute name has conflicting values within the selection, none of those values should be picked in the remaining object;
+   * - any attribute name with a nil value (`null` or `undefined`) should be ignored in the remaining object.
    * 
-   * @param selection 
+   * @param selection - the selection from which text attributes should be extracted
+   * @returns The resulting merged object
    */
   getSelectedTextAttributes(selection: Selection): TextAttributesMap<T> {
     if (selection.start === selection.end) {
@@ -361,9 +380,9 @@ export default class DocumentDelta<T extends string = any> implements GenericDel
    * - if **all characters** in the selection have the `attributeName` set to `attributeValue`, **clear** this attribute for all characters in this selection
    * - otherwise set `attributeName`  to `attributeValue` for all characters in this selection
    * 
-   * @param selection The boundaries to which the transforms should be applied
-   * @param attributeName the attribute name to modify
-   * @param attributeValue the attribute value to assign
+   * @param selection - The boundaries to which the transforms should be applied
+   * @param attributeName - The attribute name to modify
+   * @param attributeValue - The attribute value to assign
    */
   applyTextTransformToSelection(selection: Selection, attributeName: T, attributeValue: any): DocumentDelta {
     const allOperationsMatchAttributeValue = this.getSelected(selection).ops.every(op => !!op.attributes && op.attributes[attributeName] === attributeValue)
