@@ -20,7 +20,6 @@ export default class TextBlock<T extends string> extends Block<T> {
   }
 
   getSelection(): Selection {
-    // TODO inspect dependencies and refactor
     return this.selection
   }
 
@@ -48,8 +47,11 @@ export default class TextBlock<T extends string> extends Block<T> {
 
   @boundMethod
   handleOnTextChange(newText: string, context: DeltaChangeContext): void {
-    const updatedDelta = this.getDelta().applyTextDiff(newText, context)
+    const updatedDelta = this.getDelta().applyTextDiff(newText, context, this.cursorTextAttributes)
     this.updateDelta(updatedDelta)
     this.length = newText.length
+    // TODO test
+    // const textAttributes = updatedDelta.getSelectedTextAttributes(context.selectionAfterChange)
+    // this.blockInterface.bridgeInnerInterface.setSelectedTextAttributes(textAttributes)
   }
 }

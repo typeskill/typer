@@ -30,7 +30,9 @@ declare namespace Bridge {
     insertOrReplaceAtSelection: (element: Element) => void
 
     /**
-     * Switch the given attribute's value depending on the current selection:
+     * Switch the given attribute's value depending on the current selection.
+     * 
+     * @remarks
      * 
      * - if **all characters** traversed by selection have the `attributeName` set to `attributeValue`, **clear** this attribute for all characters in this selection
      * - otherwise set `attributeName`  to `attributeValue` for all characters traversed by this selection
@@ -38,7 +40,9 @@ declare namespace Bridge {
     applyTextTransformToSelection: (attributeName: T, attributeValue: any) => void
 
     /**
-     * Switch the line type of lines traversed by selection depending on its state:
+     * Switch the line type of lines traversed by selection depending on its state.
+     * 
+     * @remarks
      * 
      * - if **all lines** traversed by selection are of the type `lineType`, set the type for each of those lines to `'normal'`
      * - otherwise, set the type of each of those lines to `lineType`
@@ -101,7 +105,7 @@ declare namespace Bridge {
 }
 
 /**
- * The Bridge class is an abstraction responsible for communication between the redactor and external controls.
+ * The Bridge class is an abstraction responsible for communication between the editor and external controls.
  * 
  */
 class Bridge<T extends string = BaseTextTransformAttribute> {

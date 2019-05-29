@@ -2,13 +2,11 @@ import DocumentDelta from '@delta/DocumentDelta'
 import invariant from 'invariant'
 import TextBlock from './TextBlock'
 import Block from './Block'
-import mergeRight from 'ramda/es/mergeRight'
-import omit from 'ramda/es/omit'
 import Bridge from '@core/Bridge'
 import Orchestrator from '@model/Orchestrator'
-import { TextAttributesMap } from '@delta/attributes'
 import Store from './Store'
 import { TextLineType } from '@delta/transforms'
+import { mergeAttributesRight } from '@delta/attributes'
 
 declare namespace Document {
   export interface BlockInterface<T extends string> {
@@ -96,23 +94,15 @@ class Document<T extends string> {
         invariant(selectedBlock instanceof TextBlock, 'Text Transforms can only be applied to a TextBlock')
         const delta = selectedBlock.getDelta()
         const selection = selectedBlock.getSelection()
-        // Apply transformes to selection range
-        if (selection.start !== selection.end) {
-          const updatedDelta = delta.applyTextTransformToSelection(selection, attributeName, attributeValue)
-          const attributes = updatedDelta.getSelectedTextAttributes(selection)
-          this.orchestrator.emitToBlockController(selectedBlock.getInstanceNumber(), 'SELECTION_RANGE_ATTRIBUTES_UPDATE', attributes)
-          this.store.updateDeltaForBlockInstance(selectedBlock.getInstanceNumber(), updatedDelta)
-          consumer.bridgeInnerInterface.setSelectedTextAttributes(attributes)
-        } else {
-          // apply transforms to cursor
-          // TODO refactor this merging logic to @documentDelta
-          const oldCursorTextAttributes = selectedBlock.getCursorAttributes()
-          const newCursorTextAttributes: TextAttributesMap<T> = oldCursorTextAttributes[attributeName] && oldCursorTextAttributes[attributeName] === attributeValue ?
-                                  omit([attributeName], oldCursorTextAttributes) as TextAttributesMap<T> :
-                                  mergeRight(oldCursorTextAttributes, { [attributeName]: attributeValue })
-          selectedBlock.setCursorAttributes(newCursorTextAttributes)
-          consumer.bridgeInnerInterface.setSelectedTextAttributes(newCursorTextAttributes)
-        }
+        // Apply transforms to selection range
+        const userAttributes = { [attributeName]: attributeValue }
+        const updatedDelta = delta.applyTextTransformToSelection(selection, attributeName, attributeValue)
+        const deltaAttributes = updatedDelta.getSelectedTextAttributes(selection)
+        const attributes = mergeAttributesRight(deltaAttributes, userAttributes)
+        this.orchestrator.emitToBlockController(selectedBlock.getInstanceNumber(), 'SELECTION_RANGE_ATTRIBUTES_UPDATE', deltaAttributes)
+        this.store.updateDeltaForBlockInstance(selectedBlock.getInstanceNumber(), updatedDelta)
+        selectedBlock.setCursorAttributes(userAttributes)
+        consumer.bridgeInnerInterface.setSelectedTextAttributes(attributes)
       }
     })
     this.consumer = consumer
