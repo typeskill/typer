@@ -30,7 +30,9 @@
     <strong>Give it a try on Expo</strong>
 </a>
 <br/><br/>
-<img src="images/qr.png" alt="Expo QR code">
+<a href="https://expo.io/@jsamr/typeskill">
+    <img src="images/qr.png" alt="Expo QR code">
+</a>
 <br/>
 <a href="examples/expo">
 <code>examples/expo</code>
