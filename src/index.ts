@@ -1,4 +1,5 @@
 import Sheet from '@components/Sheet'
+import RichText from '@components/RichText'
 import Bridge from '@core/Bridge'
 import {
   TextAttributesMap,
@@ -19,7 +20,10 @@ import DocumentDelta, {
 } from '@delta/DocumentDelta'
 
 export {
+  // @components
   Sheet,
+  RichText,
+  // @core
   Bridge,
   // @delta/attributes
   TextAttributesMap,
