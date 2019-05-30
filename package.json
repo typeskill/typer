@@ -43,6 +43,7 @@
     "autobind-decorator": "^2.4.0",
     "eventemitter3": "^3.1.2",
     "invariant": "^2.2.4",
+    "prop-types": "^15.7.2",
     "quill-delta": "4.2.1",
     "ramda": "^0.26.1"
   },

@@ -1,6 +1,14 @@
 import Sheet from '@components/Sheet'
 import RichText from '@components/RichText'
 import Bridge from '@core/Bridge'
+import Toolbar, {
+  TextControlMinimalIconProps,
+  TextControlAction,
+  TextControlSpec,
+  ToolbarProps,
+  TEXT_CONTROL_SEPARATOR,
+  ToolbarLayout
+} from '@components/Toolbar'
 import {
   TextAttributesMap,
   BlockAttributesMap
@@ -23,6 +31,13 @@ export {
   // @components
   Sheet,
   RichText,
+  Toolbar,
+  ToolbarProps,
+  TextControlMinimalIconProps,
+  TextControlAction,
+  TextControlSpec,
+  TEXT_CONTROL_SEPARATOR,
+  ToolbarLayout,
   // @core
   Bridge,
   // @delta/attributes
