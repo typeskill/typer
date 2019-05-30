@@ -107,7 +107,7 @@ To see how this `outerInterface` is used in the `Toolbar` component, [read its i
 
 You need to comply with this contract to avoid resource leakage and bugs.
 
-First of, some definitions. The root component is referred to as the component containing the `Sheet` component. A controller is a component to which the `outerInterface` prop is passed.
+First off, some definitions. The root component is referred to as the component containing the `Sheet` component. A controller is a component to which the `outerInterface` prop is passed.
 
 You should follow this set of rules:
 
