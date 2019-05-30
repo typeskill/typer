@@ -1,5 +1,5 @@
 // tslint:disable: no-string-literal
-import DocumentDelta, { GenericDelta, getHeadingCharactersFromType, extractTextFromDelta, isLineInSelection } from '@delta/DocumentDelta'
+import DocumentDelta, { GenericDelta, getHeadingCharactersFromType, extractTextFromDelta, isLineInSelection, getSelectionEncompassingLine } from '@delta/DocumentDelta'
 import { TextAttributesMap } from '@delta/attributes'
 import { Selection } from '@delta/selection'
 import { TextLineType } from '@delta/transforms'
@@ -35,6 +35,24 @@ describe('@delta/DocumentDelta', () => {
         {},
         {}
       ])
+    })
+  })
+  describe('getSelectionEncompassingLine', () => {
+    it('should handle empty lines', () => {
+      const text = '\n'
+      expect(getSelectionEncompassingLine({ start: 0, end: 0 }, text)).toEqual({ start: 0, end: 0 })
+    })
+    it('should ignore previous line', () => {
+      const text = 'Hi!\n\n'
+      expect(getSelectionEncompassingLine({ start: 4, end: 4 }, text)).toEqual({ start: 4, end: 4 })
+    })
+    it('should handle non empty lines', () => {
+      const text = '\nHi!\n'
+      expect(getSelectionEncompassingLine({ start: 1, end: 1 }, text)).toEqual({ start: 1, end: 4 })
+    })
+    it('should ignore upcoming lines', () => {
+      const text = 'Hi!\nThat\n'
+      expect(getSelectionEncompassingLine({ start: 1, end: 1 }, text)).toEqual({ start: 0, end: 3 })
     })
   })
   describe('applyTextDiff', () => {
@@ -80,6 +98,17 @@ describe('@delta/DocumentDelta', () => {
         { insert: newText }
       ])
     })
+    it('should reproduce an insert operation when multiple line were inserted', () => {
+      const newText = 'Hello world\nFoo\nBar\n'
+      const originalDelta = new DocumentDelta([
+        { insert: 'Hello world\n' }
+      ])
+      const changeContext = mockDeltaChangeContext(6, 19)
+      const nextDelta = originalDelta.applyTextDiff(newText, changeContext)
+      expect(nextDelta.ops).toEqual([
+        { insert: newText }
+      ])
+    })
     it('should reproduce a replace operation when one character was replaced', () => {
       const newText = 'Hello worlq\n'
       const originalDelta = new DocumentDelta([
@@ -97,6 +126,30 @@ describe('@delta/DocumentDelta', () => {
         { insert: 'Hello world\n' }
       ])
       const changeContext = mockDeltaChangeContext(6, 9, 11)
+      const nextDelta = originalDelta.applyTextDiff(newText, changeContext)
+      expect(nextDelta.ops).toEqual([
+        { insert: newText }
+      ])
+    })
+    it("should reproduce a replace operation when cursor didn't move, but the text was replaced on the same line as cursor", () => {
+      // This would happen with keyboard suggestions
+      const newText = 'Hello cat\n'
+      const originalDelta = new DocumentDelta([
+        { insert: 'Hello pet\n' }
+      ])
+      const changeContext = mockDeltaChangeContext(9, 9)
+      const nextDelta = originalDelta.applyTextDiff(newText, changeContext)
+      expect(nextDelta.ops).toEqual([
+        { insert: newText }
+      ])
+    })
+    it('should reproduce a replace operation when cursor moved, but the change occurred out of cursor boundaries, in the same line', () => {
+      // This would happen with keyboard suggestions
+      const newText = 'Hello petty\n'
+      const originalDelta = new DocumentDelta([
+        { insert: 'Hello cat\n' }
+      ])
+      const changeContext = mockDeltaChangeContext(9, 11)
       const nextDelta = originalDelta.applyTextDiff(newText, changeContext)
       expect(nextDelta.ops).toEqual([
         { insert: newText }

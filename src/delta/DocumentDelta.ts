@@ -11,6 +11,7 @@ import clone from 'ramda/es/clone'
 import omit from 'ramda/es/omit'
 import flatten from 'ramda/es/flatten'
 import { DocumentLineIndexGenerator } from './DocumentLineIndexGenerator'
+import { makeDiffDelta } from './diff'
 
 const getTextAttributes = omit(['$type'])
 
@@ -93,6 +94,44 @@ export function shouldLineTypePropagateToNextLine(lineType: TextLineType) {
 export function isLineInSelection(selection: Selection, { beginningOfLineIndex, endOfLineIndex }: DocumentLine) {
   return selection.start >= beginningOfLineIndex && selection.start <= endOfLineIndex ||
          selection.start <= endOfLineIndex && selection.end >= beginningOfLineIndex
+}
+
+export function getSelectionEncompassingLine(selection: Selection, text: string): Selection {
+  let start = selection.start
+  let end = selection.end
+  while (start > 0 && text.charAt(start - 1) !== '\n') {
+    start -= 1
+  }
+  while (end < text.length && text.charAt(end) !== '\n') {
+    end += 1
+  }
+  return {
+    start,
+    end
+  }
+}
+
+export function selectText(selection: Selection, text: string): string {
+  return text.substring(selection.start, selection.end)
+}
+
+export function getLineDiffDelta(oldText: string, newText: string, context: DeltaChangeContext, textAttributes: BlockAttributesMap): { delta: Delta, diffSelection: Selection, lineBeforeChangeSelection: Selection, lineAfterChangeSelection: Selection } {
+  const delta = new Delta()
+  const lineBeforeChangeSelection = getSelectionEncompassingLine(context.selectionBeforeChange, oldText)
+  const lineAfterChangeSelection = getSelectionEncompassingLine(context.selectionAfterChange, newText)
+  const diffSelection = {
+    start: lineBeforeChangeSelection.start,
+    end: lineAfterChangeSelection.end
+  }
+  const lineBeforeChange = selectText(lineBeforeChangeSelection, oldText)
+  const linesAfterChange = selectText(diffSelection, newText)
+  const lineDiff = makeDiffDelta(lineBeforeChange, linesAfterChange, textAttributes)
+  return {
+    lineAfterChangeSelection,
+    lineBeforeChangeSelection,
+    diffSelection,
+    delta: delta.retain(lineBeforeChangeSelection.start).concat(lineDiff)
+  }
 }
 
 enum NormalizeOperation {
@@ -200,14 +239,15 @@ export default class DocumentDelta<T extends string = any> implements GenericDel
     const isOperationReplace = context.selectionBeforeChange.end > context.selectionBeforeChange.start && !isOperationDelete
     const isOperationInsert = context.selectionBeforeChange.start < context.selectionAfterChange.end && !isOperationReplace
     let directive: NormalizeDirective|undefined
-    const delta = new Delta()
+    let delta = new Delta()
     if (isOperationInsert || isOperationReplace) {
-      const insertedChars = newText.substr(context.selectionBeforeChange.start, context.selectionAfterChange.end - context.selectionBeforeChange.start)
+      const { delta: lineDiffDelta } = getLineDiffDelta(oldText, newText, context, textAttributes)
+      const insertedChars = newText.substring(context.selectionBeforeChange.start, context.selectionAfterChange.end)
+      const lastInsertedCharIsNewline = insertedChars.charAt(insertedChars.length - 1) === '\n'
       delta.retain(context.selectionBeforeChange.start)
       delta.delete(context.selectionBeforeChange.end - context.selectionBeforeChange.start)
-      const lastInsertedCharIsNewline = insertedChars.charAt(insertedChars.length - 1) === '\n'
-      const shouldPropagateLineType = shouldLineTypePropagateToNextLine(lineTypeBeforeChange)
       if (lastInsertedCharIsNewline) {
+        const shouldPropagateLineType = shouldLineTypePropagateToNextLine(lineTypeBeforeChange)
         delta.retain(1) // Keep the current newline
         if (shouldPropagateLineType) {
           if (isLineTypeTextLengthModifier(lineTypeBeforeChange)) {
@@ -222,7 +262,7 @@ export default class DocumentDelta<T extends string = any> implements GenericDel
         delta.insert(insertedChars.slice(0, insertedChars.length - 1), textAttributes)
         delta.insert('\n', shouldPropagateLineType ? lineAttributes : {})
       } else {
-        delta.insert(insertedChars, textAttributes)
+        delta = lineDiffDelta
       }
     } else if (isOperationDelete) {
       const deletedChar = oldText.substr(context.selectionAfterChange.start, context.selectionBeforeChange.start - context.selectionAfterChange.start)
@@ -241,6 +281,8 @@ export default class DocumentDelta<T extends string = any> implements GenericDel
         }
         delta.delete(context.selectionBeforeChange.end - context.selectionAfterChange.start)
       }
+    } else {
+      delta = getLineDiffDelta(oldText, newText, context, textAttributes).delta
     }
     return { delta, directive }
   }
