@@ -7,7 +7,8 @@ import Toolbar, {
   TextControlSpec,
   ToolbarProps,
   TEXT_CONTROL_SEPARATOR,
-  ToolbarLayout
+  ToolbarLayout,
+  buildVectorIconControlSpec
 } from '@components/Toolbar'
 import {
   TextAttributesMap,
@@ -38,6 +39,7 @@ export {
   TextControlSpec,
   TEXT_CONTROL_SEPARATOR,
   ToolbarLayout,
+  buildVectorIconControlSpec,
   // @core
   Bridge,
   // @delta/attributes

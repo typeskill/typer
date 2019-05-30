@@ -237,3 +237,11 @@ const styles = StyleSheet.create({
 })
 
 export default Toolbar
+
+export function buildVectorIconControlSpec(IconComponent: ComponentType<TextControlMinimalIconProps & { name: string }>, actionType: TextControlAction, name: string) {
+  return {
+    actionType,
+    IconComponent,
+    iconProps: { name }
+  }
+}
