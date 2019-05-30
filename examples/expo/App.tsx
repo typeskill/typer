@@ -1,7 +1,7 @@
 
 import React, { Component } from 'react'
 import { StyleSheet, View, KeyboardAvoidingView, SafeAreaView } from 'react-native'
-import { Bridge, Sheet, Toolbar, TextControlAction, ToolbarLayout, TEXT_CONTROL_SEPARATOR } from 'react-native-typeskill'
+import { Bridge, Sheet, Toolbar, TextControlAction, ToolbarLayout, TEXT_CONTROL_SEPARATOR, buildVectorIconControlSpec } from 'react-native-typeskill'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import Version from './src/Version'
 
@@ -11,11 +11,7 @@ if (typeof (global as any).self === 'undefined') {
 }
 
 function buildMaterialControlSpec(actionType: TextControlAction, name: string) {
-  return {
-    actionType,
-    IconComponent: MaterialCommunityIcons,
-    iconProps: { name }
-  }
+  return buildVectorIconControlSpec(MaterialCommunityIcons as any, actionType, name)
 }
 
 const toolbarLayout: ToolbarLayout = [
