@@ -22,6 +22,10 @@ export interface TextControlMinimalIconProps {
   size: number
 }
 
+interface VectorIconMinimalProps extends TextControlMinimalIconProps {
+  name: string
+}
+
 export interface TextControlSpec<T extends object> {
   IconComponent: ComponentType<TextControlMinimalIconProps & T>,
   actionType: TextControlAction
@@ -238,7 +242,7 @@ const styles = StyleSheet.create({
 
 export default Toolbar
 
-export function buildVectorIconControlSpec(IconComponent: ComponentType<TextControlMinimalIconProps & { name: string }>, actionType: TextControlAction, name: string) {
+export function buildVectorIconControlSpec(IconComponent: ComponentType<VectorIconMinimalProps>, actionType: TextControlAction, name: string) {
   return {
     actionType,
     IconComponent,
