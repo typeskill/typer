@@ -56,28 +56,42 @@
 
 ### Architecture
 
+#### Introduction
+
 The library exposes a naked `Sheet` component, which you can customize and style.
 The `Sheet` component is solely responsible for displaying and editing rich content.
 This `Sheet` component needs an `innerInterface` object provided by the `Bridge` class to receive actions and notify selection attributes changes.
 The actions to insert media content, change line type (normal, lists) or set text attributes to selection (bold, italic) are triggered with the `outerInterface` from the same `Bridge` instance.
 
-Bellow is a simplified snippet [from the expo example](examples/expo/App.tsx) to show you how a custom `Toolbar` can be interfaced with the `Sheet` component:
+#### Minimal example
+
+Bellow is a simplified snippet [from the expo example](examples/expo/App.tsx) to show you how the `Toolbar` can be interfaced with the `Sheet` component.
+You need a linked `react-native-vector-icons` or `@expo/vector-icons` if you are on expo to make this example work.
 
 ``` jsx
 import React from 'react'
 import { Component } from 'react-native'
-import { Bridge, Sheeet } from 'react-native-typeskill'
+import { Bridge, Sheeet, Toolbar, buildVectorIconControlSpec, TEXT_CONTROL_SEPARATOR, TextControlAction } from 'react-native-typeskill'
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
+
+const toolbarLayout = [
+  buildMaterialControlSpec(MaterialCommunityIcons, TextControlAction.SELECT_TEXT_BOLD, 'format-bold'),
+  buildMaterialControlSpec(MaterialCommunityIcons, TextControlAction.SELECT_TEXT_ITALIC, 'format-italic'),
+  buildMaterialControlSpec(MaterialCommunityIcons, TextControlAction.SELECT_TEXT_UNDERLINE, 'format-underline'),
+  buildMaterialControlSpec(MaterialCommunityIcons, TextControlAction.SELECT_TEXT_STRIKETHROUGH, 'format-strikethrough-variant'),
+  TEXT_CONTROL_SEPARATOR,
+  buildMaterialControlSpec(MaterialCommunityIcons, TextControlAction.SELECT_LINES_ORDERED_LIST, 'format-list-numbered'),
+  buildMaterialControlSpec(MaterialCommunityIcons, TextControlAction.SELECT_LINES_UNORDERED_LIST, 'format-list-bulleted')
+]
 
 export default class RichTextEditor extends Component {
-  private bridge: Bridge = new Bridge()
+  bridge: Bridge = new Bridge()
 
   render() {
-    const innerInterface = this.bridge.getInnerInterface()
-    const outerInterface = this.bridge.getOuterInterface()
     return (
     <View style={{ flex: 1 }}>
-        <Sheet bridgeInnerInterface={innerInterface} />
-        <Toolbar bridgeOuterInferface={outerInterface} />
+        <Sheet bridgeInnerInterface={this.bridge.getInnerInterface()} />
+        <Toolbar layout={toolbarLayout} bridgeOuterInferface={this.bridge.getOuterInterface()} />
     </View>
     )
   }
@@ -87,4 +101,16 @@ export default class RichTextEditor extends Component {
 **This design gives you a total flexibility on your editor layout and integration with your application**.
 The `outerInterface` smoothly fit in global state architectures such as Redux.
 
-To see how this `outerInterface` is used in the `Toolbar` expo example, [read its implementation](examples/expo/src/Toolbar.tsx).
+To see how this `outerInterface` is used in the `Toolbar` component, [read its implementation](src/components/Toolbar.tsx). Basically, this outer interface could be used anywhere in your layout, giving you the flexibility of composing multiple controls wherever you want.
+
+#### Lifecycle contract
+
+You need to comply with this contract to avoid resource leakage and bugs.
+
+First of, some definitions. The root component is referred to as the component containing the `Sheet` component. A controller is a component to which the `outerInterface` prop is passed.
+
+You should follow this set of rules:
+
+- the `Bridge` instance should be instanciated by root component, during its own istantiation or during mount;
+- there should be exactly one `Bridge` instance for one rendered `Sheet`;
+- any component (root or controller) which adds listeners to the `outerInterface` should release any references with `outerInterface.release(this)` right before it is unmounted (`componentWillUnmount`).
