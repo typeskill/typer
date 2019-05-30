@@ -96,7 +96,6 @@ class Document<T extends string> {
         const selection = selectedBlock.getSelection()
         // Apply transforms to selection range
         const userAttributes = { [attributeName]: attributeValue }
-        console.info('EXTERNALLY SET USER ATTRIBUTES TO', userAttributes)
         const updatedDelta = delta.applyTextTransformToSelection(selection, attributeName, attributeValue)
         const deltaAttributes = updatedDelta.getSelectedTextAttributes(selection)
         const attributes = mergeAttributesRight(deltaAttributes, userAttributes)
