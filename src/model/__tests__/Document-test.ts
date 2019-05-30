@@ -61,12 +61,15 @@ describe('@model/Document', () => {
         { insert: '\n', attributes: { $type: 'ol' } }
       ])
     })
-    it('deleting an ol prefix manually should remove ol type', () => {
+    it('deleting an ol prefix manually should remove ol type and notify for selected line attributes changes', () => {
       const { outerInterface, block0 } = createContext()
       const initialLine = 'First\n'
+      const owner = {}
+      const listener = jest.fn()
       block0.handleOnTextChange(initialLine, mockDeltaChangeContext(0, 5))
       block0.handleOnSelectionChange({ start: 5, end: 5 })
       outerInterface.applyLineTransformToSelection('ol')
+      outerInterface.addSelectedLineTypeChangeListener(owner, listener)
       const header = getHeadingCharactersFromType('ol', 0)
       const transformedLine = header + 'First'
       const slicedLine = header.slice(0, 1) + header.slice(2) + initialLine
@@ -79,6 +82,7 @@ describe('@model/Document', () => {
       expect(block0.getDelta().ops).toEqual([
         { insert: initialLine }
       ])
+      expect(listener).toHaveBeenCalledWith('normal')
     })
     it('applying text attributes to empty selection should result in cursor attributes matching these attributes', () => {
       const { outerInterface, block0 } = createContext()
