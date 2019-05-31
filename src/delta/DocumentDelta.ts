@@ -117,7 +117,7 @@ export function selectText(selection: Selection, text: string): string {
 }
 
 export function getLineDiffDelta(oldText: string, newText: string, context: DeltaChangeContext, textAttributes: BlockAttributesMap): { delta: Delta, diffSelection: Selection, lineBeforeChangeSelection: Selection, lineAfterChangeSelection: Selection } {
-  const delta = new Delta()
+  let delta = new Delta()
   const lineBeforeChangeSelection = getSelectionEncompassingLine(context.selectionBeforeChange, oldText)
   const lineAfterChangeSelection = getSelectionEncompassingLine(context.selectionAfterChange, newText)
   const diffSelection = {
@@ -127,11 +127,13 @@ export function getLineDiffDelta(oldText: string, newText: string, context: Delt
   const lineBeforeChange = selectText(lineBeforeChangeSelection, oldText)
   const linesAfterChange = selectText(diffSelection, newText)
   const lineDiff = makeDiffDelta(lineBeforeChange, linesAfterChange, textAttributes)
+  delta.retain(lineBeforeChangeSelection.start)
+  delta = delta.concat(lineDiff)
   return {
     lineAfterChangeSelection,
     lineBeforeChangeSelection,
     diffSelection,
-    delta: delta.retain(lineBeforeChangeSelection.start).concat(lineDiff)
+    delta
   }
 }
 
@@ -462,7 +464,7 @@ export default class DocumentDelta<T extends string = any> implements GenericDel
    */
   applyLineTypeToSelection(selection: Selection, userLineType: TextLineType): DocumentDelta {
     const selectionLineType = this.getLineTypeInSelection(selection)
-    const delta = new Delta()
+    const diffDelta = new Delta()
     const generator = new DocumentLineIndexGenerator()
     this.eachLine((line) => {
       const { lineTypeIndex: currentLineTypeIndex, delta: lineDelta, lineType: currentLineType } = line
@@ -474,12 +476,12 @@ export default class DocumentDelta<T extends string = any> implements GenericDel
         const matchedPrefix = getHeadingRegexFromType(currentLineType).exec(currentText)
         if (matchedPrefix) {
           const [_, matchedString] = matchedPrefix
-          delta.delete(matchedString.length)
-          delta.retain(lineDelta.length() - matchedString.length)
+          diffDelta.delete(matchedString.length)
+          diffDelta.retain(lineDelta.length() - matchedString.length)
         } else {
-          delta.retain(lineDelta.length())
+          diffDelta.retain(lineDelta.length())
         }
-        delta.retain(1, { $type: null })
+        diffDelta.retain(1, { $type: null })
       } else if (lineInSelection && isLineTypeTextLengthModifier(currentLineType) && isLineTypeTextLengthModifier(nextLineType)) {
         const currentText = extractTextFromDelta(lineDelta)
         const matchedPrefix = getHeadingRegexFromType(currentLineType).exec(currentText)
@@ -487,23 +489,23 @@ export default class DocumentDelta<T extends string = any> implements GenericDel
         let retainLength = lineDelta.length()
         if (matchedPrefix) {
           const [_, matchedString] = matchedPrefix
-          delta.delete(matchedString.length)
+          diffDelta.delete(matchedString.length)
           retainLength = lineDelta.length() - matchedString.length
         }
-        delta.insert(requiredPrefix)
-        delta.retain(retainLength)
-        delta.retain(1, { $type: nextLineType })
+        diffDelta.insert(requiredPrefix)
+        diffDelta.retain(retainLength)
+        diffDelta.retain(1, { $type: nextLineType })
       } else if (lineInSelection && isLineTypeTextLengthModifier(nextLineType)) {
         const requiredPrefix = getHeadingCharactersFromType(nextLineType, nextLineTypeIndex)
         const currentPrefix = extractTextFromDelta(lineDelta).substr(0, requiredPrefix.length)
         if (currentPrefix !== requiredPrefix) {
-          delta.insert(requiredPrefix)
+          diffDelta.insert(requiredPrefix)
         }
-        delta.retain(lineDelta.length())
-        delta.retain(1, { $type: nextLineType })
+        diffDelta.retain(lineDelta.length())
+        diffDelta.retain(1, { $type: nextLineType })
       } else if (lineInSelection && nextLineType !== 'normal') {
-        delta.retain(lineDelta.length())
-        delta.retain(1, { $type: nextLineType })
+        diffDelta.retain(lineDelta.length())
+        diffDelta.retain(1, { $type: nextLineType })
       } else if (!lineInSelection && currentLineType === 'ol' && currentLineType === nextLineType && currentLineTypeIndex !== nextLineTypeIndex) {
         const currentText = extractTextFromDelta(lineDelta)
         const matchedPrefix = getHeadingRegexFromType(currentLineType).exec(currentText)
@@ -511,16 +513,17 @@ export default class DocumentDelta<T extends string = any> implements GenericDel
         let retainLength = lineDelta.length()
         if (matchedPrefix) {
           const [_, matchedString] = matchedPrefix
-          delta.delete(matchedString.length)
+          diffDelta.delete(matchedString.length)
           retainLength = lineDelta.length() - matchedString.length
         }
-        delta.insert(requiredPrefix)
-        delta.retain(retainLength)
-        delta.retain(1)
+        diffDelta.insert(requiredPrefix)
+        diffDelta.retain(retainLength)
+        diffDelta.retain(1)
       } else {
-        delta.retain(lineDelta.length() + 1)
+        diffDelta.retain(lineDelta.length() + 1)
       }
     })
-    return new DocumentDelta(this.delta.compose(delta))
+    console.info(this.delta.compose(diffDelta).transformPosition(selection.start))
+    return new DocumentDelta(this.delta.compose(diffDelta))
   }
 }
