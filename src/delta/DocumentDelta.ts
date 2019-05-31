@@ -248,7 +248,10 @@ export default class DocumentDelta<T extends string = any> implements GenericDel
       delta.delete(context.selectionBeforeChange.end - context.selectionBeforeChange.start)
       if (lastInsertedCharIsNewline) {
         const shouldPropagateLineType = shouldLineTypePropagateToNextLine(lineTypeBeforeChange)
-        delta.retain(1) // Keep the current newline
+        const shouldKeepExistingNewlineAttributes = oldText.charAt(context.selectionBeforeChange.end) === '\n'
+        if (shouldKeepExistingNewlineAttributes) {
+          delta.retain(1)
+        }
         if (shouldPropagateLineType) {
           if (isLineTypeTextLengthModifier(lineTypeBeforeChange)) {
             directive = {

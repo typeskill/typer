@@ -180,6 +180,17 @@ describe('@delta/DocumentDelta', () => {
         { insert: '\n' }
       ])
     })
+    it('it should handle insertion of a newline character from the middle of a line', () => {
+      const newText = 'Hello \nworld\n'
+      const changeContext = mockDeltaChangeContext(6, 7)
+      const originalDelta = new DocumentDelta([
+        { insert: 'Hello world\n' }
+      ])
+      const nextDelta = originalDelta.applyTextDiff(newText, changeContext)
+      expect(nextDelta.ops).toEqual([
+        { insert: 'Hello \nworld\n' }
+      ])
+    })
     it('should not propagate the previous line type to the newline after replacing a newline character, if that line type is not propagable', () => {
       const newText = 'Hello worl\n'
       const changeContext = mockDeltaChangeContext(10, 11, 11)
@@ -207,6 +218,22 @@ describe('@delta/DocumentDelta', () => {
         { insert: getHeadingCharactersFromType('ul', 0) + 'Hello world' },
         { insert: '\n', attributes: { $type: 'ul' } },
         { insert: getHeadingCharactersFromType('ul', 0) },
+        { insert: '\n', attributes: { $type: 'ul' } }
+      ])
+    })
+    it('should propagate the previous line type to the newline after inserting a newline character in the middle of a line and prepend the appropriate prefix, if that line type is propagable', () => {
+      const head = getHeadingCharactersFromType('ul', 0)
+      const newText = head + 'Hello \nworld\n'
+      const changeContext = mockDeltaChangeContext(head.length + 6, head.length + 7)
+      const originalDelta = new DocumentDelta([
+        { insert: getHeadingCharactersFromType('ul', 0) + 'Hello world' },
+        { insert: '\n', attributes: { $type: 'ul' } }
+      ])
+      const nextDelta = originalDelta.applyTextDiff(newText, changeContext)
+      expect(nextDelta.ops).toEqual([
+        { insert: getHeadingCharactersFromType('ul', 0) + 'Hello ' },
+        { insert: '\n', attributes: { $type: 'ul' } },
+        { insert: getHeadingCharactersFromType('ul', 1) + 'world' },
         { insert: '\n', attributes: { $type: 'ul' } }
       ])
     })
