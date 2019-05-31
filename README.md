@@ -75,13 +75,13 @@ import { Bridge, Sheeet, Toolbar, buildVectorIconControlSpec, TEXT_CONTROL_SEPAR
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 
 const toolbarLayout = [
-  buildMaterialControlSpec(MaterialCommunityIcons, TextControlAction.SELECT_TEXT_BOLD, 'format-bold'),
-  buildMaterialControlSpec(MaterialCommunityIcons, TextControlAction.SELECT_TEXT_ITALIC, 'format-italic'),
-  buildMaterialControlSpec(MaterialCommunityIcons, TextControlAction.SELECT_TEXT_UNDERLINE, 'format-underline'),
-  buildMaterialControlSpec(MaterialCommunityIcons, TextControlAction.SELECT_TEXT_STRIKETHROUGH, 'format-strikethrough-variant'),
+  buildVectorIconControlSpec(MaterialCommunityIcons, TextControlAction.SELECT_TEXT_BOLD, 'format-bold'),
+  buildVectorIconControlSpec(MaterialCommunityIcons, TextControlAction.SELECT_TEXT_ITALIC, 'format-italic'),
+  buildVectorIconControlSpec(MaterialCommunityIcons, TextControlAction.SELECT_TEXT_UNDERLINE, 'format-underline'),
+  buildVectorIconControlSpec(MaterialCommunityIcons, TextControlAction.SELECT_TEXT_STRIKETHROUGH, 'format-strikethrough-variant'),
   TEXT_CONTROL_SEPARATOR,
-  buildMaterialControlSpec(MaterialCommunityIcons, TextControlAction.SELECT_LINES_ORDERED_LIST, 'format-list-numbered'),
-  buildMaterialControlSpec(MaterialCommunityIcons, TextControlAction.SELECT_LINES_UNORDERED_LIST, 'format-list-bulleted')
+  buildVectorIconControlSpec(MaterialCommunityIcons, TextControlAction.SELECT_LINES_ORDERED_LIST, 'format-list-numbered'),
+  buildVectorIconControlSpec(MaterialCommunityIcons, TextControlAction.SELECT_LINES_UNORDERED_LIST, 'format-list-bulleted')
 ]
 
 export default class RichTextEditor extends Component {
