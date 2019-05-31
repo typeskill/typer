@@ -51,6 +51,7 @@ export interface DeltaChangeContext {
 
 export interface GenericDelta {
   readonly ops: GenericOp[]
+  readonly length: () => number
 }
 
 /**
@@ -445,7 +446,9 @@ export default class DocumentDelta<T extends string = any> implements GenericDel
   }
 
   /**
-   * Swtich the `$type` of lines traversed by selection, depending of its sate:
+   * Swtich the `$type` of lines traversed by selection, depending of its sate.
+   * 
+   * @remarks
    * 
    * - if **all** lines traversed by selection have their `$type` set to `lineType`, set `$type` to `"normal"` for each of these lines;
    * - otherwise, set `$type` to `lineType` for each of these lines.
@@ -455,7 +458,7 @@ export default class DocumentDelta<T extends string = any> implements GenericDel
    * 
    * @param selection 
    * @param userLineType 
-   * @returns the DocumentDelta resulting this operation.
+   * @returns The DocumentDelta resulting this operation.
    */
   applyLineTypeToSelection(selection: Selection, userLineType: TextLineType): DocumentDelta {
     const selectionLineType = this.getLineTypeInSelection(selection)
@@ -472,20 +475,20 @@ export default class DocumentDelta<T extends string = any> implements GenericDel
         if (matchedPrefix) {
           const [_, matchedString] = matchedPrefix
           delta.delete(matchedString.length)
-          delta.retain((lineDelta as Delta).length() - matchedString.length)
+          delta.retain(lineDelta.length() - matchedString.length)
         } else {
-          delta.retain((lineDelta as Delta).length())
+          delta.retain(lineDelta.length())
         }
         delta.retain(1, { $type: null })
       } else if (lineInSelection && isLineTypeTextLengthModifier(currentLineType) && isLineTypeTextLengthModifier(nextLineType)) {
         const currentText = extractTextFromDelta(lineDelta)
         const matchedPrefix = getHeadingRegexFromType(currentLineType).exec(currentText)
         const requiredPrefix = getHeadingCharactersFromType(nextLineType, nextLineTypeIndex)
-        let retainLength = (lineDelta as Delta).length()
+        let retainLength = lineDelta.length()
         if (matchedPrefix) {
           const [_, matchedString] = matchedPrefix
           delta.delete(matchedString.length)
-          retainLength = (lineDelta as Delta).length() - matchedString.length
+          retainLength = lineDelta.length() - matchedString.length
         }
         delta.insert(requiredPrefix)
         delta.retain(retainLength)
@@ -496,26 +499,26 @@ export default class DocumentDelta<T extends string = any> implements GenericDel
         if (currentPrefix !== requiredPrefix) {
           delta.insert(requiredPrefix)
         }
-        delta.retain((lineDelta as Delta).length())
+        delta.retain(lineDelta.length())
         delta.retain(1, { $type: nextLineType })
       } else if (lineInSelection && nextLineType !== 'normal') {
-        delta.retain((lineDelta as Delta).length())
+        delta.retain(lineDelta.length())
         delta.retain(1, { $type: nextLineType })
       } else if (!lineInSelection && currentLineType === 'ol' && currentLineType === nextLineType && currentLineTypeIndex !== nextLineTypeIndex) {
         const currentText = extractTextFromDelta(lineDelta)
         const matchedPrefix = getHeadingRegexFromType(currentLineType).exec(currentText)
         const requiredPrefix = getHeadingCharactersFromType(nextLineType, nextLineTypeIndex)
-        let retainLength = (lineDelta as Delta).length()
+        let retainLength = lineDelta.length()
         if (matchedPrefix) {
           const [_, matchedString] = matchedPrefix
           delta.delete(matchedString.length)
-          retainLength = (lineDelta as Delta).length() - matchedString.length
+          retainLength = lineDelta.length() - matchedString.length
         }
         delta.insert(requiredPrefix)
         delta.retain(retainLength)
         delta.retain(1)
       } else {
-        delta.retain((lineDelta as Delta).length() + 1)
+        delta.retain(lineDelta.length() + 1)
       }
     })
     return new DocumentDelta(this.delta.compose(delta))
