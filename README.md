@@ -85,7 +85,7 @@ const toolbarLayout = [
 ]
 
 export default class RichTextEditor extends Component {
-  bridge: Bridge = new Bridge()
+  bridge = new Bridge()
 
   render() {
     return (
