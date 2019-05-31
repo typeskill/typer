@@ -54,16 +54,16 @@
 - Support for **arbitrary controllers** with the `Bridge` class
 - JSON-**serializable** rich text content
 
-### Architecture
+## Architecture & example
 
-#### Introduction
+### Introduction
 
 The library exposes a naked `Sheet` component, which you can customize and style.
 The `Sheet` component is solely responsible for displaying and editing rich content.
 This `Sheet` component needs an `innerInterface` object provided by the `Bridge` class to receive actions and notify selection attributes changes.
 The actions to insert media content, change line type (normal, lists) or set text attributes to selection (bold, italic) are triggered with the `outerInterface` from the same `Bridge` instance.
 
-#### Minimal example
+### Minimal example
 
 Bellow is a simplified snippet [from the expo example](examples/expo/App.tsx) to show you how the `Toolbar` can be interfaced with the `Sheet` component.
 You need a linked `react-native-vector-icons` or `@expo/vector-icons` if you are on expo to make this example work.
@@ -103,7 +103,7 @@ The `outerInterface` smoothly fit in global state architectures such as Redux.
 
 To see how this `outerInterface` is used in the `Toolbar` component, [read its implementation](src/components/Toolbar.tsx). Basically, this outer interface could be used anywhere in your layout, giving you the flexibility of composing multiple controls wherever you want.
 
-#### Lifecycle contract
+### Lifecycle contract
 
 You need to comply with this contract to avoid resource leakage and bugs.
 
