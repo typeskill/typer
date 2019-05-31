@@ -9,7 +9,7 @@ declare namespace Orchestrator {
   /**
    * Events produced by the Sheet Controller
    */
-  export type SheetControllerEvent = 'FOCUS_REQUEST' | 'SELECTION_RANGE_ATTRIBUTES_UPDATE'
+  export type SheetControllerEvent = 'FOCUS_REQUEST' | 'SELECTION_RANGE_ATTRIBUTES_UPDATE' | 'SELECTION_OVERRIDE'
 
   export type SheetControllerEventListener = ListenerFn
 }

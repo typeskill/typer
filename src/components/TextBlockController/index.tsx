@@ -18,6 +18,7 @@ export interface TextBlockControllerProps<T extends string> {
 
 interface TextBlockControllerState {
   isControlingState: boolean
+  overridingSelection: Selection|null
 }
 
 const styles = StyleSheet.create({
@@ -46,13 +47,16 @@ export default class TextBlockController<T extends string> extends Component<Tex
   private textInputRef: TextInput | null = null
   private timeouts: NodeJS.Timeout[] = []
   private textChangeSession: TextChangeSession|null = null
+  private nextOverridingSelection: Selection|null = null
+  private skipNextSelectionUpdate: boolean = false
   private selection: Selection = {
     start: 0,
     end: 0
   }
 
   state: TextBlockControllerState = {
-    isControlingState: false
+    isControlingState: false,
+    overridingSelection: null
   }
 
   constructor(props: TextBlockControllerProps<T>) {
@@ -92,27 +96,30 @@ export default class TextBlockController<T extends string> extends Component<Tex
   @boundMethod
   private handleOnSelectionChange({ nativeEvent: { selection } }: NativeSyntheticEvent<TextInputSelectionChangeEventData>) {
     const { textBlock } = this.props
-    if (!this.state.isControlingState) {
-      this.selection = selection
-      this.props.textBlock.handleOnSelectionChange(selection)
-    }
+    const nextSelection = !this.skipNextSelectionUpdate ? selection : this.selection
     if (this.textChangeSession !== null) {
-      this.textChangeSession.setSelectionAfterChange(selection)
+      this.textChangeSession.setSelectionAfterChange(nextSelection)
       textBlock.handleOnTextChange(this.textChangeSession.getTextAfterChange(), this.textChangeSession.getDeltaChangeContext())
       this.textChangeSession = null
+    }
+    if (!this.skipNextSelectionUpdate) {
+      this.selection = nextSelection
+      this.props.textBlock.handleOnSelectionChange(nextSelection)
+    } else {
+      this.skipNextSelectionUpdate = false
+      this.setState({ overridingSelection: nextSelection })
+      this.forceUpdate()
     }
   }
 
   @boundMethod
+  private handleOnSelectionOverride(selection: Selection) {
+    this.nextOverridingSelection = selection
+  }
+
+  @boundMethod
   private handleOnSelectionRangeAttributesUpdate() {
-    // This is to prevent selection changes from clearing selection after
-    // applying new attributes.
-    this.setState({ isControlingState: true }, () => {
-      const timeout = setTimeout(() => {
-        this.setState({ isControlingState: false })
-      }, 75)
-      this.timeouts.push(timeout)
-    })
+    this.skipNextSelectionUpdate = true
   }
 
   @boundMethod
@@ -129,6 +136,38 @@ export default class TextBlockController<T extends string> extends Component<Tex
   componentDidMount() {
     this.blockControllerInterface.addListener('SELECTION_RANGE_ATTRIBUTES_UPDATE', this.handleOnSelectionRangeAttributesUpdate)
     this.blockControllerInterface.addListener('FOCUS_REQUEST', this.handleOnFocusRequest)
+    this.blockControllerInterface.addListener('SELECTION_OVERRIDE', this.handleOnSelectionOverride)
+  }
+
+  getSnapshotBeforeUpdate(prevProps: TextBlockControllerProps<T>) {
+    if (this.props.documentDelta !== prevProps.documentDelta && this.nextOverridingSelection) {
+      const selection = this.nextOverridingSelection
+      this.nextOverridingSelection = null
+      return selection
+    }
+    return null
+  }
+
+  componentDidUpdate(_prevProps: TextBlockControllerProps<T>, prevState: TextBlockControllerState, overridingSelection: Selection|null) {
+    // Overriding selection during the same rendering cycle as
+    // pushing the Text elements from delta into TextInput children props
+    // triggers a setSpan exception.
+    // 
+    // We need to make sure this is rendered on next rendering cycle.
+    // Because "componentDidUpdate" is called before flushing components
+    // to native views, we must trigger a new rendering soon enough.
+    //
+    // The next rendering if forced with "forceUpdate".
+    if (overridingSelection) {
+      this.timeouts.push(setTimeout(() => {
+        this.setState({ overridingSelection }, () => {
+          this.forceUpdate()
+        })
+      }, 30))
+    } else if (prevState.overridingSelection) {
+      // Won't trigger rerender thanks to shouldComponentUpdate
+      this.setState({ overridingSelection: null })
+    }
   }
 
   componentWillUnmount() {
@@ -140,10 +179,10 @@ export default class TextBlockController<T extends string> extends Component<Tex
 
   render() {
     const { grow, documentDelta, textStyle, textBlock } = this.props
-    const { isControlingState } = this.state
+    const { overridingSelection } = this.state
     return (
       <View style={[grow ? styles.grow : undefined]}>
-        <TextInput selection={isControlingState ? this.selection : undefined}
+        <TextInput selection={overridingSelection ? overridingSelection : undefined}
                    style={[grow ? styles.grow : undefined, styles.textInput, richTextStyles.defaultText]}
                    onKeyPress={this.handleOnKeyPressed}
                    onSelectionChange={this.handleOnSelectionChange}

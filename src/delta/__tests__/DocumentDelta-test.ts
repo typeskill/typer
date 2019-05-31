@@ -541,8 +541,8 @@ describe('@delta/DocumentDelta', () => {
           start: 0,
           end: 6
         }
-        const result = delta.applyLineTypeToSelection(selection, 'normal').ops
-        expect(result).toEqual([
+        const { delta: result } = delta.applyLineTypeToSelection(selection, 'normal')
+        expect(result.ops).toEqual([
           { insert: 'A\nB\nC\n' }
         ])
       })
@@ -557,8 +557,8 @@ describe('@delta/DocumentDelta', () => {
           start: 0,
           end: 6
         }
-        const result = delta.applyLineTypeToSelection(selection, 'misc' as TextLineType).ops
-        expect(result).toEqual([
+        const { delta: result } = delta.applyLineTypeToSelection(selection, 'misc' as TextLineType)
+        expect(result.ops).toEqual([
           { insert: 'A' },
           { insert: '\n', attributes: { $type: 'misc' } },
           { insert: 'B' },
@@ -575,7 +575,7 @@ describe('@delta/DocumentDelta', () => {
           start: 0,
           end: 6
         }
-        expect(delta.applyLineTypeToSelection(selection, 'misc' as TextLineType).ops).toEqual([
+        expect(delta.applyLineTypeToSelection(selection, 'misc' as TextLineType).delta.ops).toEqual([
           { insert: 'A' },
           { insert: '\n', attributes: { $type: 'misc' } },
           { insert: 'B' },
@@ -596,7 +596,7 @@ describe('@delta/DocumentDelta', () => {
           start: 0,
           end: 12
         }
-        const result = delta.applyLineTypeToSelection(selection, 'misc' as TextLineType).ops
+        const result = delta.applyLineTypeToSelection(selection, 'misc' as TextLineType).delta.ops
         expect(result).toEqual([
           { insert: 'A' },
           { insert: '\n', attributes: { $type: 'misc' } },
@@ -616,7 +616,7 @@ describe('@delta/DocumentDelta', () => {
           start: 0,
           end: 6
         }
-        const result = delta.applyLineTypeToSelection(selection, 'ol').ops
+        const result = delta.applyLineTypeToSelection(selection, 'ol').delta.ops
         expect(result).toEqual([
           { insert: getHeadingCharactersFromType('ol', 0) + 'A' },
           { insert: '\n', attributes: { $type: 'ol' } },
@@ -637,7 +637,7 @@ describe('@delta/DocumentDelta', () => {
           start: head.length + 2,
           end: head.length + 7
         }
-        const result = delta.applyLineTypeToSelection(selection, 'ol').ops
+        const result = delta.applyLineTypeToSelection(selection, 'ol').delta.ops
         expect(result).toEqual([
           { insert: getHeadingCharactersFromType('ol', 0) + '0' },
           { insert: '\n', attributes: { $type: 'ol' } },
@@ -663,7 +663,7 @@ describe('@delta/DocumentDelta', () => {
           start: 0,
           end: delta.length()
         }
-        expect(delta.applyLineTypeToSelection(selection, 'ol').ops).toEqual([
+        expect(delta.applyLineTypeToSelection(selection, 'ol').delta.ops).toEqual([
           { insert: getHeadingCharactersFromType('ol', 0) + 'A' },
           { insert: '\n', attributes: { $type: 'ol' } },
           { insert: getHeadingCharactersFromType('ol', 1) + 'B' },
@@ -673,6 +673,20 @@ describe('@delta/DocumentDelta', () => {
           { insert: getHeadingCharactersFromType('ol', 3) + 'D' },
           { insert: '\n', attributes: { $type: 'ol' } }
         ])
+      })
+      it('should return a selection which length is augmented by the number of insertions', () => {
+        const delta = new DocumentDelta([
+          { insert: 'A\nB\nC\n' }
+        ])
+        const selection = {
+          start: 0,
+          end: 6
+        }
+        const result = delta.applyLineTypeToSelection(selection, 'ol')
+        expect(result.selection).toMatchObject({
+          start: 4,
+          end: getHeadingCharactersFromType('ol', 0).length * 3 + 6
+        })
       })
     })
     describe('when applied with "normal" type to former "ol" lines', () => {
@@ -689,7 +703,7 @@ describe('@delta/DocumentDelta', () => {
           start: 0,
           end: 12
         }
-        const result = delta.applyLineTypeToSelection(selection, 'normal').ops
+        const result = delta.applyLineTypeToSelection(selection, 'normal').delta.ops
         expect(result).toEqual([
           { insert: 'A\nB\nC\n' }
         ])
@@ -709,7 +723,7 @@ describe('@delta/DocumentDelta', () => {
           // @ts-ignore
           end: delta.delta.length()
         }
-        const result = delta.applyLineTypeToSelection(selection, 'normal').ops
+        const result = delta.applyLineTypeToSelection(selection, 'normal').delta.ops
         expect(result).toEqual([
           { insert: getHeadingCharactersFromType('ol', 0) + 'A' },
           { insert: '\n', attributes: { $type: 'ol' } },
@@ -736,7 +750,7 @@ describe('@delta/DocumentDelta', () => {
           start: firstCharOfThirdLine,
           end: firstCharOfThirdLine
         }
-        expect(delta.applyLineTypeToSelection(selection, 'normal').ops).toEqual([
+        expect(delta.applyLineTypeToSelection(selection, 'normal').delta.ops).toEqual([
           { insert: head0 + 'A' },
           { insert: '\n', attributes: { $type: 'ol' } },
           { insert: head1 + 'B' },
@@ -744,6 +758,34 @@ describe('@delta/DocumentDelta', () => {
           { insert: `C\n${head0}D` },
           { insert: '\n', attributes: { $type: 'ol' } }
         ])
+      })
+      it('should return a selection which length is reduced by the number of deletions', () => {
+        const head0 = getHeadingCharactersFromType('ol', 0)
+        const head1 = getHeadingCharactersFromType('ol', 1)
+        const head2 = getHeadingCharactersFromType('ol', 2)
+        const head3 = getHeadingCharactersFromType('ol', 3)
+        const delta = new DocumentDelta([
+          { insert: head0 + 'A' },
+          { insert: '\n', attributes: { $type: 'ol' } },
+          { insert: head1 + 'B' },
+          { insert: '\n', attributes: { $type: 'ol' } },
+          { insert: head2 + 'C' },
+          { insert: '\n', attributes: { $type: 'ol' } },
+          { insert: head3 + 'D' },
+          { insert: '\n', attributes: { $type: 'ol' } }
+        ])
+        const selection = {
+          start: 0,
+          end: delta.length()
+        }
+        const result = delta.applyLineTypeToSelection(selection, 'normal')
+        expect(result.delta.ops).toEqual([
+          { insert: 'A\nB\nC\nD\n' }
+        ])
+        expect(result.selection).toMatchObject({
+          start: 0,
+          end: 8
+        })
       })
     })
   })

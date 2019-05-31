@@ -81,11 +81,12 @@ class Document<T extends string> {
       if (this.store.hasBlock()) {
         const selectedBlock = this.store.getActiveBlock() as TextBlock<T>
         invariant(selectedBlock instanceof TextBlock, 'Line Transforms can only be applied to a TextBlock')
-        const selection = selectedBlock.getSelection()
-        const updatedDelta = selectedBlock.getDelta().applyLineTypeToSelection(selection, lineType)
-        const updateLineType = updatedDelta.getLineTypeInSelection(selection)
+        const selectionBeforeChange = selectedBlock.getSelection()
+        const { delta: updatedDelta, selection: selectionAfterChange } = selectedBlock.getDelta().applyLineTypeToSelection(selectionBeforeChange, lineType)
+        const updateLineType = updatedDelta.getLineTypeInSelection(selectionBeforeChange)
         this.store.updateDeltaForBlockInstance(selectedBlock.getInstanceNumber(), updatedDelta)
         consumer.bridgeInnerInterface.setSelectedLineType(updateLineType)
+        this.orchestrator.emitToBlockController(selectedBlock.getInstanceNumber(), 'SELECTION_OVERRIDE', selectionAfterChange)
       }
     })
     consumer.bridgeInnerInterface.addApplyTextTransformToSelectionListener(this, (attributeName: T, attributeValue: any) => {

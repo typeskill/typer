@@ -460,9 +460,9 @@ export default class DocumentDelta<T extends string = any> implements GenericDel
    * 
    * @param selection 
    * @param userLineType 
-   * @returns The DocumentDelta resulting this operation.
+   * @returns An object describing both delta and selection after applying line type.
    */
-  applyLineTypeToSelection(selection: Selection, userLineType: TextLineType): DocumentDelta {
+  applyLineTypeToSelection(selection: Selection, userLineType: TextLineType): { delta: DocumentDelta, selection: Selection } {
     const selectionLineType = this.getLineTypeInSelection(selection)
     const diffDelta = new Delta()
     const generator = new DocumentLineIndexGenerator()
@@ -523,7 +523,12 @@ export default class DocumentDelta<T extends string = any> implements GenericDel
         diffDelta.retain(lineDelta.length() + 1)
       }
     })
-    console.info(this.delta.compose(diffDelta).transformPosition(selection.start))
-    return new DocumentDelta(this.delta.compose(diffDelta))
+    return {
+      selection: {
+        start: diffDelta.transformPosition(selection.start),
+        end: diffDelta.transformPosition(selection.end)
+      },
+      delta: new DocumentDelta(this.delta.compose(diffDelta))
+    }
   }
 }
