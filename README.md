@@ -113,4 +113,4 @@ You should follow this set of rules:
 
 - the `Bridge` instance should be instanciated by root component, during its own istantiation or during mount;
 - there should be exactly one `Bridge` instance for one rendered `Sheet`;
-- any component (root or controller) which adds listeners to the `outerInterface` should release any references with `outerInterface.release(this)` right before it is unmounted (`componentWillUnmount`).
+- any component (root or controller) which adds listeners to the `outerInterface` should detatch any references with `outerInterface.release(this)` before unmounting (`componentWillUnmount`).
