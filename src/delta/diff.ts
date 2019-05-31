@@ -24,13 +24,6 @@ function getDeltasFromTextDiff<T extends string>(oldText: string, newText: strin
   return delta
 }
 
-interface LineDiffReport {
-  kind: 'RETAINED' | 'DELETED' | 'REPLACED' | 'INSERTED'
-  value: string
-  count: number
-  diff?: Delta
-}
-
 export function makeDiffDelta(oldText: string, nuText: string, textAttributes: BlockAttributesMap): Delta {
   return getDeltasFromTextDiff(oldText, nuText, textAttributes)
 }
