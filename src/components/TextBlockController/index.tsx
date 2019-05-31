@@ -105,6 +105,8 @@ export default class TextBlockController<T extends string> extends Component<Tex
     if (!this.skipNextSelectionUpdate) {
       this.selection = nextSelection
       this.props.textBlock.handleOnSelectionChange(nextSelection)
+      // Forcing update because selection must be reset
+      this.forceUpdate()
     } else {
       this.skipNextSelectionUpdate = false
       this.setState({ overridingSelection: nextSelection })
@@ -148,7 +150,7 @@ export default class TextBlockController<T extends string> extends Component<Tex
     return null
   }
 
-  componentDidUpdate(_prevProps: TextBlockControllerProps<T>, prevState: TextBlockControllerState, overridingSelection: Selection|null) {
+  componentDidUpdate(_prevProps: TextBlockControllerProps<T>, _prevState: TextBlockControllerState, overridingSelection: Selection|null) {
     // Overriding selection during the same rendering cycle as
     // pushing the Text elements from delta into TextInput children props
     // triggers a setSpan exception.
@@ -164,7 +166,8 @@ export default class TextBlockController<T extends string> extends Component<Tex
           this.forceUpdate()
         })
       }, 30))
-    } else if (prevState.overridingSelection) {
+    } else if (this.state.overridingSelection) {
+      console.info('SETTING NULL')
       // Won't trigger rerender thanks to shouldComponentUpdate
       this.setState({ overridingSelection: null })
     }
