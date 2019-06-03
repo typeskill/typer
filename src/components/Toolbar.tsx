@@ -2,9 +2,10 @@ import React, { PureComponent, SFC, ComponentType } from 'react'
 import { View, TouchableOpacity, StyleProp, ViewStyle, ViewPropTypes, StyleSheet } from 'react-native'
 import invariant from 'invariant'
 import PropTypes from 'prop-types'
-import { BaseTextTransformAttribute, TextLineType } from '@delta/transforms'
+import { BaseTextTransformAttribute } from '@delta/transforms'
 import Bridge from '@core/Bridge'
 import { TextAttributesMap } from '@delta/attributes'
+import { TextLineType } from '@delta/lines'
 
 export const TEXT_CONTROL_SEPARATOR = Symbol('separator')
 

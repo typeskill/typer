@@ -1,4 +1,4 @@
-import { TextLineType } from './transforms'
+import { TextLineType } from './lines'
 
 export class DocumentLineIndexGenerator {
   private lastContiguousOlIndex: null|number = null

@@ -3,7 +3,7 @@ import React, { Component } from 'react'
 import invariant from 'invariant'
 import { View, TextInput, NativeSyntheticEvent, TextInputSelectionChangeEventData, TextInputKeyPressEventData, StyleSheet, StyleProp, TextStyle, TextInputProps } from 'react-native'
 import RichText, { richTextStyles } from '@components/RichText'
-import { Selection } from '@delta/selection'
+import { Selection } from '@delta/Selection'
 import Orchestrator from '@model/Orchestrator'
 import { boundMethod } from 'autobind-decorator'
 import TextBlock from '@model/TextBlock'
@@ -48,10 +48,7 @@ export default class TextBlockController<T extends string> extends Component<Tex
   private textChangeSession: TextChangeSession|null = null
   private nextOverridingSelection: Selection|null = null
   private skipNextSelectionUpdate: boolean = false
-  private selection: Selection = {
-    start: 0,
-    end: 0
-  }
+  private selection = Selection.fromBounds(0)
 
   state: TextBlockControllerState = {
     isControlingState: false,
@@ -98,7 +95,7 @@ export default class TextBlockController<T extends string> extends Component<Tex
   @boundMethod
   private handleOnSelectionChange({ nativeEvent: { selection } }: NativeSyntheticEvent<TextInputSelectionChangeEventData>) {
     const { textBlock } = this.props
-    const nextSelection = !this.skipNextSelectionUpdate ? selection : this.selection
+    const nextSelection = !this.skipNextSelectionUpdate ? Selection.fromObject(selection) : this.selection
     if (this.textChangeSession !== null) {
       this.textChangeSession.setSelectionAfterChange(nextSelection)
       textBlock.handleOnTextChange(this.textChangeSession.getTextAfterChange(), this.textChangeSession.getDeltaChangeContext())

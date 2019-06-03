@@ -1,7 +1,8 @@
 import { TextAttributesMap } from '@delta/attributes'
-import { defaultTextTransforms, TextTransformSpec, BaseTextTransformAttribute, TextLineType } from '@delta/transforms'
+import { defaultTextTransforms, TextTransformSpec, BaseTextTransformAttribute } from '@delta/transforms'
 import { Endpoint } from './Endpoint'
 import TextTransformsRegistry from './TextTransformsRegistry'
+import { TextLineType } from '@delta/lines'
 
 declare namespace Bridge {
 

@@ -5,7 +5,7 @@ import { GenericOp, isTextOp, TextOp } from '@delta/operations'
 import TextTransformsRegistry from '@core/TextTransformsRegistry'
 import invariant from 'invariant'
 import { boundMethod } from 'autobind-decorator'
-import { TextLineType } from '@delta/transforms'
+import { TextLineType } from '@delta/lines'
 
 export interface RichTextProps<T extends string> {
   documentDelta: DocumentDelta

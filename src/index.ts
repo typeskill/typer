@@ -15,18 +15,22 @@ import {
   BlockAttributesMap
 } from '@delta/attributes'
 import {
-  BaseTextTransformAttribute,
   TextLineType,
-  TextLengthModifierLineType,
+  TextLengthModifierLineType
+} from '@delta/lines'
+import {
+  BaseTextTransformAttribute,
   BooleanTextTransformSpec,
   TextTransformSpec,
   TextTransformsDictionnary
 } from '@delta/transforms'
-import DocumentDelta, {
-  DeltaChangeContext,
-  DocumentLine,
+import {
+  DeltaChangeContext
+} from '@delta/DeltaChangeContext'
+import {
   GenericDelta
-} from '@delta/DocumentDelta'
+} from '@delta/generic'
+import DocumentDelta from '@delta/DocumentDelta'
 
 export {
   // @components
@@ -55,6 +59,5 @@ export {
   // @delta/DocumentDelta
   DocumentDelta,
   DeltaChangeContext,
-  DocumentLine,
   GenericDelta
 }

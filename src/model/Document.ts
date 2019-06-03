@@ -5,7 +5,7 @@ import Block from './Block'
 import Bridge from '@core/Bridge'
 import Orchestrator from '@model/Orchestrator'
 import Store from './Store'
-import { TextLineType } from '@delta/transforms'
+import { TextLineType } from '@delta/lines'
 import { mergeAttributesRight } from '@delta/attributes'
 
 declare namespace Document {

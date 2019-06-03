@@ -1,4 +1,4 @@
-import { Selection } from '@delta/selection'
+import { Selection } from '@delta/Selection'
 import Document from './Document'
 import DocumentDelta from '@delta/DocumentDelta'
 import { boundMethod } from 'autobind-decorator'

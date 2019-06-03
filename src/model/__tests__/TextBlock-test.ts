@@ -2,7 +2,8 @@
 import { mockDocumentBlockInterface } from '@test/document'
 import TextBlock from '@model/TextBlock'
 import { mockSelection } from '@test/delta'
-import DocumentDelta, { getHeadingCharactersFromType } from '@delta/DocumentDelta'
+import DocumentDelta from '@delta/DocumentDelta'
+import { getHeadingCharactersFromType } from '@delta/lines'
 
 describe('@model/TextBlock', () => {
   describe('handleOnSelectionChange', () => {

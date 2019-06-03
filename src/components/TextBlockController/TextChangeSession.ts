@@ -1,5 +1,5 @@
-import { DeltaChangeContext } from '@delta/DocumentDelta'
-import { Selection } from '@delta/selection'
+import { Selection } from '@delta/Selection'
+import { DeltaChangeContext } from '@delta/DeltaChangeContext'
 
 export class TextChangeSession {
 
@@ -14,10 +14,7 @@ export class TextChangeSession {
     if (this.selectionBeforeChange === null) {
       throw new Error('selectionBeforeChange must be set before getting delta change context.')
     }
-    return {
-      selectionAfterChange: this.selectionAfterChange,
-      selectionBeforeChange: this.selectionBeforeChange
-    }
+    return new DeltaChangeContext(this.selectionBeforeChange, this.selectionAfterChange)
   }
 
   public setTextAfterChange(textAfterChange: string) {

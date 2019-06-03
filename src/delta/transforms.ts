@@ -4,10 +4,6 @@ type TextAttributePrimitive = boolean | string
 
 export type BaseTextTransformAttribute = 'bold' | 'italic' | 'textDecoration'
 
-export type TextLengthModifierLineType = 'ol' | 'ul'
-
-export type TextLineType = 'normal' | 'quoted' | TextLengthModifierLineType
-
 export const booleanTransformBase = {
   attributeValue: true as true
 }

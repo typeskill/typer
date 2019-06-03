@@ -2,17 +2,14 @@ import Block from './Block'
 import Document from './Document'
 import { TextAttributesMap } from '@delta/attributes'
 import { boundMethod } from 'autobind-decorator'
-import { Selection } from '@delta/selection'
+import { Selection } from '@delta/Selection'
 import TextTransformsRegistry from '@core/TextTransformsRegistry'
-import { DeltaChangeContext } from '@delta/DocumentDelta'
+import { DeltaChangeContext } from '@delta/DeltaChangeContext'
 
 export default class TextBlock<T extends string> extends Block<T> {
 
   private cursorTextAttributes: TextAttributesMap<T> = {}
-  private selection: Selection = {
-    start: 0,
-    end: 0
-  }
+  private selection = Selection.fromBounds(0)
   private length: number = 0
 
   constructor(blockInterface: Document.BlockInterface<T>) {
