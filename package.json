@@ -40,13 +40,13 @@
     "@types/diff": "^4.0.2",
     "@types/invariant": "^2.2.29",
     "@types/ramda": "^0.26.8",
-    "autobind-decorator": "^2.4.0",
-    "diff": "4.0.1",
-    "eventemitter3": "^3.1.2",
-    "invariant": "^2.2.4",
-    "prop-types": "^15.7.2",
-    "quill-delta": "4.2.1",
-    "ramda": "^0.26.1"
+    "autobind-decorator": "~2.4.0",
+    "diff": "~4.0.1",
+    "eventemitter3": "~3.1.2",
+    "invariant": "~2.2.4",
+    "prop-types": "~15.7.2",
+    "quill-delta": "~4.2.1",
+    "ramda": "~0.26.1"
   },
   "devDependencies": {
     "@babel/cli": "^7.4.4",
