@@ -43,7 +43,6 @@ const constantTextInputProps = {
 
 export default class TextBlockController<T extends string> extends Component<TextBlockControllerProps<T>, TextBlockControllerState> {
 
-  private blockControllerInterface: Orchestrator.BlockControllerInterface
   private textInputRef: TextInput | null = null
   private timeouts: NodeJS.Timeout[] = []
   private textChangeSession: TextChangeSession|null = null
@@ -62,7 +61,10 @@ export default class TextBlockController<T extends string> extends Component<Tex
   constructor(props: TextBlockControllerProps<T>) {
     super(props)
     invariant(props.textBlock != null, 'textBlock prop must be given at construction')
-    this.blockControllerInterface = props.textBlock.getControllerInterface()
+  }
+
+  private get blockControllerInterface(): Orchestrator.BlockControllerInterface {
+    return this.props.textBlock.getControllerInterface()
   }
 
   /**
@@ -150,7 +152,7 @@ export default class TextBlockController<T extends string> extends Component<Tex
     return null
   }
 
-  componentDidUpdate(_prevProps: TextBlockControllerProps<T>, _prevState: TextBlockControllerState, overridingSelection: Selection|null) {
+  componentDidUpdate(prevProps: TextBlockControllerProps<T>, _prevState: TextBlockControllerState, overridingSelection: Selection|null) {
     // Overriding selection during the same rendering cycle as
     // pushing the Text elements from delta into TextInput children props
     // triggers a setSpan exception.
@@ -167,7 +169,6 @@ export default class TextBlockController<T extends string> extends Component<Tex
         })
       }, 30))
     } else if (this.state.overridingSelection) {
-      console.info('SETTING NULL')
       // Won't trigger rerender thanks to shouldComponentUpdate
       this.setState({ overridingSelection: null })
     }

@@ -172,7 +172,7 @@ export default class DocumentDelta<T extends string = any> implements GenericDel
       const { delta: lineDelta, lineType, lineTypeIndex, beginningOfLineIndex } = line
       const requiredPrefix = getHeadingCharactersFromType(lineType, lineTypeIndex)
       if (directive) {
-        const { selectionAfterChange, selectionBeforeChange } = directive.context
+        const { selectionAfterChange } = directive.context
         if (isLineInSelection(selectionAfterChange, line)) {
           if (directive.type === NormalizeOperation.INSERT_LINE_TYPE_PREFIX && shouldLineTypePropagateToNextLine(lineType)) {
             return [{ insert: requiredPrefix }, ...lineDelta.ops, this.getLineDelimiterForType(lineType)]
@@ -181,9 +181,9 @@ export default class DocumentDelta<T extends string = any> implements GenericDel
             const relativeCursorPosition = selectionAfterChange.start - beginningOfLineIndex
             if (isLineTypeTextLengthModifier(lineType) && relativeCursorPosition < requiredPrefix.length) {
               const current = new Delta([...lineDelta.ops, this.getLineDelimiterForType('normal') ])
-              const prefixCharsAlreadyDeleted = selectionBeforeChange.end - Math.min(selectionAfterChange.start, beginningOfLineIndex + requiredPrefix.length)
-              const numToDelete = requiredPrefix.length - prefixCharsAlreadyDeleted
-              return current.compose(new Delta([{ delete: numToDelete }, { retain: current.length() - numToDelete, attributes: { $type: null } }])).ops
+              const numToDelete = selectionAfterChange.start - beginningOfLineIndex
+              const diff = new Delta().delete(numToDelete).retain(current.length() - numToDelete, { $type: null })
+              return current.compose(diff).ops
             }
           }
         }

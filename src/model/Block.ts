@@ -2,6 +2,7 @@ import { Selection } from '@delta/selection'
 import Document from './Document'
 import DocumentDelta from '@delta/DocumentDelta'
 import { boundMethod } from 'autobind-decorator'
+import Orchestrator from './Orchestrator'
 
 let lastInstanceNumber = 0
 
@@ -39,7 +40,7 @@ abstract class Block<T extends string = any> {
     return this.instanceNumber
   }
 
-  getControllerInterface(): any {
+  getControllerInterface(): Orchestrator.BlockControllerInterface {
     return this.blockInterface.orchestrator.getblockControllerInterfaceForIndex(this.getInstanceNumber())
   }
 

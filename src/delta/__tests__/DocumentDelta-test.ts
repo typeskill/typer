@@ -3,7 +3,7 @@ import DocumentDelta, { GenericDelta, getHeadingCharactersFromType, extractTextF
 import { TextAttributesMap } from '@delta/attributes'
 import { Selection } from '@delta/selection'
 import { TextLineType } from '@delta/transforms'
-import { mockDeltaChangeContext } from '@test/delta'
+import { mockDeltaChangeContext, mockSelection } from '@test/delta'
 
 describe('@delta/DocumentDelta', () => {
   // The idea is to expose operations on different kind of blocks
@@ -40,19 +40,19 @@ describe('@delta/DocumentDelta', () => {
   describe('getSelectionEncompassingLine', () => {
     it('should handle empty lines', () => {
       const text = '\n'
-      expect(getSelectionEncompassingLine({ start: 0, end: 0 }, text)).toEqual({ start: 0, end: 0 })
+      expect(getSelectionEncompassingLine(mockSelection(0), text)).toEqual(mockSelection(0))
     })
     it('should ignore previous line', () => {
       const text = 'Hi!\n\n'
-      expect(getSelectionEncompassingLine({ start: 4, end: 4 }, text)).toEqual({ start: 4, end: 4 })
+      expect(getSelectionEncompassingLine(mockSelection(4), text)).toEqual(mockSelection(4))
     })
     it('should handle non empty lines', () => {
       const text = '\nHi!\n'
-      expect(getSelectionEncompassingLine({ start: 1, end: 1 }, text)).toEqual({ start: 1, end: 4 })
+      expect(getSelectionEncompassingLine(mockSelection(1), text)).toEqual(mockSelection(1, 4))
     })
     it('should ignore upcoming lines', () => {
       const text = 'Hi!\nThat\n'
-      expect(getSelectionEncompassingLine({ start: 1, end: 1 }, text)).toEqual({ start: 0, end: 3 })
+      expect(getSelectionEncompassingLine(mockSelection(1), text)).toEqual(mockSelection(0, 3))
     })
   })
   describe('applyTextDiff', () => {

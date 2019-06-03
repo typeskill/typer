@@ -19,6 +19,11 @@ export default class TextBlock<T extends string> extends Block<T> {
     super(blockInterface)
   }
 
+  private updateLineType(selection: Selection): void {
+    const lineType = this.getDelta().getLineTypeInSelection(selection)
+    this.blockInterface.bridgeInnerInterface.setSelectedLineType(lineType)
+  }
+
   private updateTextAttributes(selection: Selection): void {
     const textAttributes = this.getDelta().getSelectedTextAttributes(selection)
     this.blockInterface.bridgeInnerInterface.setSelectedTextAttributes(textAttributes)
@@ -31,6 +36,7 @@ export default class TextBlock<T extends string> extends Block<T> {
   handleOnSelectionChange(selection: Selection): void {
     this.selection = selection
     this.updateTextAttributes(selection)
+    this.updateLineType(selection)
   }
 
   getLength(): number {

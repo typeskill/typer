@@ -15,3 +15,10 @@ export function mockDeltaChangeContext(beforeStart: number, afterStart: number, 
     }
   }
 }
+
+export function mockSelection(start: number, end?: number) {
+  return {
+    start,
+    end: typeof end === 'number' ? end : start
+  }
+}

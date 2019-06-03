@@ -3,8 +3,9 @@
 import Document from '@model/Document'
 import TextBlock from '@model/TextBlock'
 import Bridge from '@core/Bridge'
-import { mockDeltaChangeContext } from '@test/delta'
+import { mockDeltaChangeContext, mockSelection } from '@test/delta'
 import { getHeadingCharactersFromType } from '@delta/DocumentDelta'
+import { Selection } from '@delta/selection'
 
 function newConsumer() {
   const bridge = new Bridge<any>()
@@ -77,10 +78,10 @@ describe('@model/Document', () => {
         { insert: transformedLine },
         { insert: '\n', attributes: { $type: 'ol' } }
       ])
-      block0.handleOnSelectionChange({ start: 2, end: 2 })
+      block0.handleOnSelectionChange(mockSelection(2))
       block0.handleOnTextChange(slicedLine, mockDeltaChangeContext(2, 1))
       expect(block0.getDelta().ops).toEqual([
-        { insert: initialLine }
+        { insert: header.slice(2) + initialLine }
       ])
       expect(listener).toHaveBeenCalledWith('normal')
     })
@@ -126,6 +127,51 @@ describe('@model/Document', () => {
       expect(block0.getDelta().ops).toEqual([
         { insert: 'F', attributes: { weight: 'bold' } },
         { insert: 'P\n' }
+      ])
+    })
+  })
+  describe('regressions', () => {
+    it('pass regression #12: deleting ul line prefix just after cutting an ul and pressing enter should be handled appropriately', () => {
+      let selection: Selection = {
+        start: 0,
+        end: 0
+      }
+      const { outerInterface, block0 } = createContext()
+      const controllerInterface = block0.getControllerInterface()
+      const witness = jest.fn()
+      controllerInterface.addListener('SELECTION_OVERRIDE', (s: Selection) => {
+        selection = s
+        witness(s)
+      })
+      const firstWord = 'First'
+      const secondWord = 'line'
+      // 1: create ul lin
+      const step1Line = `${firstWord} ${secondWord}\n`
+      block0.handleOnTextChange(step1Line, mockDeltaChangeContext(0, 10))
+      block0.handleOnSelectionChange({ start: 10, end: 10 })
+      // 2: apply ul to line
+      const header = getHeadingCharactersFromType('ul', 0)
+      outerInterface.applyLineTransformToSelection('ul')
+      // 3: move to cursor before "l"
+      block0.handleOnSelectionChange({ start: header.length + 6, end: header.length + 6 })
+      // 4: insert newline
+      const step3line = `${header}${firstWord} \n${secondWord}\n`
+      block0.handleOnTextChange(step3line, mockDeltaChangeContext(header.length + 6, header.length + 7))
+      expect(witness).toHaveBeenCalledWith({ start: header.length * 2 + 7, end: header.length * 2 + 7 })
+      block0.handleOnSelectionChange(selection)
+      expect(block0.getDelta().ops).toEqual([
+        { insert: `${header}${firstWord} ` },
+        { insert: '\n', attributes: { $type: 'ul' } },
+        { insert: `${header}${secondWord}` },
+        { insert: '\n', attributes: { $type: 'ul' } }
+      ])
+      // 5: remove one char from prefix
+      const step5line = `${header}${firstWord}\n${header.substring(0, header.length - 1)}${secondWord}\n`
+      block0.handleOnTextChange(step5line, mockDeltaChangeContext(selection.start, selection.start - 1))
+      expect(block0.getDelta().ops).toEqual([
+        { insert: `${header}${firstWord} ` },
+        { insert: '\n', attributes: { $type: 'ul' } },
+        { insert: `${secondWord}\n` }
       ])
     })
   })
