@@ -1,7 +1,8 @@
+import Delta from 'quill-delta'
 import mergeAll from 'ramda/es/mergeAll'
 import reject from 'ramda/es/reject'
 import isNil from 'ramda/es/isNil'
-import { GenericOp, getOperationLength } from './operations'
+import { GenericOp } from './operations'
 import find from 'ramda/es/find'
 import omit from 'ramda/es/omit'
 import { GenericDelta } from './generic'
@@ -38,7 +39,7 @@ export const getTextAttributes = omit(['$type'])
 export function getTextAttributesAtCursor<T extends string>(delta: GenericDelta, cursorPosition: number): TextAttributesMap<T> {
   let lowerBound = 0
   const matchedOp = find((op: GenericOp) => {
-    const len = getOperationLength(op)
+    const len = Delta.Op.length(op)
     const upperBound = len + lowerBound
     const match = cursorPosition <= upperBound && cursorPosition >= lowerBound
     lowerBound = upperBound

@@ -4,12 +4,18 @@ import { Selection } from './Selection'
 import { GenericOp } from './operations'
 import mergeRight from 'ramda/es/mergeRight'
 import pickBy from 'ramda/es/pickBy'
-import { TextLineType, getHeadingCharactersFromType, isLineInSelection, isLineTypeTextLengthModifier, DocumentLine, getLineType, getHeadingRegexFromType } from './lines'
+import { TextLineType, getHeadingCharactersFromType, isLineInSelection, isLineTypeTextLengthModifier, getLineType, getHeadingRegexFromType, GenericLine } from './lines'
 import head from 'ramda/es/head'
 import { DocumentLineIndexGenerator } from './DocumentLineIndexGenerator'
 import { GenericDelta, extractTextFromDelta } from './generic'
 import { DeltaDiffComputer, NormalizeDirective, NormalizeOperation } from './DeltaDiffComputer'
 import { DeltaChangeContext } from './DeltaChangeContext'
+
+interface DocumentLine extends GenericLine {
+  delta: GenericDelta
+  lineType: TextLineType
+  lineTypeIndex: number
+}
 
 export default class DocumentDelta<T extends string = any> implements GenericDelta {
 
@@ -59,20 +65,7 @@ export default class DocumentDelta<T extends string = any> implements GenericDel
         .retain(line.delta.length() - numToDelete)
         .retain(1, lineAttributes)
     })
-    // console.info('NORMALIZE DELTA', JSON.stringify(diffDelta, null, 2))
-    return this.compose(diffDelta)
-  }
-
-  private retain(length: number, attributes?: BlockAttributesMap): DocumentDelta {
-    return new DocumentDelta(this.delta.retain(length, attributes))
-  }
-
-  private compose(delta: Delta | DocumentDelta): DocumentDelta {
-    return new DocumentDelta(this.delta.compose(delta instanceof Delta ? delta : delta.delta))
-  }
-
-  private slice(start?: number, end?: number): DocumentDelta {
-    return new DocumentDelta(this.delta.slice(start, end))
+    return new DocumentDelta(this.delta.compose(diffDelta))
   }
 
   private getText(): string {
@@ -162,9 +155,8 @@ export default class DocumentDelta<T extends string = any> implements GenericDel
   applyTextDiff(newText: string, deltaChangeContext: DeltaChangeContext, cursorTextAttributes: TextAttributesMap<T> = {}): DocumentDelta {
     const originalText = this.getText()
     const { delta, directives } = this.getDeltasFromTextDiff(originalText, newText, deltaChangeContext, cursorTextAttributes)
-    const compositeDelta = this.compose(delta)
-    const nuDelta = compositeDelta.normalize(directives)
-    return nuDelta
+    const compositeDelta = this.delta.compose(delta)
+    return new DocumentDelta(compositeDelta).normalize(directives)
   }
 
   /**
@@ -173,7 +165,7 @@ export default class DocumentDelta<T extends string = any> implements GenericDel
    * 
    */
   getSelected(selection: Selection): DocumentDelta {
-    return this.slice(selection.start, selection.end)
+    return new DocumentDelta(this.delta.slice(selection.start, selection.end))
   }
 
   /**
@@ -190,6 +182,7 @@ export default class DocumentDelta<T extends string = any> implements GenericDel
    * @returns the line type encompassing the whole selection.
    */
   getLineTypeInSelection(selection: Selection): TextLineType {
+    // TODO inspect inconsistencies between this getSelectionEncompassingLines and Text::getSelectionEncompassingLine
     const selected = this.getSelected(this.getSelectionEncompassingLines(selection))
     const lineAttributes: BlockAttributesMap[] = []
     selected.delta.eachLine((l, a, i) => { lineAttributes.push(a) })
@@ -256,15 +249,15 @@ export default class DocumentDelta<T extends string = any> implements GenericDel
     const allOperationsMatchAttributeValue = this.getSelected(selection).ops.every(op => !!op.attributes && op.attributes[attributeName] === attributeValue)
     const selectionLength = selection.end - selection.start
     if (allOperationsMatchAttributeValue) {
-      const clearAllDelta = new DocumentDelta()
+      const clearAllDelta = new Delta()
       clearAllDelta.retain(selection.start)
       clearAllDelta.retain(selectionLength, { [attributeName]: null })
-      return this.compose(clearAllDelta)
+      return new DocumentDelta(this.delta.compose(clearAllDelta))
     }
-    const replaceAllDelta = new DocumentDelta()
+    const replaceAllDelta = new Delta()
     replaceAllDelta.retain(selection.start)
     replaceAllDelta.retain(selectionLength, { [attributeName]: attributeValue })
-    return this.compose(replaceAllDelta)
+    return new DocumentDelta(this.delta.compose(replaceAllDelta))
   }
 
   /**

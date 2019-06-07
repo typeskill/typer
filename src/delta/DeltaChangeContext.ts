@@ -1,5 +1,4 @@
 import { Selection } from './Selection'
-import Text from './Text'
 
 export class DeltaChangeContext {
   public readonly selectionBeforeChange: Selection
@@ -18,19 +17,8 @@ export class DeltaChangeContext {
     return Math.max(this.selectionAfterChange.end, this.selectionBeforeChange.end)
   }
 
-  union(): Selection {
-    return this.selectionBeforeChange.union(this.selectionAfterChange)
-  }
-
   deleteTraversal(): Selection {
     return Selection.fromBounds(Math.min(this.selectionBeforeChange.start, this.selectionAfterChange.start), this.selectionBeforeChange.end)
-  }
-
-  couldBeSuggestion(newText: Text) {
-    return this.selectionAfterChange.length() === 0 &&
-           this.selectionBeforeChange.length() === 0 &&
-           newText.select(this.union()).raw.indexOf('\n') < 0
-
   }
 
   isInsertion() {

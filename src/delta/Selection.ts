@@ -36,18 +36,7 @@ export class Selection {
     )
   }
 
-  union(selection: Selection) {
-    return Selection.fromBounds(
-      Math.min(this.start, selection.start),
-      Math.max(this.end, selection.end)
-    )
-  }
-
   length(): number {
     return this.end - this.start
-  }
-
-  selectText(text: string) {
-    return text.substring(this.start, this.end)
   }
 }

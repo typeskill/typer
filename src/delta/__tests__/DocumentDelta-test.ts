@@ -4,7 +4,7 @@ import { TextAttributesMap } from '@delta/attributes'
 import { Selection } from '@delta/Selection'
 import { mockDeltaChangeContext, mockSelection } from '@test/delta'
 import { GenericDelta, extractTextFromDelta } from '@delta/generic'
-import { getSelectionEncompassingLine, getHeadingCharactersFromType, isLineInSelection, TextLineType } from '@delta/lines'
+import { getHeadingCharactersFromType, isLineInSelection, TextLineType } from '@delta/lines'
 
 describe('@delta/DocumentDelta', () => {
   // The idea is to expose operations on different kind of blocks
@@ -36,24 +36,6 @@ describe('@delta/DocumentDelta', () => {
         {},
         {}
       ])
-    })
-  })
-  describe('getSelectionEncompassingLine', () => {
-    it('should handle empty lines', () => {
-      const text = '\n'
-      expect(getSelectionEncompassingLine(mockSelection(0), text)).toEqual(mockSelection(0))
-    })
-    it('should ignore previous line', () => {
-      const text = 'Hi!\n\n'
-      expect(getSelectionEncompassingLine(mockSelection(4), text)).toEqual(mockSelection(4))
-    })
-    it('should handle non empty lines', () => {
-      const text = '\nHi!\n'
-      expect(getSelectionEncompassingLine(mockSelection(1), text)).toEqual(mockSelection(1, 4))
-    })
-    it('should ignore upcoming lines', () => {
-      const text = 'Hi!\nThat\n'
-      expect(getSelectionEncompassingLine(mockSelection(1), text)).toEqual(mockSelection(0, 3))
     })
   })
   describe('applyTextDiff', () => {

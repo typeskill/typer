@@ -1,5 +1,5 @@
 import { Selection } from './Selection'
-import { shouldLineTypePropagateToNextLine, isLineTypeTextLengthModifier, TextLineType, TextLine } from './lines'
+import { shouldLineTypePropagateToNextLine, isLineTypeTextLengthModifier, TextLineType, GenericLine } from './lines'
 import { DeltaChangeContext } from './DeltaChangeContext'
 import { BlockAttributesMap } from './attributes'
 import Delta from 'quill-delta'
@@ -8,6 +8,10 @@ import { NormalizeDirectiveBuilder } from './NormalizeDirectiveBuilder'
 import { NormalizeOperation } from './DeltaDiffComputer'
 import zip from 'ramda/es/zip'
 import { DeltaBuffer } from './DeltaBuffer'
+
+interface TextLine extends GenericLine {
+  text: string
+}
 
 export interface TextDiffContext {
   readonly textAttributes: BlockAttributesMap
