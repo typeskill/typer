@@ -1,5 +1,6 @@
 
 import React, { Component } from 'react'
+import { Card } from 'react-native-paper'
 import { StyleSheet, View, KeyboardAvoidingView, SafeAreaView } from 'react-native'
 import { Bridge, Sheet, Toolbar, TextControlAction, ToolbarLayout, TEXT_CONTROL_SEPARATOR, buildVectorIconControlSpec } from 'react-native-typeskill'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
@@ -25,6 +26,7 @@ const toolbarLayout: ToolbarLayout = [
 ]
 
 const themeColor = '#ffffff'
+const iconSize = 25
 
 export default class App extends Component<{}> {
   private bridge: Bridge
@@ -40,9 +42,13 @@ export default class App extends Component<{}> {
       <SafeAreaView style={{ flex: 1 }}>
         <View style={styles.container} >
           <KeyboardAvoidingView style={{ flex: 1 }} enabled>
-            <Sheet bridgeInnerInterface={innerInterface} />
             <Version />
-            <Toolbar layout={toolbarLayout} contentContainerStyle={{ backgroundColor: '#eaf0fc' }} bridgeOuterInferface={outerInterface} />
+            <Card style={{ flex: 1, marginHorizontal: 10, marginTop: 4 }}>
+              <Sheet contentContainerStyle={{ marginBottom: iconSize + 4 }} bridgeInnerInterface={innerInterface} />
+            </Card>
+            <View style={styles.toolbarContainer}>
+              <Toolbar iconSize={iconSize} layout={toolbarLayout} contentContainerStyle={{ backgroundColor: '#eaf0fc' }} bridgeOuterInferface={outerInterface} />
+            </View>
           </KeyboardAvoidingView>
         </View>
       </SafeAreaView>
@@ -57,5 +63,16 @@ const styles = StyleSheet.create({
     alignItems: 'stretch',
     backgroundColor: themeColor,
     position: 'relative'
+  },
+  toolbarContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    elevation: 1000,
+    zIndex: 1000,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center'
   }
 })
