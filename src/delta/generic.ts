@@ -1,4 +1,5 @@
 import { GenericOp } from './operations'
+import Delta from 'quill-delta'
 
 export interface GenericDelta {
   readonly ops: GenericOp[]
@@ -7,4 +8,17 @@ export interface GenericDelta {
 
 export function extractTextFromDelta(delta: GenericDelta): string {
   return delta.ops.reduce((acc: string, curr: GenericOp) => typeof curr.insert === 'string' ? acc + curr.insert : acc, '')
+}
+
+export function isMutatingDelta(delta: GenericDelta): boolean {
+  const iterator = Delta.Op.iterator(delta.ops)
+  let shouldOverride = false
+  while (iterator.hasNext()) {
+    const next = iterator.next()
+    if (!next.retain || next.attributes != null) {
+      shouldOverride = true
+      break
+    }
+  }
+  return shouldOverride
 }

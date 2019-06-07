@@ -6,6 +6,7 @@ import Bridge from '@core/Bridge'
 import { mockDeltaChangeContext, mockSelection } from '@test/delta'
 import { Selection } from '@delta/Selection'
 import { getHeadingCharactersFromType } from '@delta/lines'
+import { mockDocumentDelta } from '@test/document';
 
 function newConsumer() {
   const bridge = new Bridge<any>()
@@ -62,15 +63,15 @@ describe('@model/Document', () => {
         { insert: '\n', attributes: { $type: 'ol' } }
       ])
     })
-    it('deleting an ol prefix manually should remove ol type and notify for selected line attributes changes', () => {
+    it('deleting an ol prefix manually should remove ol type and notify for selected line attributes changes and selection override', () => {
       const { outerInterface, block0 } = createContext()
       const initialLine = 'First\n'
       const owner = {}
-      const listener = jest.fn()
+      const onLineTypeChange = jest.fn()
       block0.handleOnTextChange(initialLine, mockDeltaChangeContext(0, 5))
       block0.handleOnSelectionChange(Selection.fromBounds(5))
       outerInterface.applyLineTransformToSelection('ol')
-      outerInterface.addSelectedLineTypeChangeListener(owner, listener)
+      outerInterface.addSelectedLineTypeChangeListener(owner, onLineTypeChange)
       const header = getHeadingCharactersFromType('ol', 0)
       const transformedLine = header + 'First'
       const slicedLine = header.slice(0, 1) + header.slice(2) + initialLine
@@ -79,11 +80,17 @@ describe('@model/Document', () => {
         { insert: '\n', attributes: { $type: 'ol' } }
       ])
       block0.handleOnSelectionChange(mockSelection(2))
+      const onSelectionChange = jest.fn()
+      block0.getControllerInterface().addListener('SELECTION_OVERRIDE', onSelectionChange)
       block0.handleOnTextChange(slicedLine, mockDeltaChangeContext(2, 1))
       expect(block0.getDelta().ops).toEqual([
         { insert: initialLine }
       ])
-      expect(listener).toHaveBeenCalledWith('normal')
+      expect(onSelectionChange).toHaveBeenCalledWith({
+        start: 0,
+        end: 0
+      })
+      expect(onLineTypeChange).toHaveBeenCalledWith('normal')
     })
     it('applying text attributes to empty selection should result in cursor attributes matching these attributes', () => {
       const { outerInterface, block0 } = createContext()
@@ -128,6 +135,49 @@ describe('@model/Document', () => {
         { insert: 'F', attributes: { weight: 'bold' } },
         { insert: 'P\n' }
       ])
+    })
+    it('applying text-length-transforming line type to selection should override selection with one of length augmented by the number of characters inserted', () => {
+      const { block0 } = createContext()
+      const onSelectionChange = jest.fn()
+      block0.getControllerInterface().addListener('SELECTION_OVERRIDE', onSelectionChange)
+      const initialLine = 'A\nB\nC\n'
+      const selectionEnd = 5
+      block0.handleOnTextChange(initialLine, mockDeltaChangeContext(0, selectionEnd))
+      const selection = Selection.fromBounds(0, selectionEnd)
+      block0.getDelta().applyLineTypeToSelection(selection, 'ol')
+      expect(onSelectionChange).toHaveBeenCalledWith({
+        start: 4,
+        end: getHeadingCharactersFromType('ol', 0).length * 3 + selectionEnd
+      })
+    })
+    it('unapplying text-length-transforming line type to selection should override selection with one of length reduced by the number of characters deleted', () => {
+      const { block0 } = createContext()
+      const onSelectionChange = jest.fn()
+      block0.getControllerInterface().addListener('SELECTION_OVERRIDE', onSelectionChange)
+      const head0 = getHeadingCharactersFromType('ol', 0)
+      const head1 = getHeadingCharactersFromType('ol', 1)
+      const head2 = getHeadingCharactersFromType('ol', 2)
+      const head3 = getHeadingCharactersFromType('ol', 3)
+      const delta = mockDocumentDelta([
+        { insert: head0 + 'A' },
+        { insert: '\n', attributes: { $type: 'ol' } },
+        { insert: head1 + 'B' },
+        { insert: '\n', attributes: { $type: 'ol' } },
+        { insert: head2 + 'C' },
+        { insert: '\n', attributes: { $type: 'ol' } },
+        { insert: head3 + 'D' },
+        { insert: '\n', attributes: { $type: 'ol' } }
+      ], block0.getEmitterInterface())
+      block0['updateDelta'](delta)
+      const selection = Selection.fromObject({
+        start: 0,
+        end: delta.length()
+      })
+      delta.applyLineTypeToSelection(selection, 'normal')
+      expect(onSelectionChange).toHaveBeenCalledWith({
+        start: 0,
+        end: 8
+      })
     })
   })
   describe('regressions', () => {

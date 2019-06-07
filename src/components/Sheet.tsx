@@ -40,19 +40,17 @@ export default class Sheet<T extends string> extends PureComponent<SheetProps<T>
     this.docConsumer = Object.freeze({
       bridgeInnerInterface,
       handleOnDocumentStateUpdate: (state: Store.State) => {
-        this.setState(state)
+        this.setState(state, () => this.forceUpdate())
       }
     })
   }
 
   @boundMethod
   private renderTextBlockController(blockInstanceNumber: number, index: number) {
-    invariant(this.state.deltas[blockInstanceNumber] != null, `delta must exist for block ${blockInstanceNumber}`)
-    const documentDelta = this.state.deltas[blockInstanceNumber]
     const block: TextBlock<any> = this.document.getBlock(blockInstanceNumber) as TextBlock<any>
     const key = `block-controller-${blockInstanceNumber}`
     return (
-      <TextBlockController<T> key={key} textBlock={block} documentDelta={documentDelta} grow={true} />
+      <TextBlockController<T> key={key} textBlock={block} grow={true} />
     )
   }
 

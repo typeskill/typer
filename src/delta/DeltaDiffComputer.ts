@@ -7,13 +7,15 @@ import { NormalizeDirectiveBuilder } from './NormalizeDirectiveBuilder'
 
 export enum NormalizeOperation {
   INSERT_LINE_TYPE_PREFIX,
-  INVESTIGATE_DELETION
+  INVESTIGATE_DELETION,
+  CHECK_LINE_TYPE_PREFIX
 }
 
 export interface NormalizeDirective {
   type: NormalizeOperation,
   beginningOfLineIndex: number,
-  context: DeltaChangeContext
+  context: DeltaChangeContext,
+  diff?: Delta
 }
 
 export interface DeltaDiffReport {

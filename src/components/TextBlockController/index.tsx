@@ -8,9 +8,9 @@ import Orchestrator from '@model/Orchestrator'
 import { boundMethod } from 'autobind-decorator'
 import TextBlock from '@model/TextBlock'
 import { TextChangeSession } from './TextChangeSession'
+import { GenericOp } from '@delta/operations'
 
 export interface TextBlockControllerProps<T extends string> {
-  documentDelta: DocumentDelta
   textBlock: TextBlock<T>
   grow?: boolean
   textStyle?: StyleProp<TextStyle>
@@ -19,6 +19,7 @@ export interface TextBlockControllerProps<T extends string> {
 interface TextBlockControllerState {
   isControlingState: boolean
   overridingSelection: Selection|null
+  ops: GenericOp[]|null
 }
 
 const styles = StyleSheet.create({
@@ -52,7 +53,8 @@ export default class TextBlockController<T extends string> extends Component<Tex
 
   state: TextBlockControllerState = {
     isControlingState: false,
-    overridingSelection: null
+    overridingSelection: null,
+    ops: null
   }
 
   constructor(props: TextBlockControllerProps<T>) {
@@ -128,20 +130,26 @@ export default class TextBlockController<T extends string> extends Component<Tex
     this.textInputRef && this.textInputRef.focus()
   }
 
+  @boundMethod
+  private handleOnDeltaUpdate(delta: DocumentDelta) {
+    this.setState({ ops: delta.ops })
+  }
+
   shouldComponentUpdate(nextProps: TextBlockControllerProps<T>, nextState: TextBlockControllerState) {
-    return nextProps.documentDelta !== this.props.documentDelta ||
+    return nextState.ops !== this.state.ops ||
            nextProps.grow !== this.props.grow ||
            nextState.isControlingState !== this.state.isControlingState
   }
 
   componentDidMount() {
+    this.blockControllerInterface.addListener('DELTA_UPDATE', this.handleOnDeltaUpdate)
     this.blockControllerInterface.addListener('SELECTION_RANGE_ATTRIBUTES_UPDATE', this.handleOnSelectionRangeAttributesUpdate)
     this.blockControllerInterface.addListener('FOCUS_REQUEST', this.handleOnFocusRequest)
     this.blockControllerInterface.addListener('SELECTION_OVERRIDE', this.handleOnSelectionOverride)
   }
 
-  getSnapshotBeforeUpdate(prevProps: TextBlockControllerProps<T>) {
-    if (this.props.documentDelta !== prevProps.documentDelta && this.nextOverridingSelection) {
+  getSnapshotBeforeUpdate(_prevProps: TextBlockControllerProps<T>, prevState: TextBlockControllerState) {
+    if (this.state.ops !== prevState.ops && this.nextOverridingSelection) {
       const selection = this.nextOverridingSelection
       this.nextOverridingSelection = null
       return selection
@@ -179,8 +187,11 @@ export default class TextBlockController<T extends string> extends Component<Tex
   }
 
   render() {
-    const { grow, documentDelta, textStyle, textBlock } = this.props
-    const { overridingSelection } = this.state
+    const { grow, textStyle, textBlock } = this.props
+    const { overridingSelection, ops: documentDelta } = this.state
+    const textComponent = documentDelta ? (
+      <RichText textStyle={textStyle} textTransformsReg={textBlock.getTextTransformsRegistry()} ops={documentDelta} />
+    ) : null
     return (
       <View style={[grow ? styles.grow : undefined]}>
         <TextInput selection={overridingSelection ? overridingSelection : undefined}
@@ -190,7 +201,7 @@ export default class TextBlockController<T extends string> extends Component<Tex
                    onChangeText={this.handleOnTextChanged}
                    ref={this.handleOnTextinputRef}
                    {...constantTextInputProps}>
-          <RichText textStyle={textStyle} textTransformsReg={textBlock.getTextTransformsRegistry()} documentDelta={documentDelta} />
+          {textComponent}
         </TextInput>
       </View>
     )

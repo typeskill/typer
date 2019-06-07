@@ -47,23 +47,24 @@ class Document<T extends string> {
     this.insertBlock(TextBlock)
   }
 
-  private newBlock(BlockKind: Block.Class<T>, initDelta?: DocumentDelta) {
+  private newBlock(BlockKind: Block.Class<T>) {
     invariant(this.consumer != null, 'A document consumer must be registered to create a block')
+    let delta: DocumentDelta|null = null
     if (this.consumer) {
       const blockIface: Document.BlockInterface<T> = Object.freeze({
         orchestrator: this.orchestrator,
         bridgeInnerInterface: this.consumer.bridgeInnerInterface,
         updateDelta: (nuDelta: DocumentDelta) => {
           invariant(nuDelta instanceof DocumentDelta, 'documentDelta instanceof DocumentDelta')
-          if (nuDelta) {
-            this.store.updateDeltaForBlockInstance(block.getInstanceNumber(), nuDelta)
-          }
+          delta = nuDelta
+          this.emitToBlock('DELTA_UPDATE', block.getInstanceNumber(), nuDelta)
         },
         onPressBackspaceFromOrigin: () => this.handleOnPressBackspaceFromOriginFromBlock(block),
         onPressEnter: () => this.handleOnPressEnterFromBlock(block),
-        getDelta: () => this.store.getDelta(block.getInstanceNumber())
+        getDelta: () => delta as DocumentDelta
       })
       const block = new BlockKind(blockIface)
+      delta = new DocumentDelta(block.getEmitterInterface())
       return block
     }
     throw new Error()
@@ -82,11 +83,10 @@ class Document<T extends string> {
         const selectedBlock = this.store.getActiveBlock() as TextBlock<T>
         invariant(selectedBlock instanceof TextBlock, 'Line Transforms can only be applied to a TextBlock')
         const selectionBeforeChange = selectedBlock.getSelection()
-        const { delta: updatedDelta, selection: selectionAfterChange } = selectedBlock.getDelta().applyLineTypeToSelection(selectionBeforeChange, lineType)
+        const updatedDelta = selectedBlock.getDelta().applyLineTypeToSelection(selectionBeforeChange, lineType)
         const updateLineType = updatedDelta.getLineTypeInSelection(selectionBeforeChange)
-        this.store.updateDeltaForBlockInstance(selectedBlock.getInstanceNumber(), updatedDelta)
+        selectedBlock.updateDelta(updatedDelta)
         consumer.bridgeInnerInterface.setSelectedLineType(updateLineType)
-        this.orchestrator.emitToBlockController(selectedBlock.getInstanceNumber(), 'SELECTION_OVERRIDE', selectionAfterChange)
       }
     })
     consumer.bridgeInnerInterface.addApplyTextTransformToSelectionListener(this, (attributeName: T, attributeValue: any) => {
@@ -101,7 +101,7 @@ class Document<T extends string> {
         const deltaAttributes = updatedDelta.getSelectedTextAttributes(selection)
         const attributes = mergeAttributesRight(deltaAttributes, userAttributes)
         this.orchestrator.emitToBlockController(selectedBlock.getInstanceNumber(), 'SELECTION_RANGE_ATTRIBUTES_UPDATE', deltaAttributes)
-        this.store.updateDeltaForBlockInstance(selectedBlock.getInstanceNumber(), updatedDelta)
+        selectedBlock.updateDelta(updatedDelta)
         selectedBlock.setCursorAttributes(userAttributes)
         consumer.bridgeInnerInterface.setSelectedTextAttributes(attributes)
       }
@@ -122,8 +122,8 @@ class Document<T extends string> {
     this.consumer = undefined
   }
 
-  public insertBlock(BlockKind: Block.Class<T>, initDelta?: DocumentDelta): void {
-    this.store.appendBlock(this.newBlock(BlockKind, initDelta), initDelta)
+  public insertBlock(BlockKind: Block.Class<T>): void {
+    this.store.appendBlock(this.newBlock(BlockKind))
   }
 
   public getActiveBlock(): Block<T> {

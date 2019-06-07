@@ -3,7 +3,6 @@ import { TextInput } from 'react-native'
 import React from 'react'
 // Test renderer must be required after react-native.
 import renderer from 'react-test-renderer'
-import DocumentDelta from '@delta/DocumentDelta'
 import TextBlockController, { TextBlockControllerProps } from '@components/TextBlockController'
 import { BaseTextTransformAttribute } from '@delta/transforms'
 import Document from '@model/Document'
@@ -16,7 +15,7 @@ function buildDocumentConsumer() {
   const bridge = new Bridge()
   const document = new Document<BaseTextTransformAttribute>()
   const handleOnDocumentStateUpdate = () => ({ /** */ })
-  const getDelta = () => document.getActiveBlock()['getDelta']()
+  const getDelta = () => document.getActiveBlock().getDelta()
   const docConsumer: Document.Consumer<any> = {
     handleOnDocumentStateUpdate,
     bridgeInnerInterface: bridge.getInnerInterface()
@@ -31,7 +30,6 @@ function buildDocumentConsumer() {
 }
 
 function getTextInputDefaultProps(): TextBlockControllerProps<BaseTextTransformAttribute> {
-  const delta = new DocumentDelta()
   const bridge = new Bridge()
   const document = new Document<BaseTextTransformAttribute>()
   document.registerConsumer({
@@ -39,7 +37,6 @@ function getTextInputDefaultProps(): TextBlockControllerProps<BaseTextTransformA
     bridgeInnerInterface: bridge.getInnerInterface()
   })
   return {
-    documentDelta: delta,
     textBlock: document.getActiveBlock() as TextBlock<any>
   }
 }
@@ -51,8 +48,7 @@ afterEach(() => {
 describe('@components/<TextBlockController>', () => {
   it('should throw when document has not registered a consumer yet', () => {
     expect(() => {
-      const delta = new DocumentDelta()
-      renderer.create(<TextBlockController documentDelta={delta} textBlock={undefined as any} />)
+      renderer.create(<TextBlockController textBlock={undefined as any} />)
     }).toThrowError('textBlock prop must be given at construction')
   })
   it('renders without crashing', () => {
@@ -64,7 +60,7 @@ describe('@components/<TextBlockController>', () => {
     expect(wrapper.root.findByType(TextInput)).toBeTruthy()
   })
   it('should update selection appropriately', () => {
-    const { document, bridge, docConsumer, getDelta } = buildDocumentConsumer()
+    const { document, bridge, docConsumer } = buildDocumentConsumer()
     document.registerConsumer(docConsumer)
     const block = document.getActiveBlock() as TextBlock<any>
     const listenerObj = {
@@ -76,7 +72,7 @@ describe('@components/<TextBlockController>', () => {
       start: 0,
       end: 1
     }
-    const wrapper = renderer.create(<TextBlockController textBlock={block} documentDelta={getDelta()} />)
+    const wrapper = renderer.create(<TextBlockController textBlock={block} />)
     const textBlockController = wrapper.root.instance as TextBlockController<any>
     textBlockController['handleOnSelectionChange']({ nativeEvent: { selection } } as any)
     expect(spy).toHaveBeenCalledTimes(1)
@@ -87,7 +83,7 @@ describe('@components/<TextBlockController>', () => {
     const block = document.getActiveBlock() as TextBlock<any>
     // @ts-ignore
     const spy = spyOn(TextBlockController.prototype, 'handleOnSelectionRangeAttributesUpdate')
-    const wrapper = renderer.create(<TextBlockController textBlock={block} documentDelta={getDelta()} />)
+    const wrapper = renderer.create(<TextBlockController textBlock={block} />)
     const textBlockController = wrapper.getInstance() as unknown as TextBlockController<any>
     const selection = {
       start: 0,
@@ -101,7 +97,7 @@ describe('@components/<TextBlockController>', () => {
     const { document, docConsumer, getDelta } = buildDocumentConsumer()
     document.registerConsumer(docConsumer)
     const block = document.getActiveBlock() as TextBlock<any>
-    const wrapper = renderer.create(<TextBlockController textBlock={block} documentDelta={getDelta()} />)
+    const wrapper = renderer.create(<TextBlockController textBlock={block} />)
     const textBlockController = wrapper.getInstance() as unknown as TextBlockController<any>
     expect(textBlockController).toBeInstanceOf(TextBlockController)
     textBlockController['handleOnTextChanged']('This is nu text')
@@ -111,15 +107,15 @@ describe('@components/<TextBlockController>', () => {
     ])
   })
   it('should stay in sync with textBlock', () => {
-    const { document, docConsumer, getDelta } = buildDocumentConsumer()
+    const { document, docConsumer } = buildDocumentConsumer()
     document.registerConsumer(docConsumer)
     const block = document.getActiveBlock() as TextBlock<any>
-    const wrapper = renderer.create(<TextBlockController textBlock={block} documentDelta={getDelta()} />)
+    const wrapper = renderer.create(<TextBlockController textBlock={block} />)
     const textBlockController = wrapper.getInstance() as unknown as TextBlockController<any>
     expect(textBlockController).toBeInstanceOf(TextBlockController)
     textBlockController['handleOnTextChanged']('This is nu text\nBlah')
     textBlockController['handleOnSelectionChange'](mockSelectionChangeEvent(20, 20))
-    wrapper.update(<TextBlockController textBlock={block} documentDelta={getDelta()} />)
+    wrapper.update(<TextBlockController textBlock={block}/>)
     const richText = wrapper.root.findByType(RichText)
     const text = flattenTextChild(richText)
     expect(text.join('')).toEqual('This is nu text\nBlah')

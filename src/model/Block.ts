@@ -13,6 +13,7 @@ export function setInstanceNumber(num: number) {
 abstract class Block<T extends string = any> {
   private instanceNumber: number
   protected blockInterface: Document.BlockInterface<T>
+  private emitter: Orchestrator.BlockEmitterInterface
 
   constructor(
      blockInterface: Document.BlockInterface<T>
@@ -20,10 +21,14 @@ abstract class Block<T extends string = any> {
     // tslint:disable-next-line:no-increment-decrement
     this.instanceNumber = lastInstanceNumber++
     this.blockInterface = blockInterface
-  }
-
-  protected updateDelta(diffDelta: DocumentDelta) {
-    this.blockInterface.updateDelta(diffDelta)
+    this.emitter = {
+      emitToBlockController: (eventType: Orchestrator.SheetControllerEvent, ...payload: any[]) => {
+        return this.blockInterface.orchestrator.emitToBlockController(
+            this.getInstanceNumber(),
+            eventType, ...payload
+          )
+      }
+    }
   }
 
   abstract getLength(): number
@@ -31,6 +36,10 @@ abstract class Block<T extends string = any> {
   abstract getSelection(): Selection
 
   abstract handleOnSelectionChange(s: Selection): void
+
+  updateDelta(diffDelta: DocumentDelta) {
+    this.blockInterface.updateDelta(diffDelta)
+  }
 
   getDelta(): DocumentDelta {
     return this.blockInterface.getDelta()
@@ -42,6 +51,10 @@ abstract class Block<T extends string = any> {
 
   getControllerInterface(): Orchestrator.BlockControllerInterface {
     return this.blockInterface.orchestrator.getblockControllerInterfaceForIndex(this.getInstanceNumber())
+  }
+
+  getEmitterInterface(): Orchestrator.BlockEmitterInterface {
+    return this.emitter
   }
 
   @boundMethod

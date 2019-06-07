@@ -1,5 +1,5 @@
 // tslint:disable:no-string-literal
-import { mockDocumentBlockInterface } from '@test/document'
+import { mockDocumentBlockInterface, mockDocumentDelta } from '@test/document'
 import TextBlock from '@model/TextBlock'
 import { mockSelection } from '@test/delta'
 import DocumentDelta from '@delta/DocumentDelta'
@@ -10,7 +10,7 @@ describe('@model/TextBlock', () => {
     it('should notify of a selected line type update', () => {
       const blockInterface = mockDocumentBlockInterface()
       const textBlock = new TextBlock(blockInterface)
-      textBlock['updateDelta'](new DocumentDelta([
+      textBlock['updateDelta'](mockDocumentDelta([
         { insert: 'A\n' },
         { insert: getHeadingCharactersFromType('ul', 0) + 'B' },
         { insert: '\n', attributes: { $type: 'ul' } }
@@ -21,7 +21,7 @@ describe('@model/TextBlock', () => {
     it('should notify of a selected text attribute update', () => {
       const blockInterface = mockDocumentBlockInterface()
       const textBlock = new TextBlock(blockInterface)
-      textBlock['updateDelta'](new DocumentDelta([
+      textBlock['updateDelta'](mockDocumentDelta([
         { insert: 'A\n' },
         { insert: 'B', attributes: { weight: 'bold' } },
         { insert: '\n' }

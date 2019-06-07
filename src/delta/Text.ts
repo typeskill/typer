@@ -1,5 +1,5 @@
 import { Selection } from './Selection'
-import { shouldLineTypePropagateToNextLine, isLineTypeTextLengthModifier, TextLineType, GenericLine } from './lines'
+import { shouldLineTypePropagateToNextLine, isLineTypeTextLengthModifier, TextLineType, GenericLine, getLineType } from './lines'
 import { DeltaChangeContext } from './DeltaChangeContext'
 import { BlockAttributesMap } from './attributes'
 import Delta from 'quill-delta'
@@ -91,10 +91,14 @@ export default class Text {
     buffer.push(new Delta().retain(selectionTraversalBeforeChange.start))
     const shouldPropagateLineType = shouldLineTypePropagateToNextLine(lineTypeBeforeChange)
     const replacedLines = zip(linesBeforeChange, linesAfterChange)
+    const lineType = getLineType(lineAttributes)
     let shouldDeleteNextNewline = false
     // Replaced lines
     replacedLines.forEach(([lineBefore, lineAfter]) => {
       const lineDelta = makeDiffDelta(lineBefore.text, lineAfter.text, textAttributes)
+      if (isLineTypeTextLengthModifier(lineType)) {
+        directiveBuilder.pushDirective(NormalizeOperation.CHECK_LINE_TYPE_PREFIX, lineBefore.beginningOfLineIndex, lineDelta.invert(new Delta().insert(lineBefore)))
+      }
       if (this.charAt(lineBefore.endOfLineIndex) !== '\n') {
         lineDelta.insert('\n', shouldPropagateLineType ? lineAttributes : {})
       } else {

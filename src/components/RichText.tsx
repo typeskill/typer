@@ -1,14 +1,14 @@
-import DocumentDelta from '@delta/DocumentDelta'
-import React, { PureComponent, ReactNode } from 'react'
+import React, { ReactNode, Component } from 'react'
 import { TextStyle, Text, StyleProp, StyleSheet } from 'react-native'
 import { GenericOp, isTextOp, TextOp } from '@delta/operations'
 import TextTransformsRegistry from '@core/TextTransformsRegistry'
 import invariant from 'invariant'
 import { boundMethod } from 'autobind-decorator'
 import { TextLineType } from '@delta/lines'
+import { LineWalker } from '@delta/LineWalker'
 
 export interface RichTextProps<T extends string> {
-  documentDelta: DocumentDelta
+  ops: GenericOp[]
   textTransformsReg: TextTransformsRegistry<T>
   textStyle?: StyleProp<TextStyle>
 }
@@ -34,7 +34,7 @@ export const richTextStyles = StyleSheet.create({
   }
 })
 
-export default class RichText<T extends string> extends PureComponent<RichTextProps<T>> {
+export default class RichText<T extends string> extends Component<RichTextProps<T>> {
   private textTransformsReg: TextTransformsRegistry<any>
 
   constructor(props: RichTextProps<T>) {
@@ -57,9 +57,9 @@ export default class RichText<T extends string> extends PureComponent<RichTextPr
   }
 
   private renderLines() {
-    const { documentDelta } = this.props
+    const { ops } = this.props
     const children: ReactNode[][] = []
-    documentDelta.eachLine(({ lineType, delta: lineDelta, index }) => {
+    new LineWalker(ops).eachLine(({ lineType, delta: lineDelta, index }) => {
       children.push([(
         <Text style={getLineStyle(lineType)} key={`line-${index}`}>
           {lineDelta.ops.map((l, elIndex) => this.renderOperation(l, index, elIndex))}
@@ -78,6 +78,8 @@ export default class RichText<T extends string> extends PureComponent<RichTextPr
     }
     return []
   }
+
+  shouldComponentUpdate() { return true }
 
   componentWillReceiveProps(nextProps: RichTextProps<T>) {
     invariant(nextProps.textTransformsReg === this.props.textTransformsReg, 'textTransformsReg prop cannot be changed after instantiation')
