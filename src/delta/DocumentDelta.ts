@@ -24,6 +24,7 @@ export default class DocumentDelta<T extends string = any> implements GenericDel
   }
 
   private delta: Delta
+  private text: string|null = null
 
   constructor(arg?: GenericOp[] | DocumentDelta | Delta) {
     this.delta = arg instanceof DocumentDelta ? new Delta(arg.delta) : new Delta(arg)
@@ -69,7 +70,11 @@ export default class DocumentDelta<T extends string = any> implements GenericDel
   }
 
   private getText(): string {
-    return extractTextFromDelta(this.delta)
+    if (this.text !== null) {
+      return this.text
+    }
+    this.text = extractTextFromDelta(this.delta)
+    return this.text
   }
 
   /**
