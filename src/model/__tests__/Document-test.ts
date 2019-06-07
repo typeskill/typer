@@ -6,7 +6,7 @@ import Bridge from '@core/Bridge'
 import { mockDeltaChangeContext, mockSelection } from '@test/delta'
 import { Selection } from '@delta/Selection'
 import { getHeadingCharactersFromType } from '@delta/lines'
-import { mockDocumentDelta } from '@test/document';
+import { mockDocumentDelta } from '@test/document'
 
 function newConsumer() {
   const bridge = new Bridge<any>()

@@ -2,7 +2,6 @@
 import { mockDocumentBlockInterface, mockDocumentDelta } from '@test/document'
 import TextBlock from '@model/TextBlock'
 import { mockSelection } from '@test/delta'
-import DocumentDelta from '@delta/DocumentDelta'
 import { getHeadingCharactersFromType } from '@delta/lines'
 
 describe('@model/TextBlock', () => {

@@ -2,10 +2,10 @@
 import { TextAttributesMap } from '@delta/attributes'
 import { Selection } from '@delta/Selection'
 import { mockDeltaChangeContext, mockSelection } from '@test/delta'
-import { GenericDelta, extractTextFromDelta } from '@delta/generic'
+import { GenericDelta } from '@delta/generic'
 import { getHeadingCharactersFromType, isLineInSelection, TextLineType } from '@delta/lines'
 import { mockDocumentDelta } from '@test/document'
-import { LineWalker } from '@delta/LineWalker';
+import { LineWalker } from '@delta/LineWalker'
 
 describe('@delta/DocumentDelta', () => {
   // The idea is to expose operations on different kind of blocks

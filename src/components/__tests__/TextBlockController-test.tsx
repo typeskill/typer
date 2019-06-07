@@ -78,7 +78,7 @@ describe('@components/<TextBlockController>', () => {
     expect(spy).toHaveBeenCalledTimes(1)
   })
   it('should receive SELECTION_RANGE_ATTRIBUTES_UPDATE event when attributes get updates', () => {
-    const { document, bridge, docConsumer, getDelta } = buildDocumentConsumer()
+    const { document, bridge, docConsumer } = buildDocumentConsumer()
     document.registerConsumer(docConsumer)
     const block = document.getActiveBlock() as TextBlock<any>
     // @ts-ignore
