@@ -9,10 +9,9 @@
   "dependencies": {
     "@expo/vector-icons": "^10.0.1",
     "expo": "^33.0.3",
-    "invariant": "^2.2.4",
-    "prop-types": "^15.7.2",
+    "expo-constants": "^5.0.1",
     "react": "16.8.6",
-    "react-native": "https://github.com/expo/react-native/archive/sdk-32.0.0.tar.gz",
+    "react-native": "https://github.com/expo/react-native/archive/sdk-33.0.0.tar.gz",
     "react-native-paper": "^2.16.0",
     "react-native-typeskill": "0.10.0-alpha.18",
     "whatwg-fetch": "^3.0.0"
