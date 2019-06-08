@@ -23,38 +23,50 @@
     <a href="https://github.com/jsamr/react-native-typeskill/issues?q=is%3Aissue+is%3Aopen+label%3Abug">
         <img src="https://img.shields.io/github/issues-raw/jsamr/react-native-typeskill/bug.svg?label=open%20bugs" alt="open bugs">
     </a>
+    <img alt="Greenkeeper badge" src="https://badges.greenkeeper.io/jsamr/react-native-typeskill.svg">
 </p>
 
 <p align="center">
-<a href="https://expo.io/@jsamr/typeskill">
-    <strong>Give it a try on Expo</strong>
-</a>
-<br/><br/>
-<a href="https://expo.io/@jsamr/typeskill">
-    <img src="images/qr.png" alt="Expo QR code">
-</a>
-<br/>
-<a href="examples/expo">
-<code>examples/expo</code>
-</a>
+    <a href="https://expo.io/@jsamr/typeskill">
+        <strong>Give it a try on Expo</strong>
+    </a>
+    <br/><br/>
+    <a href="https://expo.io/@jsamr/typeskill">
+        <img src="images/qr.png" alt="Expo QR code">
+    </a>
+    <br/>
+    <a href="#trying-locally">You can also run it locally in seconds</a>
+
 </p>
 
 > ⚠️ This library is in early development and subject to fast changes. Do not use in production. Also, pull requests are closed prior to reaching 1.0.
 
 ## Features & design principles
 
-[![Greenkeeper badge](https://badges.greenkeeper.io/jsamr/react-native-typeskill.svg)](https://greenkeeper.io/)
-
 ### Design
 
-- Extensively **modular** and **flexible** architecture
-- Based on the reliable [Delta](https://github.com/quilljs/delta) **operational transform** library from [quilljs](https://github.com/quilljs)
+- Extensively **modular** architecture: Typeskill handles the logic, you chose the layout;
+- No bloated/clumsy `WebView` ; this library only relies on (React) **Native** components;
+- Based on the reliable [Delta](https://github.com/quilljs/delta) **operational transform** library from [quilljs](https://github.com/quilljs).
 
 ### Features
 
 - Support for **arbitrary embedded contents**
 - Support for **arbitrary controllers** with the `Bridge` class
 - JSON-**serializable** rich text content
+
+<a name="trying-locally" />
+
+## Trying locally
+
+*Prerequisite: you must have `npm` and `expo-cli` globally installed*
+
+``` bash
+git clone https://github.com/jsamr/react-native-typeskill.git
+cd react-native-typeskill/examples/expo
+npm install
+expo start
+```
 
 ## Architecture & example
 
@@ -64,6 +76,12 @@ The library exposes a naked `Sheet` component, which you can customize and style
 The `Sheet` component is solely responsible for displaying and editing rich content.
 This `Sheet` component needs an `innerInterface` object provided by the `Bridge` class to receive actions and notify selection attributes changes.
 The actions to insert media content, change line type (normal, lists) or set text attributes to selection (bold, italic) are triggered with the `outerInterface` from the same `Bridge` instance.
+
+This decoupled design has the following advantages:
+
+- the logic can be tested independently from React components;
+- the library consumer can integrate the library to fit its UI and architectural design;
+- arbitrary content can be embdedded.
 
 ### Minimal example
 
