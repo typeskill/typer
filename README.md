@@ -43,6 +43,8 @@
 
 ## Features & design principles
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/jsamr/react-native-typeskill.svg)](https://greenkeeper.io/)
+
 ### Design
 
 - Extensively **modular** and **flexible** architecture
