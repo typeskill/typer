@@ -97,7 +97,7 @@ export default class TextBlockController<T extends string> extends Component<Tex
   @boundMethod
   private handleOnSelectionChange({ nativeEvent: { selection } }: NativeSyntheticEvent<TextInputSelectionChangeEventData>) {
     const { textBlock } = this.props
-    const nextSelection = !this.skipNextSelectionUpdate ? Selection.fromObject(selection) : this.selection
+    const nextSelection = !this.skipNextSelectionUpdate ? Selection.between(selection.start, selection.end) : this.selection
     if (this.textChangeSession !== null) {
       this.textChangeSession.setSelectionAfterChange(nextSelection)
       textBlock.handleOnTextChange(this.textChangeSession.getTextAfterChange(), this.textChangeSession.getDeltaChangeContext())
