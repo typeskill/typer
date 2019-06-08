@@ -12,7 +12,7 @@ declare namespace Document {
   export interface BlockInterface<T extends string> {
     readonly bridgeInnerInterface: Bridge.InnerInterface<T>
     readonly orchestrator: Orchestrator
-    readonly updateDelta: (nuDelta: DocumentDelta) => void
+    readonly updateDelta: (textDiffDelta: DocumentDelta, normalizedDelta?: DocumentDelta) => void
     readonly onPressBackspaceFromOrigin: () => void
     readonly onPressEnter: () => void
     readonly getDelta: () => DocumentDelta
@@ -54,10 +54,10 @@ class Document<T extends string> {
       const blockIface: Document.BlockInterface<T> = Object.freeze({
         orchestrator: this.orchestrator,
         bridgeInnerInterface: this.consumer.bridgeInnerInterface,
-        updateDelta: (nuDelta: DocumentDelta) => {
-          invariant(nuDelta instanceof DocumentDelta, 'documentDelta instanceof DocumentDelta')
-          delta = nuDelta
-          this.emitToBlock('DELTA_UPDATE', block.getInstanceNumber(), nuDelta)
+        updateDelta: (nextTextDiffDelta: DocumentDelta, normalizedDelta?: DocumentDelta) => {
+          invariant(nextTextDiffDelta instanceof DocumentDelta, 'documentDelta instanceof DocumentDelta')
+          delta = normalizedDelta || nextTextDiffDelta
+          this.emitToBlock('DELTA_UPDATE', block.getInstanceNumber(), nextTextDiffDelta, normalizedDelta)
         },
         onPressBackspaceFromOrigin: () => this.handleOnPressBackspaceFromOriginFromBlock(block),
         onPressEnter: () => this.handleOnPressEnterFromBlock(block),

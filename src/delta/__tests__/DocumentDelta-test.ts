@@ -46,7 +46,7 @@ describe('@delta/DocumentDelta', () => {
         { insert: 'Hello world\n' }
       ])
       const changeContext = mockDeltaChangeContext(11, 10)
-      const nextDelta = originalDelta.applyTextDiff(newText, changeContext)
+      const [_, nextDelta] = originalDelta.applyTextDiff(newText, changeContext)
       expect(nextDelta.ops).toEqual([
         { insert: newText }
       ])
@@ -57,7 +57,7 @@ describe('@delta/DocumentDelta', () => {
         { insert: 'Hello world\n' }
       ])
       const changeContext = mockDeltaChangeContext(6, 6, 11)
-      const nextDelta = originalDelta.applyTextDiff(newText, changeContext)
+      const [_, nextDelta] = originalDelta.applyTextDiff(newText, changeContext)
       expect(nextDelta.ops).toEqual([
         { insert: newText }
       ])
@@ -68,7 +68,7 @@ describe('@delta/DocumentDelta', () => {
         { insert: 'A\nBC\nD\n' }
       ])
       const changeContext = mockDeltaChangeContext(3, 3, 7)
-      const nextDelta = originalDelta.applyTextDiff(newText, changeContext)
+      const [_, nextDelta] = originalDelta.applyTextDiff(newText, changeContext)
       expect(nextDelta.ops).toEqual([
         { insert: 'A\nB\n' }
       ])
@@ -79,7 +79,7 @@ describe('@delta/DocumentDelta', () => {
         { insert: 'Hello worl\n' }
       ])
       const changeContext = mockDeltaChangeContext(10, 11)
-      const nextDelta = originalDelta.applyTextDiff(newText, changeContext)
+      const [_, nextDelta] = originalDelta.applyTextDiff(newText, changeContext)
       expect(nextDelta.ops[0].insert).toBe(newText)
     })
     it('should reproduce an insert operation when two or more characters were inserted', () => {
@@ -88,7 +88,7 @@ describe('@delta/DocumentDelta', () => {
         { insert: 'Hello \n' }
       ])
       const changeContext = mockDeltaChangeContext(6, 11)
-      const nextDelta = originalDelta.applyTextDiff(newText, changeContext)
+      const [_, nextDelta] = originalDelta.applyTextDiff(newText, changeContext)
       expect(nextDelta.ops).toEqual([
         { insert: newText }
       ])
@@ -99,7 +99,7 @@ describe('@delta/DocumentDelta', () => {
         { insert: 'Hello world\n' }
       ])
       const changeContext = mockDeltaChangeContext(11, 19)
-      const nextDelta = originalDelta.applyTextDiff(newText, changeContext)
+      const [_, nextDelta] = originalDelta.applyTextDiff(newText, changeContext)
       expect(nextDelta.ops).toEqual([
         { insert: newText }
       ])
@@ -110,7 +110,7 @@ describe('@delta/DocumentDelta', () => {
         { insert: 'Hello world\n' }
       ])
       const changeContext = mockDeltaChangeContext(10, 11, 11)
-      const nextDelta = originalDelta.applyTextDiff(newText, changeContext)
+      const [_, nextDelta] = originalDelta.applyTextDiff(newText, changeContext)
       expect(nextDelta.ops).toEqual([
         { insert: newText }
       ])
@@ -121,7 +121,7 @@ describe('@delta/DocumentDelta', () => {
         { insert: 'Hello world\n' }
       ])
       const changeContext = mockDeltaChangeContext(6, 9, 11)
-      const nextDelta = originalDelta.applyTextDiff(newText, changeContext)
+      const [_, nextDelta] = originalDelta.applyTextDiff(newText, changeContext)
       expect(nextDelta.ops).toEqual([
         { insert: newText }
       ])
@@ -133,7 +133,7 @@ describe('@delta/DocumentDelta', () => {
         { insert: 'Hello pet\n' }
       ])
       const changeContext = mockDeltaChangeContext(9, 9)
-      const nextDelta = originalDelta.applyTextDiff(newText, changeContext)
+      const [_, nextDelta] = originalDelta.applyTextDiff(newText, changeContext)
       expect(nextDelta.ops).toEqual([
         { insert: newText }
       ])
@@ -145,7 +145,7 @@ describe('@delta/DocumentDelta', () => {
         { insert: 'Hello cat\n' }
       ])
       const changeContext = mockDeltaChangeContext(9, 11)
-      const nextDelta = originalDelta.applyTextDiff(newText, changeContext)
+      const [_, nextDelta] = originalDelta.applyTextDiff(newText, changeContext)
       expect(nextDelta.ops).toEqual([
         { insert: newText }
       ])
@@ -157,8 +157,9 @@ describe('@delta/DocumentDelta', () => {
         { insert: '\n', attributes: { $type: 'custom' } },
         { insert: 'B\nC\n' }
       ])
-      const result = originalDelta.applyTextDiff(newText, mockDeltaChangeContext(1, 1, 5))
-      expect(result.ops).toEqual([
+      const changeContext = mockDeltaChangeContext(1, 1, 5)
+      const [_, nextDelta] = originalDelta.applyTextDiff(newText, changeContext)
+      expect(nextDelta.ops).toEqual([
         { insert: 'A' },
         { insert: '\n', attributes: { $type: 'custom' } }
       ])
@@ -169,7 +170,7 @@ describe('@delta/DocumentDelta', () => {
       const originalDelta = mockDocumentDelta([
         { insert: 'Hello world\n' }
       ])
-      const nextDelta = originalDelta.applyTextDiff(newText, changeContext)
+      const [_, nextDelta] = originalDelta.applyTextDiff(newText, changeContext)
       expect(nextDelta.ops).toEqual([
         { insert: 'Hello world\nH\n' }
       ])
@@ -181,7 +182,7 @@ describe('@delta/DocumentDelta', () => {
         { insert: 'Hello world' },
         { insert: '\n', attributes: { $type: 'misc' } }
       ])
-      const nextDelta = originalDelta.applyTextDiff(newText, changeContext)
+      const [_, nextDelta] = originalDelta.applyTextDiff(newText, changeContext)
       expect(nextDelta.ops).toEqual([
         { insert: 'Hello world' },
         { insert: '\n', attributes: { $type: 'misc' } },
@@ -194,7 +195,7 @@ describe('@delta/DocumentDelta', () => {
       const originalDelta = mockDocumentDelta([
         { insert: 'Hello world\n' }
       ])
-      const nextDelta = originalDelta.applyTextDiff(newText, changeContext)
+      const [_, nextDelta] = originalDelta.applyTextDiff(newText, changeContext)
       expect(nextDelta.ops).toEqual([
         { insert: 'Hello \nworld\n' }
       ])
@@ -206,7 +207,7 @@ describe('@delta/DocumentDelta', () => {
         { insert: 'Hello world' },
         { insert: '\n', attributes: { $type: 'misc' } }
       ])
-      const nextDelta = originalDelta.applyTextDiff(newText, changeContext)
+      const [_, nextDelta] = originalDelta.applyTextDiff(newText, changeContext)
       expect(nextDelta.ops).toEqual([
         { insert: 'Hello worl' },
         { insert: '\n', attributes: { $type: 'misc' } },
@@ -221,7 +222,7 @@ describe('@delta/DocumentDelta', () => {
         { insert: getHeadingCharactersFromType('ul', 0) + 'Hello world' },
         { insert: '\n', attributes: { $type: 'ul' } }
       ])
-      const nextDelta = originalDelta.applyTextDiff(newText, changeContext)
+      const [_, nextDelta] = originalDelta.applyTextDiff(newText, changeContext)
       expect(nextDelta.ops).toEqual([
         { insert: getHeadingCharactersFromType('ul', 0) + 'Hello world' },
         { insert: '\n', attributes: { $type: 'ul' } },
@@ -237,7 +238,7 @@ describe('@delta/DocumentDelta', () => {
         { insert: getHeadingCharactersFromType('ul', 0) + 'Hello world' },
         { insert: '\n', attributes: { $type: 'ul' } }
       ])
-      const nextDelta = originalDelta.applyTextDiff(newText, changeContext)
+      const [_, nextDelta] = originalDelta.applyTextDiff(newText, changeContext)
       expect(nextDelta.ops).toEqual([
         { insert: getHeadingCharactersFromType('ul', 0) + 'Hello ' },
         { insert: '\n', attributes: { $type: 'ul' } },
@@ -253,7 +254,7 @@ describe('@delta/DocumentDelta', () => {
         { insert: getHeadingCharactersFromType('ul', 0) + 'Hello world' },
         { insert: '\n', attributes: { $type: 'ul' } }
       ])
-      const nextDelta = originalDelta.applyTextDiff(newText, changeContext)
+      const [_, nextDelta] = originalDelta.applyTextDiff(newText, changeContext)
       expect(nextDelta.ops).toEqual([
         { insert: getHeadingCharactersFromType('ul', 0) + 'Hello worl' },
         { insert: '\n', attributes: { $type: 'ul' } },
@@ -267,7 +268,8 @@ describe('@delta/DocumentDelta', () => {
       const originalDelta = mockDocumentDelta([
         { insert: 'A\nB\nC\n' }
       ])
-      expect(originalDelta.applyTextDiff(newText, changeContext).ops).toEqual([
+      const [_, nextDelta] = originalDelta.applyTextDiff(newText, changeContext)
+      expect(nextDelta.ops).toEqual([
         { insert: 'A\n\nC\n' }
       ])
     })
@@ -279,8 +281,8 @@ describe('@delta/DocumentDelta', () => {
         { insert: '\n', attributes: { $type: 'custom' } },
         { insert: '\nC\n' }
       ])
-      const result = originalDelta.applyTextDiff(newText, changeContext)
-      expect(result.ops).toEqual([
+      const [_, nextDelta] = originalDelta.applyTextDiff(newText, changeContext)
+      expect(nextDelta.ops).toEqual([
         { insert: 'A' },
         { insert: '\n', attributes: { $type: 'custom' } },
         { insert: 'C\n' }

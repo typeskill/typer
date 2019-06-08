@@ -42,6 +42,8 @@ const constantTextInputProps = {
   blurOnSubmit: false
 } as TextInputProps
 
+const REACT_MINIMAL_INTERVAL_FOR_UPDATE = 30
+
 export default class TextBlockController<T extends string> extends Component<TextBlockControllerProps<T>, TextBlockControllerState> {
 
   private textInputRef: TextInput | null = null
@@ -131,8 +133,17 @@ export default class TextBlockController<T extends string> extends Component<Tex
   }
 
   @boundMethod
-  private handleOnDeltaUpdate(delta: DocumentDelta) {
-    this.setState({ ops: delta.ops })
+  private handleOnDeltaUpdate(nextTextDiffDelta: DocumentDelta, normalizedDelta?: DocumentDelta) {
+    // The reason for consuming two deltas is related to how updates work in React.
+    // By just passing the result of text diff and normalization, we could run into
+    // a bug when normalized delta strictly equals the delta preceding text diff.
+    // In such cases, passing normalized prop wouldn't result in a component tree update.
+    // We must therefore serially pass the two deltas.
+    this.setState({ ops: nextTextDiffDelta.ops }, () => {
+      if (normalizedDelta && normalizedDelta !== nextTextDiffDelta) {
+        this.setState({ ops: normalizedDelta.ops })
+      }
+    })
   }
 
   shouldComponentUpdate(nextProps: TextBlockControllerProps<T>, nextState: TextBlockControllerState) {
@@ -172,7 +183,7 @@ export default class TextBlockController<T extends string> extends Component<Tex
         this.setState({ overridingSelection }, () => {
           this.forceUpdate()
         })
-      }, 30))
+      }, REACT_MINIMAL_INTERVAL_FOR_UPDATE))
     } else if (this.state.overridingSelection) {
       // Won't trigger rerender thanks to shouldComponentUpdate
       this.setState({ overridingSelection: null })

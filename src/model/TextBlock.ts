@@ -54,11 +54,11 @@ export default class TextBlock<T extends string> extends Block<T> {
 
   @boundMethod
   handleOnTextChange(newText: string, deltaChangeContext: DeltaChangeContext): void {
-    const updatedDelta = this.getDelta().applyTextDiff(newText, deltaChangeContext, this.cursorTextAttributes)
-    this.updateDelta(updatedDelta)
+    const [afterTextDiffDelta, normalizedDelta] = this.getDelta().applyTextDiff(newText, deltaChangeContext, this.cursorTextAttributes)
+    this.updateDelta(afterTextDiffDelta, normalizedDelta)
     this.length = newText.length
     this.updateTextAttributes(deltaChangeContext.selectionAfterChange)
-    const lineType = updatedDelta.getLineTypeInSelection(deltaChangeContext.selectionAfterChange)
+    const lineType = normalizedDelta.getLineTypeInSelection(deltaChangeContext.selectionAfterChange)
     this.blockInterface.bridgeInnerInterface.setSelectedLineType(lineType)
   }
 }

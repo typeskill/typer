@@ -61,10 +61,10 @@ export default class DocumentDelta<T extends string = any> implements GenericDel
           numToDelete = requiredPrefix.length - alreadyDeletedChars
           lineAttributes = { $type: null }
           overridenSelection = Selection.fromBounds(line.beginningOfLineIndex)
-        } else if (shouldInvestigatePrefix) {
-          const diff = (directive.diff as Delta).slice(0, requiredPrefix.length)
-          if (isMutatingDelta(diff)) {
-            const iterator = Delta.Op.iterator(diff.ops)
+        } else if (shouldInvestigatePrefix && directive.diff) {
+          const lineDiff = directive.diff.slice(0, requiredPrefix.length)
+          if (isMutatingDelta(lineDiff)) {
+            const iterator = Delta.Op.iterator(lineDiff.ops)
             while (iterator.hasNext()) {
               const next = iterator.next()
               if (next.retain && !numToRetainInPrefix) {
@@ -85,7 +85,8 @@ export default class DocumentDelta<T extends string = any> implements GenericDel
         .retain(1, lineAttributes))
     })
     overridenSelection && this.overrideSelection(overridenSelection)
-    return this.compose(diffBuffer.compose())
+    const diff = diffBuffer.compose()
+    return isMutatingDelta(diff) ? this.compose(diff) : this
   }
 
   private getText(): string {
@@ -144,19 +145,27 @@ export default class DocumentDelta<T extends string = any> implements GenericDel
   }
 
   /**
-   * Compute a diff between this document delta text and return the result of
-   * composing the diff delta with `this` instance.
+   * Compute a diff between this document delta text and return a duo of deltas.
+   * The first one is the strict result of applying the text diff, while the second one
+   * it the result of applying normalization rules (i.e. prefixes rules for text modifying line types).
    * 
    * @remarks
    * 
-   * `cursorTextAttributes` will by applied to inserted characters if and only if `deltaChangeContext.selectionBeforeChange` is of length 0.
+   * 1. `cursorTextAttributes` will by applied to inserted characters if and only if `deltaChangeContext.selectionBeforeChange` is of length 0.
+   * 2. The reason for returning two deltas is related to how updates work in React.
+   *    By just returning the result of text diff and normalization, we could run into
+   *    a bug when normalized delta strictly equals the delta preceding text diff.
+   *    In such cases, passing normalized prop to react component wouldn't result in a
+   *    component tree update. We must therefore serially pass the two deltas.
+   * 3. If the result of applying normalization is strictly equal to the text diff instance ; the same instance will be returned.
    * 
    * @param newText - The changed text.
    * @param deltaChangeContext - The context in which the change occurred.
    * @param cursorTextAttributes - Text attributes at cursor.
-   * @returns The result of composing the diff delta with `this` instance.
+   * @returns A duo of deltas. The first one is the strict result of applying the text diff, while the second one
+   * it the result of applying normalization rules (i.e. prefixes rules for text modifying line types).
    */
-  applyTextDiff(newText: string, deltaChangeContext: DeltaChangeContext, cursorTextAttributes: TextAttributesMap<T> = {}): DocumentDelta {
+  applyTextDiff(newText: string, deltaChangeContext: DeltaChangeContext, cursorTextAttributes: TextAttributesMap<T> = {}): [DocumentDelta, DocumentDelta] {
     const oldText = this.getText()
     const computer = new DeltaDiffComputer({
       cursorTextAttributes,
@@ -165,7 +174,9 @@ export default class DocumentDelta<T extends string = any> implements GenericDel
       context: deltaChangeContext
     }, this)
     const { delta, directives } = computer.toDeltaDiffReport()
-    return this.compose(delta).normalize(directives)
+    const afterTextDiffDelta = this.compose(delta)
+    const normalizedDelta = afterTextDiffDelta.normalize(directives)
+    return [afterTextDiffDelta, normalizedDelta]
   }
 
   /**

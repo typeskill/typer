@@ -37,8 +37,8 @@ abstract class Block<T extends string = any> {
 
   abstract handleOnSelectionChange(s: Selection): void
 
-  updateDelta(diffDelta: DocumentDelta) {
-    this.blockInterface.updateDelta(diffDelta)
+  updateDelta(textDiffDelta: DocumentDelta, normalizedDelta?: DocumentDelta) {
+    this.blockInterface.updateDelta(textDiffDelta, normalizedDelta)
   }
 
   getDelta(): DocumentDelta {
