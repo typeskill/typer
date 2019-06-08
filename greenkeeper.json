@@ -1,8 +1,13 @@
 {
   "groups": {
+    "examples": {
+      "packages": [
+        "examples/expo/package.json"
+      ],
+      "ignore": ["expo", "react-native", "react"]
+    },
     "default": {
       "packages": [
-        "examples/expo/package.json",
         "package.json"
       ]
     }
