@@ -24,6 +24,9 @@
         <img src="https://img.shields.io/github/issues-raw/jsamr/react-native-typeskill/bug.svg?label=open%20bugs" alt="open bugs">
     </a>
     <img alt="Greenkeeper badge" src="https://badges.greenkeeper.io/jsamr/react-native-typeskill.svg">
+    <a href="https://snyk.io/test/github/jsamr/react-native-typeskill">
+      <img alt="vulnerabilities" src="https://snyk.io/test/github/jsamr/react-native-typeskill/badge.svg">
+    </a>
 </p>
 
 <p align="center">
