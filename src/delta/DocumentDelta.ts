@@ -46,15 +46,15 @@ export default class DocumentDelta<T extends string = any> implements GenericDel
         const relativeCursorPosition = selectionAfterChange.start - beginningOfLineIndex
         const shouldInvestigatePrefix = matchingLine &&
                                         directive.type === NormalizeOperation.CHECK_LINE_TYPE_PREFIX
-        const shouldInvestigateInsertion = matchingLine &&
-                                           directive.type === NormalizeOperation.INSERT_LINE_TYPE_PREFIX
-        const shouldInvestigateDeletion = matchingLine &&
-                                          directive.type === NormalizeOperation.INVESTIGATE_DELETION &&
-                                          relativeCursorPosition < requiredPrefix.length &&
-                                          isLineTypeTextLengthModifier(line.lineType)
-        if (shouldInvestigateInsertion) {
+        const shouldApplyInsertion = matchingLine &&
+                                     directive.type === NormalizeOperation.INSERT_LINE_TYPE_PREFIX
+        const shouldApplyDeletion = matchingLine &&
+                                    directive.type === NormalizeOperation.INVESTIGATE_DELETION &&
+                                    relativeCursorPosition <= requiredPrefix.length &&
+                                    isLineTypeTextLengthModifier(line.lineType)
+        if (shouldApplyInsertion) {
           charsToInsert = requiredPrefix
-        } else if (shouldInvestigateDeletion) {
+        } else if (shouldApplyDeletion) {
           const deleteTraversal = directive.context.deleteTraversal()
           const prefixTraversal = Selection.fromBounds(line.beginningOfLineIndex, line.beginningOfLineIndex + requiredPrefix.length)
           const alreadyDeletedChars = prefixTraversal.intersection(deleteTraversal).length()
@@ -65,15 +65,20 @@ export default class DocumentDelta<T extends string = any> implements GenericDel
           const lineDiff = directive.diff.slice(0, requiredPrefix.length)
           if (isMutatingDelta(lineDiff)) {
             const iterator = Delta.Op.iterator(lineDiff.ops)
+            let index = 0
             while (iterator.hasNext()) {
               const next = iterator.next()
-              if (next.retain && !numToRetainInPrefix) {
+              if (next.retain) {
                 numToRetainInPrefix = next.retain
-              } else if (next.delete) {
-                numToDelete = next.delete
+                index += next.retain
+              } else if (typeof next.insert === 'string') {
+                const numToInsert = requiredPrefix.length - index
+                charsToInsert += requiredPrefix.slice(index, index + numToInsert)
+                index += numToInsert
+                break
               }
             }
-            overridenSelection = Selection.fromBounds(requiredPrefix.length)
+            overridenSelection = Selection.fromBounds(selectionAfterChange.start + charsToInsert.length - numToDelete)
           }
         }
       })

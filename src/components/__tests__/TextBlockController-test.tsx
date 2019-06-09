@@ -41,8 +41,21 @@ function getTextInputDefaultProps(): TextBlockControllerProps<BaseTextTransformA
   }
 }
 
+// Running jest.runAllTimers synchronously causes a bug
+// were react component are not always rerendered
+// after those timers end.
+// See: https://git.io/fjzbL
+async function runAllTimers() {
+  return Promise.resolve().then(() => jest.runAllTimers())
+}
+
+beforeEach(() => {
+  jest.useFakeTimers()
+})
+
 afterEach(() => {
   jest.clearAllMocks()
+  jest.clearAllTimers()
 })
 
 describe('@components/<TextBlockController>', () => {
@@ -59,7 +72,7 @@ describe('@components/<TextBlockController>', () => {
     const wrapper = renderer.create(<TextBlockController {...getTextInputDefaultProps()} />)
     expect(wrapper.root.findByType(TextInput)).toBeTruthy()
   })
-  it('should update selection appropriately', () => {
+  it('should update selection appropriately', async () => {
     const { document, bridge, docConsumer } = buildDocumentConsumer()
     document.registerConsumer(docConsumer)
     const block = document.getActiveBlock() as TextBlock<any>
@@ -68,13 +81,10 @@ describe('@components/<TextBlockController>', () => {
     }
     const spy = jest.spyOn(listenerObj, 'listener')
     bridge.getOuterInterface().addSelectedAttributesChangeListener(listenerObj, spy as any)
-    const selection = {
-      start: 0,
-      end: 1
-    }
     const wrapper = renderer.create(<TextBlockController textBlock={block} />)
     const textBlockController = wrapper.root.instance as TextBlockController<any>
-    textBlockController['handleOnSelectionChange']({ nativeEvent: { selection } } as any)
+    textBlockController['handleOnSelectionChangeEvent'](mockSelectionChangeEvent(0, 1))
+    await runAllTimers()
     expect(spy).toHaveBeenCalledTimes(1)
   })
   it('should receive SELECTION_RANGE_ATTRIBUTES_UPDATE event when attributes get updates', () => {
@@ -85,15 +95,11 @@ describe('@components/<TextBlockController>', () => {
     const spy = spyOn(TextBlockController.prototype, 'handleOnSelectionRangeAttributesUpdate')
     const wrapper = renderer.create(<TextBlockController textBlock={block} />)
     const textBlockController = wrapper.getInstance() as unknown as TextBlockController<any>
-    const selection = {
-      start: 0,
-      end: 1
-    }
-    textBlockController['handleOnSelectionChange']({ nativeEvent: { selection } } as any)
+    textBlockController['handleOnSelectionChangeEvent'](mockSelectionChangeEvent(0, 1))
     bridge.getOuterInterface().applyTextTransformToSelection('bold', true)
     expect(spy).toHaveBeenCalledTimes(1)
   })
-  it('should comply with DocumentDelta when text updates', () => {
+  it('should comply with DocumentDelta when text updates', async () => {
     const { document, docConsumer, getDelta } = buildDocumentConsumer()
     document.registerConsumer(docConsumer)
     const block = document.getActiveBlock() as TextBlock<any>
@@ -101,12 +107,13 @@ describe('@components/<TextBlockController>', () => {
     const textBlockController = wrapper.getInstance() as unknown as TextBlockController<any>
     expect(textBlockController).toBeInstanceOf(TextBlockController)
     textBlockController['handleOnTextChanged']('This is nu text')
-    textBlockController['handleOnSelectionChange'](mockSelectionChangeEvent(15, 15))
+    textBlockController['handleOnSelectionChangeEvent'](mockSelectionChangeEvent(15, 15))
+    await runAllTimers()
     expect(getDelta().ops).toEqual([
       { insert: 'This is nu text\n' }
     ])
   })
-  it('should stay in sync with textBlock', () => {
+  it('should stay in sync with textBlock', async () => {
     const { document, docConsumer } = buildDocumentConsumer()
     document.registerConsumer(docConsumer)
     const block = document.getActiveBlock() as TextBlock<any>
@@ -114,7 +121,9 @@ describe('@components/<TextBlockController>', () => {
     const textBlockController = wrapper.getInstance() as unknown as TextBlockController<any>
     expect(textBlockController).toBeInstanceOf(TextBlockController)
     textBlockController['handleOnTextChanged']('This is nu text\nBlah')
-    textBlockController['handleOnSelectionChange'](mockSelectionChangeEvent(20, 20))
+    textBlockController['handleOnSelectionChangeEvent'](mockSelectionChangeEvent(20, 20))
+    wrapper.update(<TextBlockController textBlock={block}/>)
+    await runAllTimers()
     wrapper.update(<TextBlockController textBlock={block}/>)
     const richText = wrapper.root.findByType(RichText)
     const text = flattenTextChild(richText)

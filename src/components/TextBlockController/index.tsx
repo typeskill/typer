@@ -9,6 +9,8 @@ import { boundMethod } from 'autobind-decorator'
 import TextBlock from '@model/TextBlock'
 import { TextChangeSession } from './TextChangeSession'
 import { GenericOp } from '@delta/operations'
+import debounce from 'lodash.debounce'
+import { Cancelable } from 'lodash'
 
 export interface TextBlockControllerProps<T extends string> {
   textBlock: TextBlock<T>
@@ -42,7 +44,13 @@ const constantTextInputProps = {
   blurOnSubmit: false
 } as TextInputProps
 
-const REACT_MINIMAL_INTERVAL_FOR_UPDATE = 30
+export const REACT_MINIMAL_INTERVAL_FOR_UPDATE = 30
+export const TIME_TO_AGGREGATE_TEXT_CHANGES = 100
+
+const debounceByTimeToAggregate = <T extends (...args: any) => any>(fn: T) => debounce(fn, TIME_TO_AGGREGATE_TEXT_CHANGES, {
+  leading: false,
+  trailing: true
+})
 
 export default class TextBlockController<T extends string> extends Component<TextBlockControllerProps<T>, TextBlockControllerState> {
 
@@ -62,6 +70,8 @@ export default class TextBlockController<T extends string> extends Component<Tex
   constructor(props: TextBlockControllerProps<T>) {
     super(props)
     invariant(props.textBlock != null, 'textBlock prop must be given at construction')
+    this.handleOnTextChanged = debounceByTimeToAggregate(this.handleOnTextChanged).bind(this)
+    this.handleOnSelectionChange = debounceByTimeToAggregate(this.handleOnSelectionChange).bind(this)
   }
 
   private get blockControllerInterface(): Orchestrator.BlockControllerInterface {
@@ -74,7 +84,6 @@ export default class TextBlockController<T extends string> extends Component<Tex
    * 
    * @param nextText 
    */
-  @boundMethod
   private handleOnTextChanged(nextText: string) {
     this.textChangeSession = new TextChangeSession()
     this.textChangeSession.setTextAfterChange(nextText)
@@ -91,13 +100,7 @@ export default class TextBlockController<T extends string> extends Component<Tex
     this.props.textBlock.handleOnKeyPress(key)
   }
 
-  /**
-   * **Preconditions**: this method must be called after handleOnTextChanged
-   * 
-   * @param textInputSelectionChangeEvent 
-   */
-  @boundMethod
-  private handleOnSelectionChange({ nativeEvent: { selection } }: NativeSyntheticEvent<TextInputSelectionChangeEventData>) {
+  private handleOnSelectionChange(selection: { start: number, end: number }) {
     const { textBlock } = this.props
     const nextSelection = !this.skipNextSelectionUpdate ? Selection.between(selection.start, selection.end) : this.selection
     if (this.textChangeSession !== null) {
@@ -115,6 +118,16 @@ export default class TextBlockController<T extends string> extends Component<Tex
       this.setState({ overridingSelection: nextSelection })
       this.forceUpdate()
     }
+  }
+
+  /**
+   * **Preconditions**: this method must be called after handleOnTextChanged
+   * 
+   * @param textInputSelectionChangeEvent 
+   */
+  @boundMethod
+  private handleOnSelectionChangeEvent({ nativeEvent: { selection } }: NativeSyntheticEvent<TextInputSelectionChangeEventData>) {
+    this.handleOnSelectionChange(selection)
   }
 
   @boundMethod
@@ -195,6 +208,8 @@ export default class TextBlockController<T extends string> extends Component<Tex
     for (const timeout of this.timeouts) {
       clearTimeout(timeout)
     }
+    (this.handleOnTextChanged as unknown as Cancelable).cancel();
+    (this.handleOnSelectionChange as unknown as Cancelable).cancel()
   }
 
   render() {
@@ -208,7 +223,7 @@ export default class TextBlockController<T extends string> extends Component<Tex
         <TextInput selection={overridingSelection ? overridingSelection : undefined}
                    style={[grow ? styles.grow : undefined, styles.textInput, richTextStyles.defaultText]}
                    onKeyPress={this.handleOnKeyPressed}
-                   onSelectionChange={this.handleOnSelectionChange}
+                   onSelectionChange={this.handleOnSelectionChangeEvent}
                    onChangeText={this.handleOnTextChanged}
                    ref={this.handleOnTextinputRef}
                    {...constantTextInputProps}>

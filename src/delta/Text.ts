@@ -96,8 +96,8 @@ export default class Text {
     // Replaced lines
     replacedLines.forEach(([lineBefore, lineAfter]) => {
       const lineDelta = makeDiffDelta(lineBefore.text, lineAfter.text, textAttributes)
-      if (isLineTypeTextLengthModifier(lineType)) {
-        directiveBuilder.pushDirective(NormalizeOperation.CHECK_LINE_TYPE_PREFIX, lineBefore.beginningOfLineIndex, lineDelta.invert(new Delta().insert(lineBefore)))
+      if (isLineTypeTextLengthModifier(lineType) && !context.isDeletion()) {
+        directiveBuilder.pushDirective(NormalizeOperation.CHECK_LINE_TYPE_PREFIX, lineBefore.beginningOfLineIndex, lineDelta)
       }
       if (this.charAt(lineBefore.endOfLineIndex) !== '\n') {
         lineDelta.insert('\n', shouldPropagateLineType ? lineAttributes : {})
