@@ -1,4 +1,8 @@
 {
+  "commitMessages": {
+    "dependencyUpdate": "chore(ex): update ${dependency} to version ${version}",
+    "devDependencyUpdate": "chore(ex): update ${dependency} to version ${version}"
+  },
   "groups": {
     "examples": {
       "packages": [
