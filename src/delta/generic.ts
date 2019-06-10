@@ -1,5 +1,6 @@
 import { GenericOp } from './operations'
 import Delta from 'quill-delta'
+import hasPath from 'ramda/es/hasPath'
 
 export interface GenericDelta {
   readonly ops: GenericOp[]
@@ -8,6 +9,10 @@ export interface GenericDelta {
 
 export function extractTextFromDelta(delta: GenericDelta): string {
   return delta.ops.reduce((acc: string, curr: GenericOp) => typeof curr.insert === 'string' ? acc + curr.insert : acc, '')
+}
+
+export function isGenericDelta(arg: any): arg is GenericDelta {
+  return hasPath(['ops'], arg)
 }
 
 export function isMutatingDelta(delta: GenericDelta): boolean {

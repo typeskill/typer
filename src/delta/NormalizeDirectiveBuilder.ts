@@ -10,7 +10,7 @@ export class NormalizeDirectiveBuilder {
     this.context = context
   }
 
-  pushDirective(type: NormalizeOperation, beginningOfLineIndex: number, diff?: Delta) {
+  pushDirective(type: NormalizeOperation, beginningOfLineIndex: number, diff: Delta) {
     this.directives.push({
       type,
       diff,

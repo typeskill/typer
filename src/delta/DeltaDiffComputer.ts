@@ -15,7 +15,7 @@ export interface NormalizeDirective {
   type: NormalizeOperation,
   beginningOfLineIndex: number,
   context: DeltaChangeContext,
-  diff?: Delta
+  diff: Delta
 }
 
 export interface DeltaDiffReport {
@@ -58,6 +58,7 @@ export class DeltaDiffComputer {
   toDeltaDiffReport(): DeltaDiffReport {
     const { oldText, directiveBuilder } = this.diffContext
     const delta = oldText.computeGenericDelta(this.diffContext)
-    return { delta, directives: directiveBuilder.build() }
+    const directives = directiveBuilder.build()
+    return { delta, directives }
   }
 }

@@ -221,21 +221,23 @@ describe('@model/Document', () => {
         selection = deltaUpdate.overridingSelection as Selection || selection
         witness(selection)
       })
-      const firstWord = 'First'
-      const secondWord = 'line'
+      const firstWord = 'A'
+      const space = ' '
+      const secondWord = 'B'
       // 1: create ul line
-      const step1Line = `${firstWord} ${secondWord}\n`
-      block0.handleOnTextChange(step1Line, mockDeltaChangeContext(0, 10))
-      block0.handleOnSelectionChange(Selection.fromBounds(10))
+      const step1Line = `${firstWord}${space}${secondWord}`
+      const step1EndOfChange = firstWord.length + space.length + secondWord.length
+      block0.handleOnTextChange(step1Line, mockDeltaChangeContext(0, step1EndOfChange))
+      block0.handleOnSelectionChange(Selection.fromBounds(step1EndOfChange))
       // 2: apply ul to line
       const header = getHeadingCharactersFromType('ul', 0)
       outerInterface.applyLineTransformToSelection('ul')
       // 3: move to cursor before "l"
-      block0.handleOnSelectionChange(Selection.fromBounds(header.length + 6, header.length + 6))
+      block0.handleOnSelectionChange(Selection.fromBounds(header.length + firstWord.length + 1))
       // 4: insert newline
       const step3line = `${header}${firstWord} \n${secondWord}\n`
-      block0.handleOnTextChange(step3line, mockDeltaChangeContext(header.length + 6, header.length + 7))
-      expect(witness).toHaveBeenCalledWith(expect.objectContaining({ start: header.length * 2 + 7, end: header.length * 2 + 7 }))
+      block0.handleOnTextChange(step3line, mockDeltaChangeContext(header.length + firstWord.length + 1, header.length + firstWord.length + 2))
+      expect(witness).toHaveBeenLastCalledWith(expect.objectContaining(Selection.fromBounds(header.length * 2 + firstWord.length + 2)))
       block0.handleOnSelectionChange(selection)
       expect(block0.getDelta().ops).toEqual([
         { insert: `${header}${firstWord} ` },

@@ -125,9 +125,14 @@ export default class TextBlockController<T extends string> extends Component<Tex
     this.textInputRef && this.textInputRef.focus()
   }
 
-  private async setStateAsync(state: Partial<TextBlockControllerState>) {
+  private async setStateAsync(state: Partial<TextBlockControllerState>, delay?: number) {
     return new Promise((resolve) => {
-      this.setState(state as any, resolve)
+      setTimeout(() => {
+        this.setState(state as any, () => {
+          console.info('SETTING STATE', JSON.stringify(state))
+          resolve()
+        })
+      }, delay || 0)
     })
   }
 
@@ -142,12 +147,16 @@ export default class TextBlockController<T extends string> extends Component<Tex
     const normalizedDeltaOps = documentDeltaUpdate.normalizedDelta.ops
     const overridingSelection = documentDeltaUpdate.overridingSelection
     await this.setStateAsync({ ops: nextDocDeltaOps })
+    console.info('SHOULD APPLY NORM', documentDeltaUpdate.shouldApplyNormalization())
     if (documentDeltaUpdate.shouldApplyNormalization()) {
       await this.setStateAsync({ ops: normalizedDeltaOps })
     }
     if (overridingSelection) {
       // We must wait for interactions, otherwise the TextInput setSpan bug arise.
-      await InteractionManager.runAfterInteractions(() => this.setStateAsync({ overridingSelection }))
+      await InteractionManager.runAfterInteractions(() => {
+        console.info('OVERRIDING SELECTION')
+        return this.setStateAsync({ overridingSelection })
+      })
     }
   }
 

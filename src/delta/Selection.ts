@@ -1,5 +1,10 @@
 import invariant from 'invariant'
 
+/**
+ * A class representing a range of character indexes.
+ * This range can represent a selection of those characters.
+ * 
+ */
 export class Selection {
   public readonly start: number
   public readonly end: number
@@ -24,16 +29,58 @@ export class Selection {
     return new Selection(start, end)
   }
 
-  encompasses(charIndex: number): boolean {
-    return charIndex >= this.start &&
-           charIndex <= this.end
+  /**
+   * Informs wether or not an index touches this range.
+   * 
+   * @remarks
+   * 
+   * ```ts
+   * const selection = Selection.fromBounds(1, 3)
+   * selection.containsIndex(0) // false
+   * selection.containsIndex(1) // true
+   * selection.containsIndex(2) // true
+   * selection.containsIndex(3) // true
+   * selection.containsIndex(4) // false
+   * ```
+   * 
+   * @param selectionIndex 
+   */
+  touchesIndex(selectionIndex: number): boolean {
+    return selectionIndex >= this.start &&
+           selectionIndex <= this.end
   }
 
-  intersection(selection: Selection) {
-    return Selection.fromBounds(
-      Math.max(this.start, selection.start),
-      Math.min(this.end, selection.end)
-    )
+  /**
+   * Informs wether or not a selection has at least one index in
+   * common with another selection.
+   * 
+   * @param selection 
+   */
+  touchesSelection(selection: Selection): boolean {
+    const lowerBound = selection.start
+    const upperBound = selection.end
+    return this.touchesIndex(lowerBound) || this.touchesIndex(upperBound)
+  }
+
+  intersectionLength(selection: Selection) {
+    const intersection = this.intersection(selection)
+    return intersection ? intersection.length() : 0
+  }
+
+  /**
+   * 
+   * @param selection 
+   */
+  intersection(selection: Selection): Selection|null {
+    const maximumMin = Math.max(this.start, selection.start)
+    const minimumMax = Math.min(this.end, selection.end)
+    if (maximumMin < minimumMax) {
+      return Selection.fromBounds(
+        maximumMin,
+        minimumMax
+      )
+    }
+    return null
   }
 
   length(): number {

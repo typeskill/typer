@@ -6,14 +6,22 @@ export type TextLengthModifierLineType = 'ol' | 'ul'
 export type TextLineType = 'normal' | 'quoted' | TextLengthModifierLineType
 
 /**
- * **Specifications**: Given `documentText` the string representing all characters of this document,
- * this `line` must have its properties set such that:
- * `documentText.substring(line.beginningOfLineIndex, line.endOfLineIndex) === extractTextFromDelta(line.delta)`
+ * An interface representing a line of text.
+ * 
+ * @remarks
+ * 
+ * Given `documentText` the string representing all characters of a document and `line`
+ * any instance complying with this interface extracted from `documentText`, the following must
+ * be true:
+ * 
+ * ```ts
+ * documentText.substring(line.lineRange.start, line.lineRange.end) === extractTextFromDelta(line.delta)
+ * documentText.charAt(line.lineRange.end) === '\n'
+ * ```
  */
 export interface GenericLine {
   index: number
-  beginningOfLineIndex: number
-  endOfLineIndex: number
+  lineRange: Selection
 }
 
 export function isLineTypeTextLengthModifier(lineType: TextLineType): lineType is TextLengthModifierLineType {
@@ -24,7 +32,8 @@ export function shouldLineTypePropagateToNextLine(lineType: TextLineType) {
   return lineType === 'ol' || lineType === 'ul'
 }
 
-export function isLineInSelection(selection: Selection, { beginningOfLineIndex, endOfLineIndex }: GenericLine) {
+export function isLineInSelection(selection: Selection, { lineRange }: GenericLine) {
+  const { start: beginningOfLineIndex, end: endOfLineIndex } = lineRange
   return selection.start >= beginningOfLineIndex && selection.start <= endOfLineIndex ||
          selection.start <= endOfLineIndex && selection.end >= beginningOfLineIndex
 }

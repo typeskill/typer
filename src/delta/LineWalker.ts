@@ -2,6 +2,8 @@ import { GenericOp } from './operations'
 import { DocumentLineIndexGenerator } from './DocumentLineIndexGenerator'
 import { getLineType, TextLineType, GenericLine } from './lines'
 import Delta from 'quill-delta'
+import { GenericDelta, isGenericDelta } from './generic'
+import { Selection } from './Selection'
 
 export interface DocumentLine extends GenericLine {
   delta: Delta
@@ -11,8 +13,8 @@ export interface DocumentLine extends GenericLine {
 
 export class LineWalker {
   public readonly ops: GenericOp[]
-  constructor(arg: GenericOp[]|Delta) {
-    this.ops = arg instanceof Delta ? arg.ops : arg
+  constructor(arg: GenericOp[]|GenericDelta) {
+    this.ops = isGenericDelta(arg) ? arg.ops : arg
   }
 
   eachLine(predicate: (line: DocumentLine) => void) {
@@ -24,9 +26,9 @@ export class LineWalker {
       firstLineCharAt = endOfLineIndex + 1 // newline
       const lineType = getLineType(attributes)
       const lineTypeIndex = generator.findNextLineTypeIndex(lineType)
+      const lineRange = Selection.fromBounds(beginningOfLineIndex, endOfLineIndex)
       predicate({
-        beginningOfLineIndex,
-        endOfLineIndex,
+        lineRange,
         delta,
         lineType,
         lineTypeIndex,
