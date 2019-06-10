@@ -16,7 +16,7 @@ export type TextAttributesMap<T extends string> = Partial<{
 }>
 
 /**
- * Merge object beginning with the rightmost argument.
+ * Recursively merge objects from right to left.
  * 
  * @remarks
  * 
@@ -24,7 +24,7 @@ export type TextAttributesMap<T extends string> = Partial<{
  * 
  * @param attributes - the attributes object to merge
  */
-export function mergeAttributesRight(...attributes: BlockAttributesMap[]): BlockAttributesMap {
+export function mergeAttributesLeft(...attributes: BlockAttributesMap[]): BlockAttributesMap {
   return reject(isNil)(mergeAll(attributes))
 }
 

@@ -5,11 +5,11 @@ import { boundMethod } from 'autobind-decorator'
 import { Selection } from '@delta/Selection'
 import TextTransformsRegistry from '@core/TextTransformsRegistry'
 import { DeltaChangeContext } from '@delta/DeltaChangeContext'
+import mergeLeft from 'ramda/es/mergeLeft'
 
 export default class TextBlock<T extends string> extends Block<T> {
 
   private cursorTextAttributes: TextAttributesMap<T> = {}
-  private selection = Selection.fromBounds(0)
   private length: number = 0
 
   constructor(blockInterface: Document.BlockInterface<T>) {
@@ -26,10 +26,6 @@ export default class TextBlock<T extends string> extends Block<T> {
     this.blockInterface.bridgeInnerInterface.setSelectedTextAttributes(textAttributes)
   }
 
-  getSelection(): Selection {
-    return this.selection
-  }
-
   handleOnSelectionChange(selection: Selection): void {
     this.selection = selection
     this.updateTextAttributes(selection)
@@ -40,8 +36,9 @@ export default class TextBlock<T extends string> extends Block<T> {
     return this.length
   }
 
-  setCursorAttributes(cursorAttributes: TextAttributesMap<T>) {
-    this.cursorTextAttributes = cursorAttributes
+  setCursorAttributes(cursorTextAttributes: TextAttributesMap<T>): TextAttributesMap<T> {
+    this.cursorTextAttributes = mergeLeft(cursorTextAttributes, this.cursorTextAttributes)
+    return this.cursorTextAttributes
   }
 
   getCursorAttributes(): TextAttributesMap<T> {

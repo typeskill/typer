@@ -14,6 +14,7 @@ export function setInstanceNumber(num: number) {
 abstract class Block<T extends string = any> {
   private instanceNumber: number
   protected blockInterface: Document.BlockInterface<T>
+  protected selection = Selection.fromBounds(0)
 
   constructor(
      blockInterface: Document.BlockInterface<T>
@@ -25,12 +26,15 @@ abstract class Block<T extends string = any> {
 
   abstract getLength(): number
 
-  abstract getSelection(): Selection
+  getSelection(): Selection {
+    return this.selection
+  }
 
   abstract handleOnSelectionChange(s: Selection): void
 
-  updateDelta(textDiffDelta: DocumentDeltaUpdate) {
-    this.blockInterface.updateDelta(textDiffDelta)
+  updateDelta(documentDeltaUpdate: DocumentDeltaUpdate) {
+    this.selection = documentDeltaUpdate.overridingSelection || this.selection
+    this.blockInterface.updateDelta(documentDeltaUpdate)
   }
 
   getDelta(): DocumentDelta {

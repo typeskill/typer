@@ -1,6 +1,6 @@
 import Delta from 'quill-delta'
 import DocumentDelta from './DocumentDelta'
-import { BlockAttributesMap, mergeAttributesRight } from './attributes'
+import { BlockAttributesMap, mergeAttributesLeft } from './attributes'
 import { DeltaChangeContext } from './DeltaChangeContext'
 import Text, { TextDiffContext } from './Text'
 import { NormalizeDirectiveBuilder } from './NormalizeDirectiveBuilder'
@@ -38,7 +38,7 @@ export class DeltaDiffComputer {
     const { context, cursorTextAttributes, newText: newTextRaw, oldText: oldTextRaw } = model
     const selectedTextAttributes = delta.getSelectedTextAttributes(context.selectionBeforeChange)
     const selectionBeforeChangeLength = context.selectionBeforeChange.end - context.selectionBeforeChange.start
-    const textAttributes = selectionBeforeChangeLength ? selectedTextAttributes : mergeAttributesRight(selectedTextAttributes, cursorTextAttributes)
+    const textAttributes = selectionBeforeChangeLength ? selectedTextAttributes : mergeAttributesLeft(selectedTextAttributes, cursorTextAttributes)
     const lineTypeBeforeChange = delta.getLineTypeInSelection(context.selectionBeforeChange)
     const oldText = new Text(oldTextRaw)
     const newText = new Text(newTextRaw)

@@ -6,7 +6,7 @@ import Bridge from '@core/Bridge'
 import Orchestrator from '@model/Orchestrator'
 import Store from './Store'
 import { TextLineType } from '@delta/lines'
-import { mergeAttributesRight } from '@delta/attributes'
+import { mergeAttributesLeft } from '@delta/attributes'
 import { DocumentDeltaUpdate } from '@delta/DocumentDeltaUpdate'
 
 declare namespace Document {
@@ -101,9 +101,9 @@ class Document<T extends string> {
         const userAttributes = { [attributeName]: attributeValue }
         const updatedDelta = delta.applyTextTransformToSelection(selection, attributeName, attributeValue)
         const deltaAttributes = updatedDelta.getSelectedTextAttributes(selection)
-        const attributes = mergeAttributesRight(deltaAttributes, userAttributes)
+        const mergedCursorAttributes = selectedBlock.setCursorAttributes(userAttributes)
+        const attributes = mergeAttributesLeft(deltaAttributes, mergedCursorAttributes)
         selectedBlock.updateDelta(updatedDelta)
-        selectedBlock.setCursorAttributes(userAttributes)
         consumer.bridgeInnerInterface.setSelectedTextAttributes(attributes)
       }
     })

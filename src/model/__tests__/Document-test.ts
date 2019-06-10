@@ -107,6 +107,15 @@ describe('@model/Document', () => {
         weight: 'bold'
       })
     })
+    it('successively applying text attributes to empty selection should result in the merging of those attributes', () => {
+      const { outerInterface, block0 } = createContext()
+      outerInterface.applyTextTransformToSelection('weight', 'bold')
+      outerInterface.applyTextTransformToSelection('italic', true)
+      expect(block0.getCursorAttributes()).toMatchObject({
+        weight: 'bold',
+        italic: true
+      })
+    })
     it('setting cursor attributes should propagate to inserted text', () => {
       const { outerInterface, block0 } = createContext()
       const initialLine = 'F\n'
@@ -188,6 +197,20 @@ describe('@model/Document', () => {
       expect(block0.getDelta().ops).toEqual([
         { insert: 'FG\n' }
       ])
+    })
+    it('pass regression: unapplying bold followed by applying italic to zero length cursor result in italic attribute for cursor', () => {
+      const { outerInterface, block0 } = createContext()
+      const text = 'foo'
+      block0.handleOnTextChange(text, mockDeltaChangeContext(0, 3))
+      block0.handleOnSelectionChange(mockSelection(0, 3))
+      outerInterface.applyTextTransformToSelection('weight', 'bold')
+      block0.handleOnSelectionChange(mockSelection(3))
+      outerInterface.applyTextTransformToSelection('weight', null)
+      outerInterface.applyTextTransformToSelection('italic', true)
+      expect(block0.getCursorAttributes()).toEqual({
+        italic: true,
+        weight: null
+      })
     })
     it('pass regression #12: deleting ul line prefix just after cutting an ul and pressing enter should be handled appropriately', () => {
       let selection = Selection.fromBounds(0)
