@@ -1,12 +1,12 @@
 // tslint:disable:no-string-literal
 import Document from '@model/Document'
-import Orchestrator from '@model/Orchestrator'
 import Bridge from '@core/Bridge'
 import { defaultTextTransforms } from '@delta/transforms'
 import TextTransformsRegistry from '@core/TextTransformsRegistry'
 import DocumentDelta from '@delta/DocumentDelta'
 import { GenericOp } from '@delta/operations'
 import TextBlock from '@model/TextBlock'
+import { DocumentDeltaUpdate } from '@delta/DocumentDeltaUpdate'
 
 export function mokBridgeInnerInterface(): Bridge.InnerInterface<any> {
   return {
@@ -20,8 +20,12 @@ export function mokBridgeInnerInterface(): Bridge.InnerInterface<any> {
   }
 }
 
-export function mockDocumentDelta(ops?: GenericOp[], controller?: Orchestrator.BlockEmitterInterface): DocumentDelta {
-  return new DocumentDelta(controller || { emitToBlockController: () => ({}) }, ops)
+export function mockDocumentDeltaUpdate(ops?: GenericOp[]): DocumentDeltaUpdate {
+  return new DocumentDeltaUpdate(mockDocumentDelta(ops))
+}
+
+export function mockDocumentDelta(ops?: GenericOp[]): DocumentDelta {
+  return new DocumentDelta(ops)
 }
 
 export function mockDocumentBlockInterface(): Document.BlockInterface<any> {

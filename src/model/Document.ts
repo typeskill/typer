@@ -7,12 +7,13 @@ import Orchestrator from '@model/Orchestrator'
 import Store from './Store'
 import { TextLineType } from '@delta/lines'
 import { mergeAttributesRight } from '@delta/attributes'
+import { DocumentDeltaUpdate } from '@delta/DocumentDeltaUpdate'
 
 declare namespace Document {
   export interface BlockInterface<T extends string> {
     readonly bridgeInnerInterface: Bridge.InnerInterface<T>
     readonly orchestrator: Orchestrator
-    readonly updateDelta: (textDiffDelta: DocumentDelta, normalizedDelta?: DocumentDelta) => void
+    readonly updateDelta: (documentDeltaUpdate: DocumentDeltaUpdate) => void
     readonly onPressBackspaceFromOrigin: () => void
     readonly onPressEnter: () => void
     readonly getDelta: () => DocumentDelta
@@ -54,17 +55,18 @@ class Document<T extends string> {
       const blockIface: Document.BlockInterface<T> = Object.freeze({
         orchestrator: this.orchestrator,
         bridgeInnerInterface: this.consumer.bridgeInnerInterface,
-        updateDelta: (nextTextDiffDelta: DocumentDelta, normalizedDelta?: DocumentDelta) => {
-          invariant(nextTextDiffDelta instanceof DocumentDelta, 'documentDelta instanceof DocumentDelta')
-          delta = normalizedDelta || nextTextDiffDelta
-          this.emitToBlock('DELTA_UPDATE', block.getInstanceNumber(), nextTextDiffDelta, normalizedDelta)
+        updateDelta: (documentDeltaUpdate: DocumentDeltaUpdate) => {
+          invariant(documentDeltaUpdate instanceof DocumentDeltaUpdate, 'documentDelta instanceof DocumentDelta')
+          // TODO inspect possible state discrepancy
+          delta = documentDeltaUpdate.normalizedDelta
+          this.emitToBlock('DELTA_UPDATE', block.getInstanceNumber(), documentDeltaUpdate)
         },
         onPressBackspaceFromOrigin: () => this.handleOnPressBackspaceFromOriginFromBlock(block),
         onPressEnter: () => this.handleOnPressEnterFromBlock(block),
         getDelta: () => delta as DocumentDelta
       })
       const block = new BlockKind(blockIface)
-      delta = new DocumentDelta(block.getEmitterInterface())
+      delta = new DocumentDelta()
       return block
     }
     throw new Error()
@@ -83,9 +85,9 @@ class Document<T extends string> {
         const selectedBlock = this.store.getActiveBlock() as TextBlock<T>
         invariant(selectedBlock instanceof TextBlock, 'Line Transforms can only be applied to a TextBlock')
         const selectionBeforeChange = selectedBlock.getSelection()
-        const updatedDelta = selectedBlock.getDelta().applyLineTypeToSelection(selectionBeforeChange, lineType)
-        const updateLineType = updatedDelta.getLineTypeInSelection(selectionBeforeChange)
-        selectedBlock.updateDelta(updatedDelta)
+        const updateRequest = selectedBlock.getDelta().applyLineTypeToSelection(selectionBeforeChange, lineType)
+        const updateLineType = updateRequest.getLineTypeInSelection(selectionBeforeChange)
+        selectedBlock.updateDelta(updateRequest)
         consumer.bridgeInnerInterface.setSelectedLineType(updateLineType)
       }
     })
@@ -100,7 +102,6 @@ class Document<T extends string> {
         const updatedDelta = delta.applyTextTransformToSelection(selection, attributeName, attributeValue)
         const deltaAttributes = updatedDelta.getSelectedTextAttributes(selection)
         const attributes = mergeAttributesRight(deltaAttributes, userAttributes)
-        this.orchestrator.emitToBlockController(selectedBlock.getInstanceNumber(), 'SELECTION_RANGE_ATTRIBUTES_UPDATE', deltaAttributes)
         selectedBlock.updateDelta(updatedDelta)
         selectedBlock.setCursorAttributes(userAttributes)
         consumer.bridgeInnerInterface.setSelectedTextAttributes(attributes)

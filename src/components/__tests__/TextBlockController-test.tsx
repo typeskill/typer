@@ -87,18 +87,6 @@ describe('@components/<TextBlockController>', () => {
     await runAllTimers()
     expect(spy).toHaveBeenCalledTimes(1)
   })
-  it('should receive SELECTION_RANGE_ATTRIBUTES_UPDATE event when attributes get updates', () => {
-    const { document, bridge, docConsumer } = buildDocumentConsumer()
-    document.registerConsumer(docConsumer)
-    const block = document.getActiveBlock() as TextBlock<any>
-    // @ts-ignore
-    const spy = spyOn(TextBlockController.prototype, 'handleOnSelectionRangeAttributesUpdate')
-    const wrapper = renderer.create(<TextBlockController textBlock={block} />)
-    const textBlockController = wrapper.getInstance() as unknown as TextBlockController<any>
-    textBlockController['handleOnSelectionChangeEvent'](mockSelectionChangeEvent(0, 1))
-    bridge.getOuterInterface().applyTextTransformToSelection('bold', true)
-    expect(spy).toHaveBeenCalledTimes(1)
-  })
   it('should comply with DocumentDelta when text updates', async () => {
     const { document, docConsumer, getDelta } = buildDocumentConsumer()
     document.registerConsumer(docConsumer)

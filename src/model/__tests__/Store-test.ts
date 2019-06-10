@@ -1,12 +1,12 @@
 // tslint:disable:no-string-literal
 // tslint:disable:no-unused-variable
 import Store from '@model/Store'
-import DocumentDelta from '@delta/DocumentDelta'
 import TextBlock from '@model/TextBlock'
 import Bridge from '@core/Bridge'
 import Orchestrator from '@model/Orchestrator'
 import { setInstanceNumber as setBlockInstanceNumber } from '@model/Block'
 import { mockDocumentDelta } from '@test/document'
+import { DocumentDeltaUpdate } from '@delta/DocumentDeltaUpdate'
 
 function newTextBlock(): TextBlock<any> {
   let delta = mockDocumentDelta()
@@ -16,8 +16,8 @@ function newTextBlock(): TextBlock<any> {
     onPressBackspaceFromOrigin: () => { /** */ },
     onPressEnter: () => { /** */ },
     orchestrator: new Orchestrator(),
-    updateDelta: (nuDelta: DocumentDelta) => {
-      delta = nuDelta
+    updateDelta: (nuDelta: DocumentDeltaUpdate) => {
+      delta = nuDelta.normalizedDelta
     }
   })
 }

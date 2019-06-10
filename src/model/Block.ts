@@ -3,6 +3,7 @@ import Document from './Document'
 import DocumentDelta from '@delta/DocumentDelta'
 import { boundMethod } from 'autobind-decorator'
 import Orchestrator from './Orchestrator'
+import { DocumentDeltaUpdate } from '@delta/DocumentDeltaUpdate'
 
 let lastInstanceNumber = 0
 
@@ -13,7 +14,6 @@ export function setInstanceNumber(num: number) {
 abstract class Block<T extends string = any> {
   private instanceNumber: number
   protected blockInterface: Document.BlockInterface<T>
-  private emitter: Orchestrator.BlockEmitterInterface
 
   constructor(
      blockInterface: Document.BlockInterface<T>
@@ -21,14 +21,6 @@ abstract class Block<T extends string = any> {
     // tslint:disable-next-line:no-increment-decrement
     this.instanceNumber = lastInstanceNumber++
     this.blockInterface = blockInterface
-    this.emitter = {
-      emitToBlockController: (eventType: Orchestrator.SheetControllerEvent, ...payload: any[]) => {
-        return this.blockInterface.orchestrator.emitToBlockController(
-            this.getInstanceNumber(),
-            eventType, ...payload
-          )
-      }
-    }
   }
 
   abstract getLength(): number
@@ -37,8 +29,8 @@ abstract class Block<T extends string = any> {
 
   abstract handleOnSelectionChange(s: Selection): void
 
-  updateDelta(textDiffDelta: DocumentDelta, normalizedDelta?: DocumentDelta) {
-    this.blockInterface.updateDelta(textDiffDelta, normalizedDelta)
+  updateDelta(textDiffDelta: DocumentDeltaUpdate) {
+    this.blockInterface.updateDelta(textDiffDelta)
   }
 
   getDelta(): DocumentDelta {
@@ -51,10 +43,6 @@ abstract class Block<T extends string = any> {
 
   getControllerInterface(): Orchestrator.BlockControllerInterface {
     return this.blockInterface.orchestrator.getblockControllerInterfaceForIndex(this.getInstanceNumber())
-  }
-
-  getEmitterInterface(): Orchestrator.BlockEmitterInterface {
-    return this.emitter
   }
 
   @boundMethod

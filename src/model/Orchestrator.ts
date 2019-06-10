@@ -6,13 +6,10 @@ declare namespace Orchestrator {
     release: () => void
   }
 
-  export interface BlockEmitterInterface {
-    emitToBlockController: (eventType: Orchestrator.SheetControllerEvent, ...payload: any[]) => void
-  }
   /**
    * Events produced by the Sheet Controller
    */
-  export type SheetControllerEvent = 'FOCUS_REQUEST' | 'SELECTION_RANGE_ATTRIBUTES_UPDATE' | 'SELECTION_OVERRIDE' | 'DELTA_UPDATE'
+  export type SheetControllerEvent = 'FOCUS_REQUEST' | 'DELTA_UPDATE'
 
   export type SheetControllerEventListener = ListenerFn
 }

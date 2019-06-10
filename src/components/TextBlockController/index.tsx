@@ -1,7 +1,6 @@
-import DocumentDelta from '@delta/DocumentDelta'
 import React, { Component } from 'react'
 import invariant from 'invariant'
-import { View, TextInput, NativeSyntheticEvent, TextInputSelectionChangeEventData, TextInputKeyPressEventData, StyleSheet, StyleProp, TextStyle, TextInputProps } from 'react-native'
+import { View, TextInput, NativeSyntheticEvent, TextInputSelectionChangeEventData, TextInputKeyPressEventData, StyleSheet, StyleProp, TextStyle, TextInputProps, InteractionManager } from 'react-native'
 import RichText, { richTextStyles } from '@components/RichText'
 import { Selection } from '@delta/Selection'
 import Orchestrator from '@model/Orchestrator'
@@ -11,6 +10,7 @@ import { TextChangeSession } from './TextChangeSession'
 import { GenericOp } from '@delta/operations'
 import debounce from 'lodash.debounce'
 import { Cancelable } from 'lodash'
+import { DocumentDeltaUpdate } from '@delta/DocumentDeltaUpdate'
 
 export interface TextBlockControllerProps<T extends string> {
   textBlock: TextBlock<T>
@@ -55,10 +55,7 @@ const debounceByTimeToAggregate = <T extends (...args: any) => any>(fn: T) => de
 export default class TextBlockController<T extends string> extends Component<TextBlockControllerProps<T>, TextBlockControllerState> {
 
   private textInputRef: TextInput | null = null
-  private timeouts: NodeJS.Timeout[] = []
   private textChangeSession: TextChangeSession|null = null
-  private nextOverridingSelection: Selection|null = null
-  private skipNextSelectionUpdate: boolean = false
   private selection = Selection.fromBounds(0)
 
   state: TextBlockControllerState = {
@@ -102,22 +99,15 @@ export default class TextBlockController<T extends string> extends Component<Tex
 
   private handleOnSelectionChange(selection: { start: number, end: number }) {
     const { textBlock } = this.props
-    const nextSelection = !this.skipNextSelectionUpdate ? Selection.between(selection.start, selection.end) : this.selection
+    const nextSelection = Selection.between(selection.start, selection.end)
     if (this.textChangeSession !== null) {
       this.textChangeSession.setSelectionAfterChange(nextSelection)
       textBlock.handleOnTextChange(this.textChangeSession.getTextAfterChange(), this.textChangeSession.getDeltaChangeContext())
       this.textChangeSession = null
     }
-    if (!this.skipNextSelectionUpdate) {
-      this.selection = nextSelection
-      this.props.textBlock.handleOnSelectionChange(nextSelection)
-      // Forcing update because selection must be reset
-      this.forceUpdate()
-    } else {
-      this.skipNextSelectionUpdate = false
-      this.setState({ overridingSelection: nextSelection })
-      this.forceUpdate()
-    }
+    this.selection = nextSelection
+    this.props.textBlock.handleOnSelectionChange(nextSelection)
+    this.forceUpdate()
   }
 
   /**
@@ -131,83 +121,59 @@ export default class TextBlockController<T extends string> extends Component<Tex
   }
 
   @boundMethod
-  private handleOnSelectionOverride(selection: Selection) {
-    this.nextOverridingSelection = selection
-  }
-
-  @boundMethod
-  private handleOnSelectionRangeAttributesUpdate() {
-    this.skipNextSelectionUpdate = true
-  }
-
-  @boundMethod
   private handleOnFocusRequest() {
     this.textInputRef && this.textInputRef.focus()
   }
 
+  private async setStateAsync(state: Partial<TextBlockControllerState>) {
+    return new Promise((resolve) => {
+      this.setState(state as any, resolve)
+    })
+  }
+
   @boundMethod
-  private handleOnDeltaUpdate(nextTextDiffDelta: DocumentDelta, normalizedDelta?: DocumentDelta) {
-    // The reason for consuming two deltas is related to how updates work in React.
+  private async handleOnDeltaUpdate(documentDeltaUpdate: DocumentDeltaUpdate) {
+    // The reason for passing two deltas during two distinct state updates
+    // is related to how updates work in React.
     // By just passing the result of text diff and normalization, we could run into
     // a bug when normalized delta strictly equals the delta preceding text diff.
     // In such cases, passing normalized prop wouldn't result in a component tree update.
-    // We must therefore serially pass the two deltas.
-    this.setState({ ops: nextTextDiffDelta.ops }, () => {
-      if (normalizedDelta && normalizedDelta !== nextTextDiffDelta) {
-        this.setState({ ops: normalizedDelta.ops })
-      }
-    })
+    const nextDocDeltaOps = documentDeltaUpdate.nextDocumentDelta.ops
+    const normalizedDeltaOps = documentDeltaUpdate.normalizedDelta.ops
+    const overridingSelection = documentDeltaUpdate.overridingSelection
+    await this.setStateAsync({ ops: nextDocDeltaOps })
+    if (documentDeltaUpdate.shouldApplyNormalization()) {
+      await this.setStateAsync({ ops: normalizedDeltaOps })
+    }
+    if (overridingSelection) {
+      // We must wait for interactions, otherwise the TextInput setSpan bug arise.
+      await InteractionManager.runAfterInteractions(() => this.setStateAsync({ overridingSelection }))
+    }
   }
 
   shouldComponentUpdate(nextProps: TextBlockControllerProps<T>, nextState: TextBlockControllerState) {
     return nextState.ops !== this.state.ops ||
            nextProps.grow !== this.props.grow ||
-           nextState.isControlingState !== this.state.isControlingState
+           nextState.isControlingState !== this.state.isControlingState ||
+           nextState.overridingSelection !== this.state.overridingSelection
   }
 
   componentDidMount() {
     this.blockControllerInterface.addListener('DELTA_UPDATE', this.handleOnDeltaUpdate)
-    this.blockControllerInterface.addListener('SELECTION_RANGE_ATTRIBUTES_UPDATE', this.handleOnSelectionRangeAttributesUpdate)
     this.blockControllerInterface.addListener('FOCUS_REQUEST', this.handleOnFocusRequest)
-    this.blockControllerInterface.addListener('SELECTION_OVERRIDE', this.handleOnSelectionOverride)
   }
 
-  getSnapshotBeforeUpdate(_prevProps: TextBlockControllerProps<T>, prevState: TextBlockControllerState) {
-    if (this.state.ops !== prevState.ops && this.nextOverridingSelection) {
-      const selection = this.nextOverridingSelection
-      this.nextOverridingSelection = null
-      return selection
-    }
-    return null
-  }
-
-  componentDidUpdate(prevProps: TextBlockControllerProps<T>, _prevState: TextBlockControllerState, overridingSelection: Selection|null) {
-    // Overriding selection during the same rendering cycle as
-    // pushing the Text elements from delta into TextInput children props
-    // triggers a setSpan exception.
-    // 
-    // We need to make sure this is rendered on next rendering cycle.
-    // Because "componentDidUpdate" is called before flushing components
-    // to native views, we must trigger a new rendering soon enough.
-    //
-    // The next rendering if forced with "forceUpdate".
-    if (overridingSelection) {
-      this.timeouts.push(setTimeout(() => {
-        this.setState({ overridingSelection }, () => {
-          this.forceUpdate()
-        })
-      }, REACT_MINIMAL_INTERVAL_FOR_UPDATE))
-    } else if (this.state.overridingSelection) {
+  componentDidUpdate() {
+    // We must change the state to null to avoid forcing selection
+    // to TextInput component.
+    if (this.state.overridingSelection) {
       // Won't trigger rerender thanks to shouldComponentUpdate
       this.setState({ overridingSelection: null })
     }
   }
 
   componentWillUnmount() {
-    this.blockControllerInterface.release()
-    for (const timeout of this.timeouts) {
-      clearTimeout(timeout)
-    }
+    this.blockControllerInterface.release();
     (this.handleOnTextChanged as unknown as Cancelable).cancel();
     (this.handleOnSelectionChange as unknown as Cancelable).cancel()
   }

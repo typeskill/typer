@@ -6,7 +6,8 @@ import Bridge from '@core/Bridge'
 import { mockDeltaChangeContext, mockSelection } from '@test/delta'
 import { Selection } from '@delta/Selection'
 import { getHeadingCharactersFromType } from '@delta/lines'
-import { mockDocumentDelta } from '@test/document'
+import { mockDocumentDelta, mockDocumentDeltaUpdate } from '@test/document'
+import { DocumentDeltaUpdate } from '@delta/DocumentDeltaUpdate'
 
 function newConsumer() {
   const bridge = new Bridge<any>()
@@ -23,9 +24,18 @@ function createContext() {
   const document = new Document()
   document.registerConsumer(consumer)
   const block0 = document.getActiveBlock() as TextBlock<any>
+  let selection: any
+  const onDeltaUpdate = (deltaUpdate: DocumentDeltaUpdate) => {
+    selection = deltaUpdate.overridingSelection
+  }
+  function getOverridingSelection() {
+    return selection
+  }
+  block0.getControllerInterface().addListener('DELTA_UPDATE', onDeltaUpdate)
   return {
     outerInterface,
-    block0
+    block0,
+    getOverridingSelection
   }
 }
 
@@ -63,8 +73,8 @@ describe('@model/Document', () => {
         { insert: '\n', attributes: { $type: 'ol' } }
       ])
     })
-    it('deleting an ol prefix manually should remove ol type and notify for selected line attributes changes and selection override', () => {
-      const { outerInterface, block0 } = createContext()
+    it('deleting part of an ol prefix manually should remove ol type, override selection and notify for selected line attributes changes', () => {
+      const { outerInterface, block0, getOverridingSelection } = createContext()
       const initialLine = 'First\n'
       const owner = {}
       const onLineTypeChange = jest.fn()
@@ -80,16 +90,11 @@ describe('@model/Document', () => {
         { insert: '\n', attributes: { $type: 'ol' } }
       ])
       block0.handleOnSelectionChange(mockSelection(2))
-      const onSelectionChange = jest.fn()
-      block0.getControllerInterface().addListener('SELECTION_OVERRIDE', onSelectionChange)
       block0.handleOnTextChange(slicedLine, mockDeltaChangeContext(2, 1))
       expect(block0.getDelta().ops).toEqual([
         { insert: initialLine }
       ])
-      expect(onSelectionChange).toHaveBeenCalledWith({
-        start: 0,
-        end: 0
-      })
+      expect(getOverridingSelection()).toMatchObject(Selection.fromBounds(0))
       expect(onLineTypeChange).toHaveBeenCalledWith('normal')
     })
     it('applying text attributes to empty selection should result in cursor attributes matching these attributes', () => {
@@ -138,22 +143,16 @@ describe('@model/Document', () => {
     })
     it('applying text-length-transforming line type to selection should override selection with one of length augmented by the number of characters inserted', () => {
       const { block0 } = createContext()
-      const onSelectionChange = jest.fn()
-      block0.getControllerInterface().addListener('SELECTION_OVERRIDE', onSelectionChange)
       const initialLine = 'A\nB\nC\n'
       const selectionEnd = 5
       block0.handleOnTextChange(initialLine, mockDeltaChangeContext(0, selectionEnd))
       const selection = Selection.fromBounds(0, selectionEnd)
-      block0.getDelta().applyLineTypeToSelection(selection, 'ol')
-      expect(onSelectionChange).toHaveBeenCalledWith({
-        start: 4,
-        end: getHeadingCharactersFromType('ol', 0).length * 3 + selectionEnd
-      })
+      const documentDeltaUpdate = block0.getDelta().applyLineTypeToSelection(selection, 'ol')
+      const overridingSelection = { start: 4, end: getHeadingCharactersFromType('ol', 0).length * 3 + selectionEnd }
+      expect(documentDeltaUpdate.overridingSelection).toMatchObject(overridingSelection)
     })
     it('unapplying text-length-transforming line type to selection should override selection with one of length reduced by the number of characters deleted', () => {
       const { block0 } = createContext()
-      const onSelectionChange = jest.fn()
-      block0.getControllerInterface().addListener('SELECTION_OVERRIDE', onSelectionChange)
       const head0 = getHeadingCharactersFromType('ol', 0)
       const head1 = getHeadingCharactersFromType('ol', 1)
       const head2 = getHeadingCharactersFromType('ol', 2)
@@ -167,17 +166,15 @@ describe('@model/Document', () => {
         { insert: '\n', attributes: { $type: 'ol' } },
         { insert: head3 + 'D' },
         { insert: '\n', attributes: { $type: 'ol' } }
-      ], block0.getEmitterInterface())
-      block0['updateDelta'](delta)
+      ])
+      block0['updateDelta'](mockDocumentDeltaUpdate(delta.ops))
       const selection = Selection.fromObject({
         start: 0,
         end: delta.length()
       })
-      delta.applyLineTypeToSelection(selection, 'normal')
-      expect(onSelectionChange).toHaveBeenCalledWith({
-        start: 0,
-        end: 8
-      })
+      const documentDeltaUpdate = delta.applyLineTypeToSelection(selection, 'normal')
+      const overridingSelection = Selection.fromBounds(0, 8)
+      expect(documentDeltaUpdate.overridingSelection).toMatchObject(overridingSelection)
     })
   })
   describe('regressions', () => {
@@ -197,9 +194,9 @@ describe('@model/Document', () => {
       const { outerInterface, block0 } = createContext()
       const controllerInterface = block0.getControllerInterface()
       const witness = jest.fn()
-      controllerInterface.addListener('SELECTION_OVERRIDE', (s: Selection) => {
-        selection = s
-        witness(s)
+      controllerInterface.addListener('DELTA_UPDATE', (deltaUpdate: DocumentDeltaUpdate) => {
+        selection = deltaUpdate.overridingSelection as Selection || selection
+        witness(selection)
       })
       const firstWord = 'First'
       const secondWord = 'line'
@@ -215,7 +212,7 @@ describe('@model/Document', () => {
       // 4: insert newline
       const step3line = `${header}${firstWord} \n${secondWord}\n`
       block0.handleOnTextChange(step3line, mockDeltaChangeContext(header.length + 6, header.length + 7))
-      expect(witness).toHaveBeenCalledWith({ start: header.length * 2 + 7, end: header.length * 2 + 7 })
+      expect(witness).toHaveBeenCalledWith(expect.objectContaining({ start: header.length * 2 + 7, end: header.length * 2 + 7 }))
       block0.handleOnSelectionChange(selection)
       expect(block0.getDelta().ops).toEqual([
         { insert: `${header}${firstWord} ` },

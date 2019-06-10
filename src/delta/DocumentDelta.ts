@@ -7,12 +7,11 @@ import pickBy from 'ramda/es/pickBy'
 import { TextLineType, getHeadingCharactersFromType, isLineInSelection, isLineTypeTextLengthModifier, getHeadingRegexFromType } from './lines'
 import head from 'ramda/es/head'
 import { DocumentLineIndexGenerator } from './DocumentLineIndexGenerator'
-import { GenericDelta, extractTextFromDelta, isMutatingDelta } from './generic'
-import { DeltaDiffComputer, NormalizeDirective, NormalizeOperation } from './DeltaDiffComputer'
+import { GenericDelta, extractTextFromDelta } from './generic'
+import { DeltaDiffComputer } from './DeltaDiffComputer'
 import { DeltaChangeContext } from './DeltaChangeContext'
-import Orchestrator from '@model/Orchestrator'
-import { DeltaBuffer } from './DeltaBuffer'
 import { DocumentLine, LineWalker } from './LineWalker'
+import { DocumentDeltaUpdate } from './DocumentDeltaUpdate'
 
 export default class DocumentDelta<T extends string = any> implements GenericDelta {
 
@@ -22,76 +21,9 @@ export default class DocumentDelta<T extends string = any> implements GenericDel
 
   private delta: Delta
   private text: string|null = null
-  private emitterInterface: Orchestrator.BlockEmitterInterface
 
-  constructor(controller: Orchestrator.BlockEmitterInterface, arg?: GenericOp[] | DocumentDelta | Delta) {
+  constructor(arg?: GenericOp[] | DocumentDelta | Delta) {
     this.delta = arg instanceof DocumentDelta ? new Delta(arg.delta) : new Delta(arg)
-    this.emitterInterface = controller
-  }
-
-  private normalize(directives: NormalizeDirective[]): DocumentDelta {
-    const diffBuffer = new DeltaBuffer()
-    let overridenSelection: Selection|null = null
-    this.eachLine((line) => {
-      const { lineType, lineTypeIndex, beginningOfLineIndex } = line
-      const requiredPrefix = getHeadingCharactersFromType(lineType, lineTypeIndex)
-      let numToDelete = 0
-      let numToRetainInPrefix = 0
-      let lineAttributes = {}
-      let charsToInsert = ''
-      directives.forEach((directive) => {
-        const { beginningOfLineIndex: directiveIndex } = directive
-        const { selectionAfterChange } = directive.context
-        const matchingLine = directiveIndex === beginningOfLineIndex
-        const relativeCursorPosition = selectionAfterChange.start - beginningOfLineIndex
-        const shouldInvestigatePrefix = matchingLine &&
-                                        directive.type === NormalizeOperation.CHECK_LINE_TYPE_PREFIX
-        const shouldApplyInsertion = matchingLine &&
-                                     directive.type === NormalizeOperation.INSERT_LINE_TYPE_PREFIX
-        const shouldApplyDeletion = matchingLine &&
-                                    directive.type === NormalizeOperation.INVESTIGATE_DELETION &&
-                                    relativeCursorPosition <= requiredPrefix.length &&
-                                    isLineTypeTextLengthModifier(line.lineType)
-        if (shouldApplyInsertion) {
-          charsToInsert = requiredPrefix
-        } else if (shouldApplyDeletion) {
-          const deleteTraversal = directive.context.deleteTraversal()
-          const prefixTraversal = Selection.fromBounds(line.beginningOfLineIndex, line.beginningOfLineIndex + requiredPrefix.length)
-          const alreadyDeletedChars = prefixTraversal.intersection(deleteTraversal).length()
-          numToDelete = requiredPrefix.length - alreadyDeletedChars
-          lineAttributes = { $type: null }
-          overridenSelection = Selection.fromBounds(line.beginningOfLineIndex)
-        } else if (shouldInvestigatePrefix && directive.diff) {
-          const lineDiff = directive.diff.slice(0, requiredPrefix.length)
-          if (isMutatingDelta(lineDiff)) {
-            const iterator = Delta.Op.iterator(lineDiff.ops)
-            let index = 0
-            while (iterator.hasNext()) {
-              const next = iterator.next()
-              if (next.retain) {
-                numToRetainInPrefix = next.retain
-                index += next.retain
-              } else if (typeof next.insert === 'string') {
-                const numToInsert = requiredPrefix.length - index
-                charsToInsert += requiredPrefix.slice(index, index + numToInsert)
-                index += numToInsert
-                break
-              }
-            }
-            overridenSelection = Selection.fromBounds(selectionAfterChange.start + charsToInsert.length - numToDelete)
-          }
-        }
-      })
-      diffBuffer.push(new Delta()
-        .retain(numToRetainInPrefix)
-        .delete(numToDelete)
-        .insert(charsToInsert)
-        .retain(line.delta.length() - numToDelete - numToRetainInPrefix)
-        .retain(1, lineAttributes))
-    })
-    overridenSelection && this.overrideSelection(overridenSelection)
-    const diff = diffBuffer.compose()
-    return isMutatingDelta(diff) ? this.compose(diff) : this
   }
 
   private getText(): string {
@@ -125,8 +57,13 @@ export default class DocumentDelta<T extends string = any> implements GenericDel
     return Selection.fromBounds(newSelectionStart, newSelectionEnd)
   }
 
-  private overrideSelection(selection: Selection) {
-    this.emitterInterface.emitToBlockController('SELECTION_OVERRIDE', selection)
+  /**
+   * @param selection
+   * @returns The DocumentDelta representing selection
+   * 
+   */
+  private getSelected(selection: Selection): DocumentDelta {
+    return this.create(this.delta.slice(selection.start, selection.end))
   }
 
   compose(delta: Delta): DocumentDelta {
@@ -134,7 +71,7 @@ export default class DocumentDelta<T extends string = any> implements GenericDel
   }
 
   create(delta: Delta): DocumentDelta {
-    return new DocumentDelta(this.emitterInterface, delta)
+    return new DocumentDelta(delta)
   }
 
   length() {
@@ -170,7 +107,7 @@ export default class DocumentDelta<T extends string = any> implements GenericDel
    * @returns A duo of deltas. The first one is the strict result of applying the text diff, while the second one
    * it the result of applying normalization rules (i.e. prefixes rules for text modifying line types).
    */
-  applyTextDiff(newText: string, deltaChangeContext: DeltaChangeContext, cursorTextAttributes: TextAttributesMap<T> = {}): [DocumentDelta, DocumentDelta] {
+  applyTextDiff(newText: string, deltaChangeContext: DeltaChangeContext, cursorTextAttributes: TextAttributesMap<T> = {}): DocumentDeltaUpdate {
     const oldText = this.getText()
     const computer = new DeltaDiffComputer({
       cursorTextAttributes,
@@ -179,18 +116,7 @@ export default class DocumentDelta<T extends string = any> implements GenericDel
       context: deltaChangeContext
     }, this)
     const { delta, directives } = computer.toDeltaDiffReport()
-    const afterTextDiffDelta = this.compose(delta)
-    const normalizedDelta = afterTextDiffDelta.normalize(directives)
-    return [afterTextDiffDelta, normalizedDelta]
-  }
-
-  /**
-   * @param selection
-   * @returns The DocumentDelta representing selection
-   * 
-   */
-  getSelected(selection: Selection): DocumentDelta {
-    return this.create(this.delta.slice(selection.start, selection.end))
+    return new DocumentDeltaUpdate(this.compose(delta), directives)
   }
 
   /**
@@ -270,19 +196,19 @@ export default class DocumentDelta<T extends string = any> implements GenericDel
    * @param attributeName - The attribute name to modify
    * @param attributeValue - The attribute value to assign
    */
-  applyTextTransformToSelection(selection: Selection, attributeName: T, attributeValue: any): DocumentDelta {
+  applyTextTransformToSelection(selection: Selection, attributeName: T, attributeValue: any): DocumentDeltaUpdate {
     const allOperationsMatchAttributeValue = this.getSelected(selection).ops.every(op => !!op.attributes && op.attributes[attributeName] === attributeValue)
-    const selectionLength = selection.end - selection.start
+    const overridingSelection = selection.length() ? selection : undefined
     if (allOperationsMatchAttributeValue) {
       const clearAllDelta = new Delta()
       clearAllDelta.retain(selection.start)
-      clearAllDelta.retain(selectionLength, { [attributeName]: null })
-      return this.compose(clearAllDelta)
+      clearAllDelta.retain(selection.length(), { [attributeName]: null })
+      return new DocumentDeltaUpdate(this.compose(clearAllDelta))
     }
     const replaceAllDelta = new Delta()
     replaceAllDelta.retain(selection.start)
-    replaceAllDelta.retain(selectionLength, { [attributeName]: attributeValue })
-    return this.compose(replaceAllDelta)
+    replaceAllDelta.retain(selection.length(), { [attributeName]: attributeValue })
+    return new DocumentDeltaUpdate(this.compose(replaceAllDelta), [], overridingSelection)
   }
 
   /**
@@ -300,7 +226,7 @@ export default class DocumentDelta<T extends string = any> implements GenericDel
    * @param userLineType 
    * @returns The delta resulting from applying this line type.
    */
-  applyLineTypeToSelection(selection: Selection, userLineType: TextLineType): DocumentDelta {
+  applyLineTypeToSelection(selection: Selection, userLineType: TextLineType): DocumentDeltaUpdate {
     const selectionLineType = this.getLineTypeInSelection(selection)
     const diffDelta = new Delta()
     const generator = new DocumentLineIndexGenerator()
@@ -366,7 +292,7 @@ export default class DocumentDelta<T extends string = any> implements GenericDel
         diffDelta.retain(lineDelta.length() + 1)
       }
     })
-    this.overrideSelection(Selection.fromBounds(diffDelta.transformPosition(selection.start), diffDelta.transformPosition(selection.end)))
-    return this.compose(diffDelta)
+    const overridingSelection = Selection.fromBounds(diffDelta.transformPosition(selection.start), diffDelta.transformPosition(selection.end))
+    return new DocumentDeltaUpdate(this.compose(diffDelta), [], overridingSelection)
   }
 }
