@@ -5,7 +5,7 @@ import { defaultTextTransforms } from '@core/transforms'
 import TextTransformsRegistry from '@core/TextTransformsRegistry'
 import DocumentDelta from '@delta/DocumentDelta'
 import { GenericOp } from '@delta/operations'
-import TextBlock from '@model/TextBlock'
+import { TextBlock } from '@model/TextBlock'
 import { DocumentDeltaUpdate } from '@delta/DocumentDeltaUpdate'
 
 export function mokBridgeInnerInterface(): Bridge.InnerInterface<any> {

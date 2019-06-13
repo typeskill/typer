@@ -1,7 +1,7 @@
 // tslint:disable:no-string-literal
 // tslint:disable:no-unused-variable
 import Store from '@model/Store'
-import TextBlock from '@model/TextBlock'
+import { TextBlock } from '@model/TextBlock'
 import Bridge from '@core/Bridge'
 import Orchestrator from '@model/Orchestrator'
 import { setInstanceNumber as setBlockInstanceNumber } from '@model/Block'

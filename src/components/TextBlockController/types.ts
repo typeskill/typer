@@ -1,4 +1,4 @@
-import TextBlock from '@model/TextBlock'
+import { TextBlock } from '@model/TextBlock'
 import { StyleProp, TextStyle } from 'react-native'
 import { Selection } from '@delta/Selection'
 import { GenericOp } from '@delta/operations'

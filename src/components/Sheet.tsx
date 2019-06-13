@@ -4,7 +4,7 @@ import { View, StyleSheet, StyleProp, TextStyle, ViewStyle } from 'react-native'
 import TextBlockController from '@components/TextBlockController'
 import Bridge from '@core/Bridge'
 import Document from '@model/Document'
-import TextBlock from '@model/TextBlock'
+import { TextBlock } from '@model/TextBlock'
 import { boundMethod } from 'autobind-decorator'
 import Store, { getStoreInitialState } from '@model/Store'
 

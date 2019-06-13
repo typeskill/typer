@@ -7,7 +7,7 @@ import TextBlockController, { INVARIANT_MANDATORY_TEXT_BLOCK_PROP, TextBlockCont
 import { BaseTextTransformAttribute } from '@core/transforms'
 import Document from '@model/Document'
 import Bridge from '@core/Bridge'
-import TextBlock from '@model/TextBlock'
+import { TextBlock } from '@model/TextBlock'
 import RichText from '@components/RichText'
 import { mockSelectionChangeEvent, flattenTextChild } from '@test/vdom'
 

@@ -7,7 +7,7 @@ import TextTransformsRegistry from '@core/TextTransformsRegistry'
 import { DeltaChangeContext } from '@delta/DeltaChangeContext'
 import mergeLeft from 'ramda/es/mergeLeft'
 
-export default class TextBlock<T extends string> extends Block<T> {
+export class TextBlock<T extends string> extends Block<T> {
 
   private cursorTextAttributes: TextAttributesMap<T> = {}
   private length: number = 0

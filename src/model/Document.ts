@@ -1,6 +1,6 @@
 import DocumentDelta from '@delta/DocumentDelta'
 import invariant from 'invariant'
-import TextBlock from './TextBlock'
+import { TextBlock } from './TextBlock'
 import Block from './Block'
 import Bridge from '@core/Bridge'
 import Orchestrator from '@model/Orchestrator'

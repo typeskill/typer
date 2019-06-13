@@ -1,6 +1,6 @@
 // tslint:disable:no-string-literal
 import { mockDocumentBlockInterface, mockDocumentDeltaUpdate } from '@test/document'
-import TextBlock from '@model/TextBlock'
+import { TextBlock } from '@model/TextBlock'
 import { mockSelection } from '@test/delta'
 import { getHeadingCharactersFromType } from '@delta/lines'
 
