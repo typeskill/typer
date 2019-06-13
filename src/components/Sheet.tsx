@@ -54,7 +54,7 @@ export default class Sheet<T extends string> extends PureComponent<SheetProps<T>
     )
   }
 
-  componentWillMount() {
+  componentDidMount() {
     this.document.registerConsumer(this.docConsumer)
   }
 
@@ -62,11 +62,8 @@ export default class Sheet<T extends string> extends PureComponent<SheetProps<T>
     this.document.releaseConsumer(this.docConsumer)
   }
 
-  componentWillReceiveProps(nextProps: SheetProps<T>) {
-    invariant(nextProps.bridgeInnerInterface === this.props.bridgeInnerInterface, 'bridgeInnerInterface prop cannot be changed after instantiation')
-  }
-
-  componentDidUpdate(_oldProps: SheetProps<T>, oldState: Store.State) {
+  componentDidUpdate(oldProps: SheetProps<T>, oldState: Store.State) {
+    invariant(oldProps.bridgeInnerInterface === this.props.bridgeInnerInterface, 'bridgeInnerInterface prop cannot be changed after instantiation')
     if (this.state.selectedBlockInstanceNumber !== oldState.selectedBlockInstanceNumber && this.state.selectedBlockInstanceNumber !== null) {
       this.document.emitToBlock('FOCUS_REQUEST', this.state.selectedBlockInstanceNumber)
     }
