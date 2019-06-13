@@ -16,23 +16,25 @@ const styles = StyleSheet.create({
   }
 })
 
-interface SheetProps<T extends string> {
-  /**
-   * **Warning** This property cannot be changed after instantiation.
-   */
-  bridgeInnerInterface: Bridge.InnerInterface<T>
-  textStyle?: StyleProp<TextStyle>
-  contentContainerStyle?: StyleProp<ViewStyle>
+declare namespace Sheet {
+  export interface Props<T extends string> {
+    /**
+     * **Warning** This property cannot be changed after instantiation.
+     */
+    bridgeInnerInterface: Bridge.InnerInterface<T>
+    textStyle?: StyleProp<TextStyle>
+    contentContainerStyle?: StyleProp<ViewStyle>
+  }
 }
 
-export class Sheet<T extends string> extends PureComponent<SheetProps<T>, Store.State> {
+class Sheet<T extends string> extends PureComponent<Sheet.Props<T>, Store.State> {
 
   private document: Document<T>
   private docConsumer: Document.Consumer<T>
 
   state: Store.State = getStoreInitialState()
 
-  constructor(props: SheetProps<T>) {
+  constructor(props: Sheet.Props<T>) {
     super(props)
     const { bridgeInnerInterface } = this.props
     invariant(bridgeInnerInterface != null, 'bridgeInnerInterface prop is required')
@@ -62,7 +64,7 @@ export class Sheet<T extends string> extends PureComponent<SheetProps<T>, Store.
     this.document.releaseConsumer(this.docConsumer)
   }
 
-  componentDidUpdate(oldProps: SheetProps<T>, oldState: Store.State) {
+  componentDidUpdate(oldProps: Sheet.Props<T>, oldState: Store.State) {
     invariant(oldProps.bridgeInnerInterface === this.props.bridgeInnerInterface, 'bridgeInnerInterface prop cannot be changed after instantiation')
     if (this.state.selectedBlockInstanceNumber !== oldState.selectedBlockInstanceNumber && this.state.selectedBlockInstanceNumber !== null) {
       this.document.emitToBlock('FOCUS_REQUEST', this.state.selectedBlockInstanceNumber)
@@ -77,3 +79,5 @@ export class Sheet<T extends string> extends PureComponent<SheetProps<T>, Store.
     )
   }
 }
+
+export { Sheet }

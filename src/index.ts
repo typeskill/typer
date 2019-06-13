@@ -3,12 +3,8 @@ import { RichText } from '@components/RichText'
 import { Bridge } from '@core/Bridge'
 import {
   Toolbar,
-  TextControlMinimalIconProps,
-  TextControlAction,
-  TextControlSpec,
-  ToolbarProps,
+  ControlAction,
   TEXT_CONTROL_SEPARATOR,
-  ToolbarLayout,
   buildVectorIconControlSpec
 } from '@components/Toolbar'
 import {
@@ -38,12 +34,8 @@ export {
   Sheet,
   RichText,
   Toolbar,
-  ToolbarProps,
-  TextControlMinimalIconProps,
-  TextControlAction,
-  TextControlSpec,
+  ControlAction,
   TEXT_CONTROL_SEPARATOR,
-  ToolbarLayout,
   buildVectorIconControlSpec,
   // @core
   Bridge,

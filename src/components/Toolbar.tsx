@@ -9,7 +9,7 @@ import { TextLineType } from '@delta/lines'
 
 export const TEXT_CONTROL_SEPARATOR = Symbol('separator')
 
-export enum TextControlAction {
+export enum ControlAction {
   SELECT_TEXT_BOLD,
   SELECT_TEXT_ITALIC,
   SELECT_TEXT_UNDERLINE,
@@ -18,35 +18,34 @@ export enum TextControlAction {
   SELECT_LINES_UNORDERED_LIST
 }
 
-export interface TextControlMinimalIconProps {
-  color: string,
-  size: number
-}
+declare namespace Toolbar {
+  export interface ControlSpec<T extends object> {
+    IconComponent: ComponentType<TextControlMinimalIconProps & T>,
+    actionType: ControlAction
+    iconProps?: T
+  }
+  export type Layout = (ControlSpec<any>|typeof TEXT_CONTROL_SEPARATOR)[]
+  export interface Props {
+    bridgeOuterInferface: Bridge.OuterInterface<BaseTextTransformAttribute>
+    layout: Layout
+    defaultButtonBackgroundColor?: string
+    defaultButtonColor?: string
+    selectedButtonBackgroundColor?: string
+    selectedButtonColor?: string
+    separatorColor?: string
+    style?: StyleProp<ViewStyle>
+    contentContainerStyle?: StyleProp<ViewStyle>
+    iconSize?: number
+    iconSpacing?: number
+  }
+  export interface TextControlMinimalIconProps {
+    color: string,
+    size: number
+  }
 
-interface VectorIconMinimalProps extends TextControlMinimalIconProps {
-  name: string
-}
-
-export interface TextControlSpec<T extends object> {
-  IconComponent: ComponentType<TextControlMinimalIconProps & T>,
-  actionType: TextControlAction
-  iconProps?: T
-}
-
-export type ToolbarLayout = (TextControlSpec<any>|typeof TEXT_CONTROL_SEPARATOR)[]
-
-export interface ToolbarProps {
-  bridgeOuterInferface: Bridge.OuterInterface<BaseTextTransformAttribute>
-  layout: ToolbarLayout
-  defaultButtonBackgroundColor?: string
-  defaultButtonColor?: string
-  selectedButtonBackgroundColor?: string
-  selectedButtonColor?: string
-  separatorColor?: string
-  style?: StyleProp<ViewStyle>
-  contentContainerStyle?: StyleProp<ViewStyle>
-  iconSize?: number
-  iconSpacing?: number
+  export interface VectorIconMinimalProps extends TextControlMinimalIconProps {
+    name: string
+  }
 }
 
 interface ToolbarState {
@@ -56,7 +55,7 @@ interface ToolbarState {
 
 interface ButtonProps {
   selected: boolean,
-  IconComponent: ComponentType<TextControlMinimalIconProps>
+  IconComponent: ComponentType<Toolbar.TextControlMinimalIconProps>
   onPress?: () => void,
   style?: StyleProp<ViewStyle>,
   iconProps?: object
@@ -64,7 +63,8 @@ interface ButtonProps {
 
 const DEFAULT_ICON_SIZE = 32
 
-export class Toolbar extends PureComponent<ToolbarProps, ToolbarState> {
+export class Toolbar extends PureComponent<Toolbar.Props, ToolbarState> {
+
   static propTypes = {
     bridgeOuterInferface: PropTypes.object.isRequired,
     layout: PropTypes.arrayOf(PropTypes.oneOfType([
@@ -102,7 +102,7 @@ export class Toolbar extends PureComponent<ToolbarProps, ToolbarState> {
     selectedLineType: 'normal'
   }
 
-  constructor(props: ToolbarProps) {
+  constructor(props: Toolbar.Props) {
     super(props)
     this.outerInterface = props.bridgeOuterInferface
     invariant(props.bridgeOuterInferface != null, 'bridgeOuterInferface prop is required')
@@ -158,7 +158,7 @@ export class Toolbar extends PureComponent<ToolbarProps, ToolbarState> {
     return typeof this.props.iconSpacing === 'number' ? this.props.iconSpacing : this.props.iconSize as number / 3
   }
 
-  private renderTextTransformController(attributeName: BaseTextTransformAttribute, activeAttributeValue: any, textControlSpec: TextControlSpec<any>, last: boolean = false) {
+  private renderTextTransformController(attributeName: BaseTextTransformAttribute, activeAttributeValue: any, textControlSpec: Toolbar.ControlSpec<any>, last: boolean = false) {
     const { selectedAttributes } = this.state
     const IconButton = this.IconButton
     return (
@@ -171,7 +171,7 @@ export class Toolbar extends PureComponent<ToolbarProps, ToolbarState> {
     )
   }
 
-  private renderLineTransformController(lineType: TextLineType, textControlSpec: TextControlSpec<any>, last: boolean = false) {
+  private renderLineTransformController(lineType: TextLineType, textControlSpec: Toolbar.ControlSpec<any>, last: boolean = false) {
     const { selectedLineType } = this.state
     const IconButton = this.IconButton
     return <IconButton selected={selectedLineType === lineType}
@@ -181,14 +181,14 @@ export class Toolbar extends PureComponent<ToolbarProps, ToolbarState> {
                        onPress={this.applyLineTransformToSelection(lineType)} />
   }
 
-  private renderIconControl(textControlSpec: TextControlSpec<any>, last: boolean) {
+  private renderIconControl(textControlSpec: Toolbar.ControlSpec<any>, last: boolean) {
     switch (textControlSpec.actionType) {
-    case TextControlAction.SELECT_TEXT_BOLD: return this.renderTextTransformController('bold', true, textControlSpec, last)
-    case TextControlAction.SELECT_TEXT_ITALIC: return this.renderTextTransformController('italic', true, textControlSpec, last)
-    case TextControlAction.SELECT_TEXT_UNDERLINE: return this.renderTextTransformController('textDecoration', 'underline', textControlSpec, last)
-    case TextControlAction.SELECT_TEXT_STRIKETHROUGH: return this.renderTextTransformController('textDecoration', 'strikethrough', textControlSpec, last)
-    case TextControlAction.SELECT_LINES_UNORDERED_LIST: return this.renderLineTransformController('ul', textControlSpec, last)
-    case TextControlAction.SELECT_LINES_ORDERED_LIST: return this.renderLineTransformController('ol', textControlSpec, last)
+    case ControlAction.SELECT_TEXT_BOLD: return this.renderTextTransformController('bold', true, textControlSpec, last)
+    case ControlAction.SELECT_TEXT_ITALIC: return this.renderTextTransformController('italic', true, textControlSpec, last)
+    case ControlAction.SELECT_TEXT_UNDERLINE: return this.renderTextTransformController('textDecoration', 'underline', textControlSpec, last)
+    case ControlAction.SELECT_TEXT_STRIKETHROUGH: return this.renderTextTransformController('textDecoration', 'strikethrough', textControlSpec, last)
+    case ControlAction.SELECT_LINES_UNORDERED_LIST: return this.renderLineTransformController('ul', textControlSpec, last)
+    case ControlAction.SELECT_LINES_ORDERED_LIST: return this.renderLineTransformController('ol', textControlSpec, last)
     }
   }
 
@@ -213,7 +213,7 @@ export class Toolbar extends PureComponent<ToolbarProps, ToolbarState> {
     })
   }
 
-  componentWillReceiveProps(nextProps: ToolbarProps) {
+  componentWillReceiveProps(nextProps: Toolbar.Props) {
     invariant(nextProps.bridgeOuterInferface === this.props.bridgeOuterInferface, "bridgeOuterInferface prop cannot be changed during Toolbar's lifetime.")
   }
 
@@ -241,7 +241,7 @@ const styles = StyleSheet.create({
   }
 })
 
-export function buildVectorIconControlSpec(IconComponent: ComponentType<VectorIconMinimalProps>, actionType: TextControlAction, name: string) {
+export function buildVectorIconControlSpec(IconComponent: ComponentType<Toolbar.VectorIconMinimalProps>, actionType: ControlAction, name: string) {
   return {
     actionType,
     IconComponent,
