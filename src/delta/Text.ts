@@ -90,21 +90,17 @@ export default class Text {
    * 
    * **Encompassing**
    * 
-   * The selection `[0, 2]` encompasses all 2 characters in the line,
-   * and selection `[2, 3]` encompasses the newline character. A selection
-   * of length 0 never encompasses characters.
-   * 
    * The selection encompassing a line always excludes the index referring to the end of the
    * trailing newline character.
-   * In the example above, the selection `[1, 2]` would match this line: `[0, 2]`.
-   * The selection `[4, 5]` would match this line: `[3, 5]`.
+   * In the example above, the selection `[1, 2]` would match this line: `[0, 2]` with characters `'AB'`.
+   * The selection `[4, 5]` would match the line `[3, 5]` with characters `'CD'`.
    * 
    * **Multiple lines**
    * 
-   * When multiple lines are touched by the param `selection`, index referring
+   * When multiple lines are touched by the param `selection`, indexes referring
    * to the end of the trailing newline character in sibling lines are included.
    * 
-   * Therefore, in the above example, applying the selection `[]` to this function
+   * Therefore, in the above example, applying the selection `[2, 3]` to this function
    * would result in the following selection: `[0, 5]`.
    * 
    * @param documentSelection Document relative selection to which this algorithm apply.
@@ -122,7 +118,7 @@ export default class Text {
   }
 
   /**
-   * @returns A list of lines.
+   * @returns A list of lines complying with the {@link GenericLine} contract.
    */
   getLines(): TextLine[] {
     let charIndex = this.beginningIndex - 1

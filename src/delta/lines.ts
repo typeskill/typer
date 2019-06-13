@@ -16,7 +16,6 @@ export type TextLineType = 'normal' | 'quoted' | TextLengthModifierLineType
  * 
  * ```ts
  * documentText.substring(line.lineRange.start, line.lineRange.end) === extractTextFromDelta(line.delta)
- * documentText.charAt(line.lineRange.end) === '\n'
  * ```
  */
 export interface GenericLine {
