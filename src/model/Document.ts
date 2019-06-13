@@ -58,7 +58,7 @@ class Document<T extends string> {
         updateDelta: (documentDeltaUpdate: DocumentDeltaUpdate) => {
           invariant(documentDeltaUpdate instanceof DocumentDeltaUpdate, 'documentDelta instanceof DocumentDelta')
           // TODO inspect possible state discrepancy
-          delta = documentDeltaUpdate.normalizedDelta
+          delta = documentDeltaUpdate.finalDelta
           this.emitToBlock('DELTA_UPDATE', block.getInstanceNumber(), documentDeltaUpdate)
         },
         onPressBackspaceFromOrigin: () => this.handleOnPressBackspaceFromOriginFromBlock(block),

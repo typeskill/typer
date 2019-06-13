@@ -33,7 +33,7 @@ abstract class Block<T extends string = any> {
   abstract handleOnSelectionChange(s: Selection): void
 
   updateDelta(documentDeltaUpdate: DocumentDeltaUpdate) {
-    this.selection = documentDeltaUpdate.overridingSelection || this.selection
+    this.selection = documentDeltaUpdate.intermediaryOverridingSelection || this.selection
     this.blockInterface.updateDelta(documentDeltaUpdate)
   }
 

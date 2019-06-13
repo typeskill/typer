@@ -17,7 +17,7 @@ function newTextBlock(): TextBlock<any> {
     onPressEnter: () => { /** */ },
     orchestrator: new Orchestrator(),
     updateDelta: (nuDelta: DocumentDeltaUpdate) => {
-      delta = nuDelta.normalizedDelta
+      delta = nuDelta.finalDelta
     }
   })
 }

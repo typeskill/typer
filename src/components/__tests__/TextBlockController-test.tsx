@@ -3,7 +3,7 @@ import { TextInput } from 'react-native'
 import React from 'react'
 // Test renderer must be required after react-native.
 import renderer from 'react-test-renderer'
-import TextBlockController, { TextBlockControllerProps } from '@components/TextBlockController'
+import TextBlockController, { INVARIANT_MANDATORY_TEXT_BLOCK_PROP, TextBlockControllerProps } from '@components/TextBlockController'
 import { BaseTextTransformAttribute } from '@delta/transforms'
 import Document from '@model/Document'
 import Bridge from '@core/Bridge'
@@ -62,7 +62,7 @@ describe('@components/<TextBlockController>', () => {
   it('should throw when document has not registered a consumer yet', () => {
     expect(() => {
       renderer.create(<TextBlockController textBlock={undefined as any} />)
-    }).toThrowError('textBlock prop must be given at construction')
+    }).toThrowError(INVARIANT_MANDATORY_TEXT_BLOCK_PROP)
   })
   it('renders without crashing', () => {
     const textInput = renderer.create(<TextBlockController {...getTextInputDefaultProps()} />)

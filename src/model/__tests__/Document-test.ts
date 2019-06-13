@@ -26,7 +26,7 @@ function createContext() {
   const block0 = document.getActiveBlock() as TextBlock<any>
   let selection: any
   const onDeltaUpdate = (deltaUpdate: DocumentDeltaUpdate) => {
-    selection = deltaUpdate.overridingSelection
+    selection = deltaUpdate.intermediaryOverridingSelection || deltaUpdate.finalOverridingSelection
   }
   function getOverridingSelection() {
     return selection
@@ -158,7 +158,7 @@ describe('@model/Document', () => {
       const selection = Selection.fromBounds(0, selectionEnd)
       const documentDeltaUpdate = block0.getDelta().applyLineTypeToSelection(selection, 'ol')
       const overridingSelection = { start: 4, end: getHeadingCharactersFromType('ol', 0).length * 3 + selectionEnd }
-      expect(documentDeltaUpdate.overridingSelection).toMatchObject(overridingSelection)
+      expect(documentDeltaUpdate.finalOverridingSelection).toMatchObject(overridingSelection)
     })
     it('unapplying text-length-transforming line type to selection should override selection with one of length reduced by the number of characters deleted', () => {
       const { block0 } = createContext()
@@ -183,7 +183,7 @@ describe('@model/Document', () => {
       })
       const documentDeltaUpdate = delta.applyLineTypeToSelection(selection, 'normal')
       const overridingSelection = Selection.fromBounds(0, 8)
-      expect(documentDeltaUpdate.overridingSelection).toMatchObject(overridingSelection)
+      expect(documentDeltaUpdate.finalOverridingSelection).toMatchObject(overridingSelection)
     })
   })
   describe('regressions', () => {
@@ -218,7 +218,7 @@ describe('@model/Document', () => {
       const controllerInterface = block0.getControllerInterface()
       const witness = jest.fn()
       controllerInterface.addListener('DELTA_UPDATE', (deltaUpdate: DocumentDeltaUpdate) => {
-        selection = deltaUpdate.overridingSelection as Selection || selection
+        selection = deltaUpdate.finalOverridingSelection || deltaUpdate.intermediaryOverridingSelection || selection
         witness(selection)
       })
       const firstWord = 'A'

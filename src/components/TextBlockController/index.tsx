@@ -1,27 +1,17 @@
 import React, { Component } from 'react'
 import invariant from 'invariant'
-import { View, TextInput, NativeSyntheticEvent, TextInputSelectionChangeEventData, TextInputKeyPressEventData, StyleSheet, StyleProp, TextStyle, TextInputProps, InteractionManager } from 'react-native'
+import { View, TextInput, NativeSyntheticEvent, TextInputSelectionChangeEventData, TextInputKeyPressEventData, StyleSheet, TextInputProps } from 'react-native'
 import RichText, { richTextStyles } from '@components/RichText'
 import { Selection } from '@delta/Selection'
 import Orchestrator from '@model/Orchestrator'
 import { boundMethod } from 'autobind-decorator'
-import TextBlock from '@model/TextBlock'
 import { TextChangeSession } from './TextChangeSession'
-import { GenericOp } from '@delta/operations'
-import debounce from 'lodash.debounce'
-import { Cancelable } from 'lodash'
 import { DocumentDeltaUpdate } from '@delta/DocumentDeltaUpdate'
+import { TextBlockControllerProps, TextBlockControllerState } from './types'
+import { TextBlockUpdateSynchronizer } from './TextBlockUpdateSynchronizer'
 
-export interface TextBlockControllerProps<T extends string> {
-  textBlock: TextBlock<T>
-  grow?: boolean
-  textStyle?: StyleProp<TextStyle>
-}
-
-interface TextBlockControllerState {
-  isControlingState: boolean
-  overridingSelection: Selection|null
-  ops: GenericOp[]|null
+export {
+  TextBlockControllerProps
 }
 
 const styles = StyleSheet.create({
@@ -32,6 +22,8 @@ const styles = StyleSheet.create({
     textAlignVertical: 'top'
   }
 })
+
+export const INVARIANT_MANDATORY_TEXT_BLOCK_PROP = 'textBlock prop is mandatory'
 
 const constantTextInputProps = {
   disableFullscreenUI: true,
@@ -44,19 +36,12 @@ const constantTextInputProps = {
   blurOnSubmit: false
 } as TextInputProps
 
-export const REACT_MINIMAL_INTERVAL_FOR_UPDATE = 30
-export const TIME_TO_AGGREGATE_TEXT_CHANGES = 100
-
-const debounceByTimeToAggregate = <T extends (...args: any) => any>(fn: T) => debounce(fn, TIME_TO_AGGREGATE_TEXT_CHANGES, {
-  leading: false,
-  trailing: true
-})
-
 export default class TextBlockController<T extends string> extends Component<TextBlockControllerProps<T>, TextBlockControllerState> {
 
   private textInputRef: TextInput | null = null
   private textChangeSession: TextChangeSession|null = null
   private selection = Selection.fromBounds(0)
+  private synchronizer: TextBlockUpdateSynchronizer
 
   state: TextBlockControllerState = {
     isControlingState: false,
@@ -66,9 +51,8 @@ export default class TextBlockController<T extends string> extends Component<Tex
 
   constructor(props: TextBlockControllerProps<T>) {
     super(props)
-    invariant(props.textBlock != null, 'textBlock prop must be given at construction')
-    this.handleOnTextChanged = debounceByTimeToAggregate(this.handleOnTextChanged).bind(this)
-    this.handleOnSelectionChange = debounceByTimeToAggregate(this.handleOnSelectionChange).bind(this)
+    invariant(props.textBlock != null, INVARIANT_MANDATORY_TEXT_BLOCK_PROP)
+    this.synchronizer = new TextBlockUpdateSynchronizer(this as any)
   }
 
   private get blockControllerInterface(): Orchestrator.BlockControllerInterface {
@@ -81,10 +65,13 @@ export default class TextBlockController<T extends string> extends Component<Tex
    * 
    * @param nextText 
    */
+  @boundMethod
   private handleOnTextChanged(nextText: string) {
-    this.textChangeSession = new TextChangeSession()
-    this.textChangeSession.setTextAfterChange(nextText)
-    this.textChangeSession.setSelectionBeforeChange(this.selection)
+    if (!this.synchronizer.isRunning()) {
+      this.textChangeSession = new TextChangeSession()
+      this.textChangeSession.setTextAfterChange(nextText)
+      this.textChangeSession.setSelectionBeforeChange(this.selection)
+    }
   }
 
   @boundMethod
@@ -97,6 +84,7 @@ export default class TextBlockController<T extends string> extends Component<Tex
     this.props.textBlock.handleOnKeyPress(key)
   }
 
+  @boundMethod
   private handleOnSelectionChange(selection: { start: number, end: number }) {
     const { textBlock } = this.props
     const nextSelection = Selection.between(selection.start, selection.end)
@@ -125,39 +113,9 @@ export default class TextBlockController<T extends string> extends Component<Tex
     this.textInputRef && this.textInputRef.focus()
   }
 
-  private async setStateAsync(state: Partial<TextBlockControllerState>, delay?: number) {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        this.setState(state as any, () => {
-          console.info('SETTING STATE', JSON.stringify(state))
-          resolve()
-        })
-      }, delay || 0)
-    })
-  }
-
   @boundMethod
   private async handleOnDeltaUpdate(documentDeltaUpdate: DocumentDeltaUpdate) {
-    // The reason for passing two deltas during two distinct state updates
-    // is related to how updates work in React.
-    // By just passing the result of text diff and normalization, we could run into
-    // a bug when normalized delta strictly equals the delta preceding text diff.
-    // In such cases, passing normalized prop wouldn't result in a component tree update.
-    const nextDocDeltaOps = documentDeltaUpdate.nextDocumentDelta.ops
-    const normalizedDeltaOps = documentDeltaUpdate.normalizedDelta.ops
-    const overridingSelection = documentDeltaUpdate.overridingSelection
-    await this.setStateAsync({ ops: nextDocDeltaOps })
-    console.info('SHOULD APPLY NORM', documentDeltaUpdate.shouldApplyNormalization())
-    if (documentDeltaUpdate.shouldApplyNormalization()) {
-      await this.setStateAsync({ ops: normalizedDeltaOps })
-    }
-    if (overridingSelection) {
-      // We must wait for interactions, otherwise the TextInput setSpan bug arise.
-      await InteractionManager.runAfterInteractions(() => {
-        console.info('OVERRIDING SELECTION')
-        return this.setStateAsync({ overridingSelection })
-      })
-    }
+    return this.synchronizer.handleFragmentedUpdate(documentDeltaUpdate)
   }
 
   shouldComponentUpdate(nextProps: TextBlockControllerProps<T>, nextState: TextBlockControllerState) {
@@ -173,18 +131,19 @@ export default class TextBlockController<T extends string> extends Component<Tex
   }
 
   componentDidUpdate() {
-    // We must change the state to null to avoid forcing selection
-    // to TextInput component.
+    // We must change the state to null to avoid forcing selection in TextInput component.
     if (this.state.overridingSelection) {
-      // Won't trigger rerender thanks to shouldComponentUpdate
       this.setState({ overridingSelection: null })
     }
   }
 
+  componentDidCatch(error: any, info: any) {
+    console.warn(error, info)
+  }
+
   componentWillUnmount() {
-    this.blockControllerInterface.release();
-    (this.handleOnTextChanged as unknown as Cancelable).cancel();
-    (this.handleOnSelectionChange as unknown as Cancelable).cancel()
+    this.synchronizer.release()
+    this.blockControllerInterface.release()
   }
 
   render() {

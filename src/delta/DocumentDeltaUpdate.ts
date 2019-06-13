@@ -8,40 +8,55 @@ import { DocumentDeltaNormalizer } from './DocumentDeltaNormalizer'
  * a graphic update.
  */
 export class DocumentDeltaUpdate {
-  private _nextDocumentDelta: DocumentDelta
-  private _overridingSelection: Selection|null
-  private _normalizedDelta: DocumentDelta
+  private _intermediaryDelta: DocumentDelta|null = null
+  private _intermediaryOverridingSelection: Selection|null = null
+  private _finalOverridingSelection: Selection|null = null
+  private _finalDelta: DocumentDelta
 
-  constructor(nextDocumentDelta: DocumentDelta, normalizationDirectives: NormalizeDirective[] = [], overridingSelection?: Selection) {
+  constructor(afterApplyTextDiffDelta: DocumentDelta, normalizationDirectives: NormalizeDirective[] = [], overridingSelection?: Selection) {
     const mustComputeNormalization = normalizationDirectives.length > 0
-    this._nextDocumentDelta = nextDocumentDelta
-    const normalizer = new DocumentDeltaNormalizer(nextDocumentDelta)
-    const { overridingSelection: normalizeOverridingSelection, delta } = mustComputeNormalization ? normalizer.apply(normalizationDirectives) : { delta: nextDocumentDelta, overridingSelection: null }
-    this._overridingSelection = overridingSelection || normalizeOverridingSelection || null
-    this._normalizedDelta = delta
+    const normalizer = new DocumentDeltaNormalizer(afterApplyTextDiffDelta)
+    if (mustComputeNormalization) {
+      const { overridingSelection: normalizeOverridingSelection, delta: normalizedDelta } = normalizer.apply(normalizationDirectives)
+      if (normalizedDelta !== afterApplyTextDiffDelta) {
+        this._intermediaryDelta = afterApplyTextDiffDelta
+        this._intermediaryOverridingSelection = overridingSelection || null
+        this._finalDelta = normalizedDelta
+        this._finalOverridingSelection = normalizeOverridingSelection
+      }
+    }
+    // @ts-ignore
+    if (!this._finalDelta) {
+      this._finalDelta = afterApplyTextDiffDelta
+      this._finalOverridingSelection = overridingSelection || null
+    }
   }
 
-  public get nextDocumentDelta(): DocumentDelta {
-    return this._nextDocumentDelta
+  public get intermediaryDelta(): DocumentDelta|null {
+    return this._intermediaryDelta
   }
 
-  public get normalizedDelta(): DocumentDelta {
-    return this._normalizedDelta
+  public get finalDelta(): DocumentDelta {
+    return this._finalDelta
   }
 
-  public get overridingSelection(): Selection|null {
-    return this._overridingSelection
+  public get finalOverridingSelection(): Selection|null {
+    return this._finalOverridingSelection
+  }
+
+  public get intermediaryOverridingSelection(): Selection|null {
+    return this._intermediaryOverridingSelection
   }
 
   public getSelectedTextAttributes(selection: Selection) {
-    return this._normalizedDelta.getSelectedTextAttributes(selection)
+    return this._finalDelta.getSelectedTextAttributes(selection)
   }
 
   public getLineTypeInSelection(selection: Selection) {
-    return this._normalizedDelta.getLineTypeInSelection(selection)
+    return this._finalDelta.getLineTypeInSelection(selection)
   }
 
-  public shouldApplyNormalization() {
-    return this.normalizedDelta !== this.nextDocumentDelta
+  public hasIntermediaryDelta() {
+    return this._intermediaryDelta !== null
   }
 }
