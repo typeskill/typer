@@ -1,12 +1,12 @@
 import Delta from 'quill-delta'
-import DocumentDelta from './DocumentDelta'
+import { DocumentDelta } from './DocumentDelta'
 import { BlockAttributesMap, mergeAttributesLeft } from './attributes'
 import { DeltaChangeContext } from './DeltaChangeContext'
-import Text, { TextDiffContext } from './Text'
+import { Text } from './Text'
 import { NormalizeDirectiveBuilder } from './NormalizeDirectiveBuilder'
 import { Selection } from './Selection'
 import { DeltaBuffer } from './DeltaBuffer'
-import { shouldLineTypePropagateToNextLine, getLineType, isLineTypeTextLengthModifier } from './lines'
+import { shouldLineTypePropagateToNextLine, getLineType, isLineTypeTextLengthModifier, TextLineType } from './lines'
 import { makeDiffDelta } from './diff'
 import zip from 'ramda/es/zip'
 
@@ -26,6 +26,16 @@ export interface NormalizeDirective {
 export interface DeltaDiffReport {
   delta: Delta,
   directives: NormalizeDirective[]
+}
+
+interface TextDiffContext {
+  readonly textAttributes: BlockAttributesMap
+  readonly lineAttributes: BlockAttributesMap
+  readonly lineTypeBeforeChange: TextLineType
+  readonly context: DeltaChangeContext
+  readonly oldText: Text
+  readonly newText: Text
+  readonly directiveBuilder: NormalizeDirectiveBuilder
 }
 
 export interface DeltaDiffModel {

@@ -1,9 +1,9 @@
-import Block from './Block'
-import Document from './Document'
+import { Document } from './Document'
+import { Block } from './Block'
 import { TextAttributesMap } from '@delta/attributes'
 import { boundMethod } from 'autobind-decorator'
 import { Selection } from '@delta/Selection'
-import TextTransformsRegistry from '@core/TextTransformsRegistry'
+import { TextTransformsRegistry } from '@core/TextTransformsRegistry'
 import { DeltaChangeContext } from '@delta/DeltaChangeContext'
 import mergeLeft from 'ramda/es/mergeLeft'
 

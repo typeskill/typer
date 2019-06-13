@@ -11,7 +11,7 @@ export function textTransformListToDict<T extends string = BaseTextTransformAttr
   return groupBy(attributeNameGetter)(list)
 }
 
-export default class TextTransformsRegistry<T extends string = BaseTextTransformAttribute> {
+export class TextTransformsRegistry<T extends string = BaseTextTransformAttribute> {
 
   private textTransformsDict: TextTransformsDictionnary<T>
 

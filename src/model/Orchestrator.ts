@@ -66,4 +66,4 @@ class Orchestrator {
   }
 }
 
-export default Orchestrator
+export { Orchestrator }

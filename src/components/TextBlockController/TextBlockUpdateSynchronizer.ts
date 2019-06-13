@@ -1,6 +1,6 @@
 import { DocumentDeltaUpdate } from '@delta/DocumentDeltaUpdate'
 import { TextBlockComponent } from './types'
-import DocumentDelta from '@delta/DocumentDelta'
+import { DocumentDelta } from '@delta/DocumentDelta'
 import { UpdateTask } from './UpdateTask'
 
 export class TextBlockUpdateSynchronizer {

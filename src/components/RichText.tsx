@@ -1,7 +1,7 @@
 import React, { ReactNode, Component } from 'react'
 import { TextStyle, Text, StyleProp, StyleSheet } from 'react-native'
 import { GenericOp, isTextOp, TextOp } from '@delta/operations'
-import TextTransformsRegistry from '@core/TextTransformsRegistry'
+import { TextTransformsRegistry } from '@core/TextTransformsRegistry'
 import invariant from 'invariant'
 import { boundMethod } from 'autobind-decorator'
 import { TextLineType } from '@delta/lines'
@@ -34,7 +34,7 @@ export const richTextStyles = StyleSheet.create({
   }
 })
 
-export default class RichText<T extends string> extends Component<RichTextProps<T>> {
+export class RichText<T extends string> extends Component<RichTextProps<T>> {
   private textTransformsReg: TextTransformsRegistry<any>
 
   constructor(props: RichTextProps<T>) {

@@ -4,8 +4,8 @@ import { Selection } from './Selection'
 import { GenericOp } from './operations'
 import mergeRight from 'ramda/es/mergeRight'
 import pickBy from 'ramda/es/pickBy'
-import { TextLineType, getHeadingCharactersFromType, isLineInSelection, isLineTypeTextLengthModifier, getHeadingRegexFromType } from './lines'
 import head from 'ramda/es/head'
+import { TextLineType, getHeadingCharactersFromType, isLineInSelection, isLineTypeTextLengthModifier, getHeadingRegexFromType } from './lines'
 import { DocumentLineIndexGenerator } from './DocumentLineIndexGenerator'
 import { GenericDelta, extractTextFromDelta } from './generic'
 import { DeltaDiffComputer } from './DeltaDiffComputer'
@@ -13,7 +13,7 @@ import { DeltaChangeContext } from './DeltaChangeContext'
 import { DocumentLine, LineWalker } from './LineWalker'
 import { DocumentDeltaUpdate } from './DocumentDeltaUpdate'
 
-export default class DocumentDelta<T extends string = any> implements GenericDelta {
+export class DocumentDelta<T extends string = any> implements GenericDelta {
 
   get ops() {
     return this.delta.ops

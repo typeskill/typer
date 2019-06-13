@@ -1,12 +1,12 @@
 import invariant from 'invariant'
 import React, { PureComponent } from 'react'
 import { View, StyleSheet, StyleProp, TextStyle, ViewStyle } from 'react-native'
-import TextBlockController from '@components/TextBlockController'
-import Bridge from '@core/Bridge'
-import Document from '@model/Document'
+import { TextBlockController } from '@components/TextBlockController'
+import { Bridge } from '@core/Bridge'
+import { Document } from '@model/Document'
 import { TextBlock } from '@model/TextBlock'
 import { boundMethod } from 'autobind-decorator'
-import Store, { getStoreInitialState } from '@model/Store'
+import { Store, getStoreInitialState } from '@model/Store'
 
 const styles = StyleSheet.create({
   root: {
@@ -25,7 +25,7 @@ interface SheetProps<T extends string> {
   contentContainerStyle?: StyleProp<ViewStyle>
 }
 
-export default class Sheet<T extends string> extends PureComponent<SheetProps<T>, Store.State> {
+export class Sheet<T extends string> extends PureComponent<SheetProps<T>, Store.State> {
 
   private document: Document<T>
   private docConsumer: Document.Consumer<T>

@@ -1,21 +1,8 @@
 import { Selection } from './Selection'
-import { TextLineType, GenericLine } from './lines'
-import { DeltaChangeContext } from './DeltaChangeContext'
-import { BlockAttributesMap } from './attributes'
-import { NormalizeDirectiveBuilder } from './NormalizeDirectiveBuilder'
+import { GenericLine } from './lines'
 
 export interface TextLine extends GenericLine {
   text: string
-}
-
-export interface TextDiffContext {
-  readonly textAttributes: BlockAttributesMap
-  readonly lineAttributes: BlockAttributesMap
-  readonly lineTypeBeforeChange: TextLineType
-  readonly context: DeltaChangeContext
-  readonly oldText: Text
-  readonly newText: Text
-  readonly directiveBuilder: NormalizeDirectiveBuilder
 }
 
 /**
@@ -27,7 +14,7 @@ export interface TextDiffContext {
  * We refer to absolute coordinates as **Document coordinates** or index, and relative
  * coordinates as **Text coordiantes** or index.
  */
-export default class Text {
+export class Text {
   public readonly raw: string
   public readonly beginningIndex: number = 0
   constructor(rawText: string, beginningIndex?: number) {

@@ -1,9 +1,9 @@
 // tslint:disable:no-string-literal
-import Document from '@model/Document'
-import Bridge from '@core/Bridge'
+import { Document } from '@model/Document'
+import { Bridge } from '@core/Bridge'
 import { defaultTextTransforms } from '@core/transforms'
-import TextTransformsRegistry from '@core/TextTransformsRegistry'
-import DocumentDelta from '@delta/DocumentDelta'
+import { TextTransformsRegistry } from '@core/TextTransformsRegistry'
+import { DocumentDelta } from '@delta/DocumentDelta'
 import { GenericOp } from '@delta/operations'
 import { TextBlock } from '@model/TextBlock'
 import { DocumentDeltaUpdate } from '@delta/DocumentDeltaUpdate'

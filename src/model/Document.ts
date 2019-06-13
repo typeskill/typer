@@ -1,10 +1,10 @@
-import DocumentDelta from '@delta/DocumentDelta'
+import { DocumentDelta } from '@delta/DocumentDelta'
 import invariant from 'invariant'
 import { TextBlock } from './TextBlock'
-import Block from './Block'
-import Bridge from '@core/Bridge'
-import Orchestrator from '@model/Orchestrator'
-import Store from './Store'
+import { Block, BlockClass } from './Block'
+import { Bridge } from '@core/Bridge'
+import { Orchestrator } from '@model/Orchestrator'
+import { Store } from './Store'
 import { TextLineType } from '@delta/lines'
 import { mergeAttributesLeft } from '@delta/attributes'
 import { DocumentDeltaUpdate } from '@delta/DocumentDeltaUpdate'
@@ -48,7 +48,7 @@ class Document<T extends string> {
     this.insertBlock(TextBlock)
   }
 
-  private newBlock(BlockKind: Block.Class<T>) {
+  private newBlock(BlockKind: BlockClass<T>) {
     invariant(this.consumer != null, 'A document consumer must be registered to create a block')
     let delta: DocumentDelta|null = null
     if (this.consumer) {
@@ -123,7 +123,7 @@ class Document<T extends string> {
     this.consumer = undefined
   }
 
-  public insertBlock(BlockKind: Block.Class<T>): void {
+  public insertBlock(BlockKind: BlockClass<T>): void {
     this.store.appendBlock(this.newBlock(BlockKind))
   }
 
@@ -140,4 +140,4 @@ class Document<T extends string> {
   }
 }
 
-export default Document
+export { Document }

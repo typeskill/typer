@@ -1,8 +1,8 @@
 import React from 'react'
 // Test renderer must be required after react-native.
 import renderer from 'react-test-renderer'
-import RichText from '@components/RichText'
-import TextTransformsRegistry from '@core/TextTransformsRegistry'
+import { RichText } from '@components/RichText'
+import { TextTransformsRegistry } from '@core/TextTransformsRegistry'
 import { defaultTextTransforms } from '@core/transforms'
 import { flattenTextChild } from '@test/vdom'
 import { mockDocumentDelta } from '@test/document'

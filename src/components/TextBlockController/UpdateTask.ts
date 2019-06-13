@@ -2,7 +2,7 @@ import { Selection } from '@delta/Selection'
 import { GenericDelta } from '@delta/generic'
 import { InteractionManager } from 'react-native'
 import { TextBlockComponent } from './types'
-import DocumentDelta from '@delta/DocumentDelta'
+import { DocumentDelta } from '@delta/DocumentDelta'
 
 interface TaskManager {
   isClosed: boolean

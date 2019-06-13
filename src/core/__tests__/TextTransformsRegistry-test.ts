@@ -1,4 +1,4 @@
-import TextTransformsRegistry, { textTransformListToDict } from '@core/TextTransformsRegistry'
+import { TextTransformsRegistry, textTransformListToDict } from '@core/TextTransformsRegistry'
 import { defaultTextTransforms, boldTransform, italicTransform, underlineTransform, strikethroughTransform } from '@core/transforms'
 
 describe('@core/TextTransformsRegistry', () => {

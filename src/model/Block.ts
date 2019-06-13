@@ -1,8 +1,8 @@
 import { Selection } from '@delta/Selection'
-import Document from './Document'
-import DocumentDelta from '@delta/DocumentDelta'
+import { Document } from './Document'
+import { DocumentDelta } from '@delta/DocumentDelta'
 import { boundMethod } from 'autobind-decorator'
-import Orchestrator from './Orchestrator'
+import { Orchestrator } from './Orchestrator'
 import { DocumentDeltaUpdate } from '@delta/DocumentDeltaUpdate'
 
 let lastInstanceNumber = 0
@@ -11,7 +11,7 @@ export function setInstanceNumber(num: number) {
   lastInstanceNumber = num
 }
 
-abstract class Block<T extends string = any> {
+export abstract class Block<T extends string = any> {
   private instanceNumber: number
   protected blockInterface: Document.BlockInterface<T>
   protected selection = Selection.fromBounds(0)
@@ -63,8 +63,4 @@ abstract class Block<T extends string = any> {
   }
 }
 
-declare namespace Block {
-  export type Class<T extends string> = new(blockIface: Document.BlockInterface<T>) => Block<T>
-}
-
-export default Block
+export type BlockClass<T extends string> = new(blockIface: Document.BlockInterface<T>) => Block<T>

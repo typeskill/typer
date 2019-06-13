@@ -1,6 +1,6 @@
 import { Selection } from './Selection'
 import { NormalizeDirective } from './DeltaDiffComputer'
-import DocumentDelta from './DocumentDelta'
+import { DocumentDelta } from './DocumentDelta'
 import { DocumentDeltaNormalizer } from './DocumentDeltaNormalizer'
 
 /**

@@ -1,8 +1,8 @@
 // tslint:disable:no-unused-variable
 // tslint:disable:no-string-literal
-import Document from '@model/Document'
+import { Document } from '@model/Document'
 import { TextBlock } from '@model/TextBlock'
-import Bridge from '@core/Bridge'
+import { Bridge } from '@core/Bridge'
 import { mockDeltaChangeContext, mockSelection } from '@test/delta'
 import { Selection } from '@delta/Selection'
 import { getHeadingCharactersFromType } from '@delta/lines'

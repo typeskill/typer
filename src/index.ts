@@ -1,7 +1,8 @@
-import Sheet from '@components/Sheet'
-import RichText from '@components/RichText'
-import Bridge from '@core/Bridge'
-import Toolbar, {
+import { Sheet } from '@components/Sheet'
+import { RichText } from '@components/RichText'
+import { Bridge } from '@core/Bridge'
+import {
+  Toolbar,
   TextControlMinimalIconProps,
   TextControlAction,
   TextControlSpec,
@@ -30,7 +31,7 @@ import {
 import {
   GenericDelta
 } from '@delta/generic'
-import DocumentDelta from '@delta/DocumentDelta'
+import { DocumentDelta } from '@delta/DocumentDelta'
 
 export {
   // @components

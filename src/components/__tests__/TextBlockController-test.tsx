@@ -3,12 +3,12 @@ import { TextInput } from 'react-native'
 import React from 'react'
 // Test renderer must be required after react-native.
 import renderer from 'react-test-renderer'
-import TextBlockController, { INVARIANT_MANDATORY_TEXT_BLOCK_PROP, TextBlockControllerProps } from '@components/TextBlockController'
 import { BaseTextTransformAttribute } from '@core/transforms'
-import Document from '@model/Document'
-import Bridge from '@core/Bridge'
+import { Document } from '@model/Document'
+import { Bridge } from '@core/Bridge'
 import { TextBlock } from '@model/TextBlock'
-import RichText from '@components/RichText'
+import { RichText } from '@components/RichText'
+import { TextBlockController, INVARIANT_MANDATORY_TEXT_BLOCK_PROP, TextBlockControllerProps } from '@components/TextBlockController'
 import { mockSelectionChangeEvent, flattenTextChild } from '@test/vdom'
 
 function buildDocumentConsumer() {

@@ -3,7 +3,7 @@ import { View, TouchableOpacity, StyleProp, ViewStyle, ViewPropTypes, StyleSheet
 import invariant from 'invariant'
 import PropTypes from 'prop-types'
 import { BaseTextTransformAttribute } from '@core/transforms'
-import Bridge from '@core/Bridge'
+import { Bridge } from '@core/Bridge'
 import { TextAttributesMap } from '@delta/attributes'
 import { TextLineType } from '@delta/lines'
 
@@ -64,7 +64,7 @@ interface ButtonProps {
 
 const DEFAULT_ICON_SIZE = 32
 
-class Toolbar extends PureComponent<ToolbarProps, ToolbarState> {
+export class Toolbar extends PureComponent<ToolbarProps, ToolbarState> {
   static propTypes = {
     bridgeOuterInferface: PropTypes.object.isRequired,
     layout: PropTypes.arrayOf(PropTypes.oneOfType([
@@ -240,8 +240,6 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 10
   }
 })
-
-export default Toolbar
 
 export function buildVectorIconControlSpec(IconComponent: ComponentType<VectorIconMinimalProps>, actionType: TextControlAction, name: string) {
   return {

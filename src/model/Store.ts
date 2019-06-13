@@ -1,9 +1,9 @@
-import DocumentDelta from '@delta/DocumentDelta'
+import { DocumentDelta } from '@delta/DocumentDelta'
 import clone from 'ramda/es/clone'
 import concat from 'ramda/es/concat'
 import without from 'ramda/es/without'
 import mergeRight from 'ramda/es/mergeRight'
-import Block from './Block'
+import { Block } from './Block'
 import invariant from 'invariant'
 import last from 'ramda/es/last'
 import indexOf from 'ramda/es/indexOf'
@@ -101,4 +101,4 @@ class Store<T extends string = any> {
   }
 }
 
-export default Store
+export { Store }

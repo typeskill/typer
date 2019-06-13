@@ -1,9 +1,9 @@
 import React, { Component } from 'react'
 import invariant from 'invariant'
 import { View, TextInput, NativeSyntheticEvent, TextInputSelectionChangeEventData, TextInputKeyPressEventData, StyleSheet, TextInputProps } from 'react-native'
-import RichText, { richTextStyles } from '@components/RichText'
+import { RichText, richTextStyles } from '@components/RichText'
 import { Selection } from '@delta/Selection'
-import Orchestrator from '@model/Orchestrator'
+import { Orchestrator } from '@model/Orchestrator'
 import { boundMethod } from 'autobind-decorator'
 import { TextChangeSession } from './TextChangeSession'
 import { DocumentDeltaUpdate } from '@delta/DocumentDeltaUpdate'
@@ -36,7 +36,7 @@ const constantTextInputProps = {
   blurOnSubmit: false
 } as TextInputProps
 
-export default class TextBlockController<T extends string> extends Component<TextBlockControllerProps<T>, TextBlockControllerState> {
+export class TextBlockController<T extends string> extends Component<TextBlockControllerProps<T>, TextBlockControllerState> {
 
   private textInputRef: TextInput | null = null
   private textChangeSession: TextChangeSession|null = null

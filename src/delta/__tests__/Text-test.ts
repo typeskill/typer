@@ -1,4 +1,4 @@
-import Text from '@delta/Text'
+import { Text } from '@delta/Text'
 import { Selection } from '@delta/Selection'
 import zip from 'ramda/es/zip'
 

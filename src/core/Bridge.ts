@@ -1,7 +1,7 @@
 import { TextAttributesMap } from '@delta/attributes'
 import { defaultTextTransforms, TextTransformSpec, BaseTextTransformAttribute } from '@core/transforms'
 import { Endpoint } from './Endpoint'
-import TextTransformsRegistry from './TextTransformsRegistry'
+import { TextTransformsRegistry } from './TextTransformsRegistry'
 import { TextLineType } from '@delta/lines'
 
 declare namespace Bridge {
@@ -182,4 +182,4 @@ class Bridge<T extends string = BaseTextTransformAttribute> {
   }
 }
 
-export default Bridge
+export { Bridge }
