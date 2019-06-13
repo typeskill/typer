@@ -13,7 +13,7 @@
     "react": "16.8.6",
     "react-native": "https://github.com/expo/react-native/archive/sdk-33.0.0.tar.gz",
     "react-native-paper": "^2.16.0",
-    "react-native-typeskill": "0.10.0-alpha.19",
+    "react-native-typeskill": "0.10.0-alpha.20",
     "whatwg-fetch": "^3.0.0"
   },
   "devDependencies": {
