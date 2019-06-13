@@ -23,7 +23,7 @@ import {
   BooleanTextTransformSpec,
   TextTransformSpec,
   TextTransformsDictionnary
-} from '@delta/transforms'
+} from '@core/transforms'
 import {
   DeltaChangeContext
 } from '@delta/DeltaChangeContext'

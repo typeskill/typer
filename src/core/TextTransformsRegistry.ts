@@ -2,7 +2,7 @@ import prop from 'ramda/es/prop'
 import groupBy from 'ramda/es/groupBy'
 import { StyleProp, TextStyle } from 'react-native'
 import invariant from 'invariant'
-import { BaseTextTransformAttribute, TextTransformsDictionnary, TextTransformSpec } from '@delta/transforms'
+import { BaseTextTransformAttribute, TextTransformsDictionnary, TextTransformSpec } from '@core/transforms'
 import { TextOp } from '@delta/operations'
 
 const attributeNameGetter = prop('attributeName') as (t: TextTransformSpec<any, any>) => string

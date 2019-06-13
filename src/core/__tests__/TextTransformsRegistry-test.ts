@@ -1,5 +1,5 @@
 import TextTransformsRegistry, { textTransformListToDict } from '@core/TextTransformsRegistry'
-import { defaultTextTransforms, boldTransform, italicTransform, underlineTransform, strikethroughTransform } from '@delta/transforms'
+import { defaultTextTransforms, boldTransform, italicTransform, underlineTransform, strikethroughTransform } from '@core/transforms'
 
 describe('@core/TextTransformsRegistry', () => {
   describe('textTransformListToDict', () => {
