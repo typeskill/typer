@@ -1,5 +1,4 @@
-// tslint:disable:no-unused-variable
-// tslint:disable:no-string-literal
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Document } from '@model/Document'
 import { TextBlock } from '@model/TextBlock'
 import { Bridge } from '@core/Bridge'
@@ -10,7 +9,7 @@ import { mockDocumentDelta, mockDocumentDeltaUpdate } from '@test/document'
 import { DocumentDeltaUpdate } from '@delta/DocumentDeltaUpdate'
 
 function newConsumer() {
-  const bridge = new Bridge<any>()
+  const bridge = new Bridge()
   return {
     bridgeOuterInterface: bridge.getOuterInterface(),
     bridgeInnerInterface: bridge.getInnerInterface(),
@@ -25,10 +24,10 @@ function createContext() {
   const outerInterface = consumer.bridgeOuterInterface
   const document = new Document()
   document.registerConsumer(consumer)
-  const block0 = document.getActiveBlock() as TextBlock<any>
-  let selection: any
+  const block0 = document.getActiveBlock() as TextBlock
+  let selection: Selection
   const onDeltaUpdate = (deltaUpdate: DocumentDeltaUpdate) => {
-    selection = deltaUpdate.intermediaryOverridingSelection || deltaUpdate.finalOverridingSelection
+    selection = deltaUpdate.intermediaryOverridingSelection || deltaUpdate.finalOverridingSelection || selection
   }
   function getOverridingSelection() {
     return selection

@@ -14,8 +14,9 @@ export function extractTextFromDelta(delta: GenericDelta): string {
   )
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function isGenericDelta(arg: any): arg is GenericDelta {
-  return hasPath(['ops'], arg)
+  return arg && hasPath(['ops'], arg)
 }
 
 export function isMutatingDelta(delta: GenericDelta): boolean {

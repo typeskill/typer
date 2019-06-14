@@ -40,7 +40,7 @@ export function isLineInSelection(selection: Selection, { lineRange }: GenericLi
 }
 
 export function getLineType(lineAttributes?: BlockAttributesMap): TextLineType {
-  return lineAttributes && lineAttributes.$type ? lineAttributes.$type : 'normal'
+  return lineAttributes && lineAttributes.$type ? (lineAttributes.$type as TextLineType) : 'normal'
 }
 
 export function getHeadingCharactersFromType(lineType: TextLineType, index: number): string {

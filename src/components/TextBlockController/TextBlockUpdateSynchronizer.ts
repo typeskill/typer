@@ -1,14 +1,14 @@
 import { DocumentDeltaUpdate } from '@delta/DocumentDeltaUpdate'
-import { TextBlockComponent } from './types'
+import { TextBlockMinimalComponent } from './types'
 import { DocumentDelta } from '@delta/DocumentDelta'
 import { UpdateTask } from './UpdateTask'
 
 export class TextBlockUpdateSynchronizer {
   private _isClosed = false
-  private _component: TextBlockComponent
+  private _component: TextBlockMinimalComponent
   private runningTask: UpdateTask | null = null
 
-  public constructor(component: TextBlockComponent) {
+  public constructor(component: TextBlockMinimalComponent) {
     this._component = component
   }
 

@@ -1,5 +1,5 @@
 import Delta from 'quill-delta'
-import { BlockAttributesMap, TextAttributesMap, getTextAttributesAtCursor, getTextAttributes } from './attributes'
+import { BlockAttributesMap, getTextAttributesAtCursor, getTextAttributes, BlockAttributeValue } from './attributes'
 import { Selection } from './Selection'
 import { GenericOp } from './operations'
 import mergeRight from 'ramda/es/mergeRight'
@@ -19,7 +19,7 @@ import { DeltaChangeContext } from './DeltaChangeContext'
 import { DocumentLine, LineWalker } from './LineWalker'
 import { DocumentDeltaUpdate } from './DocumentDeltaUpdate'
 
-export class DocumentDelta<T extends string = any> implements GenericDelta {
+export class DocumentDelta implements GenericDelta {
   public get ops() {
     return this.delta.ops
   }
@@ -49,7 +49,7 @@ export class DocumentDelta<T extends string = any> implements GenericDelta {
     let newSelectionStart = selection.start
     let newSelectionEnd = selection.end
     let isUpperBoundFrozen = false
-    this.delta.eachLine((l, a, i) => {
+    this.delta.eachLine(l => {
       if (selection.start > accumulatedLength - 1) {
         newSelectionStart = accumulatedLength
       }
@@ -115,7 +115,7 @@ export class DocumentDelta<T extends string = any> implements GenericDelta {
   public applyTextDiff(
     newText: string,
     deltaChangeContext: DeltaChangeContext,
-    cursorTextAttributes: TextAttributesMap<T> = {},
+    cursorTextAttributes: BlockAttributesMap = {},
   ): DocumentDeltaUpdate {
     const oldText = this.getText()
     const computer = new DeltaDiffComputer(
@@ -148,16 +148,16 @@ export class DocumentDelta<T extends string = any> implements GenericDelta {
     // TODO inspect inconsistencies between this getSelectionEncompassingLines and Text::getSelectionEncompassingLine
     const selected = this.getSelected(this.getSelectionEncompassingLines(selection))
     const lineAttributes: BlockAttributesMap[] = []
-    selected.delta.eachLine((l, a, i) => {
+    selected.delta.eachLine((l, a) => {
       lineAttributes.push(a)
     })
-    const firstAttr = head(lineAttributes)
+    const firstAttr = head<BlockAttributesMap>(lineAttributes)
     let type: TextLineType = 'normal'
     if (firstAttr) {
       if (firstAttr.$type == null) {
         return 'normal'
       }
-      type = firstAttr.$type
+      type = firstAttr.$type as TextLineType
     }
     const isType = lineAttributes.every(v => v.$type === type)
     if (isType) {
@@ -187,7 +187,7 @@ export class DocumentDelta<T extends string = any> implements GenericDelta {
    * @param selection - the selection from which text attributes should be extracted
    * @returns The resulting merged object
    */
-  public getSelectedTextAttributes(selection: Selection): TextAttributesMap<T> {
+  public getSelectedTextAttributes(selection: Selection): BlockAttributesMap {
     if (selection.start === selection.end) {
       return getTextAttributesAtCursor(this, selection.start)
     }
@@ -196,7 +196,7 @@ export class DocumentDelta<T extends string = any> implements GenericDelta {
       .filter(op => typeof op.insert === 'string' && op.insert !== '\n')
       .map(op => op.attributes || {})
     const attributes = attributesList.reduce(mergeRight, {})
-    const realAttributes = pickBy((value: any, attributeName: string) =>
+    const realAttributes = pickBy((value: BlockAttributeValue, attributeName: string) =>
       attributesList.every(localValue => localValue[attributeName] === value),
     )(attributes)
     return getTextAttributes(realAttributes)
@@ -214,8 +214,8 @@ export class DocumentDelta<T extends string = any> implements GenericDelta {
    */
   public applyTextTransformToSelection(
     selection: Selection,
-    attributeName: T,
-    attributeValue: any,
+    attributeName: string,
+    attributeValue: BlockAttributeValue,
   ): DocumentDeltaUpdate {
     const allOperationsMatchAttributeValue = this.getSelected(selection).ops.every(
       op => !!op.attributes && op.attributes[attributeName] === attributeValue,

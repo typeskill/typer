@@ -2,7 +2,7 @@ import { Sheet } from '@components/Sheet'
 import { RichText } from '@components/RichText'
 import { Bridge } from '@core/Bridge'
 import { Toolbar, ControlAction, TEXT_CONTROL_SEPARATOR, buildVectorIconControlSpec } from '@components/Toolbar'
-import { TextAttributesMap, BlockAttributesMap } from '@delta/attributes'
+import { BlockAttributesMap } from '@delta/attributes'
 import { TextLineType, TextLengthModifierLineType } from '@delta/lines'
 import {
   BaseTextTransformAttribute,
@@ -25,7 +25,6 @@ export {
   // @core
   Bridge,
   // @delta/attributes
-  TextAttributesMap,
   BlockAttributesMap,
   // @delta/transforms
   BaseTextTransformAttribute,

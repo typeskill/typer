@@ -11,12 +11,12 @@ export function setInstanceNumber(num: number) {
   lastInstanceNumber = num
 }
 
-export abstract class Block<T extends string = any> {
+export abstract class Block {
   private instanceNumber: number
-  protected blockInterface: Document.BlockInterface<T>
+  protected blockInterface: Document.BlockInterface
   protected selection = Selection.fromBounds(0)
 
-  public constructor(blockInterface: Document.BlockInterface<T>) {
+  public constructor(blockInterface: Document.BlockInterface) {
     // tslint:disable-next-line:no-increment-decrement
     this.instanceNumber = lastInstanceNumber++
     this.blockInterface = blockInterface
@@ -61,4 +61,4 @@ export abstract class Block<T extends string = any> {
   }
 }
 
-export type BlockClass<T extends string> = new (blockIface: Document.BlockInterface<T>) => Block<T>
+export type BlockClass = new (blockIface: Document.BlockInterface) => Block

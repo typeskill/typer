@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 // tslint:disable:no-string-literal
 // tslint:disable:no-unused-variable
 import { Store } from '@model/Store'
@@ -8,7 +9,7 @@ import { setInstanceNumber as setBlockInstanceNumber } from '@model/Block'
 import { mockDocumentDelta } from '@test/document'
 import { DocumentDeltaUpdate } from '@delta/DocumentDeltaUpdate'
 
-function newTextBlock(): TextBlock<any> {
+function newTextBlock(): TextBlock {
   let delta = mockDocumentDelta()
   return new TextBlock({
     bridgeInnerInterface: new Bridge().getInnerInterface(),

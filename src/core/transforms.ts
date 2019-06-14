@@ -1,6 +1,5 @@
 import { TextStyle } from 'react-native'
-
-type TextAttributePrimitive = boolean | string
+import { TextAttributePrimitive } from '@delta/attributes'
 
 export type BaseTextTransformAttribute = 'bold' | 'italic' | 'textDecoration'
 
@@ -8,19 +7,19 @@ export const booleanTransformBase = {
   attributeValue: true as true,
 }
 
-export type TextTransformsDictionnary<T extends string = BaseTextTransformAttribute> = {
-  [attributeName in T]: TextTransformSpec<T, any>[]
+export interface TextTransformsDictionnary {
+  [attributeName: string]: TextTransformSpec[]
 }
 
-export interface TextTransformSpec<T extends string, A extends TextAttributePrimitive> {
-  attributeName: T
+export interface TextTransformSpec<A extends TextAttributePrimitive = TextAttributePrimitive> {
+  attributeName: string
   attributeValue: A
   activeStyle: TextStyle
 }
 
-export type BooleanTextTransformSpec<T extends string> = TextTransformSpec<T, true>
+export type BooleanTextTransformSpec = TextTransformSpec<true>
 
-export const boldTransform: BooleanTextTransformSpec<'bold'> = {
+export const boldTransform: BooleanTextTransformSpec = {
   ...booleanTransformBase,
   attributeName: 'bold',
   activeStyle: {
@@ -28,7 +27,7 @@ export const boldTransform: BooleanTextTransformSpec<'bold'> = {
   },
 }
 
-export const italicTransform: BooleanTextTransformSpec<'italic'> = {
+export const italicTransform: BooleanTextTransformSpec = {
   ...booleanTransformBase,
   attributeName: 'italic',
   activeStyle: {
@@ -36,7 +35,7 @@ export const italicTransform: BooleanTextTransformSpec<'italic'> = {
   },
 }
 
-export const underlineTransform: TextTransformSpec<'textDecoration', 'underline'> = {
+export const underlineTransform: TextTransformSpec<'underline'> = {
   attributeValue: 'underline',
   attributeName: 'textDecoration',
   activeStyle: {
@@ -45,7 +44,7 @@ export const underlineTransform: TextTransformSpec<'textDecoration', 'underline'
   },
 }
 
-export const strikethroughTransform: TextTransformSpec<'textDecoration', 'strikethrough'> = {
+export const strikethroughTransform: TextTransformSpec<'strikethrough'> = {
   attributeValue: 'strikethrough',
   attributeName: 'textDecoration',
   activeStyle: {
@@ -54,7 +53,7 @@ export const strikethroughTransform: TextTransformSpec<'textDecoration', 'strike
   },
 }
 
-export const defaultTextTransforms: TextTransformSpec<BaseTextTransformAttribute, any>[] = [
+export const defaultTextTransforms: TextTransformSpec[] = [
   boldTransform,
   italicTransform,
   underlineTransform,

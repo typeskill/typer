@@ -7,9 +7,9 @@ import { boundMethod } from 'autobind-decorator'
 import { TextLineType } from '@delta/lines'
 import { LineWalker } from '@delta/LineWalker'
 
-export interface RichTextProps<T extends string> {
+export interface RichTextProps {
   ops: GenericOp[]
-  textTransformsReg: TextTransformsRegistry<T>
+  textTransformsReg: TextTransformsRegistry
   textStyle?: StyleProp<TextStyle>
 }
 
@@ -38,10 +38,10 @@ export const richTextStyles = StyleSheet.create({
   },
 })
 
-export class RichText<T extends string> extends Component<RichTextProps<T>> {
-  private textTransformsReg: TextTransformsRegistry<any>
+export class RichText extends Component<RichTextProps> {
+  private textTransformsReg: TextTransformsRegistry
 
-  public constructor(props: RichTextProps<T>) {
+  public constructor(props: RichTextProps) {
     super(props)
     this.renderOperation = this.renderOperation.bind(this)
     this.textTransformsReg = props.textTransformsReg
@@ -52,7 +52,7 @@ export class RichText<T extends string> extends Component<RichTextProps<T>> {
   private renderOperation(op: GenericOp, lineIndex: number, elemIndex: number) {
     invariant(isTextOp(op), 'Only textual documentDelta are supported')
     const key = `text-${lineIndex}-${elemIndex}`
-    const styles = this.textTransformsReg.getStylesFromOp(op as TextOp<T>)
+    const styles = this.textTransformsReg.getStylesFromOp(op as TextOp)
     return (
       <Text style={styles} key={key}>
         {op.insert}
@@ -87,7 +87,7 @@ export class RichText<T extends string> extends Component<RichTextProps<T>> {
     return true
   }
 
-  public componentWillReceiveProps(nextProps: RichTextProps<T>) {
+  public componentWillReceiveProps(nextProps: RichTextProps) {
     invariant(
       nextProps.textTransformsReg === this.props.textTransformsReg,
       'textTransformsReg prop cannot be changed after instantiation',

@@ -33,10 +33,10 @@ export function getStoreInitialState() {
   return clone(INITIAL_STATE)
 }
 
-class Store<T extends string = any> {
+class Store {
   private state: Store.State = getStoreInitialState()
   private listeners: Set<Store.StateUpdateListener> = new Set()
-  private blockReverseMap: Map<number, Block<T>> = new Map()
+  private blockReverseMap: Map<number, Block> = new Map()
 
   private updateState(update: Partial<Store.State>) {
     this.state = mergeRight(this.state, update) as Store.State
@@ -54,14 +54,14 @@ class Store<T extends string = any> {
     }
   }
 
-  private getAtomicBlockInsertion(block: Block<T>) {
+  private getAtomicBlockInsertion(block: Block) {
     return {
       selectedBlockInstanceNumber: block.getInstanceNumber(),
       blockOrders: concat(this.state.blockOrders, [block.getInstanceNumber()]),
     }
   }
 
-  public appendBlock(block: Block<T>) {
+  public appendBlock(block: Block) {
     this.blockReverseMap.set(block.getInstanceNumber(), block)
     this.updateState(this.getAtomicBlockInsertion(block))
   }
@@ -82,20 +82,20 @@ class Store<T extends string = any> {
     return typeof this.state.selectedBlockInstanceNumber === 'number'
   }
 
-  public getActiveBlock(): Block<T> {
+  public getActiveBlock(): Block {
     invariant(
       typeof this.state.selectedBlockInstanceNumber === 'number',
       'At least one block must be selected to call getSelectedBlock',
     )
-    return this.blockReverseMap.get(this.state.selectedBlockInstanceNumber as number) as Block<T>
+    return this.blockReverseMap.get(this.state.selectedBlockInstanceNumber as number) as Block
   }
 
-  public getBlock(instanceNumber: number): Block<T> {
+  public getBlock(instanceNumber: number): Block {
     invariant(
       this.blockReverseMap.has(instanceNumber),
       `Block with instance number ${instanceNumber} is not registered.`,
     )
-    return this.blockReverseMap.get(instanceNumber) as Block<T>
+    return this.blockReverseMap.get(instanceNumber) as Block
   }
 
   public addListener(listener: Store.StateUpdateListener) {

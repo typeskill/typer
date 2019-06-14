@@ -1,4 +1,4 @@
-import { TextAttributesMap, BlockAttributesMap as GenericAttributesMap } from './attributes'
+import { BlockAttributesMap } from './attributes'
 
 interface OpBase {
   delete?: number
@@ -7,19 +7,19 @@ interface OpBase {
 
 export interface GenericOp extends OpBase {
   insert?: string | object
-  attributes?: GenericAttributesMap
+  attributes?: BlockAttributesMap
 }
 
-export interface TextOp<T extends string> extends OpBase {
+export interface TextOp extends OpBase {
   insert?: string
-  attributes?: TextAttributesMap<T>
+  attributes?: BlockAttributesMap
 }
 
 export interface BlockOp<T extends object> extends OpBase {
   insert?: T
-  attributes?: GenericAttributesMap
+  attributes?: BlockAttributesMap
 }
 
-export function isTextOp<T extends string>(op: GenericOp): op is TextOp<T> {
+export function isTextOp(op: GenericOp): op is TextOp {
   return typeof op.insert === 'string'
 }

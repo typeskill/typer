@@ -1,9 +1,8 @@
-// tslint:disable:no-string-literal
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { TextInput } from 'react-native'
 import React from 'react'
 // Test renderer must be required after react-native.
 import renderer from 'react-test-renderer'
-import { BaseTextTransformAttribute } from '@core/transforms'
 import { Document } from '@model/Document'
 import { Bridge } from '@core/Bridge'
 import { TextBlock } from '@model/TextBlock'
@@ -17,12 +16,12 @@ import { mockSelectionChangeEvent, flattenTextChild } from '@test/vdom'
 
 function buildDocumentConsumer() {
   const bridge = new Bridge()
-  const document = new Document<BaseTextTransformAttribute>()
+  const document = new Document()
   const handleOnDocumentStateUpdate = () => ({
     /** */
   })
   const getDelta = () => document.getActiveBlock().getDelta()
-  const docConsumer: Document.Consumer<any> = {
+  const docConsumer: Document.Consumer = {
     handleOnDocumentStateUpdate,
     bridgeInnerInterface: bridge.getInnerInterface(),
   }
@@ -35,15 +34,15 @@ function buildDocumentConsumer() {
   }
 }
 
-function getTextInputDefaultProps(): TextBlockControllerProps<BaseTextTransformAttribute> {
+function getTextInputDefaultProps(): TextBlockControllerProps {
   const bridge = new Bridge()
-  const document = new Document<BaseTextTransformAttribute>()
+  const document = new Document()
   document.registerConsumer({
     handleOnDocumentStateUpdate: () => ({}),
     bridgeInnerInterface: bridge.getInnerInterface(),
   })
   return {
-    textBlock: document.getActiveBlock() as TextBlock<any>,
+    textBlock: document.getActiveBlock() as TextBlock,
   }
 }
 
@@ -81,14 +80,14 @@ describe('@components/<TextBlockController>', () => {
   it('should update selection appropriately', async () => {
     const { document, bridge, docConsumer } = buildDocumentConsumer()
     document.registerConsumer(docConsumer)
-    const block = document.getActiveBlock() as TextBlock<any>
+    const block = document.getActiveBlock() as TextBlock
     const listenerObj = {
       listener: () => ({}),
     }
     const spy = jest.spyOn(listenerObj, 'listener')
     bridge.getOuterInterface().addSelectedAttributesChangeListener(listenerObj, spy as any)
     const wrapper = renderer.create(<TextBlockController textBlock={block} />)
-    const textBlockController = wrapper.root.instance as TextBlockController<any>
+    const textBlockController = wrapper.root.instance as TextBlockController
     textBlockController['handleOnSelectionChangeEvent'](mockSelectionChangeEvent(0, 1))
     await runAllTimers()
     expect(spy).toHaveBeenCalledTimes(1)
@@ -96,9 +95,9 @@ describe('@components/<TextBlockController>', () => {
   it('should comply with DocumentDelta when text updates', async () => {
     const { document, docConsumer, getDelta } = buildDocumentConsumer()
     document.registerConsumer(docConsumer)
-    const block = document.getActiveBlock() as TextBlock<any>
+    const block = document.getActiveBlock() as TextBlock
     const wrapper = renderer.create(<TextBlockController textBlock={block} />)
-    const textBlockController = (wrapper.getInstance() as unknown) as TextBlockController<any>
+    const textBlockController = (wrapper.getInstance() as unknown) as TextBlockController
     expect(textBlockController).toBeInstanceOf(TextBlockController)
     textBlockController['handleOnTextChanged']('This is nu text')
     textBlockController['handleOnSelectionChangeEvent'](mockSelectionChangeEvent(15, 15))
@@ -108,9 +107,9 @@ describe('@components/<TextBlockController>', () => {
   it('should stay in sync with textBlock', async () => {
     const { document, docConsumer } = buildDocumentConsumer()
     document.registerConsumer(docConsumer)
-    const block = document.getActiveBlock() as TextBlock<any>
+    const block = document.getActiveBlock() as TextBlock
     const wrapper = renderer.create(<TextBlockController textBlock={block} />)
-    const textBlockController = (wrapper.getInstance() as unknown) as TextBlockController<any>
+    const textBlockController = (wrapper.getInstance() as unknown) as TextBlockController
     expect(textBlockController).toBeInstanceOf(TextBlockController)
     textBlockController['handleOnTextChanged']('This is nu text\nBlah')
     textBlockController['handleOnSelectionChangeEvent'](mockSelectionChangeEvent(20, 20))

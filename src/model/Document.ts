@@ -6,12 +6,12 @@ import { Bridge } from '@core/Bridge'
 import { Orchestrator } from '@model/Orchestrator'
 import { Store } from './Store'
 import { TextLineType } from '@delta/lines'
-import { mergeAttributesLeft } from '@delta/attributes'
+import { mergeAttributesLeft, BlockAttributeValue } from '@delta/attributes'
 import { DocumentDeltaUpdate } from '@delta/DocumentDeltaUpdate'
 
 declare namespace Document {
-  export interface BlockInterface<T extends string> {
-    readonly bridgeInnerInterface: Bridge.InnerInterface<T>
+  export interface BlockInterface {
+    readonly bridgeInnerInterface: Bridge.InnerInterface
     readonly orchestrator: Orchestrator
     readonly updateDelta: (documentDeltaUpdate: DocumentDeltaUpdate) => void
     readonly onPressBackspaceFromOrigin: () => void
@@ -19,9 +19,9 @@ declare namespace Document {
     readonly getDelta: () => DocumentDelta
   }
 
-  export interface Consumer<T extends string> {
+  export interface Consumer {
     readonly handleOnDocumentStateUpdate: Store.StateUpdateListener
-    readonly bridgeInnerInterface: Bridge.InnerInterface<T>
+    readonly bridgeInnerInterface: Bridge.InnerInterface
   }
 }
 
@@ -30,8 +30,8 @@ declare namespace Document {
  * It exposes methods to apply transformations.
  *
  */
-class Document<T extends string> {
-  private consumer?: Document.Consumer<T>
+class Document {
+  private consumer?: Document.Consumer
   private orchestrator: Orchestrator = new Orchestrator()
   private store = new Store()
 
@@ -41,6 +41,7 @@ class Document<T extends string> {
     this.store.mergeAdjacentTextBlocks(block.getInstanceNumber())
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   private handleOnPressEnterFromBlock(block: Block) {
     // const selection = block.getSelection()
     // TODO implement
@@ -48,13 +49,13 @@ class Document<T extends string> {
     this.insertBlock(TextBlock)
   }
 
-  private newBlock(BlockKind: BlockClass<T>) {
+  private newBlock(BlockKind: BlockClass) {
     invariant(this.consumer != null, 'A document consumer must be registered to create a block')
     let delta: DocumentDelta | null = null
     if (this.consumer) {
       // @ts-ignore
-      let block: Block<T> = null
-      const blockIface: Document.BlockInterface<T> = Object.freeze({
+      let block: Block = null
+      const blockIface: Document.BlockInterface = Object.freeze({
         orchestrator: this.orchestrator,
         bridgeInnerInterface: this.consumer.bridgeInnerInterface,
         updateDelta: (documentDeltaUpdate: DocumentDeltaUpdate) => {
@@ -79,12 +80,12 @@ class Document<T extends string> {
    *
    * @param consumer
    */
-  public registerConsumer(consumer: Document.Consumer<T>) {
+  public registerConsumer(consumer: Document.Consumer) {
     invariant(this.consumer === undefined, 'Only one document consumer can be registered at a time')
     this.store.addListener(consumer.handleOnDocumentStateUpdate)
     consumer.bridgeInnerInterface.addApplyLineTypeToSelectionListener(this, (lineType: TextLineType) => {
       if (this.store.hasBlock()) {
-        const selectedBlock = this.store.getActiveBlock() as TextBlock<T>
+        const selectedBlock = this.store.getActiveBlock() as TextBlock
         invariant(selectedBlock instanceof TextBlock, 'Line Transforms can only be applied to a TextBlock')
         const selectionBeforeChange = selectedBlock.getSelection()
         const updateRequest = selectedBlock.getDelta().applyLineTypeToSelection(selectionBeforeChange, lineType)
@@ -95,9 +96,9 @@ class Document<T extends string> {
     })
     consumer.bridgeInnerInterface.addApplyTextTransformToSelectionListener(
       this,
-      (attributeName: T, attributeValue: any) => {
+      (attributeName: string, attributeValue: BlockAttributeValue) => {
         if (this.store.hasBlock()) {
-          const selectedBlock = this.store.getActiveBlock() as TextBlock<T>
+          const selectedBlock = this.store.getActiveBlock() as TextBlock
           invariant(selectedBlock instanceof TextBlock, 'Text Transforms can only be applied to a TextBlock')
           const delta = selectedBlock.getDelta()
           const selection = selectedBlock.getSelection()
@@ -121,25 +122,26 @@ class Document<T extends string> {
    *
    * @param consumer
    */
-  public releaseConsumer(consumer: Document.Consumer<T>) {
+  public releaseConsumer(consumer: Document.Consumer) {
     this.store.removeListener(consumer.handleOnDocumentStateUpdate)
     consumer.bridgeInnerInterface.release(this)
     this.orchestrator.release()
     this.consumer = undefined
   }
 
-  public insertBlock(BlockKind: BlockClass<T>): void {
+  public insertBlock(BlockKind: BlockClass): void {
     this.store.appendBlock(this.newBlock(BlockKind))
   }
 
-  public getActiveBlock(): Block<T> {
+  public getActiveBlock(): Block {
     return this.store.getActiveBlock()
   }
 
-  public getBlock(instanceNumber: number): Block<T> {
+  public getBlock(instanceNumber: number): Block {
     return this.store.getBlock(instanceNumber)
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public emitToBlock(event: Orchestrator.SheetControllerEvent, instanceNumber: number, ...payload: any[]) {
     this.orchestrator.emitToBlockController(instanceNumber, event, ...payload)
   }

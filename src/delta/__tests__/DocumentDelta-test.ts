@@ -1,5 +1,5 @@
 // tslint:disable: no-string-literal
-import { TextAttributesMap } from '@delta/attributes'
+import { BlockAttributesMap } from '@delta/attributes'
 import { Selection } from '@delta/Selection'
 import { mockDeltaChangeContext, mockSelection } from '@test/delta'
 import { GenericDelta } from '@delta/generic'
@@ -20,7 +20,7 @@ describe('@delta/DocumentDelta', () => {
         { insert: 'ohoh\n\n' },
       ])
       const lines: GenericDelta[] = []
-      const attributes: TextAttributesMap<any>[] = []
+      const attributes: BlockAttributesMap[] = []
       textDelta['delta'].eachLine((l, a) => {
         attributes.push(a)
         lines.push(l)

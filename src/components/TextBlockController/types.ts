@@ -2,10 +2,9 @@ import { TextBlock } from '@model/TextBlock'
 import { StyleProp, TextStyle } from 'react-native'
 import { Selection } from '@delta/Selection'
 import { GenericOp } from '@delta/operations'
-import { ClassicComponent } from 'react'
 
-export interface TextBlockControllerProps<T extends string> {
-  textBlock: TextBlock<T>
+export interface TextBlockControllerProps {
+  textBlock: TextBlock
   grow?: boolean
   textStyle?: StyleProp<TextStyle>
 }
@@ -16,4 +15,13 @@ export interface TextBlockControllerState {
   ops: GenericOp[] | null
 }
 
-export type TextBlockComponent = ClassicComponent<TextBlockControllerProps<any>, TextBlockControllerState>
+export interface TextBlockMinimalComponent {
+  setState<K extends keyof TextBlockControllerState>(
+    state:
+      | ((
+          prevState: Readonly<TextBlockControllerState>,
+        ) => Pick<TextBlockControllerState, K> | TextBlockControllerState | null)
+      | (Pick<TextBlockControllerState, K> | TextBlockControllerState | null),
+    callback?: () => void,
+  ): void
+}

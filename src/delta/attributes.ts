@@ -7,15 +7,12 @@ import find from 'ramda/es/find'
 import omit from 'ramda/es/omit'
 import { GenericDelta } from './generic'
 
+export type TextAttributePrimitive = boolean | string | number
+
+export type BlockAttributeValue = object | TextAttributePrimitive | null | undefined
 export interface BlockAttributesMap {
-  [k: string]: any
+  [k: string]: BlockAttributeValue
 }
-
-type AttributesMap<T extends string> = {
-  [key in T]: any
-}
-
-export type TextAttributesMap<T extends string> = Partial<AttributesMap<T>>
 
 /**
  * Recursively merge objects from right to left.
@@ -27,7 +24,7 @@ export type TextAttributesMap<T extends string> = Partial<AttributesMap<T>>
  * @param attributes - the attributes object to merge
  */
 export function mergeAttributesLeft(...attributes: BlockAttributesMap[]): BlockAttributesMap {
-  return reject(isNil)(mergeAll(attributes))
+  return reject(isNil)(mergeAll<BlockAttributesMap>(attributes))
 }
 
 export const getTextAttributes = omit(['$type'])
@@ -38,10 +35,7 @@ export const getTextAttributes = omit(['$type'])
  * @param delta The full rich text representation
  * @param cursorPosition
  */
-export function getTextAttributesAtCursor<T extends string>(
-  delta: GenericDelta,
-  cursorPosition: number,
-): TextAttributesMap<T> {
+export function getTextAttributesAtCursor(delta: GenericDelta, cursorPosition: number): BlockAttributesMap {
   let lowerBound = 0
   const matchedOp = find((op: GenericOp) => {
     const len = Delta.Op.length(op)

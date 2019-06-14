@@ -8,7 +8,7 @@ import { GenericOp } from '@delta/operations'
 import { TextBlock } from '@model/TextBlock'
 import { DocumentDeltaUpdate } from '@delta/DocumentDeltaUpdate'
 
-export function mokBridgeInnerInterface(): Bridge.InnerInterface<any> {
+export function mokBridgeInnerInterface(): Bridge.InnerInterface {
   return {
     addApplyLineTypeToSelectionListener: jest.fn(),
     addApplyTextTransformToSelectionListener: jest.fn(),
@@ -28,7 +28,7 @@ export function mockDocumentDeltaUpdate(ops?: GenericOp[]): DocumentDeltaUpdate 
   return new DocumentDeltaUpdate(mockDocumentDelta(ops))
 }
 
-export function mockDocumentBlockInterface(): Document.BlockInterface<any> {
+export function mockDocumentBlockInterface(): Document.BlockInterface {
   const document = new Document()
   const bridgeInnerInterface = mokBridgeInnerInterface()
   document.registerConsumer({
@@ -36,7 +36,7 @@ export function mockDocumentBlockInterface(): Document.BlockInterface<any> {
     handleOnDocumentStateUpdate: () => ({}),
   })
   document.insertBlock(TextBlock)
-  const block = document.getActiveBlock() as TextBlock<any>
+  const block = document.getActiveBlock() as TextBlock
   return {
     bridgeInnerInterface,
     orchestrator: document['orchestrator'],

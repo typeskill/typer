@@ -17,23 +17,23 @@ const styles = StyleSheet.create({
 })
 
 declare namespace Sheet {
-  export interface Props<T extends string> {
+  export interface Props {
     /**
      * **Warning** This property cannot be changed after instantiation.
      */
-    bridgeInnerInterface: Bridge.InnerInterface<T>
+    bridgeInnerInterface: Bridge.InnerInterface
     textStyle?: StyleProp<TextStyle>
     contentContainerStyle?: StyleProp<ViewStyle>
   }
 }
 
-class Sheet<T extends string> extends PureComponent<Sheet.Props<T>, Store.State> {
-  private document: Document<T>
-  private docConsumer: Document.Consumer<T>
+class Sheet extends PureComponent<Sheet.Props, Store.State> {
+  private document: Document
+  private docConsumer: Document.Consumer
 
   public state: Store.State = getStoreInitialState()
 
-  public constructor(props: Sheet.Props<T>) {
+  public constructor(props: Sheet.Props) {
     super(props)
     const { bridgeInnerInterface } = this.props
     invariant(bridgeInnerInterface != null, 'bridgeInnerInterface prop is required')
@@ -47,10 +47,10 @@ class Sheet<T extends string> extends PureComponent<Sheet.Props<T>, Store.State>
   }
 
   @boundMethod
-  private renderTextBlockController(blockInstanceNumber: number, index: number) {
-    const block: TextBlock<any> = this.document.getBlock(blockInstanceNumber) as TextBlock<any>
+  private renderTextBlockController(blockInstanceNumber: number) {
+    const block: TextBlock = this.document.getBlock(blockInstanceNumber) as TextBlock
     const key = `block-controller-${blockInstanceNumber}`
-    return <TextBlockController<T> key={key} textBlock={block} grow={true} />
+    return <TextBlockController key={key} textBlock={block} grow={true} />
   }
 
   public componentDidMount() {
@@ -61,7 +61,7 @@ class Sheet<T extends string> extends PureComponent<Sheet.Props<T>, Store.State>
     this.document.releaseConsumer(this.docConsumer)
   }
 
-  public componentDidUpdate(oldProps: Sheet.Props<T>, oldState: Store.State) {
+  public componentDidUpdate(oldProps: Sheet.Props, oldState: Store.State) {
     invariant(
       oldProps.bridgeInnerInterface === this.props.bridgeInnerInterface,
       'bridgeInnerInterface prop cannot be changed after instantiation',
@@ -77,7 +77,7 @@ class Sheet<T extends string> extends PureComponent<Sheet.Props<T>, Store.State>
   public render() {
     return (
       <View style={[styles.root, this.props.contentContainerStyle]}>
-        {this.state.blockOrders.map((instanceNumber, index) => this.renderTextBlockController(instanceNumber, index))}
+        {this.state.blockOrders.map(instanceNumber => this.renderTextBlockController(instanceNumber))}
       </View>
     )
   }

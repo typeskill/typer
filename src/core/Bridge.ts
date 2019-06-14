@@ -1,4 +1,4 @@
-import { TextAttributesMap } from '@delta/attributes'
+import { BlockAttributeValue, BlockAttributesMap } from '@delta/attributes'
 import { defaultTextTransforms, TextTransformSpec, BaseTextTransformAttribute } from '@core/transforms'
 import { Endpoint } from './Endpoint'
 import { TextTransformsRegistry } from './TextTransformsRegistry'
@@ -18,15 +18,15 @@ declare namespace Bridge {
 
   export type Element = Block | string
 
-  export type SelectedAttributesChangeListener = (selectedAttributes: any) => void
+  export type SelectedAttributesChangeListener = (selectedAttributes: BlockAttributesMap) => void
 
-  export type AttributesChangeListener<T extends string> = (attributeName: T, attributeValue: any) => void
+  export type AttributesChangeListener = (attributeName: string, attributeValue: BlockAttributeValue) => void
 
   export type LineTypeChangeListener = (lineType: TextLineType) => void
 
   export type InsertOrReplaceAtSelectionListener = (element: Element) => void
 
-  export interface OuterInterface<T extends string> {
+  export interface OuterInterface {
     /**
      * Insert an element at cursor or replace if selection exists.
      */
@@ -40,7 +40,7 @@ declare namespace Bridge {
      * - if **all characters** traversed by selection have the `attributeName` set to `attributeValue`, **clear** this attribute for all characters in this selection
      * - otherwise set `attributeName`  to `attributeValue` for all characters traversed by this selection
      */
-    applyTextTransformToSelection: (attributeName: T, attributeValue: any) => void
+    applyTextTransformToSelection: (attributeName: string, attributeValue: BlockAttributeValue) => void
 
     /**
      * Switch the line type of lines traversed by selection depending on its state.
@@ -72,11 +72,11 @@ declare namespace Bridge {
   /**
    * This controller should be used exclusively by the Sheet component.
    */
-  export interface InnerInterface<T extends string> {
+  export interface InnerInterface {
     /**
      * Listen to text attributes alterations in selection.
      */
-    addApplyTextTransformToSelectionListener: (owner: object, listener: AttributesChangeListener<T>) => void
+    addApplyTextTransformToSelectionListener: (owner: object, listener: AttributesChangeListener) => void
 
     /**
      * Listen to type changes in selection
@@ -91,7 +91,7 @@ declare namespace Bridge {
     /**
      * Set selected text attributes
      */
-    setSelectedTextAttributes: (attributes: TextAttributesMap<T>) => void
+    setSelectedTextAttributes: (attributes: BlockAttributesMap) => void
 
     /**
      * Set line type in selection
@@ -102,7 +102,7 @@ declare namespace Bridge {
      */
     release: (owner: object) => void
 
-    getTextTransformsReg(): TextTransformsRegistry<T>
+    getTextTransformsReg(): TextTransformsRegistry
   }
 }
 
@@ -113,13 +113,13 @@ declare namespace Bridge {
 class Bridge<T extends string = BaseTextTransformAttribute> {
   private innerEndpoint = new Endpoint<Bridge.InnerEvent>()
   private outerEndpoint = new Endpoint<Bridge.OuterEvent>()
-  private textTransformsReg: TextTransformsRegistry<T>
+  private textTransformsReg: TextTransformsRegistry
 
-  private outerInterface: Bridge.OuterInterface<T> = Object.freeze({
+  private outerInterface: Bridge.OuterInterface = Object.freeze({
     insertOrReplaceAtSelection: (element: string | Bridge.Block) => {
       this.outerEndpoint.emit('INSERT_OR_REPLACE_AT_SELECTION', element)
     },
-    applyTextTransformToSelection: (attributeName: T, attributeValue: any) => {
+    applyTextTransformToSelection: (attributeName: string, attributeValue: BlockAttributeValue) => {
       this.outerEndpoint.emit('APPLY_ATTRIBUTES_TO_SELECTION', attributeName, attributeValue)
     },
     applyLineTransformToSelection: (lineType: TextLineType) => {
@@ -135,8 +135,8 @@ class Bridge<T extends string = BaseTextTransformAttribute> {
       this.innerEndpoint.release(owner)
     },
   })
-  private innerInterface: Bridge.InnerInterface<T> = Object.freeze({
-    addApplyTextTransformToSelectionListener: (owner: object, listener: Bridge.AttributesChangeListener<T>) => {
+  private innerInterface: Bridge.InnerInterface = Object.freeze({
+    addApplyTextTransformToSelectionListener: (owner: object, listener: Bridge.AttributesChangeListener) => {
       this.outerEndpoint.addListener(owner, 'APPLY_ATTRIBUTES_TO_SELECTION', listener)
     },
     addApplyLineTypeToSelectionListener: (owner: object, listener: Bridge.LineTypeChangeListener) => {
@@ -145,7 +145,7 @@ class Bridge<T extends string = BaseTextTransformAttribute> {
     addInsertOrReplaceAtSelectionListener: (owner: object, listener: Bridge.InsertOrReplaceAtSelectionListener) => {
       this.outerEndpoint.addListener(owner, 'INSERT_OR_REPLACE_AT_SELECTION', listener)
     },
-    setSelectedTextAttributes: (attributes: TextAttributesMap<T>) => {
+    setSelectedTextAttributes: (attributes: BlockAttributesMap) => {
       this.innerEndpoint.emit('SELECTED_ATTRIBUTES_CHANGE', attributes)
     },
     setSelectedLineType: (lineType: TextLineType) => {
@@ -161,17 +161,15 @@ class Bridge<T extends string = BaseTextTransformAttribute> {
    *
    * @param textTransformSpecs A list of TextTransformsSpecs which will be used to map text attributes with styles.
    */
-  public constructor(textTransformSpecs?: TextTransformSpec<T, any>[]) {
-    this.textTransformsReg = new TextTransformsRegistry(
-      textTransformSpecs || (defaultTextTransforms as TextTransformSpec<T, any>[]),
-    )
+  public constructor(textTransformSpecs?: TextTransformSpec[]) {
+    this.textTransformsReg = new TextTransformsRegistry(textTransformSpecs || defaultTextTransforms)
   }
 
-  public getInnerInterface(): Bridge.InnerInterface<T> {
+  public getInnerInterface(): Bridge.InnerInterface {
     return this.innerInterface
   }
 
-  public getOuterInterface(): Bridge.OuterInterface<T> {
+  public getOuterInterface(): Bridge.OuterInterface {
     return this.outerInterface
   }
 

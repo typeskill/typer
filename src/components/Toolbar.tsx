@@ -4,7 +4,7 @@ import invariant from 'invariant'
 import PropTypes from 'prop-types'
 import { BaseTextTransformAttribute } from '@core/transforms'
 import { Bridge } from '@core/Bridge'
-import { TextAttributesMap } from '@delta/attributes'
+import { BlockAttributesMap, TextAttributePrimitive } from '@delta/attributes'
 import { TextLineType } from '@delta/lines'
 
 export const TEXT_CONTROL_SEPARATOR = Symbol('separator')
@@ -19,14 +19,14 @@ export enum ControlAction {
 }
 
 declare namespace Toolbar {
-  export interface ControlSpec<T extends object> {
+  export interface ControlSpec<T extends object = object> {
     IconComponent: ComponentType<TextControlMinimalIconProps & T>
     actionType: ControlAction
     iconProps?: T
   }
-  export type Layout = (ControlSpec<any> | typeof TEXT_CONTROL_SEPARATOR)[]
+  export type Layout = (ControlSpec | typeof TEXT_CONTROL_SEPARATOR)[]
   export interface Props {
-    bridgeOuterInferface: Bridge.OuterInterface<BaseTextTransformAttribute>
+    bridgeOuterInferface: Bridge.OuterInterface
     layout: Layout
     defaultButtonBackgroundColor?: string
     defaultButtonColor?: string
@@ -49,7 +49,7 @@ declare namespace Toolbar {
 }
 
 interface ToolbarState {
-  selectedAttributes: TextAttributesMap<BaseTextTransformAttribute>
+  selectedAttributes: BlockAttributesMap
   selectedLineType: TextLineType
 }
 
@@ -105,7 +105,7 @@ export class Toolbar extends PureComponent<Toolbar.Props, ToolbarState> {
     iconSize: DEFAULT_ICON_SIZE,
   }
 
-  private outerInterface: Bridge.OuterInterface<BaseTextTransformAttribute>
+  private outerInterface: Bridge.OuterInterface
 
   public state: ToolbarState = {
     selectedAttributes: {},
@@ -152,7 +152,10 @@ export class Toolbar extends PureComponent<Toolbar.Props, ToolbarState> {
     }
   }
 
-  private applyTextTransformToSelection(attributeName: BaseTextTransformAttribute, activeAttributeValue: any) {
+  private applyTextTransformToSelection(
+    attributeName: BaseTextTransformAttribute,
+    activeAttributeValue: TextAttributePrimitive,
+  ) {
     const nextAttributeValue =
       this.state.selectedAttributes[attributeName] === activeAttributeValue ? null : activeAttributeValue
     return () => {
@@ -172,8 +175,8 @@ export class Toolbar extends PureComponent<Toolbar.Props, ToolbarState> {
 
   private renderTextTransformController(
     attributeName: BaseTextTransformAttribute,
-    activeAttributeValue: any,
-    textControlSpec: Toolbar.ControlSpec<any>,
+    activeAttributeValue: TextAttributePrimitive,
+    textControlSpec: Toolbar.ControlSpec,
     last: boolean = false,
   ) {
     const { selectedAttributes } = this.state
@@ -191,7 +194,7 @@ export class Toolbar extends PureComponent<Toolbar.Props, ToolbarState> {
 
   private renderLineTransformController(
     lineType: TextLineType,
-    textControlSpec: Toolbar.ControlSpec<any>,
+    textControlSpec: Toolbar.ControlSpec,
     last: boolean = false,
   ) {
     const { selectedLineType } = this.state
@@ -207,7 +210,7 @@ export class Toolbar extends PureComponent<Toolbar.Props, ToolbarState> {
     )
   }
 
-  private renderIconControl(textControlSpec: Toolbar.ControlSpec<any>, last: boolean) {
+  private renderIconControl(textControlSpec: Toolbar.ControlSpec, last: boolean) {
     switch (textControlSpec.actionType) {
       case ControlAction.SELECT_TEXT_BOLD:
         return this.renderTextTransformController('bold', true, textControlSpec, last)

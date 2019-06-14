@@ -52,6 +52,7 @@ class Orchestrator {
   public emitToBlockController(
     inputControllerInstance: number,
     eventType: Orchestrator.SheetControllerEvent,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ...payload: any[]
   ): void {
     const controller = this.controllersEmitters.get(inputControllerInstance)

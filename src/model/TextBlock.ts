@@ -1,17 +1,17 @@
 import { Document } from './Document'
 import { Block } from './Block'
-import { TextAttributesMap } from '@delta/attributes'
+import { BlockAttributesMap } from '@delta/attributes'
 import { boundMethod } from 'autobind-decorator'
 import { Selection } from '@delta/Selection'
 import { TextTransformsRegistry } from '@core/TextTransformsRegistry'
 import { DeltaChangeContext } from '@delta/DeltaChangeContext'
 import mergeLeft from 'ramda/es/mergeLeft'
 
-export class TextBlock<T extends string> extends Block<T> {
-  private cursorTextAttributes: TextAttributesMap<T> = {}
+export class TextBlock extends Block {
+  private cursorTextAttributes: BlockAttributesMap = {}
   private length: number = 0
 
-  public constructor(blockInterface: Document.BlockInterface<T>) {
+  public constructor(blockInterface: Document.BlockInterface) {
     super(blockInterface)
   }
 
@@ -35,16 +35,16 @@ export class TextBlock<T extends string> extends Block<T> {
     return this.length
   }
 
-  public setCursorAttributes(cursorTextAttributes: TextAttributesMap<T>): TextAttributesMap<T> {
+  public setCursorAttributes(cursorTextAttributes: BlockAttributesMap): BlockAttributesMap {
     this.cursorTextAttributes = mergeLeft(cursorTextAttributes, this.cursorTextAttributes)
     return this.cursorTextAttributes
   }
 
-  public getCursorAttributes(): TextAttributesMap<T> {
+  public getCursorAttributes(): BlockAttributesMap {
     return this.cursorTextAttributes
   }
 
-  public getTextTransformsRegistry(): TextTransformsRegistry<T> {
+  public getTextTransformsRegistry(): TextTransformsRegistry {
     return this.blockInterface.bridgeInnerInterface.getTextTransformsReg()
   }
 

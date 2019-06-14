@@ -1,8 +1,8 @@
 import { diffChars } from 'diff'
 import Delta from 'quill-delta'
-import { TextAttributesMap, BlockAttributesMap } from './attributes'
+import { BlockAttributesMap } from './attributes'
 
-function getDeltasFromTextDiff<T extends string>(oldText: string, newText: string, attributes?: TextAttributesMap<T>) {
+function getDeltasFromTextDiff(oldText: string, newText: string, attributes?: BlockAttributesMap) {
   const changes = diffChars(oldText, newText)
   let delta = new Delta()
   for (const change of changes) {

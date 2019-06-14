@@ -15,7 +15,7 @@ import { Orchestrator } from '@model/Orchestrator'
 import { boundMethod } from 'autobind-decorator'
 import { TextChangeSession } from './TextChangeSession'
 import { DocumentDeltaUpdate } from '@delta/DocumentDeltaUpdate'
-import { TextBlockControllerProps, TextBlockControllerState } from './types'
+import { TextBlockControllerProps, TextBlockControllerState, TextBlockMinimalComponent } from './types'
 import { TextBlockUpdateSynchronizer } from './TextBlockUpdateSynchronizer'
 
 export { TextBlockControllerProps }
@@ -43,10 +43,7 @@ const constantTextInputProps: TextInputProps = {
   blurOnSubmit: false,
 } as TextInputProps
 
-export class TextBlockController<T extends string> extends Component<
-  TextBlockControllerProps<T>,
-  TextBlockControllerState
-> {
+export class TextBlockController extends Component<TextBlockControllerProps, TextBlockControllerState> {
   private textInputRef: TextInput | null = null
   private textChangeSession: TextChangeSession | null = null
   private selection = Selection.fromBounds(0)
@@ -58,10 +55,10 @@ export class TextBlockController<T extends string> extends Component<
     ops: null,
   }
 
-  public constructor(props: TextBlockControllerProps<T>) {
+  public constructor(props: TextBlockControllerProps) {
     super(props)
     invariant(props.textBlock != null, INVARIANT_MANDATORY_TEXT_BLOCK_PROP)
-    this.synchronizer = new TextBlockUpdateSynchronizer(this as any)
+    this.synchronizer = new TextBlockUpdateSynchronizer(this as TextBlockMinimalComponent)
   }
 
   private get blockControllerInterface(): Orchestrator.BlockControllerInterface {
@@ -132,7 +129,7 @@ export class TextBlockController<T extends string> extends Component<
     return this.synchronizer.handleFragmentedUpdate(documentDeltaUpdate)
   }
 
-  public shouldComponentUpdate(nextProps: TextBlockControllerProps<T>, nextState: TextBlockControllerState) {
+  public shouldComponentUpdate(nextProps: TextBlockControllerProps, nextState: TextBlockControllerState) {
     return (
       nextState.ops !== this.state.ops ||
       nextProps.grow !== this.props.grow ||
