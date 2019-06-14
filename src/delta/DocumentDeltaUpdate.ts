@@ -8,16 +8,22 @@ import { DocumentDeltaNormalizer } from './DocumentDeltaNormalizer'
  * a graphic update.
  */
 export class DocumentDeltaUpdate {
-  private _intermediaryDelta: DocumentDelta|null = null
-  private _intermediaryOverridingSelection: Selection|null = null
-  private _finalOverridingSelection: Selection|null = null
+  private _intermediaryDelta: DocumentDelta | null = null
+  private _intermediaryOverridingSelection: Selection | null = null
+  private _finalOverridingSelection: Selection | null = null
   private _finalDelta: DocumentDelta
 
-  constructor(afterApplyTextDiffDelta: DocumentDelta, normalizationDirectives: NormalizeDirective[] = [], overridingSelection?: Selection) {
+  public constructor(
+    afterApplyTextDiffDelta: DocumentDelta,
+    normalizationDirectives: NormalizeDirective[] = [],
+    overridingSelection?: Selection,
+  ) {
     const mustComputeNormalization = normalizationDirectives.length > 0
     const normalizer = new DocumentDeltaNormalizer(afterApplyTextDiffDelta)
     if (mustComputeNormalization) {
-      const { overridingSelection: normalizeOverridingSelection, delta: normalizedDelta } = normalizer.apply(normalizationDirectives)
+      const { overridingSelection: normalizeOverridingSelection, delta: normalizedDelta } = normalizer.apply(
+        normalizationDirectives,
+      )
       if (normalizedDelta !== afterApplyTextDiffDelta) {
         this._intermediaryDelta = afterApplyTextDiffDelta
         this._intermediaryOverridingSelection = overridingSelection || null
@@ -32,7 +38,7 @@ export class DocumentDeltaUpdate {
     }
   }
 
-  public get intermediaryDelta(): DocumentDelta|null {
+  public get intermediaryDelta(): DocumentDelta | null {
     return this._intermediaryDelta
   }
 
@@ -40,11 +46,11 @@ export class DocumentDeltaUpdate {
     return this._finalDelta
   }
 
-  public get finalOverridingSelection(): Selection|null {
+  public get finalOverridingSelection(): Selection | null {
     return this._finalOverridingSelection
   }
 
-  public get intermediaryOverridingSelection(): Selection|null {
+  public get intermediaryOverridingSelection(): Selection | null {
     return this._intermediaryOverridingSelection
   }
 

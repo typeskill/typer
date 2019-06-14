@@ -5,8 +5,10 @@ import { TextTransformsRegistry } from './TextTransformsRegistry'
 import { TextLineType } from '@delta/lines'
 
 declare namespace Bridge {
-
-  export type OuterEvent = 'APPLY_ATTRIBUTES_TO_SELECTION' | 'APPLY_LINE_TYPE_TO_SELECTION' | 'INSERT_OR_REPLACE_AT_SELECTION'
+  export type OuterEvent =
+    | 'APPLY_ATTRIBUTES_TO_SELECTION'
+    | 'APPLY_LINE_TYPE_TO_SELECTION'
+    | 'INSERT_OR_REPLACE_AT_SELECTION'
 
   export type InnerEvent = 'SELECTED_ATTRIBUTES_CHANGE' | 'SELECTED_LINE_TYPE_CHANGE'
 
@@ -32,9 +34,9 @@ declare namespace Bridge {
 
     /**
      * Switch the given attribute's value depending on the current selection.
-     * 
+     *
      * @remarks
-     * 
+     *
      * - if **all characters** traversed by selection have the `attributeName` set to `attributeValue`, **clear** this attribute for all characters in this selection
      * - otherwise set `attributeName`  to `attributeValue` for all characters traversed by this selection
      */
@@ -42,12 +44,12 @@ declare namespace Bridge {
 
     /**
      * Switch the line type of lines traversed by selection depending on its state.
-     * 
+     *
      * @remarks
-     * 
+     *
      * - if **all lines** traversed by selection are of the type `lineType`, set the type for each of those lines to `'normal'`
      * - otherwise, set the type of each of those lines to `lineType`
-     * 
+     *
      * @param lineType The type to apply
      */
     applyLineTransformToSelection: (lineType: TextLineType) => void
@@ -102,15 +104,13 @@ declare namespace Bridge {
 
     getTextTransformsReg(): TextTransformsRegistry<T>
   }
-
 }
 
 /**
  * The Bridge class is an abstraction responsible for communication between the editor and external controls.
- * 
+ *
  */
 class Bridge<T extends string = BaseTextTransformAttribute> {
-
   private innerEndpoint = new Endpoint<Bridge.InnerEvent>()
   private outerEndpoint = new Endpoint<Bridge.OuterEvent>()
   private textTransformsReg: TextTransformsRegistry<T>
@@ -133,7 +133,7 @@ class Bridge<T extends string = BaseTextTransformAttribute> {
     },
     release: (owner: object) => {
       this.innerEndpoint.release(owner)
-    }
+    },
   })
   private innerInterface: Bridge.InnerInterface<T> = Object.freeze({
     addApplyTextTransformToSelectionListener: (owner: object, listener: Bridge.AttributesChangeListener<T>) => {
@@ -154,15 +154,17 @@ class Bridge<T extends string = BaseTextTransformAttribute> {
     release: (owner: object) => {
       this.outerEndpoint.release(owner)
     },
-    getTextTransformsReg: () => this.textTransformsReg
+    getTextTransformsReg: () => this.textTransformsReg,
   })
 
   /**
-   * 
+   *
    * @param textTransformSpecs A list of TextTransformsSpecs which will be used to map text attributes with styles.
    */
-  constructor(textTransformSpecs?: TextTransformSpec<T, any>[]) {
-    this.textTransformsReg = new TextTransformsRegistry(textTransformSpecs || defaultTextTransforms as TextTransformSpec<T, any>[])
+  public constructor(textTransformSpecs?: TextTransformSpec<T, any>[]) {
+    this.textTransformsReg = new TextTransformsRegistry(
+      textTransformSpecs || (defaultTextTransforms as TextTransformSpec<T, any>[]),
+    )
   }
 
   public getInnerInterface(): Bridge.InnerInterface<T> {

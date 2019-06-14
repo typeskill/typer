@@ -2,10 +2,9 @@ import { Selection } from '@delta/Selection'
 import { DeltaChangeContext } from '@delta/DeltaChangeContext'
 
 export class TextChangeSession {
-
-  private selectionBeforeChange: Selection|null = null
-  private selectionAfterChange: Selection|null = null
-  private textAfterChange: string|null = null
+  private selectionBeforeChange: Selection | null = null
+  private selectionAfterChange: Selection | null = null
+  private textAfterChange: string | null = null
 
   public getDeltaChangeContext(): DeltaChangeContext {
     if (this.selectionAfterChange === null) {

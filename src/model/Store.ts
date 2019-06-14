@@ -26,7 +26,7 @@ declare namespace Store {
 const INITIAL_STATE = Object.freeze({
   selectedBlockInstanceNumber: null,
   blockOrders: [],
-  deltas: {}
+  deltas: {},
 })
 
 export function getStoreInitialState() {
@@ -50,14 +50,14 @@ class Store<T extends string = any> {
     const blockOrders = without([instanceNumber], this.state.blockOrders)
     return {
       blockOrders,
-      selectedBlockInstanceNumber: last(blockOrders)
+      selectedBlockInstanceNumber: last(blockOrders),
     }
   }
 
   private getAtomicBlockInsertion(block: Block<T>) {
     return {
       selectedBlockInstanceNumber: block.getInstanceNumber(),
-      blockOrders: concat(this.state.blockOrders, [block.getInstanceNumber()])
+      blockOrders: concat(this.state.blockOrders, [block.getInstanceNumber()]),
     }
   }
 
@@ -83,12 +83,18 @@ class Store<T extends string = any> {
   }
 
   public getActiveBlock(): Block<T> {
-    invariant(typeof this.state.selectedBlockInstanceNumber === 'number', 'At least one block must be selected to call getSelectedBlock')
+    invariant(
+      typeof this.state.selectedBlockInstanceNumber === 'number',
+      'At least one block must be selected to call getSelectedBlock',
+    )
     return this.blockReverseMap.get(this.state.selectedBlockInstanceNumber as number) as Block<T>
   }
 
   public getBlock(instanceNumber: number): Block<T> {
-    invariant(this.blockReverseMap.has(instanceNumber), `Block with instance number ${instanceNumber} is not registered.`)
+    invariant(
+      this.blockReverseMap.has(instanceNumber),
+      `Block with instance number ${instanceNumber} is not registered.`,
+    )
     return this.blockReverseMap.get(instanceNumber) as Block<T>
   }
 

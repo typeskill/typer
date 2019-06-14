@@ -4,28 +4,31 @@ export class DeltaChangeContext {
   public readonly selectionBeforeChange: Selection
   public readonly selectionAfterChange: Selection
 
-  constructor(selectionBeforeChange: Selection, selectionAfterChange: Selection) {
+  public constructor(selectionBeforeChange: Selection, selectionAfterChange: Selection) {
     this.selectionAfterChange = selectionAfterChange
     this.selectionBeforeChange = selectionBeforeChange
   }
 
-  lowerLimit() {
+  public lowerLimit() {
     return Math.min(this.selectionAfterChange.start, this.selectionBeforeChange.start)
   }
 
-  upperLimit() {
+  public upperLimit() {
     return Math.max(this.selectionAfterChange.end, this.selectionBeforeChange.end)
   }
 
-  deleteTraversal(): Selection {
-    return Selection.fromBounds(Math.min(this.selectionBeforeChange.start, this.selectionAfterChange.start), this.selectionBeforeChange.end)
+  public deleteTraversal(): Selection {
+    return Selection.fromBounds(
+      Math.min(this.selectionBeforeChange.start, this.selectionAfterChange.start),
+      this.selectionBeforeChange.end,
+    )
   }
 
-  isInsertion() {
+  public isInsertion() {
     return this.selectionBeforeChange.start < this.selectionAfterChange.end
   }
 
-  isDeletion() {
+  public isDeletion() {
     return this.selectionBeforeChange.end > this.lowerLimit()
   }
 }

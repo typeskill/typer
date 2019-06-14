@@ -7,19 +7,20 @@ import { TextOp } from '@delta/operations'
 
 const attributeNameGetter = prop('attributeName') as (t: TextTransformSpec<any, any>) => string
 
-export function textTransformListToDict<T extends string = BaseTextTransformAttribute>(list: TextTransformSpec<T, any>[]): TextTransformsDictionnary<T> {
+export function textTransformListToDict<T extends string = BaseTextTransformAttribute>(
+  list: TextTransformSpec<T, any>[],
+): TextTransformsDictionnary<T> {
   return groupBy(attributeNameGetter)(list)
 }
 
 export class TextTransformsRegistry<T extends string = BaseTextTransformAttribute> {
-
   private textTransformsDict: TextTransformsDictionnary<T>
 
-  constructor(textTransformSpecs: TextTransformSpec<T, any>[]) {
+  public constructor(textTransformSpecs: TextTransformSpec<T, any>[]) {
     this.textTransformsDict = textTransformListToDict(textTransformSpecs)
   }
 
-  getStylesFromOp(op: TextOp<T>): StyleProp<TextStyle> {
+  public getStylesFromOp(op: TextOp<T>): StyleProp<TextStyle> {
     const styles: StyleProp<TextStyle> = []
     if (op.attributes) {
       for (const attributeName of Object.keys(op.attributes)) {
@@ -27,13 +28,18 @@ export class TextTransformsRegistry<T extends string = BaseTextTransformAttribut
           const attributeValue = op.attributes[attributeName as T]
           let match = false
           if (attributeValue !== null) {
-            for (const candidate of (this.textTransformsDict[attributeName as T] || [])) {
+            for (const candidate of this.textTransformsDict[attributeName as T] || []) {
               if (candidate.attributeValue === attributeValue) {
                 styles.push(candidate.activeStyle)
                 match = true
               }
             }
-            invariant(match, `A Text Transform must be specified for attribute "${attributeName}" with value ${JSON.stringify(attributeValue)}`)
+            invariant(
+              match,
+              `A Text Transform must be specified for attribute "${attributeName}" with value ${JSON.stringify(
+                attributeValue,
+              )}`,
+            )
           }
         }
       }

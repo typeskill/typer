@@ -14,12 +14,13 @@ export class UpdateTask {
   private cancelledOverriding = false
   private running = false
   private updates: (() => Promise<void>)[] = []
-  constructor(manager: TaskManager) {
+
+  public constructor(manager: TaskManager) {
     this.synchronizer = manager
   }
 
   private async setOps(delta: GenericDelta): Promise<void> {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       if (!this.synchronizer.isClosed) {
         this.synchronizer.component.setState({ ops: delta.ops }, resolve)
       } else {
@@ -29,7 +30,7 @@ export class UpdateTask {
   }
 
   private async setSelection(selection: Selection): Promise<void> {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       // Using the interaction manager prevents the setSpan error
       // caused by text and selection being out of sync.
       InteractionManager.runAfterInteractions(() => {
@@ -42,25 +43,29 @@ export class UpdateTask {
     })
   }
 
-  isRunning() {
+  public isRunning() {
     return this.running
   }
 
-  pushUpdateFragment(delta: DocumentDelta, overridingSelection: Selection|null) {
+  public pushUpdateFragment(delta: DocumentDelta, overridingSelection: Selection | null) {
     this.updates.push(async () => this.setOps(delta))
     overridingSelection && this.updates.push(async () => this.setSelection(overridingSelection))
   }
 
-  cancelOverriding() {
+  public cancelOverriding() {
     this.cancelledOverriding = true
     this.running = false
   }
 
-  run(): Promise<void> {
-    const updates = [...this.updates, async () => { this.running = false }]
-    const promise: Promise<void> = updates.reduce((async (prom, task) => prom.then(task)), Promise.resolve())
+  public run(): Promise<void> {
+    const updates = [
+      ...this.updates,
+      async () => {
+        this.running = false
+      },
+    ]
+    const promise: Promise<void> = updates.reduce(async (prom, task) => prom.then(task), Promise.resolve())
     this.running = true
     return promise
   }
-
 }

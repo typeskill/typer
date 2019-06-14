@@ -14,7 +14,9 @@ function newConsumer() {
   return {
     bridgeOuterInterface: bridge.getOuterInterface(),
     bridgeInnerInterface: bridge.getInnerInterface(),
-    handleOnDocumentStateUpdate: () => { /** noop */ }
+    handleOnDocumentStateUpdate: () => {
+      /** noop */
+    },
   }
 }
 
@@ -35,7 +37,7 @@ function createContext() {
   return {
     outerInterface,
     block0,
-    getOverridingSelection
+    getOverridingSelection,
   }
 }
 
@@ -55,7 +57,7 @@ describe('@model/Document', () => {
       outerInterface.applyLineTransformToSelection('ol')
       expect(block0.getDelta().ops).toEqual([
         { insert: getHeadingCharactersFromType('ol', 0) + 'First' },
-        { insert: '\n', attributes: { $type: 'ol' } }
+        { insert: '\n', attributes: { $type: 'ol' } },
       ])
     })
     it('applying type to multiple lines and adding newline', () => {
@@ -70,7 +72,7 @@ describe('@model/Document', () => {
         { insert: getHeadingCharactersFromType('ol', 0) + 'First' },
         { insert: '\n', attributes: { $type: 'ol' } },
         { insert: getHeadingCharactersFromType('ol', 1) },
-        { insert: '\n', attributes: { $type: 'ol' } }
+        { insert: '\n', attributes: { $type: 'ol' } },
       ])
     })
     it('deleting part of an ol prefix manually should remove ol type, override selection and notify for selected line attributes changes', () => {
@@ -87,13 +89,11 @@ describe('@model/Document', () => {
       const slicedLine = header.slice(0, 1) + header.slice(2) + initialLine
       expect(block0.getDelta().ops).toEqual([
         { insert: transformedLine },
-        { insert: '\n', attributes: { $type: 'ol' } }
+        { insert: '\n', attributes: { $type: 'ol' } },
       ])
       block0.handleOnSelectionChange(mockSelection(2))
       block0.handleOnTextChange(slicedLine, mockDeltaChangeContext(2, 1))
-      expect(block0.getDelta().ops).toEqual([
-        { insert: initialLine }
-      ])
+      expect(block0.getDelta().ops).toEqual([{ insert: initialLine }])
       expect(getOverridingSelection()).toMatchObject(Selection.fromBounds(0))
       expect(onLineTypeChange).toHaveBeenCalledWith('normal')
     })
@@ -104,7 +104,7 @@ describe('@model/Document', () => {
       block0.handleOnSelectionChange(Selection.fromBounds(1))
       outerInterface.applyTextTransformToSelection('weight', 'bold')
       expect(block0.getCursorAttributes()).toMatchObject({
-        weight: 'bold'
+        weight: 'bold',
       })
     })
     it('successively applying text attributes to empty selection should result in the merging of those attributes', () => {
@@ -113,7 +113,7 @@ describe('@model/Document', () => {
       outerInterface.applyTextTransformToSelection('italic', true)
       expect(block0.getCursorAttributes()).toMatchObject({
         weight: 'bold',
-        italic: true
+        italic: true,
       })
     })
     it('setting cursor attributes should propagate to inserted text', () => {
@@ -124,13 +124,13 @@ describe('@model/Document', () => {
       block0.handleOnSelectionChange(Selection.fromBounds(1))
       outerInterface.applyTextTransformToSelection('weight', 'bold')
       expect(block0.getCursorAttributes()).toMatchObject({
-        weight: 'bold'
+        weight: 'bold',
       })
       block0.handleOnTextChange(nextLine, mockDeltaChangeContext(1, 2))
       expect(block0.getDelta().ops).toEqual([
         { insert: 'F' },
         { insert: 'P', attributes: { weight: 'bold' } },
-        { insert: '\n' }
+        { insert: '\n' },
       ])
     })
     it('unsetting cursor attributes should propagate to inserted text', () => {
@@ -142,13 +142,10 @@ describe('@model/Document', () => {
       block0.handleOnSelectionChange(Selection.fromBounds(1))
       outerInterface.applyTextTransformToSelection('weight', null)
       expect(block0.getCursorAttributes()).toMatchObject({
-        weight: null
+        weight: null,
       })
       block0.handleOnTextChange(nextLine, mockDeltaChangeContext(1, 2))
-      expect(block0.getDelta().ops).toEqual([
-        { insert: 'F', attributes: { weight: 'bold' } },
-        { insert: 'P\n' }
-      ])
+      expect(block0.getDelta().ops).toEqual([{ insert: 'F', attributes: { weight: 'bold' } }, { insert: 'P\n' }])
     })
     it('applying text-length-transforming line type to selection should override selection with one of length augmented by the number of characters inserted', () => {
       const { block0 } = createContext()
@@ -174,12 +171,12 @@ describe('@model/Document', () => {
         { insert: head2 + 'C' },
         { insert: '\n', attributes: { $type: 'ol' } },
         { insert: head3 + 'D' },
-        { insert: '\n', attributes: { $type: 'ol' } }
+        { insert: '\n', attributes: { $type: 'ol' } },
       ])
       block0['updateDelta'](mockDocumentDeltaUpdate(delta.ops))
       const selection = Selection.fromObject({
         start: 0,
-        end: delta.length()
+        end: delta.length(),
       })
       const documentDeltaUpdate = delta.applyLineTypeToSelection(selection, 'normal')
       const overridingSelection = Selection.fromBounds(0, 8)
@@ -194,9 +191,7 @@ describe('@model/Document', () => {
       block0.handleOnTextChange(initialLine, mockDeltaChangeContext(0, 3))
       block0.handleOnSelectionChange(Selection.fromBounds(2))
       block0.handleOnTextChange(nextLine, mockDeltaChangeContext(2, 1))
-      expect(block0.getDelta().ops).toEqual([
-        { insert: 'FG\n' }
-      ])
+      expect(block0.getDelta().ops).toEqual([{ insert: 'FG\n' }])
     })
     it('pass regression: unapplying bold followed by applying italic to zero length cursor result in italic attribute for cursor', () => {
       const { outerInterface, block0 } = createContext()
@@ -209,7 +204,7 @@ describe('@model/Document', () => {
       outerInterface.applyTextTransformToSelection('italic', true)
       expect(block0.getCursorAttributes()).toEqual({
         italic: true,
-        weight: null
+        weight: null,
       })
     })
     it('pass regression #12: deleting ul line prefix just after cutting an ul and pressing enter should be handled appropriately', () => {
@@ -236,14 +231,19 @@ describe('@model/Document', () => {
       block0.handleOnSelectionChange(Selection.fromBounds(header.length + firstWord.length + 1))
       // 4: insert newline
       const step3line = `${header}${firstWord} \n${secondWord}\n`
-      block0.handleOnTextChange(step3line, mockDeltaChangeContext(header.length + firstWord.length + 1, header.length + firstWord.length + 2))
-      expect(witness).toHaveBeenLastCalledWith(expect.objectContaining(Selection.fromBounds(header.length * 2 + firstWord.length + 2)))
+      block0.handleOnTextChange(
+        step3line,
+        mockDeltaChangeContext(header.length + firstWord.length + 1, header.length + firstWord.length + 2),
+      )
+      expect(witness).toHaveBeenLastCalledWith(
+        expect.objectContaining(Selection.fromBounds(header.length * 2 + firstWord.length + 2)),
+      )
       block0.handleOnSelectionChange(selection)
       expect(block0.getDelta().ops).toEqual([
         { insert: `${header}${firstWord} ` },
         { insert: '\n', attributes: { $type: 'ul' } },
         { insert: `${header}${secondWord}` },
-        { insert: '\n', attributes: { $type: 'ul' } }
+        { insert: '\n', attributes: { $type: 'ul' } },
       ])
       // 5: remove one char from prefix
       const step5line = `${header}${firstWord} \n${header.substring(0, header.length - 1)}${secondWord}\n`
@@ -251,7 +251,7 @@ describe('@model/Document', () => {
       expect(block0.getDelta().ops).toEqual([
         { insert: `${header}${firstWord} ` },
         { insert: '\n', attributes: { $type: 'ul' } },
-        { insert: `${secondWord}\n` }
+        { insert: `${secondWord}\n` },
       ])
     })
   })

@@ -23,21 +23,23 @@ describe('@delta/DocumentDeltaNormalizer', () => {
         { insert: head + 'Hello ' },
         { insert: '\n', attributes: { $type: 'ul' } },
         { insert: 'world' },
-        { insert: '\n', attributes: { $type: 'ul' } }
+        { insert: '\n', attributes: { $type: 'ul' } },
       ])
-      const directives: NormalizeDirective[] = [{
-        beginningOfLineIndex: (deltaAfterChange.ops[0].insert as string).length + 1,
-        context: changeContext,
-        type: NormalizeOperation.INSERT_LINE_TYPE_PREFIX,
-        diff: makeDiffDelta('world', 'world', {})
-      }]
+      const directives: NormalizeDirective[] = [
+        {
+          beginningOfLineIndex: (deltaAfterChange.ops[0].insert as string).length + 1,
+          context: changeContext,
+          type: NormalizeOperation.INSERT_LINE_TYPE_PREFIX,
+          diff: makeDiffDelta('world', 'world', {}),
+        },
+      ]
       const normalizer = new DocumentDeltaNormalizer(deltaAfterChange)
       const { delta } = normalizer.apply(directives)
       expect(delta.ops).toEqual([
         { insert: head + 'Hello ' },
         { insert: '\n', attributes: { $type: 'ul' } },
         { insert: head + 'world' },
-        { insert: '\n', attributes: { $type: 'ul' } }
+        { insert: '\n', attributes: { $type: 'ul' } },
       ])
     })
     it('should handle investigate deletion prefix directives after text deleted', () => {
@@ -47,22 +49,22 @@ describe('@delta/DocumentDeltaNormalizer', () => {
       const textAfterChange = `${head.slice(0, 1)}${head.slice(2, head.length)}Hello`
       const deltaAfterChange = mockDocumentDelta([
         { insert: textAfterChange },
-        { insert: '\n', attributes: { $type: 'ul' } }
+        { insert: '\n', attributes: { $type: 'ul' } },
       ])
-      const directives: NormalizeDirective[] = [{
-        beginningOfLineIndex: 0,
-        context: changeContext,
-        diff: makeDiffDelta(originalText, textAfterChange, {}),
-        type: NormalizeOperation.INVESTIGATE_DELETION
-      }]
+      const directives: NormalizeDirective[] = [
+        {
+          beginningOfLineIndex: 0,
+          context: changeContext,
+          diff: makeDiffDelta(originalText, textAfterChange, {}),
+          type: NormalizeOperation.INVESTIGATE_DELETION,
+        },
+      ]
       const normalizer = new DocumentDeltaNormalizer(deltaAfterChange)
       const { delta, overridingSelection } = normalizer.apply(directives)
-      expect(delta.ops).toEqual([
-        { insert: 'Hello\n' }
-      ])
+      expect(delta.ops).toEqual([{ insert: 'Hello\n' }])
       expect(overridingSelection).toMatchObject({
         start: 0,
-        end: 0
+        end: 0,
       })
     })
     it('should handle investigate deletion prefix directives after text replaced', () => {
@@ -72,22 +74,22 @@ describe('@delta/DocumentDeltaNormalizer', () => {
       const textAfterChange = `${head.slice(0, 1)}l${head.slice(2, head.length)}Hello`
       const deltaAfterChange = mockDocumentDelta([
         { insert: textAfterChange },
-        { insert: '\n', attributes: { $type: 'ul' } }
+        { insert: '\n', attributes: { $type: 'ul' } },
       ])
-      const directives: NormalizeDirective[] = [{
-        beginningOfLineIndex: 0,
-        context: changeContext,
-        diff: makeDiffDelta(originalText, textAfterChange, {}),
-        type: NormalizeOperation.INVESTIGATE_DELETION
-      }]
+      const directives: NormalizeDirective[] = [
+        {
+          beginningOfLineIndex: 0,
+          context: changeContext,
+          diff: makeDiffDelta(originalText, textAfterChange, {}),
+          type: NormalizeOperation.INVESTIGATE_DELETION,
+        },
+      ]
       const normalizer = new DocumentDeltaNormalizer(deltaAfterChange)
       const { delta, overridingSelection } = normalizer.apply(directives)
-      expect(delta.ops).toEqual([
-        { insert: `l${head.slice(2, head.length)}Hello\n` }
-      ])
+      expect(delta.ops).toEqual([{ insert: `l${head.slice(2, head.length)}Hello\n` }])
       expect(overridingSelection).toMatchObject({
         start: 1,
-        end: 1
+        end: 1,
       })
     })
     it('should handle check line type prefix directives', () => {
@@ -97,23 +99,22 @@ describe('@delta/DocumentDeltaNormalizer', () => {
       const textAfterChange = `${head.slice(0, 2)}l${head.slice(2, head.length)}Hello`
       const deltaAfterChange = mockDocumentDelta([
         { insert: textAfterChange },
-        { insert: '\n', attributes: { $type: 'ul' } }
+        { insert: '\n', attributes: { $type: 'ul' } },
       ])
-      const directives: NormalizeDirective[] = [{
-        beginningOfLineIndex: 0,
-        context: changeContext,
-        diff: makeDiffDelta(originalText, textAfterChange, {}),
-        type: NormalizeOperation.CHECK_LINE_TYPE_PREFIX
-      }]
+      const directives: NormalizeDirective[] = [
+        {
+          beginningOfLineIndex: 0,
+          context: changeContext,
+          diff: makeDiffDelta(originalText, textAfterChange, {}),
+          type: NormalizeOperation.CHECK_LINE_TYPE_PREFIX,
+        },
+      ]
       const normalizer = new DocumentDeltaNormalizer(deltaAfterChange)
       const { delta, overridingSelection } = normalizer.apply(directives)
-      expect(delta.ops).toEqual([
-        { insert: `${head}l Hello` },
-        { insert: '\n', attributes: { $type: 'ul' } }
-      ])
+      expect(delta.ops).toEqual([{ insert: `${head}l Hello` }, { insert: '\n', attributes: { $type: 'ul' } }])
       expect(overridingSelection).toMatchObject({
         start: head.length + 1,
-        end: head.length + 1
+        end: head.length + 1,
       })
     })
   })

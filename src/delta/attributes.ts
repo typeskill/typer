@@ -11,17 +11,19 @@ export interface BlockAttributesMap {
   [k: string]: any
 }
 
-export type TextAttributesMap<T extends string> = Partial<{
+type AttributesMap<T extends string> = {
   [key in T]: any
-}>
+}
+
+export type TextAttributesMap<T extends string> = Partial<AttributesMap<T>>
 
 /**
  * Recursively merge objects from right to left.
- * 
+ *
  * @remarks
- * 
+ *
  * `null` values are removed from the remaining object.
- * 
+ *
  * @param attributes - the attributes object to merge
  */
 export function mergeAttributesLeft(...attributes: BlockAttributesMap[]): BlockAttributesMap {
@@ -32,11 +34,14 @@ export const getTextAttributes = omit(['$type'])
 
 /**
  * This function returns attributes of the closest character before cursor.
- * 
+ *
  * @param delta The full rich text representation
- * @param cursorPosition 
+ * @param cursorPosition
  */
-export function getTextAttributesAtCursor<T extends string>(delta: GenericDelta, cursorPosition: number): TextAttributesMap<T> {
+export function getTextAttributesAtCursor<T extends string>(
+  delta: GenericDelta,
+  cursorPosition: number,
+): TextAttributesMap<T> {
   let lowerBound = 0
   const matchedOp = find((op: GenericOp) => {
     const len = Delta.Op.length(op)

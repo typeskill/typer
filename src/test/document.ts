@@ -16,16 +16,16 @@ export function mokBridgeInnerInterface(): Bridge.InnerInterface<any> {
     getTextTransformsReg: () => new TextTransformsRegistry(defaultTextTransforms),
     release: jest.fn(),
     setSelectedLineType: jest.fn(),
-    setSelectedTextAttributes: jest.fn()
+    setSelectedTextAttributes: jest.fn(),
   }
-}
-
-export function mockDocumentDeltaUpdate(ops?: GenericOp[]): DocumentDeltaUpdate {
-  return new DocumentDeltaUpdate(mockDocumentDelta(ops))
 }
 
 export function mockDocumentDelta(ops?: GenericOp[]): DocumentDelta {
   return new DocumentDelta(ops)
+}
+
+export function mockDocumentDeltaUpdate(ops?: GenericOp[]): DocumentDeltaUpdate {
+  return new DocumentDeltaUpdate(mockDocumentDelta(ops))
 }
 
 export function mockDocumentBlockInterface(): Document.BlockInterface<any> {
@@ -33,7 +33,7 @@ export function mockDocumentBlockInterface(): Document.BlockInterface<any> {
   const bridgeInnerInterface = mokBridgeInnerInterface()
   document.registerConsumer({
     bridgeInnerInterface,
-    handleOnDocumentStateUpdate: () => ({})
+    handleOnDocumentStateUpdate: () => ({}),
   })
   document.insertBlock(TextBlock)
   const block = document.getActiveBlock() as TextBlock<any>
@@ -43,6 +43,6 @@ export function mockDocumentBlockInterface(): Document.BlockInterface<any> {
     getDelta: block.getDelta.bind(block),
     updateDelta: block['updateDelta'].bind(block),
     onPressBackspaceFromOrigin: () => ({}),
-    onPressEnter: () => ({})
+    onPressEnter: () => ({}),
   }
 }

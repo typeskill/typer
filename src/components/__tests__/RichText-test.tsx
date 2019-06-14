@@ -11,7 +11,7 @@ describe('@components/<RichText>', () => {
   it('should renders without crashing', () => {
     const delta = mockDocumentDelta()
     const registry = new TextTransformsRegistry(defaultTextTransforms)
-    const richText = renderer.create(<RichText ops={delta.ops} textTransformsReg={registry}/>)
+    const richText = renderer.create(<RichText ops={delta.ops} textTransformsReg={registry} />)
     expect(richText).toBeTruthy()
   })
   it('should comply with document documentDelta by removing last newline character', () => {
@@ -20,17 +20,11 @@ describe('@components/<RichText>', () => {
       { insert: '\n', attributes: { $type: 'normal' } },
       { insert: 'ahah' },
       { insert: '\n', attributes: { $type: 'normal' } },
-      { insert: 'ohoh\n' }
+      { insert: 'ohoh\n' },
     ])
     const registry = new TextTransformsRegistry(defaultTextTransforms)
-    const richText = renderer.create(<RichText ops={delta.ops} textTransformsReg={registry}/>)
+    const richText = renderer.create(<RichText ops={delta.ops} textTransformsReg={registry} />)
     const textContent = flattenTextChild(richText.root)
-    expect(textContent.join('')).toEqual([
-      'eheh',
-      '\n',
-      'ahah',
-      '\n',
-      'ohoh'
-    ].join(''))
+    expect(textContent.join('')).toEqual(['eheh', '\n', 'ahah', '\n', 'ohoh'].join(''))
   })
 })

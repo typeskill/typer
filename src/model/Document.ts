@@ -28,7 +28,7 @@ declare namespace Document {
 /**
  * The Document class represents the content printed on the Sheet.
  * It exposes methods to apply transformations.
- * 
+ *
  */
 class Document<T extends string> {
   private consumer?: Document.Consumer<T>
@@ -50,8 +50,10 @@ class Document<T extends string> {
 
   private newBlock(BlockKind: BlockClass<T>) {
     invariant(this.consumer != null, 'A document consumer must be registered to create a block')
-    let delta: DocumentDelta|null = null
+    let delta: DocumentDelta | null = null
     if (this.consumer) {
+      // @ts-ignore
+      let block: Block<T> = null
       const blockIface: Document.BlockInterface<T> = Object.freeze({
         orchestrator: this.orchestrator,
         bridgeInnerInterface: this.consumer.bridgeInnerInterface,
@@ -63,9 +65,9 @@ class Document<T extends string> {
         },
         onPressBackspaceFromOrigin: () => this.handleOnPressBackspaceFromOriginFromBlock(block),
         onPressEnter: () => this.handleOnPressEnterFromBlock(block),
-        getDelta: () => delta as DocumentDelta
+        getDelta: () => delta as DocumentDelta,
       })
-      const block = new BlockKind(blockIface)
+      block = new BlockKind(blockIface)
       delta = new DocumentDelta()
       return block
     }
@@ -74,8 +76,8 @@ class Document<T extends string> {
 
   /**
    * **Lifecycle method**: must be called when consumer is ready to handle document events.
-   * 
-   * @param consumer 
+   *
+   * @param consumer
    */
   public registerConsumer(consumer: Document.Consumer<T>) {
     invariant(this.consumer === undefined, 'Only one document consumer can be registered at a time')
@@ -91,30 +93,33 @@ class Document<T extends string> {
         consumer.bridgeInnerInterface.setSelectedLineType(updateLineType)
       }
     })
-    consumer.bridgeInnerInterface.addApplyTextTransformToSelectionListener(this, (attributeName: T, attributeValue: any) => {
-      if (this.store.hasBlock()) {
-        const selectedBlock = this.store.getActiveBlock() as TextBlock<T>
-        invariant(selectedBlock instanceof TextBlock, 'Text Transforms can only be applied to a TextBlock')
-        const delta = selectedBlock.getDelta()
-        const selection = selectedBlock.getSelection()
-        // Apply transforms to selection range
-        const userAttributes = { [attributeName]: attributeValue }
-        const updatedDelta = delta.applyTextTransformToSelection(selection, attributeName, attributeValue)
-        const deltaAttributes = updatedDelta.getSelectedTextAttributes(selection)
-        const mergedCursorAttributes = selectedBlock.setCursorAttributes(userAttributes)
-        const attributes = mergeAttributesLeft(deltaAttributes, mergedCursorAttributes)
-        selectedBlock.updateDelta(updatedDelta)
-        consumer.bridgeInnerInterface.setSelectedTextAttributes(attributes)
-      }
-    })
+    consumer.bridgeInnerInterface.addApplyTextTransformToSelectionListener(
+      this,
+      (attributeName: T, attributeValue: any) => {
+        if (this.store.hasBlock()) {
+          const selectedBlock = this.store.getActiveBlock() as TextBlock<T>
+          invariant(selectedBlock instanceof TextBlock, 'Text Transforms can only be applied to a TextBlock')
+          const delta = selectedBlock.getDelta()
+          const selection = selectedBlock.getSelection()
+          // Apply transforms to selection range
+          const userAttributes = { [attributeName]: attributeValue }
+          const updatedDelta = delta.applyTextTransformToSelection(selection, attributeName, attributeValue)
+          const deltaAttributes = updatedDelta.getSelectedTextAttributes(selection)
+          const mergedCursorAttributes = selectedBlock.setCursorAttributes(userAttributes)
+          const attributes = mergeAttributesLeft(deltaAttributes, mergedCursorAttributes)
+          selectedBlock.updateDelta(updatedDelta)
+          consumer.bridgeInnerInterface.setSelectedTextAttributes(attributes)
+        }
+      },
+    )
     this.consumer = consumer
     this.insertBlock(TextBlock)
   }
 
   /**
    * **Lifecycle method**: must be called when consumer cannot handle document events anymore.
-   * 
-   * @param consumer 
+   *
+   * @param consumer
    */
   public releaseConsumer(consumer: Document.Consumer<T>) {
     this.store.removeListener(consumer.handleOnDocumentStateUpdate)

@@ -13,11 +13,12 @@ export interface DocumentLine extends GenericLine {
 
 export class LineWalker {
   public readonly ops: GenericOp[]
-  constructor(arg: GenericOp[]|GenericDelta) {
+
+  public constructor(arg: GenericOp[] | GenericDelta) {
     this.ops = isGenericDelta(arg) ? arg.ops : arg
   }
 
-  eachLine(predicate: (line: DocumentLine) => void) {
+  public eachLine(predicate: (line: DocumentLine) => void) {
     const generator = new DocumentLineIndexGenerator()
     let firstLineCharAt = 0
     new Delta(this.ops).eachLine((delta, attributes, index) => {
@@ -32,12 +33,12 @@ export class LineWalker {
         delta,
         lineType,
         lineTypeIndex,
-        index
+        index,
       })
     })
   }
 
-  getLines() {
+  public getLines() {
     const lines: DocumentLine[] = []
     this.eachLine(l => lines.push(l))
     return lines

@@ -12,8 +12,8 @@ export interface TextBlockControllerProps<T extends string> {
 
 export interface TextBlockControllerState {
   isControlingState: boolean
-  overridingSelection: Selection|null
-  ops: GenericOp[]|null
+  overridingSelection: Selection | null
+  ops: GenericOp[] | null
 }
 
 export type TextBlockComponent = ClassicComponent<TextBlockControllerProps<any>, TextBlockControllerState>

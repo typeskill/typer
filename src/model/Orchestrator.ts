@@ -21,7 +21,9 @@ class Orchestrator {
   private controllersEmitters: Map<number, EventEmitter<Orchestrator.SheetControllerEvent>> = new Map()
   private interfaces: Map<number, Orchestrator.BlockControllerInterface> = new Map()
 
-  private makeBlockControllerInterfaceForInstance(inputControllerInstance: number): Orchestrator.BlockControllerInterface {
+  private makeBlockControllerInterfaceForInstance(
+    inputControllerInstance: number,
+  ): Orchestrator.BlockControllerInterface {
     const inputCInterface = {
       release: () => {
         const emitter = this.controllersEmitters.get(inputControllerInstance)
@@ -31,34 +33,41 @@ class Orchestrator {
         }
         this.interfaces.delete(inputControllerInstance)
       },
-      addListener: (eventType: Orchestrator.SheetControllerEvent, listener: Orchestrator.SheetControllerEventListener) => {
+      addListener: (
+        eventType: Orchestrator.SheetControllerEvent,
+        listener: Orchestrator.SheetControllerEventListener,
+      ) => {
         let emitter = this.controllersEmitters.get(inputControllerInstance)
         if (!emitter) {
           emitter = new EventEmitter()
           this.controllersEmitters.set(inputControllerInstance, emitter)
         }
         emitter.addListener(eventType, listener)
-      }
+      },
     }
     this.interfaces.set(inputControllerInstance, inputCInterface)
     return inputCInterface
   }
 
-  emitToBlockController(inputControllerInstance: number, eventType: Orchestrator.SheetControllerEvent, ...payload: any[]): void {
+  public emitToBlockController(
+    inputControllerInstance: number,
+    eventType: Orchestrator.SheetControllerEvent,
+    ...payload: any[]
+  ): void {
     const controller = this.controllersEmitters.get(inputControllerInstance)
     if (controller) {
       controller.emit(eventType, ...payload)
     }
   }
 
-  getblockControllerInterfaceForIndex(blockControllerInstance: number): Orchestrator.BlockControllerInterface {
+  public getblockControllerInterfaceForIndex(blockControllerInstance: number): Orchestrator.BlockControllerInterface {
     if (!this.interfaces.has(blockControllerInstance)) {
       return this.makeBlockControllerInterfaceForInstance(blockControllerInstance)
     }
     return this.interfaces.get(blockControllerInstance) as Orchestrator.BlockControllerInterface
   }
 
-  release() {
+  public release() {
     for (const emitter of this.controllersEmitters.values()) {
       emitter.removeAllListeners()
     }

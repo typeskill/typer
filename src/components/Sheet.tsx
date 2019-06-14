@@ -12,8 +12,8 @@ const styles = StyleSheet.create({
   root: {
     flex: 1,
     alignSelf: 'stretch',
-    padding: 10
-  }
+    padding: 10,
+  },
 })
 
 declare namespace Sheet {
@@ -28,13 +28,12 @@ declare namespace Sheet {
 }
 
 class Sheet<T extends string> extends PureComponent<Sheet.Props<T>, Store.State> {
-
   private document: Document<T>
   private docConsumer: Document.Consumer<T>
 
-  state: Store.State = getStoreInitialState()
+  public state: Store.State = getStoreInitialState()
 
-  constructor(props: Sheet.Props<T>) {
+  public constructor(props: Sheet.Props<T>) {
     super(props)
     const { bridgeInnerInterface } = this.props
     invariant(bridgeInnerInterface != null, 'bridgeInnerInterface prop is required')
@@ -43,7 +42,7 @@ class Sheet<T extends string> extends PureComponent<Sheet.Props<T>, Store.State>
       bridgeInnerInterface,
       handleOnDocumentStateUpdate: (state: Store.State) => {
         this.setState(state, () => this.forceUpdate())
-      }
+      },
     })
   }
 
@@ -51,27 +50,31 @@ class Sheet<T extends string> extends PureComponent<Sheet.Props<T>, Store.State>
   private renderTextBlockController(blockInstanceNumber: number, index: number) {
     const block: TextBlock<any> = this.document.getBlock(blockInstanceNumber) as TextBlock<any>
     const key = `block-controller-${blockInstanceNumber}`
-    return (
-      <TextBlockController<T> key={key} textBlock={block} grow={true} />
-    )
+    return <TextBlockController<T> key={key} textBlock={block} grow={true} />
   }
 
-  componentDidMount() {
+  public componentDidMount() {
     this.document.registerConsumer(this.docConsumer)
   }
 
-  componentWillUnmount() {
+  public componentWillUnmount() {
     this.document.releaseConsumer(this.docConsumer)
   }
 
-  componentDidUpdate(oldProps: Sheet.Props<T>, oldState: Store.State) {
-    invariant(oldProps.bridgeInnerInterface === this.props.bridgeInnerInterface, 'bridgeInnerInterface prop cannot be changed after instantiation')
-    if (this.state.selectedBlockInstanceNumber !== oldState.selectedBlockInstanceNumber && this.state.selectedBlockInstanceNumber !== null) {
+  public componentDidUpdate(oldProps: Sheet.Props<T>, oldState: Store.State) {
+    invariant(
+      oldProps.bridgeInnerInterface === this.props.bridgeInnerInterface,
+      'bridgeInnerInterface prop cannot be changed after instantiation',
+    )
+    if (
+      this.state.selectedBlockInstanceNumber !== oldState.selectedBlockInstanceNumber &&
+      this.state.selectedBlockInstanceNumber !== null
+    ) {
       this.document.emitToBlock('FOCUS_REQUEST', this.state.selectedBlockInstanceNumber)
     }
   }
 
-  render() {
+  public render() {
     return (
       <View style={[styles.root, this.props.contentContainerStyle]}>
         {this.state.blockOrders.map((instanceNumber, index) => this.renderTextBlockController(instanceNumber, index))}

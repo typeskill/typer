@@ -15,7 +15,7 @@ describe('@delta/Selection', () => {
       const selection = Selection.fromBounds(0, 1)
       expect(selection.touchesIndex(1)).toBe(true)
     })
-    it('should be false when index doesn\'t touch the edge of selection', () => {
+    it("should be false when index doesn't touch the edge of selection", () => {
       const selection = Selection.fromBounds(0, 1)
       expect(selection.touchesIndex(2)).toBe(false)
     })
@@ -25,7 +25,7 @@ describe('@delta/Selection', () => {
       const selection = Selection.fromBounds(0, 1)
       expect(selection.touchesSelection(Selection.fromBounds(1, 1))).toBe(true)
     })
-    it('should be false when param selection doesn\'t touch the edge of selection', () => {
+    it("should be false when param selection doesn't touch the edge of selection", () => {
       const selection = Selection.fromBounds(0, 1)
       expect(selection.touchesSelection(Selection.fromBounds(2, 2))).toBe(false)
     })
@@ -36,7 +36,7 @@ describe('@delta/Selection', () => {
       const selection2 = Selection.fromBounds(1, 3)
       expect(selection1.intersection(selection2)).toMatchObject({
         start: 1,
-        end: 2
+        end: 2,
       })
     })
     it('should return null when selection 2 start equals selection 1 end', () => {

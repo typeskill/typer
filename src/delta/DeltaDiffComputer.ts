@@ -13,18 +13,18 @@ import zip from 'ramda/es/zip'
 export enum NormalizeOperation {
   INSERT_LINE_TYPE_PREFIX,
   INVESTIGATE_DELETION,
-  CHECK_LINE_TYPE_PREFIX
+  CHECK_LINE_TYPE_PREFIX,
 }
 
 export interface NormalizeDirective {
-  type: NormalizeOperation,
-  beginningOfLineIndex: number,
-  context: DeltaChangeContext,
+  type: NormalizeOperation
+  beginningOfLineIndex: number
+  context: DeltaChangeContext
   diff: Delta
 }
 
 export interface DeltaDiffReport {
-  delta: Delta,
+  delta: Delta
   directives: NormalizeDirective[]
 }
 
@@ -46,14 +46,15 @@ export interface DeltaDiffModel {
 }
 
 export class DeltaDiffComputer {
-
   private readonly diffContext: TextDiffContext
 
-  constructor(model: DeltaDiffModel, delta: DocumentDelta) {
+  public constructor(model: DeltaDiffModel, delta: DocumentDelta) {
     const { context, cursorTextAttributes, newText: newTextRaw, oldText: oldTextRaw } = model
     const selectedTextAttributes = delta.getSelectedTextAttributes(context.selectionBeforeChange)
     const selectionBeforeChangeLength = context.selectionBeforeChange.end - context.selectionBeforeChange.start
-    const textAttributes = selectionBeforeChangeLength ? selectedTextAttributes : mergeAttributesLeft(selectedTextAttributes, cursorTextAttributes)
+    const textAttributes = selectionBeforeChangeLength
+      ? selectedTextAttributes
+      : mergeAttributesLeft(selectedTextAttributes, cursorTextAttributes)
     const lineTypeBeforeChange = delta.getLineTypeInSelection(context.selectionBeforeChange)
     const oldText = new Text(oldTextRaw)
     const newText = new Text(newTextRaw)
@@ -66,7 +67,7 @@ export class DeltaDiffComputer {
       textAttributes,
       lineAttributes,
       directiveBuilder,
-      lineTypeBeforeChange
+      lineTypeBeforeChange,
     }
   }
 
@@ -76,7 +77,10 @@ export class DeltaDiffComputer {
     const lineAfterChangeSelection = newText.getSelectionEncompassingLines(context.selectionAfterChange)
     const lineChangeContext = new DeltaChangeContext(lineBeforeChangeSelection, lineAfterChangeSelection)
     const selectionTraversalBeforeChange = lineChangeContext.deleteTraversal()
-    const selectionTraversalAfterChange = Selection.between(selectionTraversalBeforeChange.start, lineAfterChangeSelection.end)
+    const selectionTraversalAfterChange = Selection.between(
+      selectionTraversalBeforeChange.start,
+      lineAfterChangeSelection.end,
+    )
     const buffer = new DeltaBuffer()
     const textBeforeChange = originalText.select(selectionTraversalBeforeChange)
     const textAfterChange = newText.select(selectionTraversalAfterChange)
@@ -90,7 +94,11 @@ export class DeltaDiffComputer {
     // Replaced lines
     replacedLines.forEach(([lineBefore, lineAfter]) => {
       const lineDelta = makeDiffDelta(lineBefore.text, lineAfter.text, textAttributes)
-      if (isLineTypeTextLengthModifier(lineType) && context.isDeletion() && lineAfter.lineRange.touchesSelection(context.selectionAfterChange)) {
+      if (
+        isLineTypeTextLengthModifier(lineType) &&
+        context.isDeletion() &&
+        lineAfter.lineRange.touchesSelection(context.selectionAfterChange)
+      ) {
         directiveBuilder.pushDirective(NormalizeOperation.INVESTIGATE_DELETION, lineAfter.lineRange.start, lineDelta)
       } else if (isLineTypeTextLengthModifier(lineType)) {
         directiveBuilder.pushDirective(NormalizeOperation.CHECK_LINE_TYPE_PREFIX, lineAfter.lineRange.start, lineDelta)
@@ -99,13 +107,13 @@ export class DeltaDiffComputer {
         lineDelta.insert('\n', shouldPropagateLineType ? lineAttributes : {})
       } else {
         lineDelta.retain(1) // Keep first newline
-        shouldDeleteNextNewline = context.isDeletion() &&
-                            selectionTraversalBeforeChange.touchesIndex(lineBefore.lineRange.end)
+        shouldDeleteNextNewline =
+          context.isDeletion() && selectionTraversalBeforeChange.touchesIndex(lineBefore.lineRange.end)
       }
       buffer.push(lineDelta)
     })
     // Inserted lines
-    linesAfterChange.slice(replacedLines.length).forEach((lineAfter) => {
+    linesAfterChange.slice(replacedLines.length).forEach(lineAfter => {
       const lineDelta = makeDiffDelta('', lineAfter.text, textAttributes)
       lineDelta.insert('\n', shouldPropagateLineType ? lineAttributes : {})
       if (isLineTypeTextLengthModifier(lineTypeBeforeChange)) {
@@ -114,7 +122,7 @@ export class DeltaDiffComputer {
       buffer.push(lineDelta)
     })
     // Deleted lines
-    linesBeforeChange.slice(replacedLines.length).forEach((lineBefore) => {
+    linesBeforeChange.slice(replacedLines.length).forEach(lineBefore => {
       const { start: beginningOfLineIndex } = lineBefore.lineRange
       const lineDelta = makeDiffDelta(lineBefore.text, '', textAttributes)
       if (beginningOfLineIndex < selectionTraversalBeforeChange.end || shouldDeleteNextNewline) {
@@ -126,7 +134,7 @@ export class DeltaDiffComputer {
     return buffer.compose()
   }
 
-  toDeltaDiffReport(): DeltaDiffReport {
+  public toDeltaDiffReport(): DeltaDiffReport {
     const { oldText, directiveBuilder } = this.diffContext
     const delta = this.computeGenericDelta(oldText, this.diffContext)
     const directives = directiveBuilder.build()

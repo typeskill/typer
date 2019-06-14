@@ -6,20 +6,20 @@ export class NormalizeDirectiveBuilder {
   private directives: NormalizeDirective[] = []
   private context: DeltaChangeContext
 
-  constructor(context: DeltaChangeContext) {
+  public constructor(context: DeltaChangeContext) {
     this.context = context
   }
 
-  pushDirective(type: NormalizeOperation, beginningOfLineIndex: number, diff: Delta) {
+  public pushDirective(type: NormalizeOperation, beginningOfLineIndex: number, diff: Delta) {
     this.directives.push({
       type,
       diff,
       beginningOfLineIndex,
-      context: this.context
+      context: this.context,
     })
   }
 
-  build() {
+  public build() {
     return this.directives
   }
 }

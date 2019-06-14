@@ -15,16 +15,16 @@ export enum ControlAction {
   SELECT_TEXT_UNDERLINE,
   SELECT_TEXT_STRIKETHROUGH,
   SELECT_LINES_ORDERED_LIST,
-  SELECT_LINES_UNORDERED_LIST
+  SELECT_LINES_UNORDERED_LIST,
 }
 
 declare namespace Toolbar {
   export interface ControlSpec<T extends object> {
-    IconComponent: ComponentType<TextControlMinimalIconProps & T>,
+    IconComponent: ComponentType<TextControlMinimalIconProps & T>
     actionType: ControlAction
     iconProps?: T
   }
-  export type Layout = (ControlSpec<any>|typeof TEXT_CONTROL_SEPARATOR)[]
+  export type Layout = (ControlSpec<any> | typeof TEXT_CONTROL_SEPARATOR)[]
   export interface Props {
     bridgeOuterInferface: Bridge.OuterInterface<BaseTextTransformAttribute>
     layout: Layout
@@ -39,7 +39,7 @@ declare namespace Toolbar {
     iconSpacing?: number
   }
   export interface TextControlMinimalIconProps {
-    color: string,
+    color: string
     size: number
   }
 
@@ -54,27 +54,37 @@ interface ToolbarState {
 }
 
 interface ButtonProps {
-  selected: boolean,
+  selected: boolean
   IconComponent: ComponentType<Toolbar.TextControlMinimalIconProps>
-  onPress?: () => void,
-  style?: StyleProp<ViewStyle>,
+  onPress?: () => void
+  style?: StyleProp<ViewStyle>
   iconProps?: object
 }
 
 const DEFAULT_ICON_SIZE = 32
 
-export class Toolbar extends PureComponent<Toolbar.Props, ToolbarState> {
+const styles = StyleSheet.create({
+  container: {
+    paddingVertical: 5,
+    flexDirection: 'row',
+    borderTopLeftRadius: 10,
+    borderTopRightRadius: 10,
+  },
+})
 
-  static propTypes = {
+export class Toolbar extends PureComponent<Toolbar.Props, ToolbarState> {
+  public static propTypes = {
     bridgeOuterInferface: PropTypes.object.isRequired,
-    layout: PropTypes.arrayOf(PropTypes.oneOfType([
-      PropTypes.symbol,
-      PropTypes.shape({
-        IconComponent: PropTypes.func.isRequired,
-        actionType: PropTypes.number.isRequired,
-        iconProps: PropTypes.object
-      })
-    ])),
+    layout: PropTypes.arrayOf(
+      PropTypes.oneOfType([
+        PropTypes.symbol,
+        PropTypes.shape({
+          IconComponent: PropTypes.func.isRequired,
+          actionType: PropTypes.number.isRequired,
+          iconProps: PropTypes.object,
+        }),
+      ]),
+    ),
     defaultButtonBackgroundColor: PropTypes.string,
     defaultButtonColor: PropTypes.string,
     selectedButtonBackgroundColor: PropTypes.string,
@@ -83,40 +93,41 @@ export class Toolbar extends PureComponent<Toolbar.Props, ToolbarState> {
     style: ViewPropTypes.style,
     contentContainerStyle: ViewPropTypes.style,
     iconSize: PropTypes.number,
-    iconSpacing: PropTypes.number
+    iconSpacing: PropTypes.number,
   }
 
-  static defaultProps = {
+  public static defaultProps = {
     defaultButtonBackgroundColor: 'transparent',
     defaultButtonColor: '#3a404c',
     selectedButtonBackgroundColor: 'transparent',
     selectedButtonColor: '#4286f4',
     separatorColor: '#646e82',
-    iconSize: DEFAULT_ICON_SIZE
+    iconSize: DEFAULT_ICON_SIZE,
   }
 
   private outerInterface: Bridge.OuterInterface<BaseTextTransformAttribute>
 
-  state: ToolbarState = {
+  public state: ToolbarState = {
     selectedAttributes: {},
-    selectedLineType: 'normal'
+    selectedLineType: 'normal',
   }
 
-  constructor(props: Toolbar.Props) {
+  public constructor(props: Toolbar.Props) {
     super(props)
     this.outerInterface = props.bridgeOuterInferface
     invariant(props.bridgeOuterInferface != null, 'bridgeOuterInferface prop is required')
   }
 
-  private Separator: SFC<{}> = () => React.createElement(View, {
-    style: {
-      height: this.props.iconSize,
-      width: 2,
-      backgroundColor: this.props.separatorColor,
-      marginRight: this.computeIconSpacing() * 2,
-      marginLeft: this.computeIconSpacing()
-    }
-  })
+  private Separator: SFC<{}> = () =>
+    React.createElement(View, {
+      style: {
+        height: this.props.iconSize,
+        width: 2,
+        backgroundColor: this.props.separatorColor,
+        marginRight: this.computeIconSpacing() * 2,
+        marginLeft: this.computeIconSpacing(),
+      },
+    })
 
   private IconButton: SFC<ButtonProps> = ({ onPress, selected, style, IconComponent, iconProps }) => {
     const dynamicStyle = selected ? this.getSelectedButtonStyle() : this.getDefaultButtonStyle()
@@ -130,19 +141,20 @@ export class Toolbar extends PureComponent<Toolbar.Props, ToolbarState> {
   private getDefaultButtonStyle() {
     return {
       color: this.props.defaultButtonColor,
-      backgroundColor: this.props.defaultButtonBackgroundColor
+      backgroundColor: this.props.defaultButtonBackgroundColor,
     }
   }
 
   private getSelectedButtonStyle() {
     return {
       color: this.props.selectedButtonColor,
-      backgroundColor: this.props.selectedButtonBackgroundColor
+      backgroundColor: this.props.selectedButtonBackgroundColor,
     }
   }
 
   private applyTextTransformToSelection(attributeName: BaseTextTransformAttribute, activeAttributeValue: any) {
-    const nextAttributeValue = this.state.selectedAttributes[attributeName] === activeAttributeValue ? null : activeAttributeValue
+    const nextAttributeValue =
+      this.state.selectedAttributes[attributeName] === activeAttributeValue ? null : activeAttributeValue
     return () => {
       this.outerInterface.applyTextTransformToSelection(attributeName, nextAttributeValue)
     }
@@ -155,40 +167,60 @@ export class Toolbar extends PureComponent<Toolbar.Props, ToolbarState> {
   }
 
   private computeIconSpacing() {
-    return typeof this.props.iconSpacing === 'number' ? this.props.iconSpacing : this.props.iconSize as number / 3
+    return typeof this.props.iconSpacing === 'number' ? this.props.iconSpacing : (this.props.iconSize as number) / 3
   }
 
-  private renderTextTransformController(attributeName: BaseTextTransformAttribute, activeAttributeValue: any, textControlSpec: Toolbar.ControlSpec<any>, last: boolean = false) {
+  private renderTextTransformController(
+    attributeName: BaseTextTransformAttribute,
+    activeAttributeValue: any,
+    textControlSpec: Toolbar.ControlSpec<any>,
+    last: boolean = false,
+  ) {
     const { selectedAttributes } = this.state
     const IconButton = this.IconButton
     return (
-      <IconButton selected={selectedAttributes[attributeName] === activeAttributeValue}
-                  style={last ? undefined : { marginRight: this.computeIconSpacing() }}
-                  IconComponent={textControlSpec.IconComponent}
-                  iconProps={textControlSpec.iconProps}
-                  onPress={this.applyTextTransformToSelection(attributeName, activeAttributeValue)} />
-
+      <IconButton
+        selected={selectedAttributes[attributeName] === activeAttributeValue}
+        style={last ? undefined : { marginRight: this.computeIconSpacing() }}
+        IconComponent={textControlSpec.IconComponent}
+        iconProps={textControlSpec.iconProps}
+        onPress={this.applyTextTransformToSelection(attributeName, activeAttributeValue)}
+      />
     )
   }
 
-  private renderLineTransformController(lineType: TextLineType, textControlSpec: Toolbar.ControlSpec<any>, last: boolean = false) {
+  private renderLineTransformController(
+    lineType: TextLineType,
+    textControlSpec: Toolbar.ControlSpec<any>,
+    last: boolean = false,
+  ) {
     const { selectedLineType } = this.state
     const IconButton = this.IconButton
-    return <IconButton selected={selectedLineType === lineType}
-                       style={last ? undefined : { marginRight: this.computeIconSpacing() }}
-                       IconComponent={textControlSpec.IconComponent}
-                       iconProps={textControlSpec.iconProps}
-                       onPress={this.applyLineTransformToSelection(lineType)} />
+    return (
+      <IconButton
+        selected={selectedLineType === lineType}
+        style={last ? undefined : { marginRight: this.computeIconSpacing() }}
+        IconComponent={textControlSpec.IconComponent}
+        iconProps={textControlSpec.iconProps}
+        onPress={this.applyLineTransformToSelection(lineType)}
+      />
+    )
   }
 
   private renderIconControl(textControlSpec: Toolbar.ControlSpec<any>, last: boolean) {
     switch (textControlSpec.actionType) {
-    case ControlAction.SELECT_TEXT_BOLD: return this.renderTextTransformController('bold', true, textControlSpec, last)
-    case ControlAction.SELECT_TEXT_ITALIC: return this.renderTextTransformController('italic', true, textControlSpec, last)
-    case ControlAction.SELECT_TEXT_UNDERLINE: return this.renderTextTransformController('textDecoration', 'underline', textControlSpec, last)
-    case ControlAction.SELECT_TEXT_STRIKETHROUGH: return this.renderTextTransformController('textDecoration', 'strikethrough', textControlSpec, last)
-    case ControlAction.SELECT_LINES_UNORDERED_LIST: return this.renderLineTransformController('ul', textControlSpec, last)
-    case ControlAction.SELECT_LINES_ORDERED_LIST: return this.renderLineTransformController('ol', textControlSpec, last)
+      case ControlAction.SELECT_TEXT_BOLD:
+        return this.renderTextTransformController('bold', true, textControlSpec, last)
+      case ControlAction.SELECT_TEXT_ITALIC:
+        return this.renderTextTransformController('italic', true, textControlSpec, last)
+      case ControlAction.SELECT_TEXT_UNDERLINE:
+        return this.renderTextTransformController('textDecoration', 'underline', textControlSpec, last)
+      case ControlAction.SELECT_TEXT_STRIKETHROUGH:
+        return this.renderTextTransformController('textDecoration', 'strikethrough', textControlSpec, last)
+      case ControlAction.SELECT_LINES_UNORDERED_LIST:
+        return this.renderLineTransformController('ul', textControlSpec, last)
+      case ControlAction.SELECT_LINES_ORDERED_LIST:
+        return this.renderLineTransformController('ol', textControlSpec, last)
     }
   }
 
@@ -204,27 +236,34 @@ export class Toolbar extends PureComponent<Toolbar.Props, ToolbarState> {
     })
   }
 
-  componentDidMount() {
-    this.outerInterface.addSelectedAttributesChangeListener(this, (selectedAttributes) => {
+  public componentDidMount() {
+    this.outerInterface.addSelectedAttributesChangeListener(this, selectedAttributes => {
       this.setState({ selectedAttributes })
     })
-    this.outerInterface.addSelectedLineTypeChangeListener(this, (selectedLineType) => {
+    this.outerInterface.addSelectedLineTypeChangeListener(this, selectedLineType => {
       this.setState({ selectedLineType })
     })
   }
 
-  componentWillReceiveProps(nextProps: Toolbar.Props) {
-    invariant(nextProps.bridgeOuterInferface === this.props.bridgeOuterInferface, "bridgeOuterInferface prop cannot be changed during Toolbar's lifetime.")
+  public componentWillReceiveProps(nextProps: Toolbar.Props) {
+    invariant(
+      nextProps.bridgeOuterInferface === this.props.bridgeOuterInferface,
+      "bridgeOuterInferface prop cannot be changed during Toolbar's lifetime.",
+    )
   }
 
-  componentWillUnmount() {
+  public componentWillUnmount() {
     this.outerInterface.release(this)
   }
 
-  render() {
+  public render() {
     return (
       <View style={[{ flexDirection: 'row', justifyContent: 'center' }, this.props.style]}>
-        <View style={[[{ paddingHorizontal: this.computeIconSpacing() }, styles.container, this.props.contentContainerStyle]]}>
+        <View
+          style={[
+            [{ paddingHorizontal: this.computeIconSpacing() }, styles.container, this.props.contentContainerStyle],
+          ]}
+        >
           {this.renderIconControlsMap()}
         </View>
       </View>
@@ -232,19 +271,14 @@ export class Toolbar extends PureComponent<Toolbar.Props, ToolbarState> {
   }
 }
 
-const styles = StyleSheet.create({
-  container: {
-    paddingVertical: 5,
-    flexDirection: 'row',
-    borderTopLeftRadius: 10,
-    borderTopRightRadius: 10
-  }
-})
-
-export function buildVectorIconControlSpec(IconComponent: ComponentType<Toolbar.VectorIconMinimalProps>, actionType: ControlAction, name: string) {
+export function buildVectorIconControlSpec(
+  IconComponent: ComponentType<Toolbar.VectorIconMinimalProps>,
+  actionType: ControlAction,
+  name: string,
+) {
   return {
     actionType,
     IconComponent,
-    iconProps: { name }
+    iconProps: { name },
   }
 }

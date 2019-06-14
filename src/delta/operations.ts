@@ -6,7 +6,7 @@ interface OpBase {
 }
 
 export interface GenericOp extends OpBase {
-  insert?: string|object
+  insert?: string | object
   attributes?: GenericAttributesMap
 }
 

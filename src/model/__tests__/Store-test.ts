@@ -13,12 +13,16 @@ function newTextBlock(): TextBlock<any> {
   return new TextBlock({
     bridgeInnerInterface: new Bridge().getInnerInterface(),
     getDelta: () => delta,
-    onPressBackspaceFromOrigin: () => { /** */ },
-    onPressEnter: () => { /** */ },
+    onPressBackspaceFromOrigin: () => {
+      /** */
+    },
+    onPressEnter: () => {
+      /** */
+    },
     orchestrator: new Orchestrator(),
     updateDelta: (nuDelta: DocumentDeltaUpdate) => {
       delta = nuDelta.finalDelta
-    }
+    },
   })
 }
 
@@ -35,7 +39,7 @@ describe('@model/Store', () => {
       const store = new Store()
       store['updateState']({
         selectedBlockInstanceNumber: 0,
-        blockOrders: [0]
+        blockOrders: [0],
       })
       setBlockInstanceNumber(1)
       store.appendBlock(newTextBlock())
@@ -49,7 +53,7 @@ describe('@model/Store', () => {
       setBlockInstanceNumber(2)
       store['updateState']({
         selectedBlockInstanceNumber: 1,
-        blockOrders: [0, 1]
+        blockOrders: [0, 1],
       })
       store.deleteBlock(1)
       expect(store['state'].blockOrders).toEqual([0])
@@ -58,7 +62,7 @@ describe('@model/Store', () => {
       const store = new Store()
       store['updateState']({
         selectedBlockInstanceNumber: 1,
-        blockOrders: [0, 1]
+        blockOrders: [0, 1],
       })
       store.deleteBlock(1)
       expect(store['state'].selectedBlockInstanceNumber).toEqual(0)

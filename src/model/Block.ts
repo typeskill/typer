@@ -16,9 +16,7 @@ export abstract class Block<T extends string = any> {
   protected blockInterface: Document.BlockInterface<T>
   protected selection = Selection.fromBounds(0)
 
-  constructor(
-     blockInterface: Document.BlockInterface<T>
-  ) {
+  public constructor(blockInterface: Document.BlockInterface<T>) {
     // tslint:disable-next-line:no-increment-decrement
     this.instanceNumber = lastInstanceNumber++
     this.blockInterface = blockInterface
@@ -26,36 +24,36 @@ export abstract class Block<T extends string = any> {
 
   abstract getLength(): number
 
-  getSelection(): Selection {
+  public getSelection(): Selection {
     return this.selection
   }
 
   abstract handleOnSelectionChange(s: Selection): void
 
-  updateDelta(documentDeltaUpdate: DocumentDeltaUpdate) {
+  public updateDelta(documentDeltaUpdate: DocumentDeltaUpdate) {
     this.selection = documentDeltaUpdate.intermediaryOverridingSelection || this.selection
     this.blockInterface.updateDelta(documentDeltaUpdate)
   }
 
-  getDelta(): DocumentDelta {
+  public getDelta(): DocumentDelta {
     return this.blockInterface.getDelta()
   }
 
-  getInstanceNumber(): number {
+  public getInstanceNumber(): number {
     return this.instanceNumber
   }
 
-  getControllerInterface(): Orchestrator.BlockControllerInterface {
+  public getControllerInterface(): Orchestrator.BlockControllerInterface {
     return this.blockInterface.orchestrator.getblockControllerInterfaceForIndex(this.getInstanceNumber())
   }
 
   @boundMethod
-  handleOnSubmitEditing() {
+  public handleOnSubmitEditing() {
     this.blockInterface.onPressEnter()
   }
 
   @boundMethod
-  handleOnKeyPress(key: string) {
+  public handleOnKeyPress(key: string) {
     const { start, end } = this.getSelection()
     if (key === 'Backspace' && start === 0 && end === 0) {
       this.blockInterface.onPressBackspaceFromOrigin()
@@ -63,4 +61,4 @@ export abstract class Block<T extends string = any> {
   }
 }
 
-export type BlockClass<T extends string> = new(blockIface: Document.BlockInterface<T>) => Block<T>
+export type BlockClass<T extends string> = new (blockIface: Document.BlockInterface<T>) => Block<T>

@@ -8,24 +8,30 @@ import { Document } from '@model/Document'
 import { Bridge } from '@core/Bridge'
 import { TextBlock } from '@model/TextBlock'
 import { RichText } from '@components/RichText'
-import { TextBlockController, INVARIANT_MANDATORY_TEXT_BLOCK_PROP, TextBlockControllerProps } from '@components/TextBlockController'
+import {
+  TextBlockController,
+  INVARIANT_MANDATORY_TEXT_BLOCK_PROP,
+  TextBlockControllerProps,
+} from '@components/TextBlockController'
 import { mockSelectionChangeEvent, flattenTextChild } from '@test/vdom'
 
 function buildDocumentConsumer() {
   const bridge = new Bridge()
   const document = new Document<BaseTextTransformAttribute>()
-  const handleOnDocumentStateUpdate = () => ({ /** */ })
+  const handleOnDocumentStateUpdate = () => ({
+    /** */
+  })
   const getDelta = () => document.getActiveBlock().getDelta()
   const docConsumer: Document.Consumer<any> = {
     handleOnDocumentStateUpdate,
-    bridgeInnerInterface: bridge.getInnerInterface()
+    bridgeInnerInterface: bridge.getInnerInterface(),
   }
   return {
     bridge,
     document,
     docConsumer,
     handleOnDocumentStateUpdate,
-    getDelta
+    getDelta,
   }
 }
 
@@ -34,10 +40,10 @@ function getTextInputDefaultProps(): TextBlockControllerProps<BaseTextTransformA
   const document = new Document<BaseTextTransformAttribute>()
   document.registerConsumer({
     handleOnDocumentStateUpdate: () => ({}),
-    bridgeInnerInterface: bridge.getInnerInterface()
+    bridgeInnerInterface: bridge.getInnerInterface(),
   })
   return {
-    textBlock: document.getActiveBlock() as TextBlock<any>
+    textBlock: document.getActiveBlock() as TextBlock<any>,
   }
 }
 
@@ -77,7 +83,7 @@ describe('@components/<TextBlockController>', () => {
     document.registerConsumer(docConsumer)
     const block = document.getActiveBlock() as TextBlock<any>
     const listenerObj = {
-      listener: () => ({})
+      listener: () => ({}),
     }
     const spy = jest.spyOn(listenerObj, 'listener')
     bridge.getOuterInterface().addSelectedAttributesChangeListener(listenerObj, spy as any)
@@ -92,27 +98,25 @@ describe('@components/<TextBlockController>', () => {
     document.registerConsumer(docConsumer)
     const block = document.getActiveBlock() as TextBlock<any>
     const wrapper = renderer.create(<TextBlockController textBlock={block} />)
-    const textBlockController = wrapper.getInstance() as unknown as TextBlockController<any>
+    const textBlockController = (wrapper.getInstance() as unknown) as TextBlockController<any>
     expect(textBlockController).toBeInstanceOf(TextBlockController)
     textBlockController['handleOnTextChanged']('This is nu text')
     textBlockController['handleOnSelectionChangeEvent'](mockSelectionChangeEvent(15, 15))
     await runAllTimers()
-    expect(getDelta().ops).toEqual([
-      { insert: 'This is nu text\n' }
-    ])
+    expect(getDelta().ops).toEqual([{ insert: 'This is nu text\n' }])
   })
   it('should stay in sync with textBlock', async () => {
     const { document, docConsumer } = buildDocumentConsumer()
     document.registerConsumer(docConsumer)
     const block = document.getActiveBlock() as TextBlock<any>
     const wrapper = renderer.create(<TextBlockController textBlock={block} />)
-    const textBlockController = wrapper.getInstance() as unknown as TextBlockController<any>
+    const textBlockController = (wrapper.getInstance() as unknown) as TextBlockController<any>
     expect(textBlockController).toBeInstanceOf(TextBlockController)
     textBlockController['handleOnTextChanged']('This is nu text\nBlah')
     textBlockController['handleOnSelectionChangeEvent'](mockSelectionChangeEvent(20, 20))
-    wrapper.update(<TextBlockController textBlock={block}/>)
+    wrapper.update(<TextBlockController textBlock={block} />)
     await runAllTimers()
-    wrapper.update(<TextBlockController textBlock={block}/>)
+    wrapper.update(<TextBlockController textBlock={block} />)
     const richText = wrapper.root.findByType(RichText)
     const text = flattenTextChild(richText)
     expect(text.join('')).toEqual('This is nu text\nBlah')

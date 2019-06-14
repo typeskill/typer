@@ -9,21 +9,21 @@ export class Endpoint<InnerEventType extends string> {
   private owners = new WeakMap<object, ListenerDescriptor<InnerEventType, any>[]>()
   private domain = new EventEmitter<InnerEventType>()
 
-  addListener(owner: object, eventType: InnerEventType, listener: ListenerFn) {
+  public addListener(owner: object, eventType: InnerEventType, listener: ListenerFn) {
     this.domain.addListener(eventType, listener)
     const listeners = this.owners.get(owner) || []
     listeners.push({
       eventType,
-      listener
+      listener,
     })
     this.owners.set(owner, listeners)
   }
 
-  emit(eventType: InnerEventType, ...payload: any[]): void {
+  public emit(eventType: InnerEventType, ...payload: any[]): void {
     this.domain.emit(eventType, ...payload)
   }
 
-  release(owner: object) {
+  public release(owner: object) {
     const descriptors = this.owners.get(owner)
     if (descriptors) {
       for (const { listener, eventType } of descriptors) {
@@ -33,7 +33,7 @@ export class Endpoint<InnerEventType extends string> {
     this.owners.delete(owner)
   }
 
-  removeAllListeners() {
+  public removeAllListeners() {
     this.domain.removeAllListeners()
   }
 }

@@ -18,26 +18,30 @@ function getLineStyle(lineType: TextLineType): StyleProp<TextStyle> {
   // TextInput as of RN60
   // TODO test
   switch (lineType) {
-  case 'normal': return null
-  case 'ol': return { paddingLeft: 20 }
-  case 'quoted': return { borderLeftWidth: 3, borderLeftColor: 'black' }
-  case 'ul': return { paddingLeft: 20 }
+    case 'normal':
+      return null
+    case 'ol':
+      return { paddingLeft: 20 }
+    case 'quoted':
+      return { borderLeftWidth: 3, borderLeftColor: 'black' }
+    case 'ul':
+      return { paddingLeft: 20 }
   }
 }
 
 export const richTextStyles = StyleSheet.create({
   defaultText: {
-    fontSize: 18
+    fontSize: 18,
   },
   grow: {
-    flexGrow: 1
-  }
+    flexGrow: 1,
+  },
 })
 
 export class RichText<T extends string> extends Component<RichTextProps<T>> {
   private textTransformsReg: TextTransformsRegistry<any>
 
-  constructor(props: RichTextProps<T>) {
+  public constructor(props: RichTextProps<T>) {
     super(props)
     this.renderOperation = this.renderOperation.bind(this)
     this.textTransformsReg = props.textTransformsReg
@@ -60,11 +64,11 @@ export class RichText<T extends string> extends Component<RichTextProps<T>> {
     const { ops } = this.props
     const children: ReactNode[][] = []
     new LineWalker(ops).eachLine(({ lineType, delta: lineDelta, index }) => {
-      children.push([(
+      children.push([
         <Text style={getLineStyle(lineType)} key={`line-${index}`}>
           {lineDelta.ops.map((l, elIndex) => this.renderOperation(l, index, elIndex))}
-        </Text>
-      )])
+        </Text>,
+      ])
     })
     if (children.length) {
       let index = 0
@@ -79,13 +83,18 @@ export class RichText<T extends string> extends Component<RichTextProps<T>> {
     return []
   }
 
-  shouldComponentUpdate() { return true }
-
-  componentWillReceiveProps(nextProps: RichTextProps<T>) {
-    invariant(nextProps.textTransformsReg === this.props.textTransformsReg, 'textTransformsReg prop cannot be changed after instantiation')
+  public shouldComponentUpdate() {
+    return true
   }
 
-  render() {
+  public componentWillReceiveProps(nextProps: RichTextProps<T>) {
+    invariant(
+      nextProps.textTransformsReg === this.props.textTransformsReg,
+      'textTransformsReg prop cannot be changed after instantiation',
+    )
+  }
+
+  public render() {
     return this.renderLines()
   }
 }

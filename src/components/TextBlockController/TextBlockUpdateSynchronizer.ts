@@ -8,11 +8,11 @@ export class TextBlockUpdateSynchronizer {
   private _component: TextBlockComponent
   private runningTask: UpdateTask | null = null
 
-  constructor(component: TextBlockComponent) {
+  public constructor(component: TextBlockComponent) {
     this._component = component
   }
 
-  async handleFragmentedUpdate(update: DocumentDeltaUpdate) {
+  public async handleFragmentedUpdate(update: DocumentDeltaUpdate) {
     this.runningTask && this.runningTask.cancelOverriding()
     const task = new UpdateTask(this)
     if (update.hasIntermediaryDelta()) {
@@ -23,19 +23,19 @@ export class TextBlockUpdateSynchronizer {
     return task.run()
   }
 
-  get component() {
+  public get component() {
     return this._component
   }
 
-  get isClosed() {
+  public get isClosed() {
     return this._isClosed
   }
 
-  isRunning() {
+  public isRunning() {
     return this.runningTask && this.runningTask.isRunning()
   }
 
-  release() {
+  public release() {
     this._isClosed = true
   }
 }

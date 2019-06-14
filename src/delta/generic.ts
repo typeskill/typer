@@ -8,7 +8,10 @@ export interface GenericDelta {
 }
 
 export function extractTextFromDelta(delta: GenericDelta): string {
-  return delta.ops.reduce((acc: string, curr: GenericOp) => typeof curr.insert === 'string' ? acc + curr.insert : acc, '')
+  return delta.ops.reduce(
+    (acc: string, curr: GenericOp) => (typeof curr.insert === 'string' ? acc + curr.insert : acc),
+    '',
+  )
 }
 
 export function isGenericDelta(arg: any): arg is GenericDelta {

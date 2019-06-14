@@ -1,6 +1,14 @@
 import React, { Component } from 'react'
 import invariant from 'invariant'
-import { View, TextInput, NativeSyntheticEvent, TextInputSelectionChangeEventData, TextInputKeyPressEventData, StyleSheet, TextInputProps } from 'react-native'
+import {
+  View,
+  TextInput,
+  NativeSyntheticEvent,
+  TextInputSelectionChangeEventData,
+  TextInputKeyPressEventData,
+  StyleSheet,
+  TextInputProps,
+} from 'react-native'
 import { RichText, richTextStyles } from '@components/RichText'
 import { Selection } from '@delta/Selection'
 import { Orchestrator } from '@model/Orchestrator'
@@ -10,22 +18,21 @@ import { DocumentDeltaUpdate } from '@delta/DocumentDeltaUpdate'
 import { TextBlockControllerProps, TextBlockControllerState } from './types'
 import { TextBlockUpdateSynchronizer } from './TextBlockUpdateSynchronizer'
 
-export {
-  TextBlockControllerProps
-}
+export { TextBlockControllerProps }
 
 const styles = StyleSheet.create({
   grow: {
-    flex: 1
+    flex: 1,
   },
   textInput: {
-    textAlignVertical: 'top'
-  }
+    textAlignVertical: 'top',
+  },
 })
 
 export const INVARIANT_MANDATORY_TEXT_BLOCK_PROP = 'textBlock prop is mandatory'
 
-const constantTextInputProps = {
+// eslint-disable-next-line @typescript-eslint/no-object-literal-type-assertion
+const constantTextInputProps: TextInputProps = {
   disableFullscreenUI: true,
   scrollEnabled: false,
   multiline: true,
@@ -33,23 +40,25 @@ const constantTextInputProps = {
   keyboardType: 'default',
   textBreakStrategy: 'highQuality',
   importantForAutofill: 'noExcludeDescendants',
-  blurOnSubmit: false
+  blurOnSubmit: false,
 } as TextInputProps
 
-export class TextBlockController<T extends string> extends Component<TextBlockControllerProps<T>, TextBlockControllerState> {
-
+export class TextBlockController<T extends string> extends Component<
+  TextBlockControllerProps<T>,
+  TextBlockControllerState
+> {
   private textInputRef: TextInput | null = null
-  private textChangeSession: TextChangeSession|null = null
+  private textChangeSession: TextChangeSession | null = null
   private selection = Selection.fromBounds(0)
   private synchronizer: TextBlockUpdateSynchronizer
 
-  state: TextBlockControllerState = {
+  public state: TextBlockControllerState = {
     isControlingState: false,
     overridingSelection: null,
-    ops: null
+    ops: null,
   }
 
-  constructor(props: TextBlockControllerProps<T>) {
+  public constructor(props: TextBlockControllerProps<T>) {
     super(props)
     invariant(props.textBlock != null, INVARIANT_MANDATORY_TEXT_BLOCK_PROP)
     this.synchronizer = new TextBlockUpdateSynchronizer(this as any)
@@ -62,8 +71,8 @@ export class TextBlockController<T extends string> extends Component<TextBlockCo
   /**
    * **Preconditions**: this method must be called before handleOnSelectionChange
    * This is the current TextInput behavior.
-   * 
-   * @param nextText 
+   *
+   * @param nextText
    */
   @boundMethod
   private handleOnTextChanged(nextText: string) {
@@ -75,7 +84,7 @@ export class TextBlockController<T extends string> extends Component<TextBlockCo
   }
 
   @boundMethod
-  private handleOnTextinputRef(ref: TextInput|null) {
+  private handleOnTextinputRef(ref: TextInput | null) {
     this.textInputRef = ref
   }
 
@@ -85,12 +94,15 @@ export class TextBlockController<T extends string> extends Component<TextBlockCo
   }
 
   @boundMethod
-  private handleOnSelectionChange(selection: { start: number, end: number }) {
+  private handleOnSelectionChange(selection: { start: number; end: number }) {
     const { textBlock } = this.props
     const nextSelection = Selection.between(selection.start, selection.end)
     if (this.textChangeSession !== null) {
       this.textChangeSession.setSelectionAfterChange(nextSelection)
-      textBlock.handleOnTextChange(this.textChangeSession.getTextAfterChange(), this.textChangeSession.getDeltaChangeContext())
+      textBlock.handleOnTextChange(
+        this.textChangeSession.getTextAfterChange(),
+        this.textChangeSession.getDeltaChangeContext(),
+      )
       this.textChangeSession = null
     }
     this.selection = nextSelection
@@ -100,11 +112,13 @@ export class TextBlockController<T extends string> extends Component<TextBlockCo
 
   /**
    * **Preconditions**: this method must be called after handleOnTextChanged
-   * 
-   * @param textInputSelectionChangeEvent 
+   *
+   * @param textInputSelectionChangeEvent
    */
   @boundMethod
-  private handleOnSelectionChangeEvent({ nativeEvent: { selection } }: NativeSyntheticEvent<TextInputSelectionChangeEventData>) {
+  private handleOnSelectionChangeEvent({
+    nativeEvent: { selection },
+  }: NativeSyntheticEvent<TextInputSelectionChangeEventData>) {
     this.handleOnSelectionChange(selection)
   }
 
@@ -118,35 +132,37 @@ export class TextBlockController<T extends string> extends Component<TextBlockCo
     return this.synchronizer.handleFragmentedUpdate(documentDeltaUpdate)
   }
 
-  shouldComponentUpdate(nextProps: TextBlockControllerProps<T>, nextState: TextBlockControllerState) {
-    return nextState.ops !== this.state.ops ||
-           nextProps.grow !== this.props.grow ||
-           nextState.isControlingState !== this.state.isControlingState ||
-           nextState.overridingSelection !== this.state.overridingSelection
+  public shouldComponentUpdate(nextProps: TextBlockControllerProps<T>, nextState: TextBlockControllerState) {
+    return (
+      nextState.ops !== this.state.ops ||
+      nextProps.grow !== this.props.grow ||
+      nextState.isControlingState !== this.state.isControlingState ||
+      nextState.overridingSelection !== this.state.overridingSelection
+    )
   }
 
-  componentDidMount() {
+  public componentDidMount() {
     this.blockControllerInterface.addListener('DELTA_UPDATE', this.handleOnDeltaUpdate)
     this.blockControllerInterface.addListener('FOCUS_REQUEST', this.handleOnFocusRequest)
   }
 
-  componentDidUpdate() {
+  public componentDidUpdate() {
     // We must change the state to null to avoid forcing selection in TextInput component.
     if (this.state.overridingSelection) {
       this.setState({ overridingSelection: null })
     }
   }
 
-  componentDidCatch(error: any, info: any) {
+  public componentDidCatch(error: {}, info: {}) {
     console.warn(error, info)
   }
 
-  componentWillUnmount() {
+  public componentWillUnmount() {
     this.synchronizer.release()
     this.blockControllerInterface.release()
   }
 
-  render() {
+  public render() {
     const { grow, textStyle, textBlock } = this.props
     const { overridingSelection, ops: documentDelta } = this.state
     const textComponent = documentDelta ? (
@@ -154,13 +170,15 @@ export class TextBlockController<T extends string> extends Component<TextBlockCo
     ) : null
     return (
       <View style={[grow ? styles.grow : undefined]}>
-        <TextInput selection={overridingSelection ? overridingSelection : undefined}
-                   style={[grow ? styles.grow : undefined, styles.textInput, richTextStyles.defaultText]}
-                   onKeyPress={this.handleOnKeyPressed}
-                   onSelectionChange={this.handleOnSelectionChangeEvent}
-                   onChangeText={this.handleOnTextChanged}
-                   ref={this.handleOnTextinputRef}
-                   {...constantTextInputProps}>
+        <TextInput
+          selection={overridingSelection ? overridingSelection : undefined}
+          style={[grow ? styles.grow : undefined, styles.textInput, richTextStyles.defaultText]}
+          onKeyPress={this.handleOnKeyPressed}
+          onSelectionChange={this.handleOnSelectionChangeEvent}
+          onChangeText={this.handleOnTextChanged}
+          ref={this.handleOnTextinputRef}
+          {...constantTextInputProps}
+        >
           {textComponent}
         </TextInput>
       </View>

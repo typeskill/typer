@@ -5,7 +5,7 @@ type TextAttributePrimitive = boolean | string
 export type BaseTextTransformAttribute = 'bold' | 'italic' | 'textDecoration'
 
 export const booleanTransformBase = {
-  attributeValue: true as true
+  attributeValue: true as true,
 }
 
 export type TextTransformsDictionnary<T extends string = BaseTextTransformAttribute> = {
@@ -24,16 +24,16 @@ export const boldTransform: BooleanTextTransformSpec<'bold'> = {
   ...booleanTransformBase,
   attributeName: 'bold',
   activeStyle: {
-    fontWeight: 'bold'
-  }
+    fontWeight: 'bold',
+  },
 }
 
 export const italicTransform: BooleanTextTransformSpec<'italic'> = {
   ...booleanTransformBase,
   attributeName: 'italic',
   activeStyle: {
-    fontStyle: 'italic'
-  }
+    fontStyle: 'italic',
+  },
 }
 
 export const underlineTransform: TextTransformSpec<'textDecoration', 'underline'> = {
@@ -41,8 +41,8 @@ export const underlineTransform: TextTransformSpec<'textDecoration', 'underline'
   attributeName: 'textDecoration',
   activeStyle: {
     textDecorationStyle: 'solid',
-    textDecorationLine: 'underline'
-  }
+    textDecorationLine: 'underline',
+  },
 }
 
 export const strikethroughTransform: TextTransformSpec<'textDecoration', 'strikethrough'> = {
@@ -50,13 +50,13 @@ export const strikethroughTransform: TextTransformSpec<'textDecoration', 'strike
   attributeName: 'textDecoration',
   activeStyle: {
     textDecorationStyle: 'solid',
-    textDecorationLine: 'line-through'
-  }
+    textDecorationLine: 'line-through',
+  },
 }
 
 export const defaultTextTransforms: TextTransformSpec<BaseTextTransformAttribute, any>[] = [
   boldTransform,
   italicTransform,
   underlineTransform,
-  strikethroughTransform
+  strikethroughTransform,
 ]

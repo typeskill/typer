@@ -8,21 +8,21 @@ describe('@delta/Text', () => {
       const text = new Text('ABC\nDEF\n')
       expect(text.getSelectionEncompassingLines(Selection.fromBounds(3))).toMatchObject({
         start: 0,
-        end: 3
+        end: 3,
       })
     })
     it('should encompass line when the start touches the beginning of a line', () => {
       const text = new Text('ABC\nDEF\n')
       expect(text.getSelectionEncompassingLines(Selection.fromBounds(4))).toMatchObject({
         start: 4,
-        end: 7
+        end: 7,
       })
     })
     it('should encompass two lines when start touches the end of a line and end touches the beginning of its sibling', () => {
       const text = new Text('ABC\nDEF\n')
       expect(text.getSelectionEncompassingLines(Selection.fromBounds(3, 4))).toMatchObject({
         start: 0,
-        end: 7
+        end: 7,
       })
     })
   })
