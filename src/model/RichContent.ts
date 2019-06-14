@@ -18,7 +18,7 @@ export class RichContent implements GenericDelta {
     }
   }
 
-  public length() {
+  public length(): number {
     return this.ops.length
   }
 
@@ -44,8 +44,8 @@ export class RichContent implements GenericDelta {
    * Creates an instance from a serialized JSON array of operations.
    *
    * @param serializedOperations - The serialized JSON array of operations
-   * @throws {@link SyntaxError} if the `serialized` param is not valid JSON
-   * @throws {@link TypeError} if the unmarshaleld object doesn't have the expected shape
+   * @throws `SyntaxError` if the `serialized` param is not valid JSON
+   * @throws `TypeError` if the unmarshaleld object doesn't have the expected shape
    *
    * @returns The unmarshalled instance.
    */

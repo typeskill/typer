@@ -1,31 +1,68 @@
 import { BlockAttributeValue, BlockAttributesMap } from '@delta/attributes'
-import { defaultTextTransforms, TextTransformSpec, BaseTextTransformAttribute } from '@core/transforms'
+import { defaultTextTransforms, TextTransformSpec } from '@core/transforms'
+import { TextLineType } from '@delta/lines'
 import { Endpoint } from './Endpoint'
 import { TextTransformsRegistry } from './TextTransformsRegistry'
-import { TextLineType } from '@delta/lines'
 
+/**
+ * A set of definitions related to the {@link Bridge:class} class.
+ *
+ * @public
+ */
 declare namespace Bridge {
+  /**
+   * An event external to the {@link Sheet:class}.
+   */
   export type OuterEvent =
     | 'APPLY_ATTRIBUTES_TO_SELECTION'
     | 'APPLY_LINE_TYPE_TO_SELECTION'
     | 'INSERT_OR_REPLACE_AT_SELECTION'
 
+  /**
+   * An event internal to the {@link Sheet:class}.
+   */
   export type InnerEvent = 'SELECTED_ATTRIBUTES_CHANGE' | 'SELECTED_LINE_TYPE_CHANGE'
 
+  /**
+   * Block content to insert.
+   */
   export interface Block {
     type: string
   }
 
+  /**
+   * Content to insert.
+   */
   export type Element = Block | string
 
+  /**
+   * Listener to selected text attributes changes.
+   */
   export type SelectedAttributesChangeListener = (selectedAttributes: BlockAttributesMap) => void
 
-  export type AttributesChangeListener = (attributeName: string, attributeValue: BlockAttributeValue) => void
+  /**
+   * Listener to attribute override.
+   *
+   * @internal
+   */
+  export type AttributesOverrideListener = (attributeName: string, attributeValue: BlockAttributeValue) => void
 
-  export type LineTypeChangeListener = (lineType: TextLineType) => void
+  /**
+   * Listener to line type override.
+   *
+   * @internal
+   */
+  export type LineTypeOverrideListener = (lineType: TextLineType) => void
 
+  /**
+   *
+   * @internal
+   */
   export type InsertOrReplaceAtSelectionListener = (element: Element) => void
 
+  /**
+   * An object to react from and dispatch to internal events.
+   */
   export interface OuterInterface {
     /**
      * Insert an element at cursor or replace if selection exists.
@@ -62,7 +99,7 @@ declare namespace Bridge {
     /**
      * Listen to line type changes in selection.
      */
-    addSelectedLineTypeChangeListener: (owner: object, listener: LineTypeChangeListener) => void
+    addSelectedLineTypeChangeListener: (owner: object, listener: LineTypeOverrideListener) => void
     /**
      * Remove all listeners registered for this owner
      */
@@ -70,18 +107,24 @@ declare namespace Bridge {
   }
 
   /**
-   * This controller should be used exclusively by the Sheet component.
+   * An object to react from and dispatch to external events.
+   *
+   * @remarks
+   *
+   * This controller should be used exclusively by the {@link Sheet:class} component.
+   *
+   * @internal
    */
   export interface InnerInterface {
     /**
      * Listen to text attributes alterations in selection.
      */
-    addApplyTextTransformToSelectionListener: (owner: object, listener: AttributesChangeListener) => void
+    addApplyTextTransformToSelectionListener: (owner: object, listener: AttributesOverrideListener) => void
 
     /**
      * Listen to type changes in selection
      */
-    addApplyLineTypeToSelectionListener: (owner: object, listener: Bridge.LineTypeChangeListener) => void
+    addApplyLineTypeToSelectionListener: (owner: object, listener: LineTypeOverrideListener) => void
 
     /**
      * Listen to insertions of text or blocks at selection.
@@ -107,10 +150,15 @@ declare namespace Bridge {
 }
 
 /**
- * The Bridge class is an abstraction responsible for communication between the editor and external controls.
+ * An abstraction responsible for event dispatching between the {@link Sheet:class} and external controls.
  *
+ * @internalRemarks
+ *
+ * The implemententation is isolated and decoupled from the {@link Sheet:class} class.
+ *
+ * @public
  */
-class Bridge<T extends string = BaseTextTransformAttribute> {
+class Bridge {
   private innerEndpoint = new Endpoint<Bridge.InnerEvent>()
   private outerEndpoint = new Endpoint<Bridge.OuterEvent>()
   private textTransformsReg: TextTransformsRegistry
@@ -128,18 +176,19 @@ class Bridge<T extends string = BaseTextTransformAttribute> {
     addSelectedAttributesChangeListener: (owner: object, listener: Bridge.SelectedAttributesChangeListener) => {
       this.innerEndpoint.addListener(owner, 'SELECTED_ATTRIBUTES_CHANGE', listener)
     },
-    addSelectedLineTypeChangeListener: (owner: object, listener: Bridge.LineTypeChangeListener) => {
+    addSelectedLineTypeChangeListener: (owner: object, listener: Bridge.LineTypeOverrideListener) => {
       this.innerEndpoint.addListener(owner, 'SELECTED_LINE_TYPE_CHANGE', listener)
     },
     release: (owner: object) => {
       this.innerEndpoint.release(owner)
     },
   })
+
   private innerInterface: Bridge.InnerInterface = Object.freeze({
-    addApplyTextTransformToSelectionListener: (owner: object, listener: Bridge.AttributesChangeListener) => {
+    addApplyTextTransformToSelectionListener: (owner: object, listener: Bridge.AttributesOverrideListener) => {
       this.outerEndpoint.addListener(owner, 'APPLY_ATTRIBUTES_TO_SELECTION', listener)
     },
-    addApplyLineTypeToSelectionListener: (owner: object, listener: Bridge.LineTypeChangeListener) => {
+    addApplyLineTypeToSelectionListener: (owner: object, listener: Bridge.LineTypeOverrideListener) => {
       this.outerEndpoint.addListener(owner, 'APPLY_LINE_TYPE_TO_SELECTION', listener)
     },
     addInsertOrReplaceAtSelectionListener: (owner: object, listener: Bridge.InsertOrReplaceAtSelectionListener) => {
@@ -165,16 +214,32 @@ class Bridge<T extends string = BaseTextTransformAttribute> {
     this.textTransformsReg = new TextTransformsRegistry(textTransformSpecs || defaultTextTransforms)
   }
 
+  /**
+   * Get this bridge {@link Bridge:namespace.InnerInterface | innerInterface}.
+   *
+   * @internal
+   */
   public getInnerInterface(): Bridge.InnerInterface {
     return this.innerInterface
   }
 
+  /**
+   * Get this bridge {@link Bridge:namespace.InnerInterface | outerInterface}.
+   *
+   * @remarks
+   *
+   * The returned object can be used to react from and trigger {@link Sheet:class} events.
+   */
   public getOuterInterface(): Bridge.OuterInterface {
     return this.outerInterface
   }
 
   /**
    * End of the bridge's lifecycle.
+   *
+   * @remarks
+   *
+   * One would typically call this method during `componentWillUnmout` hook.
    */
   public release() {
     this.innerEndpoint.removeAllListeners()

@@ -3,7 +3,14 @@ import Delta from 'quill-delta'
 import hasPath from 'ramda/es/hasPath'
 
 export interface GenericDelta {
+  /**
+   * An array of operations.
+   */
   readonly ops: GenericOp[]
+  /**
+   * @returns The length of the underlying rich text representation.
+   * This length represents the number of cursor positions in the document.
+   */
   readonly length: () => number
 }
 
