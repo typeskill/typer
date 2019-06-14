@@ -24,7 +24,7 @@
     "lib/**/*"
   ],
   "main": "lib/index.js",
-  "types": "lib/index.d.ts",
+  "types": "types/react-native-typeskill.d.ts",
   "keywords": [
     "react native",
     "rich text",
@@ -67,6 +67,7 @@
     "@babel/runtime": "^7.4.5",
     "@commitlint/cli": "^8.0.0",
     "@commitlint/config-conventional": "^8.0.0",
+    "@microsoft/api-extractor": "^7.2.1",
     "@react-native-community/eslint-config": "^0.0.5",
     "@semantic-release/changelog": "^3.0.2",
     "@semantic-release/commit-analyzer": "^6.1.0",
