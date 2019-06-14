@@ -94,17 +94,48 @@ You need a linked `react-native-vector-icons` or `@expo/vector-icons` if you are
 ``` jsx
 import React from 'react'
 import { Component } from 'react-native'
-import { Bridge, Sheeet, Toolbar, buildVectorIconControlSpec, TEXT_CONTROL_SEPARATOR, ControlAction } from 'react-native-typeskill'
+import {
+  Bridge,
+  Sheeet,
+  Toolbar,
+  buildVectorIconControlSpec,
+  TEXT_CONTROL_SEPARATOR,
+  ControlAction
+} from 'react-native-typeskill'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 
 const toolbarLayout = [
-  buildVectorIconControlSpec(MaterialCommunityIcons, ControlAction.SELECT_TEXT_BOLD, 'format-bold'),
-  buildVectorIconControlSpec(MaterialCommunityIcons, ControlAction.SELECT_TEXT_ITALIC, 'format-italic'),
-  buildVectorIconControlSpec(MaterialCommunityIcons, ControlAction.SELECT_TEXT_UNDERLINE, 'format-underline'),
-  buildVectorIconControlSpec(MaterialCommunityIcons, ControlAction.SELECT_TEXT_STRIKETHROUGH, 'format-strikethrough-variant'),
+  buildVectorIconControlSpec(
+    MaterialCommunityIcons,
+    ControlAction.SELECT_TEXT_BOLD,
+    'format-bold'
+  ),
+  buildVectorIconControlSpec(
+    MaterialCommunityIcons,
+    ControlAction.SELECT_TEXT_ITALIC,
+    'format-italic'
+  ),
+  buildVectorIconControlSpec(
+    MaterialCommunityIcons,
+    ControlAction.SELECT_TEXT_UNDERLINE,
+    'format-underline'
+  ),
+  buildVectorIconControlSpec(
+    MaterialCommunityIcons,
+    ControlAction.SELECT_TEXT_STRIKETHROUGH,
+    'format-strikethrough-variant'
+  ),
   TEXT_CONTROL_SEPARATOR,
-  buildVectorIconControlSpec(MaterialCommunityIcons, ControlAction.SELECT_LINES_ORDERED_LIST, 'format-list-numbered'),
-  buildVectorIconControlSpec(MaterialCommunityIcons, ControlAction.SELECT_LINES_UNORDERED_LIST, 'format-list-bulleted')
+  buildVectorIconControlSpec(
+    MaterialCommunityIcons,
+    ControlAction.SELECT_LINES_ORDERED_LIST,
+    'format-list-numbered'
+  ),
+  buildVectorIconControlSpec(
+    MaterialCommunityIcons,
+    ControlAction.SELECT_LINES_UNORDERED_LIST,
+    'format-list-bulleted'
+  )
 ]
 
 export class RichTextEditor extends Component {
@@ -112,10 +143,13 @@ export class RichTextEditor extends Component {
 
   render() {
     return (
-    <View style={{ flex: 1 }}>
+      <View style={{ flex: 1 }}>
         <Sheet bridgeInnerInterface={this.bridge.getInnerInterface()} />
-        <Toolbar layout={toolbarLayout} bridgeOuterInferface={this.bridge.getOuterInterface()} />
-    </View>
+        <Toolbar
+          layout={toolbarLayout}
+          bridgeOuterInferface={this.bridge.getOuterInterface()}
+        />
+      </View>
     )
   }
 }
