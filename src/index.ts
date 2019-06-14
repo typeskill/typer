@@ -13,6 +13,7 @@ import {
 import { DeltaChangeContext } from '@delta/DeltaChangeContext'
 import { GenericDelta } from '@delta/generic'
 import { DocumentDelta } from '@delta/DocumentDelta'
+import { RichContent } from '@model/RichContent'
 
 export {
   // @components
@@ -24,6 +25,7 @@ export {
   buildVectorIconControlSpec,
   // @core
   Bridge,
+  RichContent,
   // @delta/attributes
   BlockAttributesMap,
   // @delta/transforms
