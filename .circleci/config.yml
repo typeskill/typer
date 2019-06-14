@@ -22,8 +22,8 @@ jobs: # a collection of steps
           name: 'validate:typescript'
           command: 'npm run validate:typescript'
       - run:
-          name: 'validate:tslint'
-          command: 'npm run validate:tslint'
+          name: 'validate:lint'
+          command: 'npm run validate:lint'
       - run:
           name: 'test:jest'
           command: 'npm run test:jest'
