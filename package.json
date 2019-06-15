@@ -12,6 +12,7 @@
     "build:clean": "rimraf lib",
     "build:types": "ttsc --project tsconfig-build.json",
     "build:js": "babel src --config-file ./build.babel.config.js --out-dir lib --extensions \".ts,.tsx\" --source-maps inline",
+    "build:docs": "api-documenter markdown --input-folder temp --output-folder docs",
     "prepare": "npm run build",
     "test": "npm run validate:typescript && npm run validate:lint && npm run test:jest && npm run validate:api",
     "test:jest": "jest",
