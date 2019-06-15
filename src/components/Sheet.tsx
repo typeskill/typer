@@ -1,6 +1,6 @@
 import invariant from 'invariant'
 import React, { PureComponent, ComponentClass } from 'react'
-import { View, StyleSheet, StyleProp, TextStyle, ViewStyle, ViewPropTypes, Text } from 'react-native'
+import { View, StyleSheet, StyleProp, TextStyle, ViewStyle, ViewPropTypes } from 'react-native'
 import { TextBlockController } from '@components/TextBlockController'
 import { Bridge } from '@core/Bridge'
 import { Document } from '@model/Document'
