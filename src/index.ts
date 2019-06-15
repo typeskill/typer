@@ -4,7 +4,7 @@
  *
  * @remarks
  *
- * ## Introduction
+ * **Introduction**
  *
  * The library exposes:
  *
@@ -12,7 +12,7 @@
  * - The {@link (RichText:class)} component, a display for {@link (RichContent:class)}.
  * - The {@link (Toolbar:type)} component, which permits text transforms on current selection.
  *
- * ## Triggering actions from external controls
+ * **Triggering actions from external controls**
  *
  * A {@link (Bridge:class)} instance should be shared between a {@link (Sheet:type)} and any controlling component such as {@link (Toolbar:type)}.
  * Actions can be triggered with the help of the object returned by {@link (Bridge:class).getControlEventDomain}.
