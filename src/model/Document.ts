@@ -5,13 +5,12 @@ import { Block, BlockClass } from './Block'
 import { Bridge } from '@core/Bridge'
 import { Orchestrator } from '@model/Orchestrator'
 import { Store } from './Store'
-import { TextLineType } from '@delta/lines'
-import { mergeAttributesLeft, BlockAttributeValue } from '@delta/attributes'
+import { mergeAttributesLeft, Attributes } from '@delta/attributes'
 import { DocumentDeltaUpdate } from '@delta/DocumentDeltaUpdate'
 
 declare namespace Document {
   export interface BlockInterface {
-    readonly bridgeInnerInterface: Bridge.InnerInterface
+    readonly sheetEventDom: Bridge.SheetEventDomain
     readonly orchestrator: Orchestrator
     readonly updateDelta: (documentDeltaUpdate: DocumentDeltaUpdate) => void
     readonly onPressBackspaceFromOrigin: () => void
@@ -21,7 +20,7 @@ declare namespace Document {
 
   export interface Consumer {
     readonly handleOnDocumentStateUpdate: Store.StateUpdateListener
-    readonly bridgeInnerInterface: Bridge.InnerInterface
+    readonly sheetEventDom: Bridge.SheetEventDomain
   }
 }
 
@@ -57,7 +56,7 @@ class Document {
       let block: Block = null
       const blockIface: Document.BlockInterface = Object.freeze({
         orchestrator: this.orchestrator,
-        bridgeInnerInterface: this.consumer.bridgeInnerInterface,
+        sheetEventDom: this.consumer.sheetEventDom,
         updateDelta: (documentDeltaUpdate: DocumentDeltaUpdate) => {
           invariant(documentDeltaUpdate instanceof DocumentDeltaUpdate, 'documentDelta instanceof DocumentDelta')
           // TODO inspect possible state discrepancy
@@ -78,12 +77,12 @@ class Document {
   /**
    * **Lifecycle method**: must be called when consumer is ready to handle document events.
    *
-   * @param consumer
+   * @param consumer - the document consumer.
    */
   public registerConsumer(consumer: Document.Consumer) {
     invariant(this.consumer === undefined, 'Only one document consumer can be registered at a time')
     this.store.addListener(consumer.handleOnDocumentStateUpdate)
-    consumer.bridgeInnerInterface.addApplyLineTypeToSelectionListener(this, (lineType: TextLineType) => {
+    consumer.sheetEventDom.addSwitchLineTypeInSelectionListener(this, (lineType: Attributes.LineType) => {
       if (this.store.hasBlock()) {
         const selectedBlock = this.store.getActiveBlock() as TextBlock
         invariant(selectedBlock instanceof TextBlock, 'Line Transforms can only be applied to a TextBlock')
@@ -91,12 +90,12 @@ class Document {
         const updateRequest = selectedBlock.getDelta().applyLineTypeToSelection(selectionBeforeChange, lineType)
         const updateLineType = updateRequest.getLineTypeInSelection(selectionBeforeChange)
         selectedBlock.updateDelta(updateRequest)
-        consumer.bridgeInnerInterface.setSelectedLineType(updateLineType)
+        consumer.sheetEventDom.notifySelectedLineTypeChange(updateLineType)
       }
     })
-    consumer.bridgeInnerInterface.addApplyTextTransformToSelectionListener(
+    consumer.sheetEventDom.addApplyTextTransformToSelectionListener(
       this,
-      (attributeName: string, attributeValue: BlockAttributeValue) => {
+      (attributeName: string, attributeValue: Attributes.GenericValue) => {
         if (this.store.hasBlock()) {
           const selectedBlock = this.store.getActiveBlock() as TextBlock
           invariant(selectedBlock instanceof TextBlock, 'Text Transforms can only be applied to a TextBlock')
@@ -109,7 +108,7 @@ class Document {
           const mergedCursorAttributes = selectedBlock.setCursorAttributes(userAttributes)
           const attributes = mergeAttributesLeft(deltaAttributes, mergedCursorAttributes)
           selectedBlock.updateDelta(updatedDelta)
-          consumer.bridgeInnerInterface.setSelectedTextAttributes(attributes)
+          consumer.sheetEventDom.notifySelectedTextAttributesChange(attributes)
         }
       },
     )
@@ -120,11 +119,11 @@ class Document {
   /**
    * **Lifecycle method**: must be called when consumer cannot handle document events anymore.
    *
-   * @param consumer
+   * @param consumer - The document consumer.
    */
   public releaseConsumer(consumer: Document.Consumer) {
     this.store.removeListener(consumer.handleOnDocumentStateUpdate)
-    consumer.bridgeInnerInterface.release(this)
+    consumer.sheetEventDom.release(this)
     this.orchestrator.release()
     this.consumer = undefined
   }

@@ -1,5 +1,5 @@
 import { NormalizeDirective, NormalizeOperation } from './DeltaDiffComputer'
-import { DeltaChangeContext } from 'index'
+import { DeltaChangeContext } from './DeltaChangeContext'
 import Delta from 'quill-delta'
 
 export class NormalizeDirectiveBuilder {

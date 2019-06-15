@@ -1,20 +1,21 @@
 import { GenericOp } from './operations'
 import { DocumentLineIndexGenerator } from './DocumentLineIndexGenerator'
-import { getLineType, TextLineType, GenericLine } from './lines'
+import { getLineType, GenericLine } from './lines'
 import Delta from 'quill-delta'
-import { GenericDelta, isGenericDelta } from './generic'
+import { GenericRichContent, isGenericDelta } from './generic'
 import { Selection } from './Selection'
+import { Attributes } from '@delta/attributes'
 
 export interface DocumentLine extends GenericLine {
   delta: Delta
-  lineType: TextLineType
+  lineType: Attributes.LineType
   lineTypeIndex: number
 }
 
 export class LineWalker {
   public readonly ops: GenericOp[]
 
-  public constructor(arg: GenericOp[] | GenericDelta) {
+  public constructor(arg: GenericOp[] | GenericRichContent) {
     this.ops = isGenericDelta(arg) ? arg.ops : arg
   }
 

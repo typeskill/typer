@@ -1,7 +1,7 @@
 import { TextBlock } from '@model/TextBlock'
 import { StyleProp, TextStyle } from 'react-native'
 import { Selection } from '@delta/Selection'
-import { GenericOp } from '@delta/operations'
+import { GenericRichContent } from '@delta/generic'
 
 export interface TextBlockControllerProps {
   textBlock: TextBlock
@@ -12,7 +12,7 @@ export interface TextBlockControllerProps {
 export interface TextBlockControllerState {
   isControlingState: boolean
   overridingSelection: Selection | null
-  ops: GenericOp[] | null
+  richContent: GenericRichContent | null
 }
 
 export interface TextBlockMinimalComponent {

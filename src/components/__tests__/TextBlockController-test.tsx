@@ -23,7 +23,7 @@ function buildDocumentConsumer() {
   const getDelta = () => document.getActiveBlock().getDelta()
   const docConsumer: Document.Consumer = {
     handleOnDocumentStateUpdate,
-    bridgeInnerInterface: bridge.getInnerInterface(),
+    sheetEventDom: bridge.getSheetEventDomain(),
   }
   return {
     bridge,
@@ -39,7 +39,7 @@ function getTextInputDefaultProps(): TextBlockControllerProps {
   const document = new Document()
   document.registerConsumer({
     handleOnDocumentStateUpdate: () => ({}),
-    bridgeInnerInterface: bridge.getInnerInterface(),
+    sheetEventDom: bridge.getSheetEventDomain(),
   })
   return {
     textBlock: document.getActiveBlock() as TextBlock,
@@ -85,7 +85,7 @@ describe('@components/<TextBlockController>', () => {
       listener: () => ({}),
     }
     const spy = jest.spyOn(listenerObj, 'listener')
-    bridge.getOuterInterface().addSelectedAttributesChangeListener(listenerObj, spy as any)
+    bridge.getControlEventDomain().addSelectedAttributesChangeListener(listenerObj, spy as any)
     const wrapper = renderer.create(<TextBlockController textBlock={block} />)
     const textBlockController = wrapper.root.instance as TextBlockController
     textBlockController['handleOnSelectionChangeEvent'](mockSelectionChangeEvent(0, 1))

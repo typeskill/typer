@@ -12,27 +12,39 @@ describe('@model/RichContent', () => {
   describe('::fromJSON', () => {
     it('should instanciate from JSON', () => {
       expect(() => {
-        const content = RichContent.fromJSON('[]')
+        const content = RichContent.fromJSON('{ "ops":[] }')
       }).not.toThrow()
     })
-    it('should throw when provided string is misformatted JSON', () => {
+    it('should throw SyntaxError when provided string is misformatted JSON', () => {
       expect(() => {
         const content = RichContent.fromJSON('[')
       }).toThrowError(SyntaxError)
     })
-    it('should throw when provided string is not a JSON array', () => {
+    it('should throw TypeError when provided string is not a JSON object', () => {
       expect(() => {
         const content = RichContent.fromJSON('{}')
+      }).toThrowError(TypeError)
+    })
+    it('should throw TypeError when provided string is a JSON object missing "ops" property', () => {
+      expect(() => {
+        const content = RichContent.fromJSON('{}')
+      }).toThrowError(TypeError)
+    })
+    it('should throw TypeError when provided string is a JSON object with "ops" property which is not an array', () => {
+      expect(() => {
+        const content = RichContent.fromJSON('{ "ops": {} }')
       }).toThrowError(TypeError)
     })
     describe('toJSON', () => {
       it('should return a JSON array of operations', () => {
         const serialized = RichContent.fromOps([{ insert: 'Hi' }]).toJSON()
-        expect(JSON.parse(serialized)).toEqual([
-          {
-            insert: 'Hi',
-          },
-        ])
+        expect(JSON.parse(serialized)).toEqual({
+          ops: [
+            {
+              insert: 'Hi',
+            },
+          ],
+        })
       })
     })
   })

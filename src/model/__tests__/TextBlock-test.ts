@@ -17,7 +17,7 @@ describe('@model/TextBlock', () => {
         ]),
       )
       textBlock.handleOnSelectionChange(mockSelection(0))
-      expect(blockInterface.bridgeInnerInterface.setSelectedLineType).toHaveBeenCalledWith('normal')
+      expect(blockInterface.sheetEventDom.notifySelectedLineTypeChange).toHaveBeenCalledWith('normal')
     })
     it('should notify of a selected text attribute update', () => {
       const blockInterface = mockDocumentBlockInterface()
@@ -26,7 +26,9 @@ describe('@model/TextBlock', () => {
         mockDocumentDeltaUpdate([{ insert: 'A\n' }, { insert: 'B', attributes: { weight: 'bold' } }, { insert: '\n' }]),
       )
       textBlock.handleOnSelectionChange(mockSelection(3))
-      expect(blockInterface.bridgeInnerInterface.setSelectedTextAttributes).toHaveBeenCalledWith({ weight: 'bold' })
+      expect(blockInterface.sheetEventDom.notifySelectedTextAttributesChange).toHaveBeenCalledWith({
+        weight: 'bold',
+      })
     })
   })
 })

@@ -1,22 +1,21 @@
-// tslint:disable:no-string-literal
 import { Document } from '@model/Document'
 import { Bridge } from '@core/Bridge'
-import { defaultTextTransforms } from '@core/transforms'
-import { TextTransformsRegistry } from '@core/TextTransformsRegistry'
+import { defaultTextTransforms } from '@core/Transforms'
+import { Transforms } from '@core/Transforms'
 import { DocumentDelta } from '@delta/DocumentDelta'
 import { GenericOp } from '@delta/operations'
 import { TextBlock } from '@model/TextBlock'
 import { DocumentDeltaUpdate } from '@delta/DocumentDeltaUpdate'
 
-export function mokBridgeInnerInterface(): Bridge.InnerInterface {
+export function mokBridgeSheetEventDomain(): Bridge.SheetEventDomain {
   return {
-    addApplyLineTypeToSelectionListener: jest.fn(),
+    addSwitchLineTypeInSelectionListener: jest.fn(),
     addApplyTextTransformToSelectionListener: jest.fn(),
     addInsertOrReplaceAtSelectionListener: jest.fn(),
-    getTextTransformsReg: () => new TextTransformsRegistry(defaultTextTransforms),
+    getTransforms: () => new Transforms(defaultTextTransforms),
     release: jest.fn(),
-    setSelectedLineType: jest.fn(),
-    setSelectedTextAttributes: jest.fn(),
+    notifySelectedLineTypeChange: jest.fn(),
+    notifySelectedTextAttributesChange: jest.fn(),
   }
 }
 
@@ -30,15 +29,15 @@ export function mockDocumentDeltaUpdate(ops?: GenericOp[]): DocumentDeltaUpdate 
 
 export function mockDocumentBlockInterface(): Document.BlockInterface {
   const document = new Document()
-  const bridgeInnerInterface = mokBridgeInnerInterface()
+  const sheetEventDom = mokBridgeSheetEventDomain()
   document.registerConsumer({
-    bridgeInnerInterface,
+    sheetEventDom,
     handleOnDocumentStateUpdate: () => ({}),
   })
   document.insertBlock(TextBlock)
   const block = document.getActiveBlock() as TextBlock
   return {
-    bridgeInnerInterface,
+    sheetEventDom,
     orchestrator: document['orchestrator'],
     getDelta: block.getDelta.bind(block),
     updateDelta: block['updateDelta'].bind(block),

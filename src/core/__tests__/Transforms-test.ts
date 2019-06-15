@@ -1,11 +1,11 @@
-import { TextTransformsRegistry, textTransformListToDict } from '@core/TextTransformsRegistry'
+import { Transforms, textTransformListToDict } from '@core/Transforms'
 import {
   defaultTextTransforms,
   boldTransform,
   italicTransform,
   underlineTransform,
   strikethroughTransform,
-} from '@core/transforms'
+} from '@core/Transforms'
 
 describe('@core/TextTransformsRegistry', () => {
   describe('textTransformListToDict', () => {
@@ -20,7 +20,7 @@ describe('@core/TextTransformsRegistry', () => {
   })
   describe('getStylesFromOp', () => {
     it('should merge styles from OP', () => {
-      const registry = new TextTransformsRegistry(defaultTextTransforms)
+      const registry = new Transforms(defaultTextTransforms)
       expect(
         registry.getStylesFromOp({
           insert: 'A',

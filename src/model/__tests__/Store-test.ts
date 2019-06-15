@@ -12,7 +12,7 @@ import { DocumentDeltaUpdate } from '@delta/DocumentDeltaUpdate'
 function newTextBlock(): TextBlock {
   let delta = mockDocumentDelta()
   return new TextBlock({
-    bridgeInnerInterface: new Bridge().getInnerInterface(),
+    sheetEventDom: new Bridge().getSheetEventDomain(),
     getDelta: () => delta,
     onPressBackspaceFromOrigin: () => {
       /** */

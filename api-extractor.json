@@ -279,7 +279,7 @@
          *
          * DEFAULT VALUE: "warning"
          */
-        "logLevel": "warning",
+        "logLevel": "error",
 
         /**
          * When addToApiReportFile is true:  If API Extractor is configured to write an API report file (.api.md),
@@ -308,16 +308,29 @@
      */
     "extractorMessageReporting": {
       "default": {
-        "logLevel": "warning",
-        // "addToApiReportFile": false
+        "logLevel": "error",
+        "addToApiReportFile": false
       },
-
-      // "ae-extra-release-tag": {
-      //   "logLevel": "warning",
-      //   "addToApiReportFile": true
-      // },
-      //
-      // . . .
+      "ae-forgotten-export": {
+        "logLevel": "error",
+        "addToApiReportFile": false
+      },
+      "ae-incompatible-release-tags": {
+        "logLevel": "error",
+        "addToApiReportFile": false
+      },
+      "ae-internal-missing-underscore": {
+        "logLevel": "warning",
+        "addToApiReportFile": false
+      },
+      "ae-unresolved-inheritdoc-reference": {
+        "logLevel": "error",
+        "addToApiReportFile": false
+      },
+      "ae-unresolved-inheritdoc-base": {
+        "logLevel": "error",
+        "addToApiReportFile": true
+      }
     },
 
     /**

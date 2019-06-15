@@ -1,14 +1,21 @@
-
 import React, { Component } from 'react'
 import { Card } from 'react-native-paper'
 import { StyleSheet, View, KeyboardAvoidingView, SafeAreaView } from 'react-native'
-import { Bridge, Sheet, Toolbar, TextControlAction, ToolbarLayout, TEXT_CONTROL_SEPARATOR, buildVectorIconControlSpec } from 'react-native-typeskill'
+import {
+  Bridge,
+  Sheet,
+  Toolbar,
+  TextControlAction,
+  ToolbarLayout,
+  TEXT_CONTROL_SEPARATOR,
+  buildVectorIconControlSpec,
+} from 'react-native-typeskill'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import Version from './src/Version'
 
 // @see: https://github.com/facebook/react-native/issues/9599
 if (typeof (global as any).self === 'undefined') {
-  (global as any).self = global
+  ;(global as any).self = global
 }
 
 function buildMaterialControlSpec(actionType: TextControlAction, name: string) {
@@ -22,7 +29,7 @@ const toolbarLayout: ToolbarLayout = [
   buildMaterialControlSpec(TextControlAction.SELECT_TEXT_STRIKETHROUGH, 'format-strikethrough-variant'),
   TEXT_CONTROL_SEPARATOR,
   buildMaterialControlSpec(TextControlAction.SELECT_LINES_ORDERED_LIST, 'format-list-numbered'),
-  buildMaterialControlSpec(TextControlAction.SELECT_LINES_UNORDERED_LIST, 'format-list-bulleted')
+  buildMaterialControlSpec(TextControlAction.SELECT_LINES_UNORDERED_LIST, 'format-list-bulleted'),
 ]
 
 const themeColor = '#ffffff'
@@ -36,18 +43,23 @@ export default class App extends Component<{}> {
   }
 
   render() {
-    const innerInterface = this.bridge.getInnerInterface()
-    const outerInterface = this.bridge.getOuterInterface()
+    const sheetEventDom = this.bridge.getSheetEventDomain()
+    const controlEventDom = this.bridge.getControlEventDomain()
     return (
       <SafeAreaView style={{ flex: 1 }}>
-        <View style={styles.container} >
+        <View style={styles.container}>
           <KeyboardAvoidingView style={{ flex: 1 }} enabled>
             <Version />
             <Card style={{ flex: 1, marginHorizontal: 10, marginTop: 4 }}>
-              <Sheet contentContainerStyle={{ marginBottom: iconSize + 4 }} bridgeInnerInterface={innerInterface} />
+              <Sheet contentContainerStyle={{ marginBottom: iconSize + 4 }} sheetEventDom={sheetEventDom} />
             </Card>
             <View style={styles.toolbarContainer}>
-              <Toolbar iconSize={iconSize} layout={toolbarLayout} contentContainerStyle={{ backgroundColor: '#eaf0fc' }} bridgeOuterInferface={outerInterface} />
+              <Toolbar
+                iconSize={iconSize}
+                layout={toolbarLayout}
+                contentContainerStyle={{ backgroundColor: '#eaf0fc' }}
+                bridgeOuterInferface={controlEventDom}
+              />
             </View>
           </KeyboardAvoidingView>
         </View>
@@ -62,7 +74,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'stretch',
     backgroundColor: themeColor,
-    position: 'relative'
+    position: 'relative',
   },
   toolbarContainer: {
     position: 'absolute',
@@ -73,6 +85,6 @@ const styles = StyleSheet.create({
     zIndex: 1000,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center'
-  }
+    justifyContent: 'center',
+  },
 })

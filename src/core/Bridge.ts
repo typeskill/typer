@@ -1,27 +1,26 @@
-import { BlockAttributeValue, BlockAttributesMap } from '@delta/attributes'
-import { defaultTextTransforms, TextTransformSpec } from '@core/transforms'
-import { TextLineType } from '@delta/lines'
+import { Attributes } from '@delta/attributes'
+import { defaultTextTransforms } from '@core/Transforms'
 import { Endpoint } from './Endpoint'
-import { TextTransformsRegistry } from './TextTransformsRegistry'
+import { Transforms } from './Transforms'
 
 /**
- * A set of definitions related to the {@link Bridge:class} class.
+ * A set of definitions related to the {@link (Bridge:class)} class.
  *
  * @public
  */
 declare namespace Bridge {
   /**
-   * An event external to the {@link Sheet:class}.
+   * An event which signals the intent to modify the content touched by current selection.
    */
-  export type OuterEvent =
+  export type ControlEvent =
     | 'APPLY_ATTRIBUTES_TO_SELECTION'
     | 'APPLY_LINE_TYPE_TO_SELECTION'
     | 'INSERT_OR_REPLACE_AT_SELECTION'
 
   /**
-   * An event internal to the {@link Sheet:class}.
+   * An event which informs from selection changes resulting from interactions happening within the {@link (Sheet:type)} component.
    */
-  export type InnerEvent = 'SELECTED_ATTRIBUTES_CHANGE' | 'SELECTED_LINE_TYPE_CHANGE'
+  export type SheetEvent = 'SELECTED_ATTRIBUTES_CHANGE' | 'SELECTED_LINE_TYPE_CHANGE'
 
   /**
    * Block content to insert.
@@ -38,21 +37,19 @@ declare namespace Bridge {
   /**
    * Listener to selected text attributes changes.
    */
-  export type SelectedAttributesChangeListener = (selectedAttributes: BlockAttributesMap) => void
+  export type SelectedAttributesChangeListener = (selectedAttributes: Attributes.Map) => void
 
   /**
-   * Listener to attribute override.
+   * Listener to attribute overrides.
    *
-   * @internal
    */
-  export type AttributesOverrideListener = (attributeName: string, attributeValue: BlockAttributeValue) => void
+  export type AttributesOverrideListener = (attributeName: string, attributeValue: Attributes.GenericValue) => void
 
   /**
-   * Listener to line type override.
+   * Listener to line type overrides.
    *
-   * @internal
    */
-  export type LineTypeOverrideListener = (lineType: TextLineType) => void
+  export type LineTypeOverrideListener = (lineType: Attributes.LineType) => void
 
   /**
    *
@@ -61,35 +58,39 @@ declare namespace Bridge {
   export type InsertOrReplaceAtSelectionListener = (element: Element) => void
 
   /**
-   * An object to react from and dispatch to internal events.
+   * An object representing an area of events happening by the mean of external controls.
+   *
+   * @remarks
+   *
+   * This object exposes methods to trigger such events, and react to internal events.
    */
-  export interface OuterInterface {
+  export interface ControlEventDomain {
     /**
      * Insert an element at cursor or replace if selection exists.
+     *
+     * @internal
      */
     insertOrReplaceAtSelection: (element: Element) => void
 
     /**
      * Switch the given attribute's value depending on the current selection.
      *
-     * @remarks
-     *
-     * - if **all characters** traversed by selection have the `attributeName` set to `attributeValue`, **clear** this attribute for all characters in this selection
-     * - otherwise set `attributeName`  to `attributeValue` for all characters traversed by this selection
+     * @param attributeName - The name of the attribute to edit.
+     * @param attributeValue - The value of the attribute to edit. Assigning `null` clears any former truthy value.
      */
-    applyTextTransformToSelection: (attributeName: string, attributeValue: BlockAttributeValue) => void
+    applyTextTransformToSelection: (attributeName: string, attributeValue: Attributes.TextValue) => void
 
     /**
      * Switch the line type of lines traversed by selection depending on its state.
      *
      * @remarks
      *
-     * - if **all lines** traversed by selection are of the type `lineType`, set the type for each of those lines to `'normal'`
-     * - otherwise, set the type of each of those lines to `lineType`
+     * - if **all lines** traversed by selection are of the type `userLineType`, set the type for each of those lines to `'normal'`;
+     * - otherwise, set the type of each of those lines to `userLineType`.
      *
-     * @param lineType The type to apply
+     * @param userLineType - The type to switch.
      */
-    applyLineTransformToSelection: (lineType: TextLineType) => void
+    switchLineTypeInSelection: (userLineType: Attributes.LineType) => void
 
     /**
      * Listen to attributes changes in selection.
@@ -100,22 +101,23 @@ declare namespace Bridge {
      * Listen to line type changes in selection.
      */
     addSelectedLineTypeChangeListener: (owner: object, listener: LineTypeOverrideListener) => void
+
     /**
-     * Remove all listeners registered for this owner
+     * Dereference all listeners registered for this owner.
      */
     release: (owner: object) => void
   }
 
   /**
-   * An object to react from and dispatch to external events.
+   * An object representing an area of events happening inside the {@link (Sheet:type)}.
    *
-   * @remarks
+   * @privateRemarks
    *
-   * This controller should be used exclusively by the {@link Sheet:class} component.
+   * This object exposes methods to trigger such events, and react to external events.
    *
    * @internal
    */
-  export interface InnerInterface {
+  export interface SheetEventDomain {
     /**
      * Listen to text attributes alterations in selection.
      */
@@ -124,7 +126,7 @@ declare namespace Bridge {
     /**
      * Listen to type changes in selection
      */
-    addApplyLineTypeToSelectionListener: (owner: object, listener: LineTypeOverrideListener) => void
+    addSwitchLineTypeInSelectionListener: (owner: object, listener: LineTypeOverrideListener) => void
 
     /**
      * Listen to insertions of text or blocks at selection.
@@ -132,45 +134,48 @@ declare namespace Bridge {
     addInsertOrReplaceAtSelectionListener: (owner: object, listener: InsertOrReplaceAtSelectionListener) => void
 
     /**
-     * Set selected text attributes
+     * Notify selected text attributes update.
+     *
      */
-    setSelectedTextAttributes: (attributes: BlockAttributesMap) => void
+    notifySelectedTextAttributesChange: (attributesMap: Attributes.Map) => void
 
     /**
-     * Set line type in selection
+     * Notify selected line type update.
+     *
      */
-    setSelectedLineType: (lineType: TextLineType) => void
+    notifySelectedLineTypeChange: (selectionLineType: Attributes.LineType) => void
+
     /**
-     * Remove all listeners registered for this owner
+     * Dereference all listeners registered for this owner.
      */
     release: (owner: object) => void
 
-    getTextTransformsReg(): TextTransformsRegistry
+    getTransforms(): Transforms
   }
 }
 
 /**
- * An abstraction responsible for event dispatching between the {@link Sheet:class} and external controls.
+ * An abstraction responsible for event dispatching between the {@link (Sheet:type)} and external controls.
  *
  * @internalRemarks
  *
- * The implemententation is isolated and decoupled from the {@link Sheet:class} class.
+ * The implemententation is isolated and decoupled from the {@link (Sheet:type)} class.
  *
  * @public
  */
 class Bridge {
-  private innerEndpoint = new Endpoint<Bridge.InnerEvent>()
-  private outerEndpoint = new Endpoint<Bridge.OuterEvent>()
-  private textTransformsReg: TextTransformsRegistry
+  private innerEndpoint = new Endpoint<Bridge.SheetEvent>()
+  private outerEndpoint = new Endpoint<Bridge.ControlEvent>()
+  private transforms: Transforms
 
-  private outerInterface: Bridge.OuterInterface = Object.freeze({
+  private controlEventDom: Bridge.ControlEventDomain = {
     insertOrReplaceAtSelection: (element: string | Bridge.Block) => {
       this.outerEndpoint.emit('INSERT_OR_REPLACE_AT_SELECTION', element)
     },
-    applyTextTransformToSelection: (attributeName: string, attributeValue: BlockAttributeValue) => {
+    applyTextTransformToSelection: (attributeName: string, attributeValue: Attributes.GenericValue) => {
       this.outerEndpoint.emit('APPLY_ATTRIBUTES_TO_SELECTION', attributeName, attributeValue)
     },
-    applyLineTransformToSelection: (lineType: TextLineType) => {
+    switchLineTypeInSelection: (lineType: Attributes.LineType) => {
       this.outerEndpoint.emit('APPLY_LINE_TYPE_TO_SELECTION', lineType)
     },
     addSelectedAttributesChangeListener: (owner: object, listener: Bridge.SelectedAttributesChangeListener) => {
@@ -182,56 +187,65 @@ class Bridge {
     release: (owner: object) => {
       this.innerEndpoint.release(owner)
     },
-  })
+  }
 
-  private innerInterface: Bridge.InnerInterface = Object.freeze({
+  private sheetEventDom: Bridge.SheetEventDomain = {
     addApplyTextTransformToSelectionListener: (owner: object, listener: Bridge.AttributesOverrideListener) => {
       this.outerEndpoint.addListener(owner, 'APPLY_ATTRIBUTES_TO_SELECTION', listener)
     },
-    addApplyLineTypeToSelectionListener: (owner: object, listener: Bridge.LineTypeOverrideListener) => {
+    addSwitchLineTypeInSelectionListener: (owner: object, listener: Bridge.LineTypeOverrideListener) => {
       this.outerEndpoint.addListener(owner, 'APPLY_LINE_TYPE_TO_SELECTION', listener)
     },
     addInsertOrReplaceAtSelectionListener: (owner: object, listener: Bridge.InsertOrReplaceAtSelectionListener) => {
       this.outerEndpoint.addListener(owner, 'INSERT_OR_REPLACE_AT_SELECTION', listener)
     },
-    setSelectedTextAttributes: (attributes: BlockAttributesMap) => {
+    notifySelectedTextAttributesChange: (attributes: Attributes.Map) => {
       this.innerEndpoint.emit('SELECTED_ATTRIBUTES_CHANGE', attributes)
     },
-    setSelectedLineType: (lineType: TextLineType) => {
+    notifySelectedLineTypeChange: (lineType: Attributes.LineType) => {
       this.innerEndpoint.emit('SELECTED_LINE_TYPE_CHANGE', lineType)
     },
     release: (owner: object) => {
       this.outerEndpoint.release(owner)
     },
-    getTextTransformsReg: () => this.textTransformsReg,
-  })
-
-  /**
-   *
-   * @param textTransformSpecs A list of TextTransformsSpecs which will be used to map text attributes with styles.
-   */
-  public constructor(textTransformSpecs?: TextTransformSpec[]) {
-    this.textTransformsReg = new TextTransformsRegistry(textTransformSpecs || defaultTextTransforms)
+    getTransforms: () => this.transforms,
   }
 
   /**
-   * Get this bridge {@link Bridge:namespace.InnerInterface | innerInterface}.
+   *
+   * @param textTransformSpecs - A list of {@link (Transforms:namespace).GenericSpec | specs} which will be used to map text attributes with styles.
+   */
+  public constructor(textTransformSpecs?: Transforms.GenericSpec<Attributes.TextValue, 'text'>[]) {
+    this.transforms = new Transforms(textTransformSpecs || defaultTextTransforms)
+    this.sheetEventDom = Object.freeze(this.sheetEventDom)
+    this.controlEventDom = Object.freeze(this.controlEventDom)
+  }
+
+  /**
+   * Get {@link (Bridge:namespace).SheetEventDomain | sheetEventDom}.
    *
    * @internal
    */
-  public getInnerInterface(): Bridge.InnerInterface {
-    return this.innerInterface
+  public getSheetEventDomain(): Bridge.SheetEventDomain {
+    return this.sheetEventDom
   }
 
   /**
-   * Get this bridge {@link Bridge:namespace.InnerInterface | outerInterface}.
+   * Get this bridge {@link (Bridge:namespace).ControlEventDomain}.
    *
    * @remarks
    *
-   * The returned object can be used to react from and trigger {@link Sheet:class} events.
+   * The returned object can be used to react from and trigger {@link (Sheet:type)} events.
    */
-  public getOuterInterface(): Bridge.OuterInterface {
-    return this.outerInterface
+  public getControlEventDomain(): Bridge.ControlEventDomain {
+    return this.controlEventDom
+  }
+
+  /**
+   * Get transforms.
+   */
+  public getTransforms(): Transforms {
+    return this.transforms
   }
 
   /**

@@ -1,12 +1,12 @@
 import Delta from 'quill-delta'
 import { DocumentDelta } from './DocumentDelta'
-import { BlockAttributesMap, mergeAttributesLeft } from './attributes'
+import { Attributes, mergeAttributesLeft } from './attributes'
 import { DeltaChangeContext } from './DeltaChangeContext'
 import { Text } from './Text'
 import { NormalizeDirectiveBuilder } from './NormalizeDirectiveBuilder'
 import { Selection } from './Selection'
 import { DeltaBuffer } from './DeltaBuffer'
-import { shouldLineTypePropagateToNextLine, getLineType, isLineTypeTextLengthModifier, TextLineType } from './lines'
+import { shouldLineTypePropagateToNextLine, getLineType, isLineTypeTextLengthModifier } from './lines'
 import { makeDiffDelta } from './diff'
 import zip from 'ramda/es/zip'
 
@@ -29,9 +29,9 @@ export interface DeltaDiffReport {
 }
 
 interface TextDiffContext {
-  readonly textAttributes: BlockAttributesMap
-  readonly lineAttributes: BlockAttributesMap
-  readonly lineTypeBeforeChange: TextLineType
+  readonly textAttributes: Attributes.Map
+  readonly lineAttributes: Attributes.Map
+  readonly lineTypeBeforeChange: Attributes.LineType
   readonly context: DeltaChangeContext
   readonly oldText: Text
   readonly newText: Text
@@ -42,7 +42,7 @@ export interface DeltaDiffModel {
   readonly oldText: string
   readonly newText: string
   readonly context: DeltaChangeContext
-  readonly cursorTextAttributes: BlockAttributesMap
+  readonly cursorTextAttributes: Attributes.Map
 }
 
 export class DeltaDiffComputer {

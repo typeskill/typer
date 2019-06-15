@@ -40,7 +40,7 @@ export class Selection {
    * selection.containsIndex(4) // false
    * ```
    *
-   * @param selectionIndex
+   * @param selectionIndex - The index to test.
    */
   public touchesIndex(selectionIndex: number): boolean {
     return selectionIndex >= this.start && selectionIndex <= this.end
@@ -50,7 +50,7 @@ export class Selection {
    * Informs wether or not a selection has at least one index in
    * common with another selection.
    *
-   * @param selection
+   * @param selection - The selection to which this test should apply.
    */
   public touchesSelection(selection: Selection): boolean {
     const lowerBound = selection.start
@@ -65,7 +65,7 @@ export class Selection {
 
   /**
    *
-   * @param selection
+   * @param selection - The selection to which this test should apply.
    */
   public intersection(selection: Selection): Selection | null {
     const maximumMin = Math.max(this.start, selection.start)

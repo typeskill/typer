@@ -1,9 +1,9 @@
 // tslint:disable: no-string-literal
-import { BlockAttributesMap } from '@delta/attributes'
+import { Attributes } from '@delta/attributes'
 import { Selection } from '@delta/Selection'
 import { mockDeltaChangeContext, mockSelection } from '@test/delta'
-import { GenericDelta } from '@delta/generic'
-import { getHeadingCharactersFromType, isLineInSelection, TextLineType } from '@delta/lines'
+import { GenericRichContent } from '@delta/generic'
+import { getHeadingCharactersFromType, isLineInSelection } from '@delta/lines'
 import { mockDocumentDelta } from '@test/document'
 import { LineWalker } from '@delta/LineWalker'
 
@@ -19,8 +19,8 @@ describe('@delta/DocumentDelta', () => {
         { insert: '\n', attributes: { $type: 'rand' } },
         { insert: 'ohoh\n\n' },
       ])
-      const lines: GenericDelta[] = []
-      const attributes: BlockAttributesMap[] = []
+      const lines: GenericRichContent[] = []
+      const attributes: Attributes.Map[] = []
       textDelta['delta'].eachLine((l, a) => {
         attributes.push(a)
         lines.push(l)
@@ -495,7 +495,7 @@ describe('@delta/DocumentDelta', () => {
           start: 0,
           end: 6,
         })
-        const { finalDelta: normalizedDelta } = delta.applyLineTypeToSelection(selection, 'misc' as TextLineType)
+        const { finalDelta: normalizedDelta } = delta.applyLineTypeToSelection(selection, 'misc' as Attributes.LineType)
         expect(normalizedDelta.ops).toEqual([
           { insert: 'A' },
           { insert: '\n', attributes: { $type: 'misc' } },
@@ -509,7 +509,7 @@ describe('@delta/DocumentDelta', () => {
           start: 0,
           end: 6,
         })
-        const { finalDelta: normalizedDelta } = delta.applyLineTypeToSelection(selection, 'misc' as TextLineType)
+        const { finalDelta: normalizedDelta } = delta.applyLineTypeToSelection(selection, 'misc' as Attributes.LineType)
         expect(normalizedDelta.ops).toEqual([
           { insert: 'A' },
           { insert: '\n', attributes: { $type: 'misc' } },
@@ -531,7 +531,7 @@ describe('@delta/DocumentDelta', () => {
           start: 0,
           end: 12,
         })
-        const { finalDelta: normalizedDelta } = delta.applyLineTypeToSelection(selection, 'misc' as TextLineType)
+        const { finalDelta: normalizedDelta } = delta.applyLineTypeToSelection(selection, 'misc' as Attributes.LineType)
         expect(normalizedDelta.ops).toEqual([
           { insert: 'A' },
           { insert: '\n', attributes: { $type: 'misc' } },

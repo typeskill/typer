@@ -5,13 +5,47 @@ import isNil from 'ramda/es/isNil'
 import { GenericOp } from './operations'
 import find from 'ramda/es/find'
 import omit from 'ramda/es/omit'
-import { GenericDelta } from './generic'
+import { GenericRichContent } from './generic'
 
-export type TextAttributePrimitive = boolean | string | number
+/**
+ * A set of definitions for {@link GenericOp} attributes.
+ *
+ * @public
+ */
+export declare namespace Attributes {
+  /**
+   * Possible values for a text transform.
+   *
+   * @public
+   */
+  export type TextValue = boolean | string | number | null
 
-export type BlockAttributeValue = object | TextAttributePrimitive | null | undefined
-export interface BlockAttributesMap {
-  [k: string]: BlockAttributeValue
+  /**
+   * An attribute value.
+   *
+   * @public
+   */
+  export type GenericValue = object | TextValue | undefined
+
+  /**
+   * A set of attributes applying to a {@link GenericOp}.
+   *
+   * @public
+   */
+  export interface Map {
+    readonly [k: string]: GenericValue
+  }
+
+  /**
+   * A special text attribute value applied to a whole line.
+   *
+   * @remarks
+   *
+   * There can be only one text line type attribute active at once.
+   *
+   * @public
+   */
+  export type LineType = 'normal' | 'quoted' | 'ol' | 'ul'
 }
 
 /**
@@ -19,12 +53,12 @@ export interface BlockAttributesMap {
  *
  * @remarks
  *
- * `null` values are removed from the remaining object.
+ * `null` values are removed from the returned object.
  *
  * @param attributes - the attributes object to merge
  */
-export function mergeAttributesLeft(...attributes: BlockAttributesMap[]): BlockAttributesMap {
-  return reject(isNil)(mergeAll<BlockAttributesMap>(attributes))
+export function mergeAttributesLeft(...attributes: Attributes.Map[]): Attributes.Map {
+  return reject(isNil)(mergeAll<Attributes.Map>(attributes))
 }
 
 export const getTextAttributes = omit(['$type'])
@@ -35,7 +69,7 @@ export const getTextAttributes = omit(['$type'])
  * @param delta The full rich text representation
  * @param cursorPosition
  */
-export function getTextAttributesAtCursor(delta: GenericDelta, cursorPosition: number): BlockAttributesMap {
+export function getTextAttributesAtCursor(delta: GenericRichContent, cursorPosition: number): Attributes.Map {
   let lowerBound = 0
   const matchedOp = find((op: GenericOp) => {
     const len = Delta.Op.length(op)

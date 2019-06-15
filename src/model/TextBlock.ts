@@ -1,14 +1,14 @@
 import { Document } from './Document'
 import { Block } from './Block'
-import { BlockAttributesMap } from '@delta/attributes'
+import { Attributes } from '@delta/attributes'
 import { boundMethod } from 'autobind-decorator'
 import { Selection } from '@delta/Selection'
-import { TextTransformsRegistry } from '@core/TextTransformsRegistry'
+import { Transforms } from '@core/Transforms'
 import { DeltaChangeContext } from '@delta/DeltaChangeContext'
 import mergeLeft from 'ramda/es/mergeLeft'
 
 export class TextBlock extends Block {
-  private cursorTextAttributes: BlockAttributesMap = {}
+  private cursorTextAttributes: Attributes.Map = {}
   private length: number = 0
 
   public constructor(blockInterface: Document.BlockInterface) {
@@ -17,12 +17,12 @@ export class TextBlock extends Block {
 
   private updateLineType(selection: Selection): void {
     const lineType = this.getDelta().getLineTypeInSelection(selection)
-    this.blockInterface.bridgeInnerInterface.setSelectedLineType(lineType)
+    this.blockInterface.sheetEventDom.notifySelectedLineTypeChange(lineType)
   }
 
   private updateTextAttributes(selection: Selection): void {
     const textAttributes = this.getDelta().getSelectedTextAttributes(selection)
-    this.blockInterface.bridgeInnerInterface.setSelectedTextAttributes(textAttributes)
+    this.blockInterface.sheetEventDom.notifySelectedTextAttributesChange(textAttributes)
   }
 
   public handleOnSelectionChange(selection: Selection): void {
@@ -35,17 +35,17 @@ export class TextBlock extends Block {
     return this.length
   }
 
-  public setCursorAttributes(cursorTextAttributes: BlockAttributesMap): BlockAttributesMap {
+  public setCursorAttributes(cursorTextAttributes: Attributes.Map): Attributes.Map {
     this.cursorTextAttributes = mergeLeft(cursorTextAttributes, this.cursorTextAttributes)
     return this.cursorTextAttributes
   }
 
-  public getCursorAttributes(): BlockAttributesMap {
+  public getCursorAttributes(): Attributes.Map {
     return this.cursorTextAttributes
   }
 
-  public getTextTransformsRegistry(): TextTransformsRegistry {
-    return this.blockInterface.bridgeInnerInterface.getTextTransformsReg()
+  public getTextTransformsRegistry(): Transforms {
+    return this.blockInterface.sheetEventDom.getTransforms()
   }
 
   @boundMethod
@@ -55,6 +55,6 @@ export class TextBlock extends Block {
     this.length = newText.length
     this.updateTextAttributes(deltaChangeContext.selectionAfterChange)
     const lineType = documentDeltaUpdate.getLineTypeInSelection(deltaChangeContext.selectionAfterChange)
-    this.blockInterface.bridgeInnerInterface.setSelectedLineType(lineType)
+    this.blockInterface.sheetEventDom.notifySelectedLineTypeChange(lineType)
   }
 }

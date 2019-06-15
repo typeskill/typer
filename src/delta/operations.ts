@@ -1,23 +1,62 @@
-import { BlockAttributesMap } from './attributes'
+import { Attributes } from './attributes'
 
-interface OpBase {
-  delete?: number
-  retain?: number
+/**
+ * An atomic operation representing changes to a document.
+ *
+ * @remarks
+ *
+ * This interface is a redefinition of {@link quilljs-delta#Op}.
+ *
+ * @public
+ */
+export interface GenericOp {
+  /**
+   * A representation of inserted content.
+   */
+  readonly insert?: string | object
+  /**
+   * A delete operation.
+   *
+   * @internal
+   */
+  readonly delete?: number
+  /**
+   * A retain operation
+   *
+   * @internal
+   */
+  readonly retain?: number
+  /**
+   * A set of attributes describing properties of the content.
+   */
+  readonly attributes?: Attributes.Map
 }
 
-export interface GenericOp extends OpBase {
-  insert?: string | object
-  attributes?: BlockAttributesMap
+/**
+ * An operation containing text.
+ *
+ * @public
+ */
+export interface TextOp extends GenericOp {
+  /**
+   * {@inheritdoc GenericOp.insert}
+   */
+  readonly insert?: string
+  /**
+   * {@inheritdoc GenericOp.attributes}
+   */
+  readonly attributes?: Attributes.Map
 }
 
-export interface TextOp extends OpBase {
-  insert?: string
-  attributes?: BlockAttributesMap
-}
-
-export interface BlockOp<T extends object> extends OpBase {
-  insert?: T
-  attributes?: BlockAttributesMap
+export interface BlockOp<T extends object> extends GenericOp {
+  /**
+   * {@inheritdoc GenericOp.insert}
+   */
+  readonly insert?: T
+  /**
+   * {@inheritdoc GenericOp.attributes}
+   */
+  readonly attributes?: Attributes.Map
 }
 
 export function isTextOp(op: GenericOp): op is TextOp {

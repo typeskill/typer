@@ -1,9 +1,12 @@
 import { Selection } from './Selection'
-import { BlockAttributesMap } from './attributes'
+import { Attributes } from './attributes'
 
+/**
+ * Line types which will modify the length of a line when activated or disactivated.
+ *
+ * @public
+ */
 export type TextLengthModifierLineType = 'ol' | 'ul'
-
-export type TextLineType = 'normal' | 'quoted' | TextLengthModifierLineType
 
 /**
  * An interface representing a line of text.
@@ -17,17 +20,18 @@ export type TextLineType = 'normal' | 'quoted' | TextLengthModifierLineType
  * ```ts
  * documentText.substring(line.lineRange.start, line.lineRange.end) === extractTextFromDelta(line.delta)
  * ```
+ * @internal
  */
 export interface GenericLine {
   index: number
   lineRange: Selection
 }
 
-export function isLineTypeTextLengthModifier(lineType: TextLineType): lineType is TextLengthModifierLineType {
+export function isLineTypeTextLengthModifier(lineType: Attributes.LineType): lineType is TextLengthModifierLineType {
   return lineType === 'ol' || lineType === 'ul'
 }
 
-export function shouldLineTypePropagateToNextLine(lineType: TextLineType) {
+export function shouldLineTypePropagateToNextLine(lineType: Attributes.LineType) {
   return lineType === 'ol' || lineType === 'ul'
 }
 
@@ -39,11 +43,11 @@ export function isLineInSelection(selection: Selection, { lineRange }: GenericLi
   )
 }
 
-export function getLineType(lineAttributes?: BlockAttributesMap): TextLineType {
-  return lineAttributes && lineAttributes.$type ? (lineAttributes.$type as TextLineType) : 'normal'
+export function getLineType(lineAttributes?: Attributes.Map): Attributes.LineType {
+  return lineAttributes && lineAttributes.$type ? (lineAttributes.$type as Attributes.LineType) : 'normal'
 }
 
-export function getHeadingCharactersFromType(lineType: TextLineType, index: number): string {
+export function getHeadingCharactersFromType(lineType: Attributes.LineType, index: number): string {
   switch (lineType) {
     case 'ol':
       return `${index + 1}.  `

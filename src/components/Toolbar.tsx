@@ -1,56 +1,173 @@
-import React, { PureComponent, SFC, ComponentType } from 'react'
+import React, { PureComponent, SFC, ComponentType, ComponentClass } from 'react'
 import { View, TouchableOpacity, StyleProp, ViewStyle, ViewPropTypes, StyleSheet } from 'react-native'
 import invariant from 'invariant'
 import PropTypes from 'prop-types'
-import { BaseTextTransformAttribute } from '@core/transforms'
+import { Transforms } from '@core/Transforms'
 import { Bridge } from '@core/Bridge'
-import { BlockAttributesMap, TextAttributePrimitive } from '@delta/attributes'
-import { TextLineType } from '@delta/lines'
+import { Attributes } from '@delta/attributes'
+import { ToolbarLayoutPropType } from './types'
 
-export const TEXT_CONTROL_SEPARATOR = Symbol('separator')
+/**
+ * Constant used within a {@link (Toolbar:namespace).Layout} to denote a separator.
+ *
+ * @public
+ */
+export const CONTROL_SEPARATOR = Symbol('separator')
 
+/**
+ * Actions which can be triggered with the {@link (Toolbar:type)} component.
+ *
+ * @public
+ */
 export enum ControlAction {
+  /**
+   * Switch bold formatting in the selected text.
+   */
   SELECT_TEXT_BOLD,
+  /**
+   * Switch italic formatting in the selected text.
+   */
   SELECT_TEXT_ITALIC,
+  /**
+   * Switch underline formatting in the selected text.
+   */
   SELECT_TEXT_UNDERLINE,
+  /**
+   * Switch strikethrough formatting in the selected text.
+   */
   SELECT_TEXT_STRIKETHROUGH,
+  /**
+   * Switch the layout of lines traversed by selection to or from ordered list.
+   */
   SELECT_LINES_ORDERED_LIST,
+  /**
+   * Switch the layout of lines traversed by selection to or from unordered list.
+   */
   SELECT_LINES_UNORDERED_LIST,
 }
 
+/**
+ * A set of definitions related to the {@link (Toolbar:type)} component.
+ *
+ * @public
+ */
 declare namespace Toolbar {
+  /**
+   * An object describing the characteristics of a control.
+   */
   export interface ControlSpec<T extends object = object> {
+    /**
+     * The react {@link react#ComponentType} representing the rendered icon.
+     *
+     * @remarks
+     *
+     * - This icon component is expected to at least support {@link (Toolbar:namespace).TextControlMinimalIconProps}.
+     * - The component will optionally receive `iconProps`.
+     * - The icon should have a transparent background.
+     */
     IconComponent: ComponentType<TextControlMinimalIconProps & T>
+    /**
+     * The action performed when the control is actionated.
+     */
     actionType: ControlAction
+    /**
+     * The props passed to `IconComponent`
+     */
     iconProps?: T
   }
-  export type Layout = (ControlSpec | typeof TEXT_CONTROL_SEPARATOR)[]
+  /**
+   * Declaratively describes the layout of the {@link (Toolbar:type)} component.
+   */
+  export type Layout = (ControlSpec | typeof CONTROL_SEPARATOR)[]
+
+  /**
+   * Props of the {@link (Toolbar:type)} component.
+   */
   export interface Props {
-    bridgeOuterInferface: Bridge.OuterInterface
+    /**
+     * The instance to be shared with the {@link (Sheet:type)}.
+     */
+    bridge: Bridge
+    /**
+     * An array describing the resulting layout of this component.
+     */
     layout: Layout
-    defaultButtonBackgroundColor?: string
-    defaultButtonColor?: string
-    selectedButtonBackgroundColor?: string
-    selectedButtonColor?: string
+    /**
+     * Button background when a control is not in active state.
+     */
+    inactiveButtonBackgroundColor?: string
+    /**
+     * Button icon color when a control is not in active state.
+     */
+    inactiveButtonColor?: string
+    /**
+     * Button icon color when a control is in active state.
+     */
+    activeButtonBackgroundColor?: string
+    /**
+     * Button background when a control is in active state.
+     */
+    activeButtonColor?: string
+    /**
+     * The color of the separator.
+     *
+     * @remarks
+     *
+     * A separator can be defined by inserting {@link CONTROL_SEPARATOR} constant to the `layout` prop.
+     */
     separatorColor?: string
+    /**
+     * Style of the root component.
+     */
     style?: StyleProp<ViewStyle>
+    /**
+     * Style of the container component encompassing all controls.
+     */
     contentContainerStyle?: StyleProp<ViewStyle>
+    /**
+     * Icon size.
+     */
     iconSize?: number
-    iconSpacing?: number
+    /**
+     * The space between two buttons.
+     */
+    buttonSpacing?: number
   }
+
+  /**
+   * The props passed to every icon {@link react#ComponentType}.
+   */
   export interface TextControlMinimalIconProps {
+    /**
+     * Icon color.
+     *
+     * @remarks
+     *
+     * The color varies depending on the active state.
+     * Will receive {@link (Toolbar:namespace).Props.inactiveButtonColor} when not active and
+     * {@link (Toolbar:namespace).Props.activeButtonColor} when active.
+     */
     color: string
+    /**
+     * Icon size.
+     */
     size: number
   }
 
+  /**
+   * The shape of expected props to an icon from {@link https://www.npmjs.com/package/react-native-vector-icons | react-native-vector-icons}.
+   */
   export interface VectorIconMinimalProps extends TextControlMinimalIconProps {
+    /**
+     * Icon name.
+     */
     name: string
   }
 }
 
 interface ToolbarState {
-  selectedAttributes: BlockAttributesMap
-  selectedLineType: TextLineType
+  selectedAttributes: Attributes.Map
+  selectedLineType: Attributes.LineType
 }
 
 interface ButtonProps {
@@ -72,40 +189,34 @@ const styles = StyleSheet.create({
   },
 })
 
-export class Toolbar extends PureComponent<Toolbar.Props, ToolbarState> {
-  public static propTypes = {
-    bridgeOuterInferface: PropTypes.object.isRequired,
-    layout: PropTypes.arrayOf(
-      PropTypes.oneOfType([
-        PropTypes.symbol,
-        PropTypes.shape({
-          IconComponent: PropTypes.func.isRequired,
-          actionType: PropTypes.number.isRequired,
-          iconProps: PropTypes.object,
-        }),
-      ]),
-    ),
-    defaultButtonBackgroundColor: PropTypes.string,
-    defaultButtonColor: PropTypes.string,
-    selectedButtonBackgroundColor: PropTypes.string,
-    selectedButtonColor: PropTypes.string,
+// eslint-disable-next-line @typescript-eslint/class-name-casing
+class _Toolbar extends PureComponent<Toolbar.Props, ToolbarState> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public static propTypes: Record<keyof Toolbar.Props, any> = {
+    bridge: PropTypes.instanceOf(Bridge).isRequired,
+    layout: ToolbarLayoutPropType,
+    inactiveButtonBackgroundColor: PropTypes.string,
+    inactiveButtonColor: PropTypes.string,
+    activeButtonBackgroundColor: PropTypes.string,
+    activeButtonColor: PropTypes.string,
     separatorColor: PropTypes.string,
     style: ViewPropTypes.style,
     contentContainerStyle: ViewPropTypes.style,
     iconSize: PropTypes.number,
-    iconSpacing: PropTypes.number,
+    buttonSpacing: PropTypes.number,
   }
 
-  public static defaultProps = {
-    defaultButtonBackgroundColor: 'transparent',
-    defaultButtonColor: '#3a404c',
-    selectedButtonBackgroundColor: 'transparent',
-    selectedButtonColor: '#4286f4',
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public static defaultProps: Partial<Record<keyof Toolbar.Props, any>> = {
+    inactiveButtonBackgroundColor: 'transparent',
+    inactiveButtonColor: '#3a404c',
+    activeButtonBackgroundColor: 'transparent',
+    activeButtonColor: '#4286f4',
     separatorColor: '#646e82',
     iconSize: DEFAULT_ICON_SIZE,
   }
 
-  private outerInterface: Bridge.OuterInterface
+  private controlEventDom: Bridge.ControlEventDomain
 
   public state: ToolbarState = {
     selectedAttributes: {},
@@ -114,8 +225,8 @@ export class Toolbar extends PureComponent<Toolbar.Props, ToolbarState> {
 
   public constructor(props: Toolbar.Props) {
     super(props)
-    this.outerInterface = props.bridgeOuterInferface
-    invariant(props.bridgeOuterInferface != null, 'bridgeOuterInferface prop is required')
+    invariant(props.bridge != null, 'bridge prop is required')
+    this.controlEventDom = props.bridge.getControlEventDomain()
   }
 
   private Separator: SFC<{}> = () =>
@@ -140,42 +251,42 @@ export class Toolbar extends PureComponent<Toolbar.Props, ToolbarState> {
 
   private getDefaultButtonStyle() {
     return {
-      color: this.props.defaultButtonColor,
-      backgroundColor: this.props.defaultButtonBackgroundColor,
+      color: this.props.inactiveButtonColor,
+      backgroundColor: this.props.inactiveButtonBackgroundColor,
     }
   }
 
   private getSelectedButtonStyle() {
     return {
-      color: this.props.selectedButtonColor,
-      backgroundColor: this.props.selectedButtonBackgroundColor,
+      color: this.props.activeButtonColor,
+      backgroundColor: this.props.activeButtonBackgroundColor,
     }
   }
 
   private applyTextTransformToSelection(
-    attributeName: BaseTextTransformAttribute,
-    activeAttributeValue: TextAttributePrimitive,
+    attributeName: Transforms.TextAttributeName,
+    activeAttributeValue: Attributes.TextValue,
   ) {
     const nextAttributeValue =
       this.state.selectedAttributes[attributeName] === activeAttributeValue ? null : activeAttributeValue
     return () => {
-      this.outerInterface.applyTextTransformToSelection(attributeName, nextAttributeValue)
+      this.controlEventDom.applyTextTransformToSelection(attributeName, nextAttributeValue)
     }
   }
 
-  private applyLineTransformToSelection(lineType: TextLineType) {
+  private applyLineTransformToSelection(lineType: Attributes.LineType) {
     return () => {
-      this.outerInterface.applyLineTransformToSelection(lineType)
+      this.controlEventDom.switchLineTypeInSelection(lineType)
     }
   }
 
   private computeIconSpacing() {
-    return typeof this.props.iconSpacing === 'number' ? this.props.iconSpacing : (this.props.iconSize as number) / 3
+    return typeof this.props.buttonSpacing === 'number' ? this.props.buttonSpacing : (this.props.iconSize as number) / 3
   }
 
   private renderTextTransformController(
-    attributeName: BaseTextTransformAttribute,
-    activeAttributeValue: TextAttributePrimitive,
+    attributeName: Transforms.TextAttributeName,
+    activeAttributeValue: Attributes.TextValue,
     textControlSpec: Toolbar.ControlSpec,
     last: boolean = false,
   ) {
@@ -193,7 +304,7 @@ export class Toolbar extends PureComponent<Toolbar.Props, ToolbarState> {
   }
 
   private renderLineTransformController(
-    lineType: TextLineType,
+    lineType: Attributes.LineType,
     textControlSpec: Toolbar.ControlSpec,
     last: boolean = false,
   ) {
@@ -232,7 +343,7 @@ export class Toolbar extends PureComponent<Toolbar.Props, ToolbarState> {
     const Separator = this.Separator
     return textControlsMap.map((m, index) => {
       const key = `index-${index}`
-      if (m === TEXT_CONTROL_SEPARATOR) {
+      if (m === CONTROL_SEPARATOR) {
         return <Separator key={key} />
       }
       return React.cloneElement(this.renderIconControl(m, index === textControlsMap.length - 1), { key })
@@ -240,23 +351,20 @@ export class Toolbar extends PureComponent<Toolbar.Props, ToolbarState> {
   }
 
   public componentDidMount() {
-    this.outerInterface.addSelectedAttributesChangeListener(this, selectedAttributes => {
+    this.controlEventDom.addSelectedAttributesChangeListener(this, selectedAttributes => {
       this.setState({ selectedAttributes })
     })
-    this.outerInterface.addSelectedLineTypeChangeListener(this, selectedLineType => {
+    this.controlEventDom.addSelectedLineTypeChangeListener(this, selectedLineType => {
       this.setState({ selectedLineType })
     })
   }
 
   public componentWillReceiveProps(nextProps: Toolbar.Props) {
-    invariant(
-      nextProps.bridgeOuterInferface === this.props.bridgeOuterInferface,
-      "bridgeOuterInferface prop cannot be changed during Toolbar's lifetime.",
-    )
+    invariant(nextProps.bridge === this.props.bridge, "bridge prop cannot be changed during Toolbar's lifetime.")
   }
 
   public componentWillUnmount() {
-    this.outerInterface.release(this)
+    this.controlEventDom.release(this)
   }
 
   public render() {
@@ -274,6 +382,17 @@ export class Toolbar extends PureComponent<Toolbar.Props, ToolbarState> {
   }
 }
 
+/**
+ * Utility function to build {@link (Toolbar:type)} controls from {@link https://www.npmjs.com/package/react-native-vector-icons | react-native-vector-icons}.
+ *
+ * @param IconComponent - The icon {@link react#ComponentType} such as `MaterialCommunityIcons`
+ * @param actionType - The control action performed when this control is actionated.
+ * @param name - The name of the icon within the `IconComponent` set.
+ *
+ * @returns An object describing this control.
+ *
+ * @public
+ */
 export function buildVectorIconControlSpec(
   IconComponent: ComponentType<Toolbar.VectorIconMinimalProps>,
   actionType: ControlAction,
@@ -285,3 +404,18 @@ export function buildVectorIconControlSpec(
     iconProps: { name },
   }
 }
+
+/**
+ * A component to let user control the {@link (Sheet:type)} through a {@link (Bridge:class)}.
+ *
+ * @public
+ *
+ * @internalRemarks
+ *
+ * This type trick is aimed at preventing from exporting the component State which should be out of API surface.
+ */
+type Toolbar = ComponentClass<Toolbar.Props>
+
+const Toolbar = _Toolbar as Toolbar
+
+export { Toolbar }

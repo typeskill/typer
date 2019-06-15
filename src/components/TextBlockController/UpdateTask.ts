@@ -1,5 +1,5 @@
 import { Selection } from '@delta/Selection'
-import { GenericDelta } from '@delta/generic'
+import { GenericRichContent } from '@delta/generic'
 import { InteractionManager } from 'react-native'
 import { TextBlockMinimalComponent } from './types'
 import { DocumentDelta } from '@delta/DocumentDelta'
@@ -19,10 +19,10 @@ export class UpdateTask {
     this.synchronizer = manager
   }
 
-  private async setOps(delta: GenericDelta): Promise<void> {
+  private async setOps(richContent: GenericRichContent): Promise<void> {
     return new Promise(resolve => {
       if (!this.synchronizer.isClosed) {
-        this.synchronizer.component.setState({ ops: delta.ops }, resolve)
+        this.synchronizer.component.setState({ richContent }, resolve)
       } else {
         resolve()
       }

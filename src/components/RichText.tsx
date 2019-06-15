@@ -1,19 +1,50 @@
-import React, { ReactNode, Component } from 'react'
+import React, { ReactNode, Component, ComponentClass } from 'react'
 import { TextStyle, Text, StyleProp, StyleSheet } from 'react-native'
 import { GenericOp, isTextOp, TextOp } from '@delta/operations'
-import { TextTransformsRegistry } from '@core/TextTransformsRegistry'
+import { Transforms } from '@core/Transforms'
 import invariant from 'invariant'
 import { boundMethod } from 'autobind-decorator'
-import { TextLineType } from '@delta/lines'
 import { LineWalker } from '@delta/LineWalker'
+import { GenericRichContent } from '@delta/generic'
+import { Attributes } from '@delta/attributes'
+import PropTypes from 'prop-types'
+import { RichContentPropType } from './types'
 
-export interface RichTextProps {
-  ops: GenericOp[]
-  textTransformsReg: TextTransformsRegistry
-  textStyle?: StyleProp<TextStyle>
+/**
+ * A set of definitions related to the {@link (RichText:type)} component.
+ *
+ * @public
+ */
+declare namespace RichText {
+  /**
+   * Properties for the {@link (RichText:type)} component.
+   */
+  export interface Props {
+    /**
+     * The content to display.
+     */
+    richContent: GenericRichContent
+    /**
+     * An object describing how to convert attributes to style properties.
+     *
+     * @remarks
+     *
+     * You can use {@link (Bridge:class).getTransforms} and pass it to this component.
+     */
+    transforms: Transforms
+    /**
+     * Default text style.
+     *
+     * @remarks
+     *
+     * Text style can be overriden depending on attributes applying to an {@link GenericOp | operation}.
+     * The mapped styled are dictated by the `textTransformsReg` property.
+     */
+    textStyle?: StyleProp<TextStyle>
+  }
 }
 
-function getLineStyle(lineType: TextLineType): StyleProp<TextStyle> {
+function getLineStyle(lineType: Attributes.LineType): StyleProp<TextStyle> {
   // Padding is supported from direct Text descendents of
   // TextInput as of RN60
   // TODO test
@@ -38,21 +69,28 @@ export const richTextStyles = StyleSheet.create({
   },
 })
 
-export class RichText extends Component<RichTextProps> {
-  private textTransformsReg: TextTransformsRegistry
+// eslint-disable-next-line @typescript-eslint/class-name-casing
+class _RichText extends Component<RichText.Props> {
+  private transforms: Transforms
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public static propTypes: Record<keyof RichText.Props, any> = {
+    richContent: RichContentPropType,
+    textStyle: PropTypes.any,
+    transforms: PropTypes.instanceOf(Transforms),
+  }
 
-  public constructor(props: RichTextProps) {
+  public constructor(props: RichText.Props) {
     super(props)
     this.renderOperation = this.renderOperation.bind(this)
-    this.textTransformsReg = props.textTransformsReg
-    invariant(props.textTransformsReg instanceof TextTransformsRegistry, 'textTransformsReg prop is mandatory')
+    this.transforms = props.transforms
+    invariant(props.transforms instanceof Transforms, 'textTransformsReg prop is mandatory')
   }
 
   @boundMethod
   private renderOperation(op: GenericOp, lineIndex: number, elemIndex: number) {
     invariant(isTextOp(op), 'Only textual documentDelta are supported')
     const key = `text-${lineIndex}-${elemIndex}`
-    const styles = this.textTransformsReg.getStylesFromOp(op as TextOp)
+    const styles = this.transforms.getStylesFromOp(op as TextOp)
     return (
       <Text style={styles} key={key}>
         {op.insert}
@@ -61,9 +99,9 @@ export class RichText extends Component<RichTextProps> {
   }
 
   private renderLines() {
-    const { ops } = this.props
+    const { richContent } = this.props
     const children: ReactNode[][] = []
-    new LineWalker(ops).eachLine(({ lineType, delta: lineDelta, index }) => {
+    new LineWalker(richContent).eachLine(({ lineType, delta: lineDelta, index }) => {
       children.push([
         <Text style={getLineStyle(lineType)} key={`line-${index}`}>
           {lineDelta.ops.map((l, elIndex) => this.renderOperation(l, index, elIndex))}
@@ -83,18 +121,41 @@ export class RichText extends Component<RichTextProps> {
     return []
   }
 
+  /**
+   * @internal
+   */
   public shouldComponentUpdate() {
     return true
   }
 
-  public componentWillReceiveProps(nextProps: RichTextProps) {
+  /**
+   * @internal
+   */
+  public componentWillReceiveProps(nextProps: RichText.Props) {
     invariant(
-      nextProps.textTransformsReg === this.props.textTransformsReg,
+      nextProps.transforms === this.props.transforms,
       'textTransformsReg prop cannot be changed after instantiation',
     )
   }
 
+  /**
+   * @internal
+   */
   public render() {
     return this.renderLines()
   }
 }
+
+/**
+ * A component to display rich content.
+ *
+ * @public
+ *
+ * @internalRemarks
+ *
+ * This type trick is aimed at preventing from exporting members which should be out of API surface.
+ */
+type RichText = ComponentClass<RichText.Props>
+const RichText = _RichText as RichText
+
+export { RichText }

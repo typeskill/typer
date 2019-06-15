@@ -1,61 +1,58 @@
-import { Sheet } from '@components/Sheet'
-import { RichText } from '@components/RichText'
-import { Bridge } from '@core/Bridge'
-import { Toolbar, ControlAction, TEXT_CONTROL_SEPARATOR, buildVectorIconControlSpec } from '@components/Toolbar'
-import { BlockAttributesMap } from '@delta/attributes'
-import { TextLineType, TextLengthModifierLineType } from '@delta/lines'
-import {
-  BaseTextTransformAttribute,
-  BooleanTextTransformSpec,
-  TextTransformSpec,
-  TextTransformsDictionnary,
-} from '@core/transforms'
-import { DeltaChangeContext } from '@delta/DeltaChangeContext'
-import { GenericDelta } from '@delta/generic'
-import { DocumentDelta } from '@delta/DocumentDelta'
-import { RichContent } from '@model/RichContent'
-
 /**
  *
  * Typeskill, the Operational-Transform Based (React) Native Rich Text library.
  *
  * @remarks
  *
- * The library exposes a naked {@link Sheet:class} component, which represents a support for editing {@link RichContent:class}.
- * It also exposes a {@link RichText:class} component, which solely display the {@link RichContent:class}.
- * The {@link Sheet:class} component is solely responsible for displaying and editing {@link RichContent:class}.
- * This {@link Sheet:class} component needs a {@link Bridge:class} object which you can instanciate in the controlling root component.
+ * ## Introduction
  *
- * The actions are triggered with the {@link Bridge:namespace.InnerInterface | outerInterface} from the same {@link Bridge} instance. Such actions include:
- * - insert media content;
- * - change line type (normal, lists);
- * - set text attributes to selection (bold, italic).
+ * The library exposes:
+ *
+ * - The {@link (Sheet:type)} component, a support for editing {@link (RichContent:class)}.
+ * - The {@link (RichText:class)} component, a display for {@link (RichContent:class)}.
+ * - The {@link (Toolbar:type)} component, which permits text transforms on current selection.
+ *
+ * ## Triggering actions from external controls
+ *
+ * A {@link (Bridge:class)} instance should be shared between a {@link (Sheet:type)} and any controlling component such as {@link (Toolbar:type)}.
+ * Actions can be triggered with the help of the object returned by {@link (Bridge:class).getControlEventDomain}.
+ *
+ * Such actions include:
+ *
+ * - inserting media content;
+ * - switching line type (normal, lists);
+ * - (un)setting text attributes (bold, italic).
+ *
+ * Selection change events can also be listened to with `add...Listener` methods.
+ * {@link (Bridge:class).release} must be call from the component holding a reference to the {@link (Bridge:class)} instance,
+ * during `componentWillUnmount` hook.
  *
  * @packageDocumentation
  */
+import { Sheet } from '@components/Sheet'
+import { RichText } from '@components/RichText'
+import { Bridge } from '@core/Bridge'
+import { Toolbar, ControlAction, CONTROL_SEPARATOR, buildVectorIconControlSpec } from '@components/Toolbar'
+import { Attributes } from '@delta/attributes'
+import { GenericRichContent } from '@delta/generic'
+import { RichContent } from '@model/RichContent'
+import { GenericOp, TextOp } from '@delta/operations'
+import { Transforms } from '@core/Transforms'
 
 export {
-  // @components
+  // Components related
   Sheet,
   RichText,
   Toolbar,
   ControlAction,
-  TEXT_CONTROL_SEPARATOR,
+  CONTROL_SEPARATOR,
   buildVectorIconControlSpec,
-  // @core
+  // Model related
   Bridge,
   RichContent,
-  // @delta/attributes
-  BlockAttributesMap,
-  // @delta/transforms
-  BaseTextTransformAttribute,
-  TextLineType,
-  TextLengthModifierLineType,
-  BooleanTextTransformSpec,
-  TextTransformSpec,
-  TextTransformsDictionnary,
-  // @delta/DocumentDelta
-  DocumentDelta,
-  DeltaChangeContext,
-  GenericDelta,
+  GenericRichContent,
+  GenericOp,
+  TextOp,
+  Attributes,
+  Transforms,
 }

@@ -52,7 +52,7 @@ export class TextBlockController extends Component<TextBlockControllerProps, Tex
   public state: TextBlockControllerState = {
     isControlingState: false,
     overridingSelection: null,
-    ops: null,
+    richContent: null,
   }
 
   public constructor(props: TextBlockControllerProps) {
@@ -131,7 +131,7 @@ export class TextBlockController extends Component<TextBlockControllerProps, Tex
 
   public shouldComponentUpdate(nextProps: TextBlockControllerProps, nextState: TextBlockControllerState) {
     return (
-      nextState.ops !== this.state.ops ||
+      nextState.richContent !== this.state.richContent ||
       nextProps.grow !== this.props.grow ||
       nextState.isControlingState !== this.state.isControlingState ||
       nextState.overridingSelection !== this.state.overridingSelection
@@ -161,9 +161,9 @@ export class TextBlockController extends Component<TextBlockControllerProps, Tex
 
   public render() {
     const { grow, textStyle, textBlock } = this.props
-    const { overridingSelection, ops: documentDelta } = this.state
-    const textComponent = documentDelta ? (
-      <RichText textStyle={textStyle} textTransformsReg={textBlock.getTextTransformsRegistry()} ops={documentDelta} />
+    const { overridingSelection, richContent } = this.state
+    const textComponent = richContent ? (
+      <RichText textStyle={textStyle} transforms={textBlock.getTextTransformsRegistry()} richContent={richContent} />
     ) : null
     return (
       <View style={[grow ? styles.grow : undefined]}>
