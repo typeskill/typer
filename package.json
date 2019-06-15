@@ -13,10 +13,11 @@
     "build:types": "ttsc --project tsconfig-build.json",
     "build:js": "babel src --config-file ./build.babel.config.js --out-dir lib --extensions \".ts,.tsx\" --source-maps inline",
     "prepare": "npm run build",
-    "test": "npm run validate:typescript && npm run validate:lint && npm run test:jest",
+    "test": "npm run validate:typescript && npm run validate:lint && npm run test:jest && npm run validate:api",
     "test:jest": "jest",
     "validate:typescript": "tsc --project ./ --noEmit",
     "validate:lint": "eslint --ext .ts --ext .tsx 'src/'",
+    "validate:api": "npm run build:types && npx api-extractor run --local --verbose",
     "release": "standard-version",
     "semantic-release": "semantic-release"
   },

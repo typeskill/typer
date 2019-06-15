@@ -30,4 +30,7 @@ jobs: # a collection of steps
       - run: # run coverage report
           name: code-coverage
           command: 'npx codecov --token="$CODECOV_TOKEN"'
+      - run:
+          name: 'validate:api'
+          command: 'npm run validate:api'
 
