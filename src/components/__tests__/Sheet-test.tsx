@@ -1,4 +1,4 @@
-// tslint:disable:no-string-literal
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React from 'react'
 // Test renderer must be required after react-native.
 import renderer from 'react-test-renderer'
@@ -6,9 +6,15 @@ import { Sheet } from '@components/Sheet'
 import { Bridge } from '@core/Bridge'
 
 describe('@components/<Sheet>', () => {
-  it('should renders without crashing', () => {
+  it('should renders without crashing when a bridge instance is provided', () => {
     const bridge = new Bridge()
-    const sheet = renderer.create(<Sheet bridgeInnerInterface={bridge.getInnerInterface()} />)
-    expect(sheet).toBeTruthy()
+    expect(() => {
+      renderer.create(<Sheet bridge={bridge} />)
+    }).not.toThrow()
+  })
+  it('should crash when the bridge prop is not an instance of the Bridge class', () => {
+    expect(() => {
+      renderer.create(<Sheet bridge={{} as any} />)
+    }).toThrow()
   })
 })
