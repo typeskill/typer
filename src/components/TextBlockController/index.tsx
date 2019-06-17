@@ -14,9 +14,10 @@ import { Selection } from '@delta/Selection'
 import { Orchestrator } from '@model/Orchestrator'
 import { boundMethod } from 'autobind-decorator'
 import { TextChangeSession } from './TextChangeSession'
-import { DocumentDeltaUpdate } from '@delta/DocumentDeltaUpdate'
-import { TextBlockControllerProps, TextBlockControllerState, TextBlockMinimalComponent } from './types'
+import { DocumentDeltaSerialUpdate } from '@delta/DocumentDeltaSerialUpdate'
+import { TextBlockControllerProps, TextBlockControllerState, TextBlockSyncInterface } from './types'
 import { TextBlockUpdateSynchronizer } from './TextBlockUpdateSynchronizer'
+import { DocumentDeltaAtomicUpdate } from '@delta/DocumentDeltaAtomicUpdate'
 
 export { TextBlockControllerProps }
 
@@ -43,7 +44,64 @@ const constantTextInputProps: TextInputProps = {
   blurOnSubmit: false,
 } as TextInputProps
 
-export class TextBlockController extends Component<TextBlockControllerProps, TextBlockControllerState> {
+/**
+ * A component which is responsible for providing a user interface to edit {@link RichContent}.
+ *
+ * @privateRemarks
+ *
+ * The synchronization mechanism is complex, because of three potential state discrepancies.
+ *
+ * **Fake equality**
+ *
+ * The second one is not a bug, but rather a feature of React virtual DOM engine. To understand the challange, lets propose a scenario:
+ *
+ * - The user types a word
+ * - {@link react-native#TextInputProps.onChangeText} is fired
+ * - {@link react-native#TextInputProps.onSelectionChange} is fired
+ *
+ * At that point, a delta is computed from text change and selection before and after change.
+ * This delta strictly represents the result of applying a text diff algorithm to the previous text.
+ *
+ * Because of ordered and unordered lists in the context of a pure-text component, there is a set of rules which define
+ * if applying a delta should result in adding or removing a text prefix. This phase is called *normalization*.
+ *
+ * Therefore, it appears that up to two delta might be computed for one {@link react-native#TextInputProps.onChangeText} call.
+ * The concern is that, if we were to update component state with the latest delta alone, we could run into a situation were this
+ * delta deeeply equals the previous delta, and thus the VDOM diff algorithm detects no changes after rerendering.
+ *
+ * This is why **we must serialy apply two delta updates when a normalization process happens**. We call this process *serial update*,
+ * and the data necessary to perform such is encapsulated in {@link DocumentDeltaSerialUpdate} class.
+ *
+ * **Selection discrepancy**
+ *
+ * Because of *normalization*, the active selection in native {@link react-native#TextInput} component might become inconsistant.
+ * That is why we must update it during a *serial update*. We call this process *selection override*.
+ *
+ * However, {@link https://git.io/fjamu | a bug in RN < 60} prevents updating selection and text during the same
+ * render cycle. Instead, any selection override must happen after the next {@link react-native#TextInputProps.onSelectionChange} call
+ * following a render cycle.
+ *
+ * **Atomicity**
+ *
+ * A new issue might emerge during a *serial update*. That is: user types during the update, and the consistency breaks, introducing bugs.
+ *
+ * One solution could be to lock state during update. But that would prevent the user from typing; not acceptable for UX.
+ * Another solution would be to deterministically infer a new state from this text update disruption. To do so, lets cut a *serial update*
+ * into a list of atomic updates. Required updates are marked with an asterisk (*):
+ *
+ * 1. intermediary rich content (delta) update
+ * 2. intermediary selection update
+ * 3. final rich content (delta) update*
+ * 4. final selection update
+ *
+ * When {@link react-native#TextInputProps.onChangeText} is called between one of these steps, we can:
+ *
+ * 1. compute a new *serial update* from the last applied delta
+ * 2. ignore forthcoming atomic updates from the original *serial update*
+ *
+ */
+export class TextBlockController extends Component<TextBlockControllerProps, TextBlockControllerState>
+  implements TextBlockSyncInterface {
   private textInputRef: TextInput | null = null
   private textChangeSession: TextChangeSession | null = null
   private selection = Selection.fromBounds(0)
@@ -58,7 +116,7 @@ export class TextBlockController extends Component<TextBlockControllerProps, Tex
   public constructor(props: TextBlockControllerProps) {
     super(props)
     invariant(props.textBlock != null, INVARIANT_MANDATORY_TEXT_BLOCK_PROP)
-    this.synchronizer = new TextBlockUpdateSynchronizer(this as TextBlockMinimalComponent)
+    this.synchronizer = new TextBlockUpdateSynchronizer(this)
   }
 
   private get blockControllerInterface(): Orchestrator.BlockControllerInterface {
@@ -125,7 +183,7 @@ export class TextBlockController extends Component<TextBlockControllerProps, Tex
   }
 
   @boundMethod
-  private async handleOnDeltaUpdate(documentDeltaUpdate: DocumentDeltaUpdate) {
+  private async handleOnDeltaUpdate(documentDeltaUpdate: DocumentDeltaSerialUpdate) {
     return this.synchronizer.handleFragmentedUpdate(documentDeltaUpdate)
   }
 
