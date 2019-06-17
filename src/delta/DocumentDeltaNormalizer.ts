@@ -76,6 +76,8 @@ export class DocumentDeltaNormalizer {
           if (index < requiredPrefix.length) {
             const numFromPrefixToInsert = requiredPrefix.length - index
             diffDelta.insert(requiredPrefix.slice(index, index + numFromPrefixToInsert))
+            diffDelta.retain(next.insert.length)
+            diffDelta.delete(numFromPrefixToInsert)
             index += numFromPrefixToInsert
           } else {
             diffDelta.insert(next.insert)

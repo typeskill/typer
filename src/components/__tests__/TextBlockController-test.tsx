@@ -88,7 +88,7 @@ describe('@components/<TextBlockController>', () => {
     bridge.getControlEventDomain().addSelectedAttributesChangeListener(listenerObj, spy as any)
     const wrapper = renderer.create(<TextBlockController textBlock={block} />)
     const textBlockController = wrapper.root.instance as TextBlockController
-    textBlockController['handleOnSelectionChangeEvent'](mockSelectionChangeEvent(0, 1))
+    textBlockController['handleOnSheetDomainSelectionChange'](mockSelectionChangeEvent(0, 1))
     await runAllTimers()
     expect(spy).toHaveBeenCalledTimes(1)
   })
@@ -99,9 +99,8 @@ describe('@components/<TextBlockController>', () => {
     const wrapper = renderer.create(<TextBlockController textBlock={block} />)
     const textBlockController = (wrapper.getInstance() as unknown) as TextBlockController
     expect(textBlockController).toBeInstanceOf(TextBlockController)
-    textBlockController['handleOnTextChanged']('This is nu text')
-    textBlockController['handleOnSelectionChangeEvent'](mockSelectionChangeEvent(15, 15))
-    await runAllTimers()
+    textBlockController['handleOnSheetDomainTextChanged']('This is nu text')
+    await textBlockController['handleOnSheetDomainSelectionChange'](mockSelectionChangeEvent(15, 15))
     expect(getDelta().ops).toEqual([{ insert: 'This is nu text\n' }])
   })
   it('should stay in sync with textBlock', async () => {
@@ -111,8 +110,8 @@ describe('@components/<TextBlockController>', () => {
     const wrapper = renderer.create(<TextBlockController textBlock={block} />)
     const textBlockController = (wrapper.getInstance() as unknown) as TextBlockController
     expect(textBlockController).toBeInstanceOf(TextBlockController)
-    textBlockController['handleOnTextChanged']('This is nu text\nBlah')
-    textBlockController['handleOnSelectionChangeEvent'](mockSelectionChangeEvent(20, 20))
+    textBlockController['handleOnSheetDomainTextChanged']('This is nu text\nBlah')
+    textBlockController['handleOnSheetDomainSelectionChange'](mockSelectionChangeEvent(20, 20))
     wrapper.update(<TextBlockController textBlock={block} />)
     await runAllTimers()
     wrapper.update(<TextBlockController textBlock={block} />)

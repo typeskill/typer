@@ -9,7 +9,7 @@ declare namespace Orchestrator {
   /**
    * Events produced by the Sheet Controller
    */
-  export type SheetControllerEvent = 'FOCUS_REQUEST' | 'DELTA_UPDATE'
+  export type SheetControllerEvent = 'FOCUS_REQUEST' | 'CONTROL_DOMAIN_CONTENT_CHANGE'
 
   export type SheetControllerEventListener = ListenerFn
 }

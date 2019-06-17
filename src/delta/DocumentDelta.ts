@@ -16,7 +16,8 @@ import { GenericRichContent, extractTextFromDelta } from './generic'
 import { DeltaDiffComputer } from './DeltaDiffComputer'
 import { DeltaChangeContext } from './DeltaChangeContext'
 import { DocumentLine, LineWalker } from './LineWalker'
-import { DocumentDeltaUpdate } from './DocumentDeltaUpdate'
+import { DocumentDeltaSerialUpdate } from './DocumentDeltaSerialUpdate'
+import { DocumentDeltaAtomicUpdate } from './DocumentDeltaAtomicUpdate'
 
 export class DocumentDelta implements GenericRichContent {
   public get ops() {
@@ -98,7 +99,7 @@ export class DocumentDelta implements GenericRichContent {
    * @remarks
    *
    * 1. `cursorTextAttributes` will by applied to inserted characters if and only if `deltaChangeContext.selectionBeforeChange` is of length 0.
-   * 2. The reason for returning a {@link DocumentDeltaUpdate} is related to how updates work in React.
+   * 2. The reason for returning a {@link DocumentDeltaSerialUpdate} is related to how updates work in React.
    *    By just returning the result of text diff and normalization, we could run into
    *    a bug when normalized delta strictly equals the delta preceding text diff.
    *    In such cases, passing normalized prop to react component wouldn't result in a
@@ -115,7 +116,7 @@ export class DocumentDelta implements GenericRichContent {
     newText: string,
     deltaChangeContext: DeltaChangeContext,
     cursorTextAttributes: Attributes.Map = {},
-  ): DocumentDeltaUpdate {
+  ): DocumentDeltaSerialUpdate {
     const oldText = this.getText()
     const computer = new DeltaDiffComputer(
       {
@@ -127,7 +128,7 @@ export class DocumentDelta implements GenericRichContent {
       this,
     )
     const { delta, directives } = computer.toDeltaDiffReport()
-    return new DocumentDeltaUpdate(this.compose(delta), directives)
+    return new DocumentDeltaSerialUpdate(this.compose(delta), directives, deltaChangeContext.selectionAfterChange)
   }
 
   /**
@@ -207,29 +208,29 @@ export class DocumentDelta implements GenericRichContent {
    * - if **all characters** in the selection have the `attributeName` set to `attributeValue`, **clear** this attribute for all characters in this selection
    * - otherwise set `attributeName`  to `attributeValue` for all characters in this selection
    *
-   * @param selection - The boundaries to which the transforms should be applied
+   * @param selectionBeforeChange - The boundaries to which the transforms should be applied
    * @param attributeName - The attribute name to modify
    * @param attributeValue - The attribute value to assign
    */
   public applyTextTransformToSelection(
-    selection: Selection,
+    selectionBeforeChange: Selection,
     attributeName: string,
     attributeValue: Attributes.GenericValue,
-  ): DocumentDeltaUpdate {
-    const allOperationsMatchAttributeValue = this.getSelected(selection).ops.every(
+  ): DocumentDeltaAtomicUpdate {
+    const allOperationsMatchAttributeValue = this.getSelected(selectionBeforeChange).ops.every(
       op => !!op.attributes && op.attributes[attributeName] === attributeValue,
     )
-    const overridingSelection = selection.length() ? selection : undefined
+    const overridingSelection = selectionBeforeChange.length() ? selectionBeforeChange : undefined
     if (allOperationsMatchAttributeValue) {
       const clearAllDelta = new Delta()
-      clearAllDelta.retain(selection.start)
-      clearAllDelta.retain(selection.length(), { [attributeName]: null })
-      return new DocumentDeltaUpdate(this.compose(clearAllDelta))
+      clearAllDelta.retain(selectionBeforeChange.start)
+      clearAllDelta.retain(selectionBeforeChange.length(), { [attributeName]: null })
+      return new DocumentDeltaAtomicUpdate(this.compose(clearAllDelta), selectionBeforeChange)
     }
     const replaceAllDelta = new Delta()
-    replaceAllDelta.retain(selection.start)
-    replaceAllDelta.retain(selection.length(), { [attributeName]: attributeValue })
-    return new DocumentDeltaUpdate(this.compose(replaceAllDelta), [], overridingSelection)
+    replaceAllDelta.retain(selectionBeforeChange.start)
+    replaceAllDelta.retain(selectionBeforeChange.length(), { [attributeName]: attributeValue })
+    return new DocumentDeltaAtomicUpdate(this.compose(replaceAllDelta), selectionBeforeChange, overridingSelection)
   }
 
   /**
@@ -243,22 +244,25 @@ export class DocumentDelta implements GenericRichContent {
    * Calling this function will also iterate over each out of selection lines to update
    * their prefix when appropriate.
    *
-   * @param selection - The selection touching lines to which the transform will be applied.
+   * @param selectionBeforeChange - The selection touching lines to which the transform will be applied.
    * @param userLineType - The line type proposed by user.
    * @returns The delta resulting from applying this line type.
    */
-  public applyLineTypeToSelection(selection: Selection, userLineType: Attributes.LineType): DocumentDeltaUpdate {
-    const selectionLineType = this.getLineTypeInSelection(selection)
+  public applyLineTypeToSelection(
+    selectionBeforeChange: Selection,
+    userLineType: Attributes.LineType,
+  ): DocumentDeltaAtomicUpdate {
+    const selectionLineType = this.getLineTypeInSelection(selectionBeforeChange)
     const diffDelta = new Delta()
     const generator = new DocumentLineIndexGenerator()
     if (!this.ops.length) {
       // Special condition where the delta is empty, hence cannot update on non existing line.
       const tempDelta = this.create(diffDelta.insert('\n'))
-      return tempDelta.applyLineTypeToSelection(selection, userLineType)
+      return tempDelta.applyLineTypeToSelection(selectionBeforeChange, userLineType)
     }
     this.eachLine(line => {
       const { lineTypeIndex: currentLineTypeIndex, delta: lineDelta, lineType: currentLineType } = line
-      const lineInSelection = isLineInSelection(selection, line)
+      const lineInSelection = isLineInSelection(selectionBeforeChange, line)
       const nextLineType = lineInSelection
         ? selectionLineType !== userLineType
           ? userLineType
@@ -327,9 +331,9 @@ export class DocumentDelta implements GenericRichContent {
       }
     })
     const overridingSelection = Selection.fromBounds(
-      diffDelta.transformPosition(selection.start),
-      diffDelta.transformPosition(selection.end),
+      diffDelta.transformPosition(selectionBeforeChange.start),
+      diffDelta.transformPosition(selectionBeforeChange.end),
     )
-    return new DocumentDeltaUpdate(this.compose(diffDelta), [], overridingSelection)
+    return new DocumentDeltaAtomicUpdate(this.compose(diffDelta), selectionBeforeChange, overridingSelection)
   }
 }

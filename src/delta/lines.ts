@@ -47,14 +47,26 @@ export function getLineType(lineAttributes?: Attributes.Map): Attributes.LineTyp
   return lineAttributes && lineAttributes.$type ? (lineAttributes.$type as Attributes.LineType) : 'normal'
 }
 
+/**
+ * Provide the prefix expected for a line type at index.
+ *
+ * @remarks
+ *
+ * Zero-width spaces `\u200B` are used to prevent whitespace trim bug in React Native.
+ * Another advantage is that removing the trailing character from the prefix doesn't move the cursor,
+ * making the prefix normalization process smooth in the perspective of user experience.
+ *
+ * @param lineType - The line type to get the header from.
+ * @param index - The index at which this line sits.
+ */
 export function getHeadingCharactersFromType(lineType: Attributes.LineType, index: number): string {
   switch (lineType) {
     case 'ol':
-      return `${index + 1}.  `
+      return `${index + 1}.\u00A0\u00A0\u200B`
     case 'ul':
-      return '•  '
+      return '•\u00A0\u00A0\u200B'
     case 'quoted':
-      return '  '
+      return '\u00A0\u00A0\u200B'
     default:
       return ''
   }
@@ -62,7 +74,7 @@ export function getHeadingCharactersFromType(lineType: Attributes.LineType, inde
 
 export function getHeadingRegexFromType(lineType: TextLengthModifierLineType): RegExp {
   if (lineType === 'ol') {
-    return /^(\d+\.\s\s)/
+    return /^(\d+\.\s\s\u200B)/
   }
-  return /^(•\s\s)/
+  return /^(•\s\s\u200B)/
 }

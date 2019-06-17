@@ -6,6 +6,7 @@ import { Selection } from '@delta/Selection'
 import { Transforms } from '@core/Transforms'
 import { DeltaChangeContext } from '@delta/DeltaChangeContext'
 import mergeLeft from 'ramda/es/mergeLeft'
+import { DocumentDeltaAtomicUpdate } from '@delta/DocumentDeltaAtomicUpdate'
 
 export class TextBlock extends Block {
   private cursorTextAttributes: Attributes.Map = {}
@@ -16,17 +17,22 @@ export class TextBlock extends Block {
   }
 
   private updateLineType(selection: Selection): void {
-    const lineType = this.getDelta().getLineTypeInSelection(selection)
+    const lineType = this.delta.getLineTypeInSelection(selection)
     this.blockInterface.sheetEventDom.notifySelectedLineTypeChange(lineType)
   }
 
   private updateTextAttributes(selection: Selection): void {
-    const textAttributes = this.getDelta().getSelectedTextAttributes(selection)
+    const textAttributes = this.delta.getSelectedTextAttributes(selection)
     this.blockInterface.sheetEventDom.notifySelectedTextAttributesChange(textAttributes)
   }
 
+  protected afterAtomicUpdate(update: DocumentDeltaAtomicUpdate) {
+    this.length = update.delta.length()
+    this.handleOnSelectionChange(update.selectionAfterChange)
+  }
+
   public handleOnSelectionChange(selection: Selection): void {
-    this.selection = selection
+    this.setSelection(selection)
     this.updateTextAttributes(selection)
     this.updateLineType(selection)
   }
@@ -49,12 +55,11 @@ export class TextBlock extends Block {
   }
 
   @boundMethod
-  public handleOnTextChange(newText: string, deltaChangeContext: DeltaChangeContext): void {
-    const documentDeltaUpdate = this.getDelta().applyTextDiff(newText, deltaChangeContext, this.cursorTextAttributes)
-    this.updateDelta(documentDeltaUpdate)
-    this.length = newText.length
-    this.updateTextAttributes(deltaChangeContext.selectionAfterChange)
-    const lineType = documentDeltaUpdate.getLineTypeInSelection(deltaChangeContext.selectionAfterChange)
-    this.blockInterface.sheetEventDom.notifySelectedLineTypeChange(lineType)
+  public createSerialUpdateGenerator(
+    newText: string,
+    deltaChangeContext: DeltaChangeContext,
+  ): IterableIterator<DocumentDeltaAtomicUpdate> {
+    const documentDeltaUpdate = this.delta.applyTextDiff(newText, deltaChangeContext, this.cursorTextAttributes)
+    return this.transformSerialUpdateToGenerator(documentDeltaUpdate)
   }
 }

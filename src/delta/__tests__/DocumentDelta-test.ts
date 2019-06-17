@@ -243,7 +243,7 @@ describe('@delta/DocumentDelta', () => {
         start: 6,
         end: 14,
       })
-      const { finalDelta } = delta.applyTextTransformToSelection(selection, 'textDecoration', 'underline')
+      const { delta: finalDelta } = delta.applyTextTransformToSelection(selection, 'textDecoration', 'underline')
       expect(finalDelta.ops).toEqual([
         { insert: 'prefix', attributes: { untouched: true } },
         { insert: 'test' },
@@ -262,7 +262,7 @@ describe('@delta/DocumentDelta', () => {
         start: 6,
         end: 14,
       })
-      const { finalDelta } = delta.applyTextTransformToSelection(selection, 'textDecoration', 'underline')
+      const { delta: finalDelta } = delta.applyTextTransformToSelection(selection, 'textDecoration', 'underline')
       expect(finalDelta.ops).toEqual([
         { insert: 'prefix', attributes: { untouched: true } },
         { insert: 'testtest', attributes: { textDecoration: 'underline' } },
@@ -280,7 +280,7 @@ describe('@delta/DocumentDelta', () => {
         start: 6,
         end: 14,
       })
-      const { finalDelta } = delta.applyTextTransformToSelection(selection, 'textDecoration', 'underline')
+      const { delta: finalDelta } = delta.applyTextTransformToSelection(selection, 'textDecoration', 'underline')
       expect(finalDelta.ops).toEqual([
         { insert: 'prefix', attributes: { untouched: true } },
         { insert: 'testtest', attributes: { textDecoration: 'underline' } },
@@ -299,7 +299,7 @@ describe('@delta/DocumentDelta', () => {
         start: 6,
         end: 18,
       })
-      const { finalDelta } = delta.applyTextTransformToSelection(selection, 'textDecoration', 'underline')
+      const { delta: finalDelta } = delta.applyTextTransformToSelection(selection, 'textDecoration', 'underline')
       expect(finalDelta.ops).toEqual([
         { insert: 'prefix', attributes: { untouched: true } },
         { insert: 'testtesttest', attributes: { textDecoration: 'underline' } },
@@ -481,7 +481,7 @@ describe('@delta/DocumentDelta', () => {
           start: 0,
           end: 6,
         })
-        const { finalDelta: normalizedDelta } = delta.applyLineTypeToSelection(selection, 'normal')
+        const { delta: normalizedDelta } = delta.applyLineTypeToSelection(selection, 'normal')
         expect(normalizedDelta.ops).toEqual([{ insert: 'A\nB\nC\n' }])
       })
       it('should set lines type to type when all lines have a different type', () => {
@@ -495,7 +495,7 @@ describe('@delta/DocumentDelta', () => {
           start: 0,
           end: 6,
         })
-        const { finalDelta: normalizedDelta } = delta.applyLineTypeToSelection(selection, 'misc' as Attributes.LineType)
+        const { delta: normalizedDelta } = delta.applyLineTypeToSelection(selection, 'misc' as Attributes.LineType)
         expect(normalizedDelta.ops).toEqual([
           { insert: 'A' },
           { insert: '\n', attributes: { $type: 'misc' } },
@@ -509,7 +509,7 @@ describe('@delta/DocumentDelta', () => {
           start: 0,
           end: 6,
         })
-        const { finalDelta: normalizedDelta } = delta.applyLineTypeToSelection(selection, 'misc' as Attributes.LineType)
+        const { delta: normalizedDelta } = delta.applyLineTypeToSelection(selection, 'misc' as Attributes.LineType)
         expect(normalizedDelta.ops).toEqual([
           { insert: 'A' },
           { insert: '\n', attributes: { $type: 'misc' } },
@@ -531,7 +531,7 @@ describe('@delta/DocumentDelta', () => {
           start: 0,
           end: 12,
         })
-        const { finalDelta: normalizedDelta } = delta.applyLineTypeToSelection(selection, 'misc' as Attributes.LineType)
+        const { delta: normalizedDelta } = delta.applyLineTypeToSelection(selection, 'misc' as Attributes.LineType)
         expect(normalizedDelta.ops).toEqual([
           { insert: 'A' },
           { insert: '\n', attributes: { $type: 'misc' } },
@@ -549,7 +549,7 @@ describe('@delta/DocumentDelta', () => {
           start: 0,
           end: 6,
         })
-        const { finalDelta: normalizedDelta } = delta.applyLineTypeToSelection(selection, 'ol')
+        const { delta: normalizedDelta } = delta.applyLineTypeToSelection(selection, 'ol')
         expect(normalizedDelta.ops).toEqual([
           { insert: getHeadingCharactersFromType('ol', 0) + 'A' },
           { insert: '\n', attributes: { $type: 'ol' } },
@@ -570,7 +570,7 @@ describe('@delta/DocumentDelta', () => {
           start: head.length + 2,
           end: head.length + 7,
         })
-        const { finalDelta: normalizedDelta } = delta.applyLineTypeToSelection(selection, 'ol')
+        const { delta: normalizedDelta } = delta.applyLineTypeToSelection(selection, 'ol')
         expect(normalizedDelta.ops).toEqual([
           { insert: getHeadingCharactersFromType('ol', 0) + '0' },
           { insert: '\n', attributes: { $type: 'ol' } },
@@ -596,7 +596,7 @@ describe('@delta/DocumentDelta', () => {
           start: 0,
           end: delta.length(),
         })
-        const { finalDelta: normalizedDelta } = delta.applyLineTypeToSelection(selection, 'ol')
+        const { delta: normalizedDelta } = delta.applyLineTypeToSelection(selection, 'ol')
         expect(normalizedDelta.ops).toEqual([
           { insert: getHeadingCharactersFromType('ol', 0) + 'A' },
           { insert: '\n', attributes: { $type: 'ol' } },
@@ -619,11 +619,8 @@ describe('@delta/DocumentDelta', () => {
           { insert: getHeadingCharactersFromType('ol', 2) + 'C' },
           { insert: '\n', attributes: { $type: 'ol' } },
         ])
-        const selection = Selection.fromObject({
-          start: 0,
-          end: 12,
-        })
-        const { finalDelta: normalizedDelta } = delta.applyLineTypeToSelection(selection, 'normal')
+        const selection = Selection.fromBounds(0, delta.length())
+        const { delta: normalizedDelta } = delta.applyLineTypeToSelection(selection, 'normal')
         expect(normalizedDelta.ops).toEqual([{ insert: 'A\nB\nC\n' }])
       })
       it('should only remove prefixes from encompassed lines', () => {
@@ -638,10 +635,9 @@ describe('@delta/DocumentDelta', () => {
         ])
         const selection = Selection.fromObject({
           start: head.length + 2,
-          // @ts-ignore
-          end: delta.delta.length(),
+          end: delta.length(),
         })
-        const { finalDelta: normalizedDelta } = delta.applyLineTypeToSelection(selection, 'normal')
+        const { delta: normalizedDelta } = delta.applyLineTypeToSelection(selection, 'normal')
         expect(normalizedDelta.ops).toEqual([
           { insert: getHeadingCharactersFromType('ol', 0) + 'A' },
           { insert: '\n', attributes: { $type: 'ol' } },
@@ -668,7 +664,7 @@ describe('@delta/DocumentDelta', () => {
           start: firstCharOfThirdLine,
           end: firstCharOfThirdLine,
         })
-        const { finalDelta: normalizedDelta } = delta.applyLineTypeToSelection(selection, 'normal')
+        const { delta: normalizedDelta } = delta.applyLineTypeToSelection(selection, 'normal')
         expect(normalizedDelta.ops).toEqual([
           { insert: head0 + 'A' },
           { insert: '\n', attributes: { $type: 'ol' } },

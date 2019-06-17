@@ -5,7 +5,9 @@ import { Transforms } from '@core/Transforms'
 import { DocumentDelta } from '@delta/DocumentDelta'
 import { GenericOp } from '@delta/operations'
 import { TextBlock } from '@model/TextBlock'
-import { DocumentDeltaUpdate } from '@delta/DocumentDeltaUpdate'
+import { DocumentDeltaSerialUpdate } from '@delta/DocumentDeltaSerialUpdate'
+import { Selection } from '@delta/Selection'
+import { DocumentDeltaAtomicUpdate } from '@delta/DocumentDeltaAtomicUpdate'
 
 export function mokBridgeSheetEventDomain(): Bridge.SheetEventDomain {
   return {
@@ -23,8 +25,9 @@ export function mockDocumentDelta(ops?: GenericOp[]): DocumentDelta {
   return new DocumentDelta(ops)
 }
 
-export function mockDocumentDeltaUpdate(ops?: GenericOp[]): DocumentDeltaUpdate {
-  return new DocumentDeltaUpdate(mockDocumentDelta(ops))
+export function mockDocumentDeltaSerialUpdate(ops?: GenericOp[]): DocumentDeltaSerialUpdate {
+  const delta = mockDocumentDelta(ops)
+  return new DocumentDeltaSerialUpdate(delta, [], Selection.fromBounds(delta.length()))
 }
 
 export function mockDocumentBlockInterface(): Document.BlockInterface {
@@ -35,13 +38,14 @@ export function mockDocumentBlockInterface(): Document.BlockInterface {
     handleOnDocumentStateUpdate: () => ({}),
   })
   document.insertBlock(TextBlock)
-  const block = document.getActiveBlock() as TextBlock
   return {
     sheetEventDom,
     orchestrator: document['orchestrator'],
-    getDelta: block.getDelta.bind(block),
-    updateDelta: block['updateDelta'].bind(block),
     onPressBackspaceFromOrigin: () => ({}),
     onPressEnter: () => ({}),
   }
+}
+
+export function runUpdates(iterator: IterableIterator<DocumentDeltaAtomicUpdate>) {
+  while (!iterator.next().done) {}
 }

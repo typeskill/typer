@@ -111,7 +111,8 @@ describe('@delta/DocumentDeltaNormalizer', () => {
       ]
       const normalizer = new DocumentDeltaNormalizer(deltaAfterChange)
       const { delta, overridingSelection } = normalizer.apply(directives)
-      expect(delta.ops).toEqual([{ insert: `${head}l Hello` }, { insert: '\n', attributes: { $type: 'ul' } }])
+      const expected = `${head}lHello`
+      expect(delta.ops).toEqual([{ insert: expected }, { insert: '\n', attributes: { $type: 'ul' } }])
       expect(overridingSelection).toMatchObject({
         start: head.length + 1,
         end: head.length + 1,

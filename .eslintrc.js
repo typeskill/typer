@@ -20,7 +20,8 @@ module.exports = {
     "@typescript-eslint/no-namespace": "off",
     "@typescript-eslint/member-delimiter-style": "off",
     "@typescript-eslint/explicit-function-return-type": "off",
-    "@typescript-eslint/indent": "off"
+    "@typescript-eslint/indent": "off",
+    "@typescript-eslint/no-non-null-assertion": "off",
   },
   settings: {
     react: {

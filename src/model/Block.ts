@@ -3,7 +3,8 @@ import { Document } from './Document'
 import { DocumentDelta } from '@delta/DocumentDelta'
 import { boundMethod } from 'autobind-decorator'
 import { Orchestrator } from './Orchestrator'
-import { DocumentDeltaUpdate } from '@delta/DocumentDeltaUpdate'
+import { DocumentDeltaSerialUpdate } from '@delta/DocumentDeltaSerialUpdate'
+import { DocumentDeltaAtomicUpdate } from '@delta/DocumentDeltaAtomicUpdate'
 
 let lastInstanceNumber = 0
 
@@ -12,9 +13,10 @@ export function setInstanceNumber(num: number) {
 }
 
 export abstract class Block {
+  protected delta: DocumentDelta = new DocumentDelta()
   private instanceNumber: number
   protected blockInterface: Document.BlockInterface
-  protected selection = Selection.fromBounds(0)
+  private selection = Selection.fromBounds(0)
 
   public constructor(blockInterface: Document.BlockInterface) {
     // tslint:disable-next-line:no-increment-decrement
@@ -24,19 +26,43 @@ export abstract class Block {
 
   abstract getLength(): number
 
+  protected setSelection(selection: Selection) {
+    this.selection = selection
+  }
+
   public getSelection(): Selection {
     return this.selection
   }
 
   abstract handleOnSelectionChange(s: Selection): void
 
-  public updateDelta(documentDeltaUpdate: DocumentDeltaUpdate) {
-    this.selection = documentDeltaUpdate.intermediaryOverridingSelection || this.selection
-    this.blockInterface.updateDelta(documentDeltaUpdate)
+  /**
+   * @virtual
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected afterAtomicUpdate(update: DocumentDeltaAtomicUpdate) {}
+
+  public handleAtomicUpdate(update: DocumentDeltaAtomicUpdate) {
+    this.delta = update.delta
+    this.setSelection(update.selectionAfterChange)
+    this.afterAtomicUpdate(update)
+  }
+
+  protected *transformSerialUpdateToGenerator(
+    serialUpdate: DocumentDeltaSerialUpdate,
+  ): IterableIterator<DocumentDeltaAtomicUpdate> {
+    if (serialUpdate.intermediaryUpdate) {
+      const intermediaryUpdate = serialUpdate.intermediaryUpdate
+      this.handleAtomicUpdate(intermediaryUpdate)
+      yield intermediaryUpdate
+    }
+    const finalUpdate = serialUpdate.finalUpdate
+    this.handleAtomicUpdate(finalUpdate)
+    yield finalUpdate
   }
 
   public getDelta(): DocumentDelta {
-    return this.blockInterface.getDelta()
+    return this.delta
   }
 
   public getInstanceNumber(): number {

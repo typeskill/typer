@@ -1,4 +1,3 @@
-import { DocumentDelta } from '@delta/DocumentDelta'
 import invariant from 'invariant'
 import { TextBlock } from './TextBlock'
 import { Block, BlockClass } from './Block'
@@ -6,16 +5,13 @@ import { Bridge } from '@core/Bridge'
 import { Orchestrator } from '@model/Orchestrator'
 import { Store } from './Store'
 import { mergeAttributesLeft, Attributes } from '@delta/attributes'
-import { DocumentDeltaUpdate } from '@delta/DocumentDeltaUpdate'
 
 declare namespace Document {
   export interface BlockInterface {
     readonly sheetEventDom: Bridge.SheetEventDomain
     readonly orchestrator: Orchestrator
-    readonly updateDelta: (documentDeltaUpdate: DocumentDeltaUpdate) => void
     readonly onPressBackspaceFromOrigin: () => void
     readonly onPressEnter: () => void
-    readonly getDelta: () => DocumentDelta
   }
 
   export interface Consumer {
@@ -50,25 +46,17 @@ class Document {
 
   private newBlock(BlockKind: BlockClass) {
     invariant(this.consumer != null, 'A document consumer must be registered to create a block')
-    let delta: DocumentDelta | null = null
     if (this.consumer) {
       // @ts-ignore
       let block: Block = null
-      const blockIface: Document.BlockInterface = Object.freeze({
+      let blockIface: Document.BlockInterface = {
         orchestrator: this.orchestrator,
         sheetEventDom: this.consumer.sheetEventDom,
-        updateDelta: (documentDeltaUpdate: DocumentDeltaUpdate) => {
-          invariant(documentDeltaUpdate instanceof DocumentDeltaUpdate, 'documentDelta instanceof DocumentDelta')
-          // TODO inspect possible state discrepancy
-          delta = documentDeltaUpdate.finalDelta
-          this.emitToBlock('DELTA_UPDATE', block.getInstanceNumber(), documentDeltaUpdate)
-        },
         onPressBackspaceFromOrigin: () => this.handleOnPressBackspaceFromOriginFromBlock(block),
         onPressEnter: () => this.handleOnPressEnterFromBlock(block),
-        getDelta: () => delta as DocumentDelta,
-      })
+      }
+      blockIface = Object.freeze(blockIface)
       block = new BlockKind(blockIface)
-      delta = new DocumentDelta()
       return block
     }
     throw new Error()
@@ -87,10 +75,13 @@ class Document {
         const selectedBlock = this.store.getActiveBlock() as TextBlock
         invariant(selectedBlock instanceof TextBlock, 'Line Transforms can only be applied to a TextBlock')
         const selectionBeforeChange = selectedBlock.getSelection()
-        const updateRequest = selectedBlock.getDelta().applyLineTypeToSelection(selectionBeforeChange, lineType)
-        const updateLineType = updateRequest.getLineTypeInSelection(selectionBeforeChange)
-        selectedBlock.updateDelta(updateRequest)
-        consumer.sheetEventDom.notifySelectedLineTypeChange(updateLineType)
+        const atomicUpdate = selectedBlock.getDelta().applyLineTypeToSelection(selectionBeforeChange, lineType)
+        selectedBlock.handleAtomicUpdate(atomicUpdate)
+        this.orchestrator.emitToBlockController(
+          selectedBlock.getInstanceNumber(),
+          'CONTROL_DOMAIN_CONTENT_CHANGE',
+          atomicUpdate,
+        )
       }
     })
     consumer.sheetEventDom.addApplyTextTransformToSelectionListener(
@@ -103,12 +94,19 @@ class Document {
           const selection = selectedBlock.getSelection()
           // Apply transforms to selection range
           const userAttributes = { [attributeName]: attributeValue }
-          const updatedDelta = delta.applyTextTransformToSelection(selection, attributeName, attributeValue)
-          const deltaAttributes = updatedDelta.getSelectedTextAttributes(selection)
+          const atomicUpdate = delta.applyTextTransformToSelection(selection, attributeName, attributeValue)
+          const deltaAttributes = atomicUpdate.delta.getSelectedTextAttributes(selection)
           const mergedCursorAttributes = selectedBlock.setCursorAttributes(userAttributes)
           const attributes = mergeAttributesLeft(deltaAttributes, mergedCursorAttributes)
-          selectedBlock.updateDelta(updatedDelta)
+          selectedBlock.handleAtomicUpdate(atomicUpdate)
+          console.info('APPLYING TEXT TRANSFORM', attributes)
+          // TODO investigate to refactor to block
           consumer.sheetEventDom.notifySelectedTextAttributesChange(attributes)
+          this.orchestrator.emitToBlockController(
+            selectedBlock.getInstanceNumber(),
+            'CONTROL_DOMAIN_CONTENT_CHANGE',
+            atomicUpdate,
+          )
         }
       },
     )

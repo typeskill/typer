@@ -2,6 +2,7 @@ import { TextBlock } from '@model/TextBlock'
 import { StyleProp, TextStyle } from 'react-native'
 import { Selection } from '@delta/Selection'
 import { GenericRichContent } from '@delta/generic'
+import PCancelable from 'p-cancelable'
 
 export interface TextBlockControllerProps {
   textBlock: TextBlock
@@ -11,17 +12,12 @@ export interface TextBlockControllerProps {
 
 export interface TextBlockControllerState {
   isControlingState: boolean
+  disableEdition: boolean
   overridingSelection: Selection | null
   richContent: GenericRichContent | null
 }
 
-export interface TextBlockMinimalComponent {
-  setState<K extends keyof TextBlockControllerState>(
-    state:
-      | ((
-          prevState: Readonly<TextBlockControllerState>,
-        ) => Pick<TextBlockControllerState, K> | TextBlockControllerState | null)
-      | (Pick<TextBlockControllerState, K> | TextBlockControllerState | null),
-    callback?: () => void,
-  ): void
+export interface SyncSubject {
+  setStateAsync: (stateFragment: Partial<TextBlockControllerState>) => PCancelable<void>
+  getTextBlock: () => TextBlock
 }

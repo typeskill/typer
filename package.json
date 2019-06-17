@@ -40,13 +40,16 @@
     "expo"
   ],
   "dependencies": {
+    "@types/async-lock": "^1.1.1",
     "@types/diff": "^4.0.2",
     "@types/invariant": "^2.2.29",
     "@types/ramda": "^0.26.9",
+    "async-lock": "^1.2.0",
     "autobind-decorator": "~2.4.0",
     "diff": "~4.0.1",
     "eventemitter3": "~3.1.2",
     "invariant": "~2.2.4",
+    "p-cancelable": "^2.0.0",
     "prop-types": "~15.7.2",
     "quill-delta": "~4.2.1",
     "ramda": "~0.26.1"

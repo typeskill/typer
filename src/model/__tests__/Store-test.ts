@@ -6,14 +6,11 @@ import { TextBlock } from '@model/TextBlock'
 import { Bridge } from '@core/Bridge'
 import { Orchestrator } from '@model/Orchestrator'
 import { setInstanceNumber as setBlockInstanceNumber } from '@model/Block'
-import { mockDocumentDelta } from '@test/document'
-import { DocumentDeltaUpdate } from '@delta/DocumentDeltaUpdate'
+import { DocumentDeltaSerialUpdate } from '@delta/DocumentDeltaSerialUpdate'
 
 function newTextBlock(): TextBlock {
-  let delta = mockDocumentDelta()
-  return new TextBlock({
+  const block = new TextBlock({
     sheetEventDom: new Bridge().getSheetEventDomain(),
-    getDelta: () => delta,
     onPressBackspaceFromOrigin: () => {
       /** */
     },
@@ -21,10 +18,8 @@ function newTextBlock(): TextBlock {
       /** */
     },
     orchestrator: new Orchestrator(),
-    updateDelta: (nuDelta: DocumentDeltaUpdate) => {
-      delta = nuDelta.finalDelta
-    },
   })
+  return block
 }
 
 describe('@model/Store', () => {

@@ -4,19 +4,17 @@ import {
   View,
   TextInput,
   NativeSyntheticEvent,
-  TextInputSelectionChangeEventData,
   TextInputKeyPressEventData,
   StyleSheet,
   TextInputProps,
+  TextInputSelectionChangeEventData,
 } from 'react-native'
 import { RichText, richTextStyles } from '@components/RichText'
-import { Selection } from '@delta/Selection'
 import { Orchestrator } from '@model/Orchestrator'
 import { boundMethod } from 'autobind-decorator'
-import { TextChangeSession } from './TextChangeSession'
-import { DocumentDeltaSerialUpdate } from '@delta/DocumentDeltaSerialUpdate'
-import { TextBlockControllerProps, TextBlockControllerState, TextBlockSyncInterface } from './types'
-import { TextBlockUpdateSynchronizer } from './TextBlockUpdateSynchronizer'
+import { TextBlockControllerProps, TextBlockControllerState, SyncSubject } from './types'
+import { Synchronizer } from './Synchronizer'
+import PCancelable from 'p-cancelable'
 import { DocumentDeltaAtomicUpdate } from '@delta/DocumentDeltaAtomicUpdate'
 
 export { TextBlockControllerProps }
@@ -49,93 +47,43 @@ const constantTextInputProps: TextInputProps = {
  *
  * @privateRemarks
  *
- * The synchronization mechanism is complex, because of three potential state discrepancies.
- *
- * **Fake equality**
- *
- * The second one is not a bug, but rather a feature of React virtual DOM engine. To understand the challange, lets propose a scenario:
- *
- * - The user types a word
- * - {@link react-native#TextInputProps.onChangeText} is fired
- * - {@link react-native#TextInputProps.onSelectionChange} is fired
- *
- * At that point, a delta is computed from text change and selection before and after change.
- * This delta strictly represents the result of applying a text diff algorithm to the previous text.
- *
- * Because of ordered and unordered lists in the context of a pure-text component, there is a set of rules which define
- * if applying a delta should result in adding or removing a text prefix. This phase is called *normalization*.
- *
- * Therefore, it appears that up to two delta might be computed for one {@link react-native#TextInputProps.onChangeText} call.
- * The concern is that, if we were to update component state with the latest delta alone, we could run into a situation were this
- * delta deeeply equals the previous delta, and thus the VDOM diff algorithm detects no changes after rerendering.
- *
- * This is why **we must serialy apply two delta updates when a normalization process happens**. We call this process *serial update*,
- * and the data necessary to perform such is encapsulated in {@link DocumentDeltaSerialUpdate} class.
- *
- * **Selection discrepancy**
- *
- * Because of *normalization*, the active selection in native {@link react-native#TextInput} component might become inconsistant.
- * That is why we must update it during a *serial update*. We call this process *selection override*.
- *
- * However, {@link https://git.io/fjamu | a bug in RN < 60} prevents updating selection and text during the same
- * render cycle. Instead, any selection override must happen after the next {@link react-native#TextInputProps.onSelectionChange} call
- * following a render cycle.
- *
- * **Atomicity**
- *
- * A new issue might emerge during a *serial update*. That is: user types during the update, and the consistency breaks, introducing bugs.
- *
- * One solution could be to lock state during update. But that would prevent the user from typing; not acceptable for UX.
- * Another solution would be to deterministically infer a new state from this text update disruption. To do so, lets cut a *serial update*
- * into a list of atomic updates. Required updates are marked with an asterisk (*):
- *
- * 1. intermediary rich content (delta) update
- * 2. intermediary selection update
- * 3. final rich content (delta) update*
- * 4. final selection update
- *
- * When {@link react-native#TextInputProps.onChangeText} is called between one of these steps, we can:
- *
- * 1. compute a new *serial update* from the last applied delta
- * 2. ignore forthcoming atomic updates from the original *serial update*
- *
+ *  Read the {@link Synchronizer} documentation to understand the implementation challenges of this component.
  */
 export class TextBlockController extends Component<TextBlockControllerProps, TextBlockControllerState>
-  implements TextBlockSyncInterface {
+  implements SyncSubject {
   private textInputRef: TextInput | null = null
-  private textChangeSession: TextChangeSession | null = null
-  private selection = Selection.fromBounds(0)
-  private synchronizer: TextBlockUpdateSynchronizer
+  private synchronizer: Synchronizer
 
   public state: TextBlockControllerState = {
     isControlingState: false,
     overridingSelection: null,
     richContent: null,
+    disableEdition: false,
   }
 
   public constructor(props: TextBlockControllerProps) {
     super(props)
     invariant(props.textBlock != null, INVARIANT_MANDATORY_TEXT_BLOCK_PROP)
-    this.synchronizer = new TextBlockUpdateSynchronizer(this)
+    this.synchronizer = new Synchronizer(this)
   }
 
   private get blockControllerInterface(): Orchestrator.BlockControllerInterface {
     return this.props.textBlock.getControllerInterface()
   }
 
-  /**
-   * **Preconditions**: this method must be called before handleOnSelectionChange
-   * This is the current TextInput behavior.
-   *
-   * @param nextText
-   */
   @boundMethod
-  private handleOnTextChanged(nextText: string) {
-    if (!this.synchronizer.isRunning()) {
-      this.textChangeSession = new TextChangeSession()
-      this.textChangeSession.setTextAfterChange(nextText)
-      this.textChangeSession.setSelectionBeforeChange(this.selection)
-    }
+  private handleOnSheetDomainTextChanged(text: string) {
+    this.synchronizer.handleOnSheetDomainTextChanged(text)
+  }
+
+  @boundMethod
+  private async handleOnSheetDomainSelectionChange(e: NativeSyntheticEvent<TextInputSelectionChangeEventData>) {
+    return this.synchronizer.handleOnSheetDomainSelectionChange(e)
+  }
+
+  @boundMethod
+  private handleControlDomainContentChange(contentChange: DocumentDeltaAtomicUpdate) {
+    this.synchronizer.handleControlDomainContentChange(contentChange)
   }
 
   @boundMethod
@@ -145,36 +93,7 @@ export class TextBlockController extends Component<TextBlockControllerProps, Tex
 
   @boundMethod
   private handleOnKeyPressed({ nativeEvent: { key } }: NativeSyntheticEvent<TextInputKeyPressEventData>) {
-    this.props.textBlock.handleOnKeyPress(key)
-  }
-
-  @boundMethod
-  private handleOnSelectionChange(selection: { start: number; end: number }) {
-    const { textBlock } = this.props
-    const nextSelection = Selection.between(selection.start, selection.end)
-    if (this.textChangeSession !== null) {
-      this.textChangeSession.setSelectionAfterChange(nextSelection)
-      textBlock.handleOnTextChange(
-        this.textChangeSession.getTextAfterChange(),
-        this.textChangeSession.getDeltaChangeContext(),
-      )
-      this.textChangeSession = null
-    }
-    this.selection = nextSelection
-    this.props.textBlock.handleOnSelectionChange(nextSelection)
-    this.forceUpdate()
-  }
-
-  /**
-   * **Preconditions**: this method must be called after handleOnTextChanged
-   *
-   * @param textInputSelectionChangeEvent
-   */
-  @boundMethod
-  private handleOnSelectionChangeEvent({
-    nativeEvent: { selection },
-  }: NativeSyntheticEvent<TextInputSelectionChangeEventData>) {
-    this.handleOnSelectionChange(selection)
+    this.getTextBlock().handleOnKeyPress(key)
   }
 
   @boundMethod
@@ -182,9 +101,14 @@ export class TextBlockController extends Component<TextBlockControllerProps, Tex
     this.textInputRef && this.textInputRef.focus()
   }
 
-  @boundMethod
-  private async handleOnDeltaUpdate(documentDeltaUpdate: DocumentDeltaSerialUpdate) {
-    return this.synchronizer.handleFragmentedUpdate(documentDeltaUpdate)
+  public getTextBlock() {
+    return this.props.textBlock
+  }
+
+  public async setStateAsync(stateFragment: Partial<TextBlockControllerState>): PCancelable<void> {
+    return new PCancelable(res => {
+      this.setState(stateFragment as TextBlockControllerState, res)
+    })
   }
 
   public shouldComponentUpdate(nextProps: TextBlockControllerProps, nextState: TextBlockControllerState) {
@@ -197,14 +121,17 @@ export class TextBlockController extends Component<TextBlockControllerProps, Tex
   }
 
   public componentDidMount() {
-    this.blockControllerInterface.addListener('DELTA_UPDATE', this.handleOnDeltaUpdate)
     this.blockControllerInterface.addListener('FOCUS_REQUEST', this.handleOnFocusRequest)
+    this.blockControllerInterface.addListener('CONTROL_DOMAIN_CONTENT_CHANGE', this.handleControlDomainContentChange)
   }
 
-  public componentDidUpdate() {
+  public componentDidUpdate(_oldProps: TextBlockControllerProps, oldState: TextBlockControllerState) {
     // We must change the state to null to avoid forcing selection in TextInput component.
     if (this.state.overridingSelection) {
       this.setState({ overridingSelection: null })
+    }
+    if (oldState.richContent !== this.state.richContent && this.state.richContent) {
+      console.info(`UPDATES RICH CONTENT ${JSON.stringify(this.state.richContent.ops, null, 2)}`)
     }
   }
 
@@ -229,8 +156,8 @@ export class TextBlockController extends Component<TextBlockControllerProps, Tex
           selection={overridingSelection ? overridingSelection : undefined}
           style={[grow ? styles.grow : undefined, styles.textInput, richTextStyles.defaultText]}
           onKeyPress={this.handleOnKeyPressed}
-          onSelectionChange={this.handleOnSelectionChangeEvent}
-          onChangeText={this.handleOnTextChanged}
+          onSelectionChange={this.handleOnSheetDomainSelectionChange}
+          onChangeText={this.handleOnSheetDomainTextChanged}
           ref={this.handleOnTextinputRef}
           {...constantTextInputProps}
         >
