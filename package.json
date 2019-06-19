@@ -42,7 +42,7 @@
     "@types/ramda": "^0.26.8",
     "autobind-decorator": "~2.4.0",
     "diff": "~4.0.1",
-    "eventemitter3": "~3.1.2",
+    "eventemitter3": "~4.0.0",
     "invariant": "~2.2.4",
     "prop-types": "~15.7.2",
     "quill-delta": "~4.2.1",
