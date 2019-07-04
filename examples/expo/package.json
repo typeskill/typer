@@ -4,7 +4,9 @@
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "eject": "expo eject"
+    "eject": "expo eject",
+    "snyk-protect": "snyk protect",
+    "prepare": "npm run snyk-protect"
   },
   "dependencies": {
     "@expo/vector-icons": "^10.0.1",
@@ -14,7 +16,8 @@
     "react-native": "https://github.com/expo/react-native/archive/sdk-33.0.0.tar.gz",
     "react-native-paper": "^2.16.0",
     "react-native-typeskill": "0.10.0-alpha.20",
-    "whatwg-fetch": "^3.0.0"
+    "whatwg-fetch": "^3.0.0",
+    "snyk": "^1.189.0"
   },
   "devDependencies": {
     "@babel/plugin-proposal-class-properties": "^7.4.4",
@@ -29,5 +32,6 @@
     "tslint-react-recommended": "^1.0.15",
     "typescript": "^3.4.5"
   },
-  "private": true
+  "private": true,
+  "snyk": true
 }
