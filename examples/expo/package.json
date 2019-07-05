@@ -21,7 +21,7 @@
     "@babel/plugin-proposal-object-rest-spread": "^7.4.4",
     "@types/expo": "^32.0.13",
     "@types/react": "^16.8.18",
-    "@types/react-native": "^0.57.60",
+    "@types/react-native": "^0.60.0",
     "babel-plugin-transform-es2015-modules-commonjs": "^6.26.2",
     "babel-preset-expo": "^6.0.0",
     "tslint": "^5.16.0",
