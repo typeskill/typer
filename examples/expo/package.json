@@ -9,7 +9,7 @@
   "dependencies": {
     "@expo/vector-icons": "^10.0.1",
     "expo": "^33.0.3",
-    "expo-constants": "^5.0.1",
+    "expo-constants": "^6.0.0",
     "react": "16.8.6",
     "react-native": "https://github.com/expo/react-native/archive/sdk-33.0.0.tar.gz",
     "react-native-paper": "^2.16.0",
