@@ -19,7 +19,7 @@ const LOCK_NAME = 'Sync'
  *
  * **Fake equality**
  *
- * The second one is not a bug, but rather a feature of React virtual DOM engine. To understand the challange, lets propose a scenario:
+ * It is not a bug, but rather a feature of React virtual DOM engine. To understand the challange, lets propose a scenario:
  *
  * - The user types a word
  * - {@link react-native#TextInputProps.onChangeText} is fired

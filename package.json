@@ -52,7 +52,8 @@
     "p-cancelable": "^2.0.0",
     "prop-types": "~15.7.2",
     "quill-delta": "~4.2.1",
-    "ramda": "~0.26.1"
+    "ramda": "~0.26.1",
+    "rxjs": "^6.5.2"
   },
   "devDependencies": {
     "@babel/cli": "^7.4.4",

@@ -13,6 +13,8 @@ import {
   TextBlockControllerProps,
 } from '@components/TextBlockController'
 import { mockSelectionChangeEvent, flattenTextChild } from '@test/vdom'
+import { TestScheduler } from 'rxjs/testing'
+import { zip } from 'rxjs/operators'
 
 function buildDocumentConsumer() {
   const bridge = new Bridge()
@@ -118,5 +120,27 @@ describe('@components/<TextBlockController>', () => {
     const richText = wrapper.root.findByType(RichText)
     const text = flattenTextChild(richText)
     expect(text.join('')).toEqual('This is nu text\nBlah')
+  })
+})
+
+const testScheduler = new TestScheduler((actual, expected) => {
+  // asserting the two objects are equal
+  // e.g. using chai.
+  expect(actual).toEqual(expected)
+})
+
+describe('synchronise', () => {
+  testScheduler.run(helpers => {
+    const { cold, expectObservable, expectSubscriptions } = helpers
+    const textChangesT = cold('-a--b--c--d-|')
+    const selectionChangesT = cold('--1--2--3--4|')
+    const expected = '         --A--B--C--D|'
+    const expectedValues = {
+      A: ['a', '1'],
+      B: ['b', '2'],
+      C: ['c', '3'],
+      D: ['d', '4'],
+    }
+    expectObservable(textChangesT.pipe(zip(selectionChangesT))).toBe(expected, expectedValues)
   })
 })
