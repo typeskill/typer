@@ -11,7 +11,6 @@ import { DocumentDeltaAtomicUpdate } from '@delta/DocumentDeltaAtomicUpdate'
 
 export function mokBridgeSheetEventDomain(): Bridge.SheetEventDomain {
   return {
-    addSwitchLineTypeInSelectionListener: jest.fn(),
     addApplyTextTransformToSelectionListener: jest.fn(),
     addInsertOrReplaceAtSelectionListener: jest.fn(),
     getTransforms: () => new Transforms(defaultTextTransforms),
@@ -27,7 +26,7 @@ export function mockDocumentDelta(ops?: GenericOp[]): DocumentDelta {
 
 export function mockDocumentDeltaSerialUpdate(ops?: GenericOp[]): DocumentDeltaSerialUpdate {
   const delta = mockDocumentDelta(ops)
-  return new DocumentDeltaSerialUpdate(delta, [], Selection.fromBounds(delta.length()))
+  return new DocumentDeltaSerialUpdate(delta, Selection.fromBounds(delta.length()))
 }
 
 export function mockDocumentBlockInterface(): Document.BlockInterface {

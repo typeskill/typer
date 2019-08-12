@@ -45,7 +45,7 @@ export declare namespace Attributes {
    *
    * @public
    */
-  export type LineType = 'normal' | 'quoted' | 'ol' | 'ul'
+  export type LineType = 'normal' | 'quoted'
 }
 
 /**

@@ -70,20 +70,6 @@ class Document {
   public registerConsumer(consumer: Document.Consumer) {
     invariant(this.consumer === undefined, 'Only one document consumer can be registered at a time')
     this.store.addListener(consumer.handleOnDocumentStateUpdate)
-    consumer.sheetEventDom.addSwitchLineTypeInSelectionListener(this, (lineType: Attributes.LineType) => {
-      if (this.store.hasBlock()) {
-        const selectedBlock = this.store.getActiveBlock() as TextBlock
-        invariant(selectedBlock instanceof TextBlock, 'Line Transforms can only be applied to a TextBlock')
-        const selectionBeforeChange = selectedBlock.getSelection()
-        const atomicUpdate = selectedBlock.getDelta().applyLineTypeToSelection(selectionBeforeChange, lineType)
-        selectedBlock.handleAtomicUpdate(atomicUpdate)
-        this.orchestrator.emitToBlockController(
-          selectedBlock.getInstanceNumber(),
-          'CONTROL_DOMAIN_CONTENT_CHANGE',
-          atomicUpdate,
-        )
-      }
-    })
     consumer.sheetEventDom.addApplyTextTransformToSelectionListener(
       this,
       (attributeName: string, attributeValue: Attributes.GenericValue) => {
@@ -99,7 +85,6 @@ class Document {
           const mergedCursorAttributes = selectedBlock.setCursorAttributes(userAttributes)
           const attributes = mergeAttributesLeft(deltaAttributes, mergedCursorAttributes)
           selectedBlock.handleAtomicUpdate(atomicUpdate)
-          console.info('APPLYING TEXT TRANSFORM', attributes)
           // TODO investigate to refactor to block
           consumer.sheetEventDom.notifySelectedTextAttributesChange(attributes)
           this.orchestrator.emitToBlockController(

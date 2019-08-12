@@ -51,12 +51,8 @@ function getLineStyle(lineType: Attributes.LineType): StyleProp<TextStyle> {
   switch (lineType) {
     case 'normal':
       return null
-    case 'ol':
-      return { paddingLeft: 20 }
     case 'quoted':
       return { borderLeftWidth: 3, borderLeftColor: 'black' }
-    case 'ul':
-      return { paddingLeft: 20 }
   }
 }
 

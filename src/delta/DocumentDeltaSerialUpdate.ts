@@ -1,7 +1,5 @@
 import { Selection } from './Selection'
-import { NormalizeDirective } from './DeltaDiffComputer'
 import { DocumentDelta } from './DocumentDelta'
-import { DocumentDeltaNormalizer } from './DocumentDeltaNormalizer'
 import { DocumentDeltaAtomicUpdate } from './DocumentDeltaAtomicUpdate'
 
 /**
@@ -14,37 +12,10 @@ export class DocumentDeltaSerialUpdate {
 
   public constructor(
     afterApplyTextDiffDelta: DocumentDelta,
-    normalizationDirectives: NormalizeDirective[],
     selectionAfterChange: Selection,
     overridingSelection?: Selection,
   ) {
-    const mustComputeNormalization = normalizationDirectives.length > 0
-    const normalizer = new DocumentDeltaNormalizer(afterApplyTextDiffDelta)
-    if (mustComputeNormalization) {
-      const { overridingSelection: normalizedOverridingSelection, delta: normalizedDelta } = normalizer.apply(
-        normalizationDirectives,
-      )
-      if (normalizedDelta !== afterApplyTextDiffDelta) {
-        this.intermediaryUpdate = new DocumentDeltaAtomicUpdate(
-          afterApplyTextDiffDelta,
-          selectionAfterChange,
-          overridingSelection,
-        )
-        this.finalUpdate = new DocumentDeltaAtomicUpdate(
-          normalizedDelta,
-          selectionAfterChange,
-          normalizedOverridingSelection || overridingSelection,
-        )
-      }
-    }
-    // @ts-ignore
-    if (!this.finalUpdate) {
-      this.finalUpdate = new DocumentDeltaAtomicUpdate(
-        afterApplyTextDiffDelta,
-        selectionAfterChange,
-        overridingSelection,
-      )
-    }
+    this.finalUpdate = new DocumentDeltaAtomicUpdate(afterApplyTextDiffDelta, selectionAfterChange, overridingSelection)
   }
 
   public get intermediaryDelta(): DocumentDelta | null {

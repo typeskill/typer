@@ -5,13 +5,6 @@ import { GenericOp } from './operations'
 import mergeRight from 'ramda/es/mergeRight'
 import pickBy from 'ramda/es/pickBy'
 import head from 'ramda/es/head'
-import {
-  getHeadingCharactersFromType,
-  isLineInSelection,
-  isLineTypeTextLengthModifier,
-  getHeadingRegexFromType,
-} from './lines'
-import { DocumentLineIndexGenerator } from './DocumentLineIndexGenerator'
 import { GenericRichContent, extractTextFromDelta } from './generic'
 import { DeltaDiffComputer } from './DeltaDiffComputer'
 import { DeltaChangeContext } from './DeltaChangeContext'
@@ -127,8 +120,8 @@ export class DocumentDelta implements GenericRichContent {
       },
       this,
     )
-    const { delta, directives } = computer.toDeltaDiffReport()
-    return new DocumentDeltaSerialUpdate(this.compose(delta), directives, deltaChangeContext.selectionAfterChange)
+    const { delta } = computer.toDeltaDiffReport()
+    return new DocumentDeltaSerialUpdate(this.compose(delta), deltaChangeContext.selectionAfterChange)
   }
 
   /**
@@ -231,109 +224,5 @@ export class DocumentDelta implements GenericRichContent {
     replaceAllDelta.retain(selectionBeforeChange.start)
     replaceAllDelta.retain(selectionBeforeChange.length(), { [attributeName]: attributeValue })
     return new DocumentDeltaAtomicUpdate(this.compose(replaceAllDelta), selectionBeforeChange, overridingSelection)
-  }
-
-  /**
-   * Swtich the `$type` of lines traversed by selection, depending of its sate.
-   *
-   * @remarks
-   *
-   * - if **all** lines traversed by selection have their `$type` set to `lineType`, set `$type` to `"normal"` for each of these lines;
-   * - otherwise, set `$type` to `lineType` for each of these lines.
-   *
-   * Calling this function will also iterate over each out of selection lines to update
-   * their prefix when appropriate.
-   *
-   * @param selectionBeforeChange - The selection touching lines to which the transform will be applied.
-   * @param userLineType - The line type proposed by user.
-   * @returns The delta resulting from applying this line type.
-   */
-  public applyLineTypeToSelection(
-    selectionBeforeChange: Selection,
-    userLineType: Attributes.LineType,
-  ): DocumentDeltaAtomicUpdate {
-    const selectionLineType = this.getLineTypeInSelection(selectionBeforeChange)
-    const diffDelta = new Delta()
-    const generator = new DocumentLineIndexGenerator()
-    if (!this.ops.length) {
-      // Special condition where the delta is empty, hence cannot update on non existing line.
-      const tempDelta = this.create(diffDelta.insert('\n'))
-      return tempDelta.applyLineTypeToSelection(selectionBeforeChange, userLineType)
-    }
-    this.eachLine(line => {
-      const { lineTypeIndex: currentLineTypeIndex, delta: lineDelta, lineType: currentLineType } = line
-      const lineInSelection = isLineInSelection(selectionBeforeChange, line)
-      const nextLineType = lineInSelection
-        ? selectionLineType !== userLineType
-          ? userLineType
-          : 'normal'
-        : currentLineType
-      const nextLineTypeIndex = generator.findNextLineTypeIndex(nextLineType)
-      if (lineInSelection && isLineTypeTextLengthModifier(currentLineType) && nextLineType === 'normal') {
-        const currentText = extractTextFromDelta(lineDelta)
-        const matchedPrefix = getHeadingRegexFromType(currentLineType).exec(currentText)
-        if (matchedPrefix) {
-          const [_, matchedString] = matchedPrefix
-          diffDelta.delete(matchedString.length)
-          diffDelta.retain(lineDelta.length() - matchedString.length)
-        } else {
-          diffDelta.retain(lineDelta.length())
-        }
-        diffDelta.retain(1, { $type: null })
-      } else if (
-        lineInSelection &&
-        isLineTypeTextLengthModifier(currentLineType) &&
-        isLineTypeTextLengthModifier(nextLineType)
-      ) {
-        const currentText = extractTextFromDelta(lineDelta)
-        const matchedPrefix = getHeadingRegexFromType(currentLineType).exec(currentText)
-        const requiredPrefix = getHeadingCharactersFromType(nextLineType, nextLineTypeIndex)
-        let retainLength = lineDelta.length()
-        if (matchedPrefix) {
-          const [_, matchedString] = matchedPrefix
-          diffDelta.delete(matchedString.length)
-          retainLength = lineDelta.length() - matchedString.length
-        }
-        diffDelta.insert(requiredPrefix)
-        diffDelta.retain(retainLength)
-        diffDelta.retain(1, { $type: nextLineType })
-      } else if (lineInSelection && isLineTypeTextLengthModifier(nextLineType)) {
-        const requiredPrefix = getHeadingCharactersFromType(nextLineType, nextLineTypeIndex)
-        const currentPrefix = extractTextFromDelta(lineDelta).substr(0, requiredPrefix.length)
-        if (currentPrefix !== requiredPrefix) {
-          diffDelta.insert(requiredPrefix)
-        }
-        diffDelta.retain(lineDelta.length())
-        diffDelta.retain(1, { $type: nextLineType })
-      } else if (lineInSelection && nextLineType !== 'normal') {
-        diffDelta.retain(lineDelta.length())
-        diffDelta.retain(1, { $type: nextLineType })
-      } else if (
-        !lineInSelection &&
-        currentLineType === 'ol' &&
-        currentLineType === nextLineType &&
-        currentLineTypeIndex !== nextLineTypeIndex
-      ) {
-        const currentText = extractTextFromDelta(lineDelta)
-        const matchedPrefix = getHeadingRegexFromType(currentLineType).exec(currentText)
-        const requiredPrefix = getHeadingCharactersFromType(nextLineType, nextLineTypeIndex)
-        let retainLength = lineDelta.length()
-        if (matchedPrefix) {
-          const [_, matchedString] = matchedPrefix
-          diffDelta.delete(matchedString.length)
-          retainLength = lineDelta.length() - matchedString.length
-        }
-        diffDelta.insert(requiredPrefix)
-        diffDelta.retain(retainLength)
-        diffDelta.retain(1)
-      } else {
-        diffDelta.retain(lineDelta.length() + 1)
-      }
-    })
-    const overridingSelection = Selection.fromBounds(
-      diffDelta.transformPosition(selectionBeforeChange.start),
-      diffDelta.transformPosition(selectionBeforeChange.end),
-    )
-    return new DocumentDeltaAtomicUpdate(this.compose(diffDelta), selectionBeforeChange, overridingSelection)
   }
 }

@@ -36,14 +36,6 @@ export enum ControlAction {
    * Switch strikethrough formatting in the selected text.
    */
   SELECT_TEXT_STRIKETHROUGH,
-  /**
-   * Switch the layout of lines traversed by selection to or from ordered list.
-   */
-  SELECT_LINES_ORDERED_LIST,
-  /**
-   * Switch the layout of lines traversed by selection to or from unordered list.
-   */
-  SELECT_LINES_UNORDERED_LIST,
 }
 
 /**
@@ -274,12 +266,6 @@ class _Toolbar extends PureComponent<Toolbar.Props, ToolbarState> {
     }
   }
 
-  private applyLineTransformToSelection(lineType: Attributes.LineType) {
-    return () => {
-      this.controlEventDom.switchLineTypeInSelection(lineType)
-    }
-  }
-
   private computeIconSpacing() {
     return typeof this.props.buttonSpacing === 'number' ? this.props.buttonSpacing : (this.props.iconSize as number) / 3
   }
@@ -303,24 +289,6 @@ class _Toolbar extends PureComponent<Toolbar.Props, ToolbarState> {
     )
   }
 
-  private renderLineTransformController(
-    lineType: Attributes.LineType,
-    textControlSpec: Toolbar.ControlSpec,
-    last: boolean = false,
-  ) {
-    const { selectedLineType } = this.state
-    const IconButton = this.IconButton
-    return (
-      <IconButton
-        selected={selectedLineType === lineType}
-        style={last ? undefined : { marginRight: this.computeIconSpacing() }}
-        IconComponent={textControlSpec.IconComponent}
-        iconProps={textControlSpec.iconProps}
-        onPress={this.applyLineTransformToSelection(lineType)}
-      />
-    )
-  }
-
   private renderIconControl(textControlSpec: Toolbar.ControlSpec, last: boolean) {
     switch (textControlSpec.actionType) {
       case ControlAction.SELECT_TEXT_BOLD:
@@ -331,10 +299,6 @@ class _Toolbar extends PureComponent<Toolbar.Props, ToolbarState> {
         return this.renderTextTransformController('textDecoration', 'underline', textControlSpec, last)
       case ControlAction.SELECT_TEXT_STRIKETHROUGH:
         return this.renderTextTransformController('textDecoration', 'strikethrough', textControlSpec, last)
-      case ControlAction.SELECT_LINES_UNORDERED_LIST:
-        return this.renderLineTransformController('ul', textControlSpec, last)
-      case ControlAction.SELECT_LINES_ORDERED_LIST:
-        return this.renderLineTransformController('ol', textControlSpec, last)
     }
   }
 
@@ -353,9 +317,6 @@ class _Toolbar extends PureComponent<Toolbar.Props, ToolbarState> {
   public componentDidMount() {
     this.controlEventDom.addSelectedAttributesChangeListener(this, selectedAttributes => {
       this.setState({ selectedAttributes })
-    })
-    this.controlEventDom.addSelectedLineTypeChangeListener(this, selectedLineType => {
-      this.setState({ selectedLineType })
     })
   }
 

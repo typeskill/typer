@@ -81,26 +81,9 @@ declare namespace Bridge {
     applyTextTransformToSelection: (attributeName: string, attributeValue: Attributes.TextValue) => void
 
     /**
-     * Switch the line type of lines traversed by selection depending on its state.
-     *
-     * @remarks
-     *
-     * - if **all lines** traversed by selection are of the type `userLineType`, set the type for each of those lines to `'normal'`;
-     * - otherwise, set the type of each of those lines to `userLineType`.
-     *
-     * @param userLineType - The type to switch.
-     */
-    switchLineTypeInSelection: (userLineType: Attributes.LineType) => void
-
-    /**
      * Listen to attributes changes in selection.
      */
     addSelectedAttributesChangeListener: (owner: object, listener: SelectedAttributesChangeListener) => void
-
-    /**
-     * Listen to line type changes in selection.
-     */
-    addSelectedLineTypeChangeListener: (owner: object, listener: LineTypeOverrideListener) => void
 
     /**
      * Dereference all listeners registered for this owner.
@@ -122,11 +105,6 @@ declare namespace Bridge {
      * Listen to text attributes alterations in selection.
      */
     addApplyTextTransformToSelectionListener: (owner: object, listener: AttributesOverrideListener) => void
-
-    /**
-     * Listen to type changes in selection
-     */
-    addSwitchLineTypeInSelectionListener: (owner: object, listener: LineTypeOverrideListener) => void
 
     /**
      * Listen to insertions of text or blocks at selection.
@@ -175,14 +153,8 @@ class Bridge {
     applyTextTransformToSelection: (attributeName: string, attributeValue: Attributes.GenericValue) => {
       this.outerEndpoint.emit('APPLY_ATTRIBUTES_TO_SELECTION', attributeName, attributeValue)
     },
-    switchLineTypeInSelection: (lineType: Attributes.LineType) => {
-      this.outerEndpoint.emit('APPLY_LINE_TYPE_TO_SELECTION', lineType)
-    },
     addSelectedAttributesChangeListener: (owner: object, listener: Bridge.SelectedAttributesChangeListener) => {
       this.innerEndpoint.addListener(owner, 'SELECTED_ATTRIBUTES_CHANGE', listener)
-    },
-    addSelectedLineTypeChangeListener: (owner: object, listener: Bridge.LineTypeOverrideListener) => {
-      this.innerEndpoint.addListener(owner, 'SELECTED_LINE_TYPE_CHANGE', listener)
     },
     release: (owner: object) => {
       this.innerEndpoint.release(owner)
@@ -192,9 +164,6 @@ class Bridge {
   private sheetEventDom: Bridge.SheetEventDomain = {
     addApplyTextTransformToSelectionListener: (owner: object, listener: Bridge.AttributesOverrideListener) => {
       this.outerEndpoint.addListener(owner, 'APPLY_ATTRIBUTES_TO_SELECTION', listener)
-    },
-    addSwitchLineTypeInSelectionListener: (owner: object, listener: Bridge.LineTypeOverrideListener) => {
-      this.outerEndpoint.addListener(owner, 'APPLY_LINE_TYPE_TO_SELECTION', listener)
     },
     addInsertOrReplaceAtSelectionListener: (owner: object, listener: Bridge.InsertOrReplaceAtSelectionListener) => {
       this.outerEndpoint.addListener(owner, 'INSERT_OR_REPLACE_AT_SELECTION', listener)
