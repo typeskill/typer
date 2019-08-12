@@ -1,5 +1,5 @@
 // tslint:disable:no-string-literal
-import { mockDocumentBlockInterface, mockDocumentDeltaSerialUpdate, runUpdates } from '@test/document'
+import { mockDocumentBlockInterface, mockDocumentDeltaAtomicUpdate, runUpdates } from '@test/document'
 import { TextBlock } from '@model/TextBlock'
 import { mockSelection } from '@test/delta'
 
@@ -8,7 +8,7 @@ describe('@model/TextBlock', () => {
     it('should notify of a selected text attribute update', () => {
       const blockInterface = mockDocumentBlockInterface()
       const textBlock = new TextBlock(blockInterface)
-      const serialUpdate = mockDocumentDeltaSerialUpdate([
+      const serialUpdate = mockDocumentDeltaAtomicUpdate([
         { insert: 'A\n' },
         { insert: 'B', attributes: { weight: 'bold' } },
         { insert: '\n' },

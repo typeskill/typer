@@ -39,73 +39,73 @@ describe('@delta/DocumentDelta', () => {
       const newText = 'Hello worl\n'
       const originalDelta = mockDocumentDelta([{ insert: 'Hello world\n' }])
       const changeContext = mockDeltaChangeContext(11, 10)
-      const { finalDelta } = originalDelta.applyTextDiff(newText, changeContext)
-      expect(finalDelta.ops).toEqual([{ insert: newText }])
+      const { delta } = originalDelta.applyTextDiff(newText, changeContext)
+      expect(delta.ops).toEqual([{ insert: newText }])
     })
     it('should reproduce a delete operation when two or more characters were deleted', () => {
       const newText = 'Hello \n'
       const originalDelta = mockDocumentDelta([{ insert: 'Hello world\n' }])
       const changeContext = mockDeltaChangeContext(6, 6, 11)
-      const { finalDelta } = originalDelta.applyTextDiff(newText, changeContext)
-      expect(finalDelta.ops).toEqual([{ insert: newText }])
+      const { delta } = originalDelta.applyTextDiff(newText, changeContext)
+      expect(delta.ops).toEqual([{ insert: newText }])
     })
     it('should reproduce a delete operation when multiple lines were deleted', () => {
       const newText = 'A\nB\n'
       const originalDelta = mockDocumentDelta([{ insert: 'A\nBC\nD\n' }])
       const changeContext = mockDeltaChangeContext(3, 3, 7)
-      const { finalDelta } = originalDelta.applyTextDiff(newText, changeContext)
-      expect(finalDelta.ops).toEqual([{ insert: 'A\nB\n' }])
+      const { delta } = originalDelta.applyTextDiff(newText, changeContext)
+      expect(delta.ops).toEqual([{ insert: 'A\nB\n' }])
     })
     it('should reproduce an insert operation when one character was inserted', () => {
       const newText = 'Hello world\n'
       const originalDelta = mockDocumentDelta([{ insert: 'Hello worl\n' }])
       const changeContext = mockDeltaChangeContext(10, 11)
-      const { finalDelta } = originalDelta.applyTextDiff(newText, changeContext)
-      expect(finalDelta.ops[0].insert).toBe(newText)
+      const { delta } = originalDelta.applyTextDiff(newText, changeContext)
+      expect(delta.ops[0].insert).toBe(newText)
     })
     it('should reproduce an insert operation when two or more characters were inserted', () => {
       const newText = 'Hello world\n'
       const originalDelta = mockDocumentDelta([{ insert: 'Hello \n' }])
       const changeContext = mockDeltaChangeContext(6, 11)
-      const { finalDelta } = originalDelta.applyTextDiff(newText, changeContext)
-      expect(finalDelta.ops).toEqual([{ insert: newText }])
+      const { delta } = originalDelta.applyTextDiff(newText, changeContext)
+      expect(delta.ops).toEqual([{ insert: newText }])
     })
     it('should reproduce an insert operation when multiple lines were inserted', () => {
       const newText = 'Hello world\nFoo\nBar\n'
       const originalDelta = mockDocumentDelta([{ insert: 'Hello world\n' }])
       const changeContext = mockDeltaChangeContext(11, 19)
-      const { finalDelta } = originalDelta.applyTextDiff(newText, changeContext)
-      expect(finalDelta.ops).toEqual([{ insert: newText }])
+      const { delta } = originalDelta.applyTextDiff(newText, changeContext)
+      expect(delta.ops).toEqual([{ insert: newText }])
     })
     it('should reproduce a replace operation when one character was replaced', () => {
       const newText = 'Hello worlq\n'
       const originalDelta = mockDocumentDelta([{ insert: 'Hello world\n' }])
       const changeContext = mockDeltaChangeContext(10, 11, 11)
-      const { finalDelta } = originalDelta.applyTextDiff(newText, changeContext)
-      expect(finalDelta.ops).toEqual([{ insert: newText }])
+      const { delta } = originalDelta.applyTextDiff(newText, changeContext)
+      expect(delta.ops).toEqual([{ insert: newText }])
     })
     it('should reproduce a replace operation when two ore more characters were replaced', () => {
       const newText = 'Hello cat\n'
       const originalDelta = mockDocumentDelta([{ insert: 'Hello world\n' }])
       const changeContext = mockDeltaChangeContext(6, 9, 11)
-      const { finalDelta } = originalDelta.applyTextDiff(newText, changeContext)
-      expect(finalDelta.ops).toEqual([{ insert: newText }])
+      const { delta } = originalDelta.applyTextDiff(newText, changeContext)
+      expect(delta.ops).toEqual([{ insert: newText }])
     })
     it("should reproduce a replace operation when cursor didn't move, but the text was replaced on the same line as cursor", () => {
       // This would happen with keyboard suggestions
       const newText = 'Hello cat\n'
       const originalDelta = mockDocumentDelta([{ insert: 'Hello pet\n' }])
       const changeContext = mockDeltaChangeContext(9, 9)
-      const { finalDelta } = originalDelta.applyTextDiff(newText, changeContext)
-      expect(finalDelta.ops).toEqual([{ insert: newText }])
+      const { delta } = originalDelta.applyTextDiff(newText, changeContext)
+      expect(delta.ops).toEqual([{ insert: newText }])
     })
     it('should reproduce a replace operation when cursor moved, but the change occurred out of cursor boundaries, in the same line', () => {
       // This would happen with keyboard suggestions
       const newText = 'Hello petty\n'
       const originalDelta = mockDocumentDelta([{ insert: 'Hello cat\n' }])
       const changeContext = mockDeltaChangeContext(9, 11)
-      const { finalDelta } = originalDelta.applyTextDiff(newText, changeContext)
-      expect(finalDelta.ops).toEqual([{ insert: newText }])
+      const { delta } = originalDelta.applyTextDiff(newText, changeContext)
+      expect(delta.ops).toEqual([{ insert: newText }])
     })
     it('should keep the line type at selection start when reproducing a multiline replace operation', () => {
       const newText = 'A\n'
@@ -115,15 +115,15 @@ describe('@delta/DocumentDelta', () => {
         { insert: 'B\nC\n' },
       ])
       const changeContext = mockDeltaChangeContext(1, 1, 5)
-      const { finalDelta } = originalDelta.applyTextDiff(newText, changeContext)
-      expect(finalDelta.ops).toEqual([{ insert: 'A' }, { insert: '\n', attributes: { $type: 'custom' } }])
+      const { delta } = originalDelta.applyTextDiff(newText, changeContext)
+      expect(delta.ops).toEqual([{ insert: 'A' }, { insert: '\n', attributes: { $type: 'custom' } }])
     })
     it('should append a newline character to delta after inserting a character at the begening of a newline', () => {
       const newText = 'Hello world\nH'
       const changeContext = mockDeltaChangeContext(12, 13)
       const originalDelta = mockDocumentDelta([{ insert: 'Hello world\n' }])
-      const { finalDelta } = originalDelta.applyTextDiff(newText, changeContext)
-      expect(finalDelta.ops).toEqual([{ insert: 'Hello world\nH\n' }])
+      const { delta } = originalDelta.applyTextDiff(newText, changeContext)
+      expect(delta.ops).toEqual([{ insert: 'Hello world\nH\n' }])
     })
     it('should retain newline character after inserting a newline character to keep the current linetype, if that line type is not propagable', () => {
       const newText = 'Hello world\n'
@@ -132,8 +132,8 @@ describe('@delta/DocumentDelta', () => {
         { insert: 'Hello world' },
         { insert: '\n', attributes: { $type: 'misc' } },
       ])
-      const { finalDelta } = originalDelta.applyTextDiff(newText, changeContext)
-      expect(finalDelta.ops).toEqual([
+      const { delta } = originalDelta.applyTextDiff(newText, changeContext)
+      expect(delta.ops).toEqual([
         { insert: 'Hello world' },
         { insert: '\n', attributes: { $type: 'misc' } },
         { insert: '\n' },
@@ -143,8 +143,8 @@ describe('@delta/DocumentDelta', () => {
       const newText = 'Hello \nworld\n'
       const changeContext = mockDeltaChangeContext(6, 7)
       const originalDelta = mockDocumentDelta([{ insert: 'Hello world\n' }])
-      const { finalDelta } = originalDelta.applyTextDiff(newText, changeContext)
-      expect(finalDelta.ops).toEqual([{ insert: 'Hello \nworld\n' }])
+      const { delta } = originalDelta.applyTextDiff(newText, changeContext)
+      expect(delta.ops).toEqual([{ insert: 'Hello \nworld\n' }])
     })
     it('should not propagate the previous line type to the newline after replacing a newline character, if that line type is not propagable', () => {
       const newText = 'Hello worl\n'
@@ -153,8 +153,8 @@ describe('@delta/DocumentDelta', () => {
         { insert: 'Hello world' },
         { insert: '\n', attributes: { $type: 'misc' } },
       ])
-      const { finalDelta } = originalDelta.applyTextDiff(newText, changeContext)
-      expect(finalDelta.ops).toEqual([
+      const { delta } = originalDelta.applyTextDiff(newText, changeContext)
+      expect(delta.ops).toEqual([
         { insert: 'Hello worl' },
         { insert: '\n', attributes: { $type: 'misc' } },
         { insert: '\n' },
@@ -164,8 +164,8 @@ describe('@delta/DocumentDelta', () => {
       const changeContext = mockDeltaChangeContext(3, 2)
       const newText = 'A\n\nC\n'
       const originalDelta = mockDocumentDelta([{ insert: 'A\nB\nC\n' }])
-      const { finalDelta } = originalDelta.applyTextDiff(newText, changeContext)
-      expect(finalDelta.ops).toEqual([{ insert: 'A\n\nC\n' }])
+      const { delta } = originalDelta.applyTextDiff(newText, changeContext)
+      expect(delta.ops).toEqual([{ insert: 'A\n\nC\n' }])
     })
     it('should retain first newline character and remove next newline when removing newline', () => {
       const changeContext = mockDeltaChangeContext(2, 1)
@@ -175,12 +175,8 @@ describe('@delta/DocumentDelta', () => {
         { insert: '\n', attributes: { $type: 'custom' } },
         { insert: '\nC\n' },
       ])
-      const { finalDelta } = originalDelta.applyTextDiff(newText, changeContext)
-      expect(finalDelta.ops).toEqual([
-        { insert: 'A' },
-        { insert: '\n', attributes: { $type: 'custom' } },
-        { insert: 'C\n' },
-      ])
+      const { delta } = originalDelta.applyTextDiff(newText, changeContext)
+      expect(delta.ops).toEqual([{ insert: 'A' }, { insert: '\n', attributes: { $type: 'custom' } }, { insert: 'C\n' }])
     })
   })
   describe('applyTextTransformToSelection', () => {

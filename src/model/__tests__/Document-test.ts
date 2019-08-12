@@ -4,7 +4,7 @@ import { TextBlock } from '@model/TextBlock'
 import { Bridge } from '@core/Bridge'
 import { mockDeltaChangeContext, mockSelection } from '@test/delta'
 import { Selection } from '@delta/Selection'
-import { mockDocumentDelta, mockDocumentDeltaSerialUpdate, runUpdates } from '@test/document'
+import { runUpdates } from '@test/document'
 
 function newConsumer() {
   const bridge = new Bridge()

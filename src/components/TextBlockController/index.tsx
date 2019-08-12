@@ -73,6 +73,7 @@ export class TextBlockController extends Component<TextBlockControllerProps, Tex
 
   @boundMethod
   private handleOnSheetDomainTextChanged(text: string) {
+    console.info(text)
     this.synchronizer.handleOnSheetDomainTextChanged(text)
   }
 

@@ -6,7 +6,6 @@ import { TextBlock } from '@model/TextBlock'
 import { Bridge } from '@core/Bridge'
 import { Orchestrator } from '@model/Orchestrator'
 import { setInstanceNumber as setBlockInstanceNumber } from '@model/Block'
-import { DocumentDeltaSerialUpdate } from '@delta/DocumentDeltaSerialUpdate'
 
 function newTextBlock(): TextBlock {
   const block = new TextBlock({

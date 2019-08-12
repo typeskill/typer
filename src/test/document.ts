@@ -5,7 +5,6 @@ import { Transforms } from '@core/Transforms'
 import { DocumentDelta } from '@delta/DocumentDelta'
 import { GenericOp } from '@delta/operations'
 import { TextBlock } from '@model/TextBlock'
-import { DocumentDeltaSerialUpdate } from '@delta/DocumentDeltaSerialUpdate'
 import { Selection } from '@delta/Selection'
 import { DocumentDeltaAtomicUpdate } from '@delta/DocumentDeltaAtomicUpdate'
 
@@ -24,9 +23,9 @@ export function mockDocumentDelta(ops?: GenericOp[]): DocumentDelta {
   return new DocumentDelta(ops)
 }
 
-export function mockDocumentDeltaSerialUpdate(ops?: GenericOp[]): DocumentDeltaSerialUpdate {
+export function mockDocumentDeltaAtomicUpdate(ops?: GenericOp[]): DocumentDeltaAtomicUpdate {
   const delta = mockDocumentDelta(ops)
-  return new DocumentDeltaSerialUpdate(delta, Selection.fromBounds(delta.length()))
+  return new DocumentDeltaAtomicUpdate(delta, Selection.fromBounds(delta.length()))
 }
 
 export function mockDocumentBlockInterface(): Document.BlockInterface {

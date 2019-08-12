@@ -3,7 +3,6 @@ import { Document } from './Document'
 import { DocumentDelta } from '@delta/DocumentDelta'
 import { boundMethod } from 'autobind-decorator'
 import { Orchestrator } from './Orchestrator'
-import { DocumentDeltaSerialUpdate } from '@delta/DocumentDeltaSerialUpdate'
 import { DocumentDeltaAtomicUpdate } from '@delta/DocumentDeltaAtomicUpdate'
 
 let lastInstanceNumber = 0
@@ -49,16 +48,10 @@ export abstract class Block {
   }
 
   protected *transformSerialUpdateToGenerator(
-    serialUpdate: DocumentDeltaSerialUpdate,
+    serialUpdate: DocumentDeltaAtomicUpdate,
   ): IterableIterator<DocumentDeltaAtomicUpdate> {
-    if (serialUpdate.intermediaryUpdate) {
-      const intermediaryUpdate = serialUpdate.intermediaryUpdate
-      this.handleAtomicUpdate(intermediaryUpdate)
-      yield intermediaryUpdate
-    }
-    const finalUpdate = serialUpdate.finalUpdate
-    this.handleAtomicUpdate(finalUpdate)
-    yield finalUpdate
+    this.handleAtomicUpdate(serialUpdate)
+    yield serialUpdate
   }
 
   public getDelta(): DocumentDelta {

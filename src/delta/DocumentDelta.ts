@@ -9,7 +9,6 @@ import { GenericRichContent, extractTextFromDelta } from './generic'
 import { DeltaDiffComputer } from './DeltaDiffComputer'
 import { DeltaChangeContext } from './DeltaChangeContext'
 import { DocumentLine, LineWalker } from './LineWalker'
-import { DocumentDeltaSerialUpdate } from './DocumentDeltaSerialUpdate'
 import { DocumentDeltaAtomicUpdate } from './DocumentDeltaAtomicUpdate'
 
 export class DocumentDelta implements GenericRichContent {
@@ -85,31 +84,24 @@ export class DocumentDelta implements GenericRichContent {
   }
 
   /**
-   * Compute a diff between this document delta text and return a duo of deltas.
+   * Compute a diff between this document delta text and return the resulting atomic update.
    * The first one is the strict result of applying the text diff, while the second one
    * it the result of applying normalization rules (i.e. prefixes rules for text modifying line types).
    *
    * @remarks
    *
-   * 1. `cursorTextAttributes` will by applied to inserted characters if and only if `deltaChangeContext.selectionBeforeChange` is of length 0.
-   * 2. The reason for returning a {@link DocumentDeltaSerialUpdate} is related to how updates work in React.
-   *    By just returning the result of text diff and normalization, we could run into
-   *    a bug when normalized delta strictly equals the delta preceding text diff.
-   *    In such cases, passing normalized prop to react component wouldn't result in a
-   *    component tree update. We must therefore serially pass the two deltas.
-   * 3. If the result of applying normalization is strictly equal to the text diff instance ; the same instance will be returned.
+   * `cursorTextAttributes` will by applied to inserted characters if and only if `deltaChangeContext.selectionBeforeChange` is of length 0.
    *
    * @param newText - The changed text.
    * @param deltaChangeContext - The context in which the change occurred.
    * @param cursorTextAttributes - Text attributes at cursor.
-   * @returns A duo of deltas. The first one is the strict result of applying the text diff, while the second one
-   * it the result of applying normalization rules (i.e. prefixes rules for text modifying line types).
+   * @returns The resulting atomic update from applying the text diff.
    */
   public applyTextDiff(
     newText: string,
     deltaChangeContext: DeltaChangeContext,
     cursorTextAttributes: Attributes.Map = {},
-  ): DocumentDeltaSerialUpdate {
+  ): DocumentDeltaAtomicUpdate {
     const oldText = this.getText()
     const computer = new DeltaDiffComputer(
       {
@@ -121,7 +113,7 @@ export class DocumentDelta implements GenericRichContent {
       this,
     )
     const { delta } = computer.toDeltaDiffReport()
-    return new DocumentDeltaSerialUpdate(this.compose(delta), deltaChangeContext.selectionAfterChange)
+    return new DocumentDeltaAtomicUpdate(this.compose(delta), deltaChangeContext.selectionAfterChange)
   }
 
   /**
