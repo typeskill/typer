@@ -1,6 +1,6 @@
 {
   "name": "react-native-typeskill",
-  "version": "0.10.0-alpha.22",
+  "version": "0.10.0-alpha.23",
   "repository": "git@github.com:jsamr/react-native-typeskill.git",
   "description": "Operational-Transform Based (React) Native Rich Text Editor",
   "author": "Jules Randolph <jules.sam.randolph@gmail.com>",
