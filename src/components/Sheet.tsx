@@ -40,13 +40,13 @@ declare namespace Sheet {
      */
     textStyle?: StyleProp<TextStyle>
     /**
-     * The initial rich text.
+     * The rich content to display.
      */
-    initialRichContent?: RichContent
+    richContent: RichContent
     /**
      * Handler to receive {@link (RichContent:class)} updates.
      */
-    onRichTextUpdate?: (richText: RichContent) => void
+    onRichContentUpdate?: (richText: RichContent) => void
     /**
      * Style applied to the container.
      */
@@ -65,8 +65,8 @@ class _Sheet extends PureComponent<Sheet.Props, Store.State> {
     bridge: PropTypes.instanceOf(Bridge).isRequired,
     contentContainerStyle: ViewPropTypes.style,
     textStyle: PropTypes.any,
-    initialRichContent: RichContentPropType,
-    onRichTextUpdate: PropTypes.func,
+    richContent: RichContentPropType,
+    onRichContentUpdate: PropTypes.func,
   }
 
   public constructor(props: Sheet.Props) {

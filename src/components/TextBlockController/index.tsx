@@ -47,7 +47,7 @@ const constantTextInputProps: TextInputProps = {
  *
  * @privateRemarks
  *
- *  Read the {@link Synchronizer} documentation to understand the implementation challenges of this component.
+ * Read the {@link Synchronizer} documentation to understand the implementation challenges of this component.
  */
 export class TextBlockController extends Component<TextBlockControllerProps, TextBlockControllerState>
   implements SyncSubject {
@@ -73,7 +73,6 @@ export class TextBlockController extends Component<TextBlockControllerProps, Tex
 
   @boundMethod
   private handleOnSheetDomainTextChanged(text: string) {
-    console.info(text)
     this.synchronizer.handleOnSheetDomainTextChanged(text)
   }
 
