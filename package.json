@@ -24,7 +24,8 @@
     "semantic-release": "semantic-release"
   },
   "files": [
-    "lib/**/*"
+    "lib/**/*",
+    "types/**/*"
   ],
   "main": "lib/index.js",
   "types": "types/react-native-typeskill.d.ts",
