@@ -70,7 +70,8 @@ declare namespace Toolbar {
   /**
    * Declaratively describes the layout of the {@link (Toolbar:type)} component.
    */
-  export type Layout = (ControlSpec | typeof CONTROL_SEPARATOR)[]
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  export type Layout = (ControlSpec<any> | typeof CONTROL_SEPARATOR)[]
 
   /**
    * Props of the {@link (Toolbar:type)} component.
@@ -139,11 +140,11 @@ declare namespace Toolbar {
      * Will receive {@link (Toolbar:namespace).Props.inactiveButtonColor} when not active and
      * {@link (Toolbar:namespace).Props.activeButtonColor} when active.
      */
-    color: string
+    color?: string
     /**
      * Icon size.
      */
-    size: number
+    size?: number
   }
 
   /**

@@ -243,13 +243,7 @@ export declare class Bridge {
  *
  * @public
  */
-export declare function buildVectorIconControlSpec(IconComponent: ComponentType<Toolbar.VectorIconMinimalProps>, actionType: ControlAction, name: string): {
-    actionType: ControlAction;
-    IconComponent: React.ComponentType<Toolbar.VectorIconMinimalProps>;
-    iconProps: {
-        name: string;
-    };
-};
+export declare function buildVectorIconControlSpec<T extends Toolbar.VectorIconMinimalProps>(IconComponent: ComponentType<T & Toolbar.TextControlMinimalIconProps>, actionType: ControlAction, name: string): Toolbar.ControlSpec<T>;
 
 /**
  * Constant used within a {@link (Toolbar:namespace).Layout} to denote a separator.
@@ -509,7 +503,7 @@ export declare namespace Toolbar {
     /**
      * An object describing the characteristics of a control.
      */
-    export interface ControlSpec<T extends object = object> {
+    export interface ControlSpec<T extends object = {}> {
         /**
          * The react {@link react#ComponentType} representing the rendered icon.
          *
@@ -527,7 +521,7 @@ export declare namespace Toolbar {
         /**
          * The props passed to `IconComponent`
          */
-        iconProps?: T;
+        iconProps?: T extends Toolbar.VectorIconMinimalProps ? Toolbar.VectorIconMinimalProps : Partial<T>;
     }
     /**
      * Declaratively describes the layout of the {@link (Toolbar:type)} component.
@@ -608,7 +602,7 @@ export declare namespace Toolbar {
     /**
      * The shape of expected props to an icon from {@link https://www.npmjs.com/package/react-native-vector-icons | react-native-vector-icons}.
      */
-    export interface VectorIconMinimalProps extends TextControlMinimalIconProps {
+    export interface VectorIconMinimalProps {
         /**
          * Icon name.
          */

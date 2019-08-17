@@ -66,13 +66,7 @@ export class Bridge {
     }
 
 // @public
-export function buildVectorIconControlSpec(IconComponent: ComponentType<Toolbar.VectorIconMinimalProps>, actionType: ControlAction, name: string): {
-    actionType: ControlAction;
-    IconComponent: React.ComponentType<Toolbar.VectorIconMinimalProps>;
-    iconProps: {
-        name: string;
-    };
-};
+export function buildVectorIconControlSpec<T extends Toolbar.VectorIconMinimalProps>(IconComponent: ComponentType<T & Toolbar.TextControlMinimalIconProps>, actionType: ControlAction, name: string): Toolbar.ControlSpec<T>;
 
 // @public
 export const CONTROL_SEPARATOR: unique symbol;
@@ -153,10 +147,10 @@ export interface TextOp extends GenericOp {
 
 // @public
 export namespace Toolbar {
-    export interface ControlSpec<T extends object = object> {
+    export interface ControlSpec<T extends object = {}> {
         actionType: ControlAction;
         IconComponent: ComponentType<TextControlMinimalIconProps & T>;
-        iconProps?: T;
+        iconProps?: T extends Toolbar.VectorIconMinimalProps ? Toolbar.VectorIconMinimalProps : Partial<T>;
     }
     export type Layout = (ControlSpec | typeof CONTROL_SEPARATOR)[];
     export interface Props {
@@ -176,7 +170,7 @@ export namespace Toolbar {
         color: string;
         size: number;
     }
-    export interface VectorIconMinimalProps extends TextControlMinimalIconProps {
+    export interface VectorIconMinimalProps {
         name: string;
     }
 }
