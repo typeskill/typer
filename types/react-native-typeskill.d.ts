@@ -72,7 +72,7 @@ export declare namespace Attributes {
      *
      * @public
      */
-    export type LineType = 'normal' | 'quoted' | 'ol' | 'ul';
+    export type LineType = 'normal' | 'quoted';
 }
 
 /**
@@ -140,24 +140,9 @@ export declare namespace Bridge {
          */
         applyTextTransformToSelection: (attributeName: string, attributeValue: Attributes.TextValue) => void;
         /**
-         * Switch the line type of lines traversed by selection depending on its state.
-         *
-         * @remarks
-         *
-         * - if **all lines** traversed by selection are of the type `userLineType`, set the type for each of those lines to `'normal'`;
-         * - otherwise, set the type of each of those lines to `userLineType`.
-         *
-         * @param userLineType - The type to switch.
-         */
-        switchLineTypeInSelection: (userLineType: Attributes.LineType) => void;
-        /**
          * Listen to attributes changes in selection.
          */
         addSelectedAttributesChangeListener: (owner: object, listener: SelectedAttributesChangeListener) => void;
-        /**
-         * Listen to line type changes in selection.
-         */
-        addSelectedLineTypeChangeListener: (owner: object, listener: LineTypeOverrideListener) => void;
         /**
          * Dereference all listeners registered for this owner.
          */
@@ -177,10 +162,6 @@ export declare namespace Bridge {
          * Listen to text attributes alterations in selection.
          */
         addApplyTextTransformToSelectionListener: (owner: object, listener: AttributesOverrideListener) => void;
-        /**
-         * Listen to type changes in selection
-         */
-        addSwitchLineTypeInSelectionListener: (owner: object, listener: LineTypeOverrideListener) => void;
         /**
          * Listen to insertions of text or blocks at selection.
          */
@@ -298,15 +279,7 @@ export declare enum ControlAction {
     /**
      * Switch strikethrough formatting in the selected text.
      */
-    SELECT_TEXT_STRIKETHROUGH = 3,
-    /**
-     * Switch the layout of lines traversed by selection to or from ordered list.
-     */
-    SELECT_LINES_ORDERED_LIST = 4,
-    /**
-     * Switch the layout of lines traversed by selection to or from unordered list.
-     */
-    SELECT_LINES_UNORDERED_LIST = 5
+    SELECT_TEXT_STRIKETHROUGH = 3
 }
 
 /**

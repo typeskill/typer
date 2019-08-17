@@ -14,7 +14,7 @@ import { ViewStyle } from 'react-native';
 // @public
 export namespace Attributes {
     export type GenericValue = object | TextValue | undefined;
-    export type LineType = 'normal' | 'quoted' | 'ol' | 'ul';
+    export type LineType = 'normal' | 'quoted';
     export interface Map {
         // (undocumented)
         readonly [k: string]: GenericValue;
@@ -32,12 +32,10 @@ export namespace Bridge {
     export type ControlEvent = 'APPLY_ATTRIBUTES_TO_SELECTION' | 'APPLY_LINE_TYPE_TO_SELECTION' | 'INSERT_OR_REPLACE_AT_SELECTION';
     export interface ControlEventDomain {
         addSelectedAttributesChangeListener: (owner: object, listener: SelectedAttributesChangeListener) => void;
-        addSelectedLineTypeChangeListener: (owner: object, listener: LineTypeOverrideListener) => void;
         applyTextTransformToSelection: (attributeName: string, attributeValue: Attributes.TextValue) => void;
         // @internal
         insertOrReplaceAtSelection: (element: Element) => void;
         release: (owner: object) => void;
-        switchLineTypeInSelection: (userLineType: Attributes.LineType) => void;
     }
     export type Element = Block | string;
     // @internal (undocumented)
@@ -49,7 +47,6 @@ export namespace Bridge {
     export interface SheetEventDomain {
         addApplyTextTransformToSelectionListener: (owner: object, listener: AttributesOverrideListener) => void;
         addInsertOrReplaceAtSelectionListener: (owner: object, listener: InsertOrReplaceAtSelectionListener) => void;
-        addSwitchLineTypeInSelectionListener: (owner: object, listener: LineTypeOverrideListener) => void;
         // (undocumented)
         getTransforms(): Transforms;
         notifySelectedLineTypeChange: (selectionLineType: Attributes.LineType) => void;
@@ -82,8 +79,6 @@ export const CONTROL_SEPARATOR: unique symbol;
 
 // @public
 export enum ControlAction {
-    SELECT_LINES_ORDERED_LIST = 4,
-    SELECT_LINES_UNORDERED_LIST = 5,
     SELECT_TEXT_BOLD = 0,
     SELECT_TEXT_ITALIC = 1,
     SELECT_TEXT_STRIKETHROUGH = 3,
