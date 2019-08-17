@@ -1,24 +1,23 @@
-import React, { Component } from 'react'
+import React, { Component, ComponentClass } from 'react'
 import { Card } from 'react-native-paper'
 import { StyleSheet, View, KeyboardAvoidingView, SafeAreaView } from 'react-native'
-import {
-  Bridge,
-  Sheet,
-  Toolbar,
-  ControlAction,
-  CONTROL_SEPARATOR,
-  buildVectorIconControlSpec,
-} from 'react-native-typeskill'
+import { Bridge, Sheet, Toolbar, ControlAction, buildVectorIconControlSpec } from 'react-native-typeskill'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import Version from './src/Version'
 
 // @see: https://github.com/facebook/react-native/issues/9599
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 if (typeof (global as any).self === 'undefined') {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ;(global as any).self = global
 }
 
 function buildMaterialControlSpec(actionType: ControlAction, name: string) {
-  return buildVectorIconControlSpec(MaterialCommunityIcons as any, actionType, name)
+  return buildVectorIconControlSpec(
+    (MaterialCommunityIcons as unknown) as ComponentClass<Toolbar.VectorIconMinimalProps>,
+    actionType,
+    name,
+  )
 }
 
 const toolbarLayout: Toolbar.Layout = [
@@ -26,9 +25,6 @@ const toolbarLayout: Toolbar.Layout = [
   buildMaterialControlSpec(ControlAction.SELECT_TEXT_ITALIC, 'format-italic'),
   buildMaterialControlSpec(ControlAction.SELECT_TEXT_UNDERLINE, 'format-underline'),
   buildMaterialControlSpec(ControlAction.SELECT_TEXT_STRIKETHROUGH, 'format-strikethrough-variant'),
-  CONTROL_SEPARATOR,
-  buildMaterialControlSpec(ControlAction.SELECT_LINES_ORDERED_LIST, 'format-list-numbered'),
-  buildMaterialControlSpec(ControlAction.SELECT_LINES_UNORDERED_LIST, 'format-list-bulleted'),
 ]
 
 const themeColor = '#ffffff'

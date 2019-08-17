@@ -47,7 +47,7 @@ declare namespace Toolbar {
   /**
    * An object describing the characteristics of a control.
    */
-  export interface ControlSpec<T extends object = object> {
+  export interface ControlSpec<T extends object = {}> {
     /**
      * The react {@link react#ComponentType} representing the rendered icon.
      *
@@ -65,7 +65,7 @@ declare namespace Toolbar {
     /**
      * The props passed to `IconComponent`
      */
-    iconProps?: T
+    iconProps?: T extends Toolbar.VectorIconMinimalProps ? Toolbar.VectorIconMinimalProps : Partial<T>
   }
   /**
    * Declaratively describes the layout of the {@link (Toolbar:type)} component.
@@ -149,7 +149,7 @@ declare namespace Toolbar {
   /**
    * The shape of expected props to an icon from {@link https://www.npmjs.com/package/react-native-vector-icons | react-native-vector-icons}.
    */
-  export interface VectorIconMinimalProps extends TextControlMinimalIconProps {
+  export interface VectorIconMinimalProps {
     /**
      * Icon name.
      */
@@ -354,16 +354,19 @@ class _Toolbar extends PureComponent<Toolbar.Props, ToolbarState> {
  *
  * @public
  */
-export function buildVectorIconControlSpec(
-  IconComponent: ComponentType<Toolbar.VectorIconMinimalProps>,
+export function buildVectorIconControlSpec<T extends Toolbar.VectorIconMinimalProps>(
+  IconComponent: ComponentType<T & Toolbar.TextControlMinimalIconProps>,
   actionType: ControlAction,
   name: string,
-) {
-  return {
+): Toolbar.ControlSpec<T> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const iconProps: any = { name }
+  const specs: Toolbar.ControlSpec<T> = {
     actionType,
+    iconProps,
     IconComponent,
-    iconProps: { name },
   }
+  return specs
 }
 
 /**
