@@ -42,7 +42,7 @@ declare namespace Sheet {
     /**
      * The rich content to display.
      */
-    richContent: RichContent
+    initialRichContent?: RichContent
     /**
      * Handler to receive {@link (RichContent:class)} updates.
      */
@@ -65,7 +65,7 @@ class _Sheet extends PureComponent<Sheet.Props, Store.State> {
     bridge: PropTypes.instanceOf(Bridge).isRequired,
     contentContainerStyle: ViewPropTypes.style,
     textStyle: PropTypes.any,
-    richContent: RichContentPropType,
+    initialRichContent: RichContentPropType,
     onRichContentUpdate: PropTypes.func,
   }
 

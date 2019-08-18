@@ -128,7 +128,7 @@ export namespace Sheet {
         bridge: Bridge;
         contentContainerStyle?: StyleProp<ViewStyle>;
         initialRichContent?: RichContent;
-        onRichTextUpdate?: (richText: RichContent) => void;
+        onRichContentUpdate?: (richText: RichContent) => void;
         textStyle?: StyleProp<TextStyle>;
     }
 }
@@ -152,7 +152,7 @@ export namespace Toolbar {
         IconComponent: ComponentType<TextControlMinimalIconProps & T>;
         iconProps?: T extends Toolbar.VectorIconMinimalProps ? Toolbar.VectorIconMinimalProps : Partial<T>;
     }
-    export type Layout = (ControlSpec | typeof CONTROL_SEPARATOR)[];
+    export type Layout = (ControlSpec<any> | typeof CONTROL_SEPARATOR)[];
     export interface Props {
         activeButtonBackgroundColor?: string;
         activeButtonColor?: string;
@@ -167,8 +167,8 @@ export namespace Toolbar {
         style?: StyleProp<ViewStyle>;
     }
     export interface TextControlMinimalIconProps {
-        color: string;
-        size: number;
+        color?: string;
+        size?: number;
     }
     export interface VectorIconMinimalProps {
         name: string;

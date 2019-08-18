@@ -451,13 +451,13 @@ export declare namespace Sheet {
          */
         textStyle?: StyleProp<TextStyle>;
         /**
-         * The initial rich text.
+         * The rich content to display.
          */
         initialRichContent?: RichContent;
         /**
          * Handler to receive {@link (RichContent:class)} updates.
          */
-        onRichTextUpdate?: (richText: RichContent) => void;
+        onRichContentUpdate?: (richText: RichContent) => void;
         /**
          * Style applied to the container.
          */
@@ -526,7 +526,7 @@ export declare namespace Toolbar {
     /**
      * Declaratively describes the layout of the {@link (Toolbar:type)} component.
      */
-    export type Layout = (ControlSpec | typeof CONTROL_SEPARATOR)[];
+    export type Layout = (ControlSpec<any> | typeof CONTROL_SEPARATOR)[];
     /**
      * Props of the {@link (Toolbar:type)} component.
      */
@@ -593,11 +593,11 @@ export declare namespace Toolbar {
          * Will receive {@link (Toolbar:namespace).Props.inactiveButtonColor} when not active and
          * {@link (Toolbar:namespace).Props.activeButtonColor} when active.
          */
-        color: string;
+        color?: string;
         /**
          * Icon size.
          */
-        size: number;
+        size?: number;
     }
     /**
      * The shape of expected props to an icon from {@link https://www.npmjs.com/package/react-native-vector-icons | react-native-vector-icons}.
