@@ -9,6 +9,12 @@ import { Transforms } from './Transforms'
  * @public
  */
 declare namespace Bridge {
+  export interface Config {
+    /**
+     * A list of {@link (Transforms:namespace).GenericSpec | specs} which will be used to map text attributes with styles.
+     */
+    textTransformSpecs?: Transforms.GenericSpec<Attributes.TextValue, 'text'>[]
+  }
   /**
    * An event which signals the intent to modify the content touched by current selection.
    */
@@ -182,9 +188,10 @@ class Bridge {
 
   /**
    *
-   * @param textTransformSpecs - A list of {@link (Transforms:namespace).GenericSpec | specs} which will be used to map text attributes with styles.
+   * @param config - An object to customize bridge behavior
    */
-  public constructor(textTransformSpecs?: Transforms.GenericSpec<Attributes.TextValue, 'text'>[]) {
+  public constructor(config: Bridge.Config) {
+    const { textTransformSpecs } = config
     this.transforms = new Transforms(textTransformSpecs || defaultTextTransforms)
     this.sheetEventDom = Object.freeze(this.sheetEventDom)
     this.controlEventDom = Object.freeze(this.controlEventDom)
