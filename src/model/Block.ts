@@ -80,4 +80,4 @@ export abstract class Block {
   }
 }
 
-export type BlockClass = new (blockIface: Document.BlockInterface) => Block
+export type BlockClass = new (blockIface: Document.BlockInterface, ...rest: any[]) => Block

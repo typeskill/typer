@@ -1,7 +1,6 @@
 import invariant from 'invariant'
 import React, { PureComponent, ComponentClass } from 'react'
 import { View, StyleSheet, StyleProp, TextStyle, ViewStyle, ViewPropTypes } from 'react-native'
-import { TextBlockController } from '@components/TextBlockController'
 import { Bridge } from '@core/Bridge'
 import { Document } from '@model/Document'
 import { TextBlock } from '@model/TextBlock'
@@ -10,6 +9,7 @@ import { Store, getStoreInitialState } from '@model/Store'
 import { RichContent } from '@model/RichContent'
 import PropTypes from 'prop-types'
 import { RichContentPropType } from './types'
+import { GenericBlockController } from './GenericBlockController'
 
 const styles = StyleSheet.create({
   root: {
@@ -85,10 +85,18 @@ class _Sheet extends PureComponent<Sheet.Props, Store.State> {
   }
 
   @boundMethod
-  private renderTextBlockController(blockInstanceNumber: number) {
+  private renderBlockController(blockInstanceNumber: number) {
     const block: TextBlock = this.document.getBlock(blockInstanceNumber) as TextBlock
     const key = `block-controller-${blockInstanceNumber}`
-    return <TextBlockController key={key} textBlock={block} grow={true} />
+    return (
+      <GenericBlockController
+        textStyle={this.props.textStyle}
+        imageLocatorService={this.props.bridge.getImageLocator()}
+        key={key}
+        block={block}
+        grow={true}
+      />
+    )
   }
 
   public componentDidMount() {
@@ -112,7 +120,7 @@ class _Sheet extends PureComponent<Sheet.Props, Store.State> {
   public render() {
     return (
       <View style={[styles.root, this.props.contentContainerStyle]}>
-        {this.state.blockOrders.map(instanceNumber => this.renderTextBlockController(instanceNumber))}
+        {this.state.blockOrders.map(instanceNumber => this.renderBlockController(instanceNumber))}
       </View>
     )
   }

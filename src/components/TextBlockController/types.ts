@@ -5,7 +5,7 @@ import { GenericRichContent } from '@delta/generic'
 import PCancelable from 'p-cancelable'
 
 export interface TextBlockControllerProps {
-  textBlock: TextBlock
+  block: TextBlock
   grow?: boolean
   textStyle?: StyleProp<TextStyle>
 }

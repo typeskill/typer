@@ -45,7 +45,7 @@ class Document {
     this.insertBlock(TextBlock)
   }
 
-  private newBlock(BlockKind: BlockClass) {
+  private newBlock(BlockKind: BlockClass, ...params: any[]) {
     invariant(this.consumer != null, 'A document consumer must be registered to create a block')
     if (this.consumer) {
       // @ts-ignore
@@ -57,7 +57,7 @@ class Document {
         onPressEnter: () => this.handleOnPressEnterFromBlock(block),
       }
       blockIface = Object.freeze(blockIface)
-      block = new BlockKind(blockIface)
+      block = new BlockKind(blockIface, ...params)
       return block
     }
     throw new Error()
@@ -112,8 +112,8 @@ class Document {
     this.consumer = undefined
   }
 
-  public insertBlock(BlockKind: BlockClass): void {
-    this.store.appendBlock(this.newBlock(BlockKind))
+  public insertBlock(BlockKind: BlockClass, ...params: any[]): void {
+    this.store.appendBlock(this.newBlock(BlockKind, ...params))
   }
 
   public getActiveBlock(): Block {

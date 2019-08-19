@@ -63,12 +63,12 @@ export class TextBlockController extends Component<TextBlockControllerProps, Tex
 
   public constructor(props: TextBlockControllerProps) {
     super(props)
-    invariant(props.textBlock != null, INVARIANT_MANDATORY_TEXT_BLOCK_PROP)
+    invariant(props.block != null, INVARIANT_MANDATORY_TEXT_BLOCK_PROP)
     this.synchronizer = new Synchronizer(this)
   }
 
   private get blockControllerInterface(): Orchestrator.BlockControllerInterface {
-    return this.props.textBlock.getControllerInterface()
+    return this.props.block.getControllerInterface()
   }
 
   @boundMethod
@@ -102,7 +102,7 @@ export class TextBlockController extends Component<TextBlockControllerProps, Tex
   }
 
   public getTextBlock() {
-    return this.props.textBlock
+    return this.props.block
   }
 
   public async setStateAsync(stateFragment: Partial<TextBlockControllerState>): PCancelable<void> {
@@ -145,7 +145,7 @@ export class TextBlockController extends Component<TextBlockControllerProps, Tex
   }
 
   public render() {
-    const { grow, textStyle, textBlock } = this.props
+    const { grow, textStyle, block: textBlock } = this.props
     const { overridingSelection, richContent } = this.state
     const textComponent = richContent ? (
       <RichText textStyle={textStyle} transforms={textBlock.getTextTransformsRegistry()} richContent={richContent} />

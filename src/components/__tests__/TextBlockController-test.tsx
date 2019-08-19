@@ -42,7 +42,7 @@ function getTextInputDefaultProps(): TextBlockControllerProps {
     sheetEventDom: bridge.getSheetEventDomain(),
   })
   return {
-    textBlock: document.getActiveBlock() as TextBlock,
+    block: document.getActiveBlock() as TextBlock,
   }
 }
 
@@ -66,7 +66,7 @@ afterEach(() => {
 describe('@components/<TextBlockController>', () => {
   it('should throw when document has not registered a consumer yet', () => {
     expect(() => {
-      renderer.create(<TextBlockController textBlock={undefined as any} />)
+      renderer.create(<TextBlockController block={undefined as any} />)
     }).toThrowError(INVARIANT_MANDATORY_TEXT_BLOCK_PROP)
   })
   it('renders without crashing', () => {
@@ -86,7 +86,7 @@ describe('@components/<TextBlockController>', () => {
     }
     const spy = jest.spyOn(listenerObj, 'listener')
     bridge.getControlEventDomain().addSelectedAttributesChangeListener(listenerObj, spy as any)
-    const wrapper = renderer.create(<TextBlockController textBlock={block} />)
+    const wrapper = renderer.create(<TextBlockController block={block} />)
     const textBlockController = wrapper.root.instance as TextBlockController
     textBlockController['handleOnSheetDomainSelectionChange'](mockSelectionChangeEvent(0, 1))
     await runAllTimers()
@@ -96,7 +96,7 @@ describe('@components/<TextBlockController>', () => {
     const { document, docConsumer, getDelta } = buildDocumentConsumer()
     document.registerConsumer(docConsumer)
     const block = document.getActiveBlock() as TextBlock
-    const wrapper = renderer.create(<TextBlockController textBlock={block} />)
+    const wrapper = renderer.create(<TextBlockController block={block} />)
     const textBlockController = (wrapper.getInstance() as unknown) as TextBlockController
     expect(textBlockController).toBeInstanceOf(TextBlockController)
     textBlockController['handleOnSheetDomainTextChanged']('This is nu text')
@@ -107,14 +107,14 @@ describe('@components/<TextBlockController>', () => {
     const { document, docConsumer } = buildDocumentConsumer()
     document.registerConsumer(docConsumer)
     const block = document.getActiveBlock() as TextBlock
-    const wrapper = renderer.create(<TextBlockController textBlock={block} />)
+    const wrapper = renderer.create(<TextBlockController block={block} />)
     const textBlockController = (wrapper.getInstance() as unknown) as TextBlockController
     expect(textBlockController).toBeInstanceOf(TextBlockController)
     textBlockController['handleOnSheetDomainTextChanged']('This is nu text\nBlah')
     textBlockController['handleOnSheetDomainSelectionChange'](mockSelectionChangeEvent(20, 20))
-    wrapper.update(<TextBlockController textBlock={block} />)
+    wrapper.update(<TextBlockController block={block} />)
     await runAllTimers()
-    wrapper.update(<TextBlockController textBlock={block} />)
+    wrapper.update(<TextBlockController block={block} />)
     const richText = wrapper.root.findByType(RichText)
     const text = flattenTextChild(richText)
     expect(text.join('')).toEqual('This is nu text\nBlah')

@@ -12,6 +12,10 @@ import mergeLeft from 'ramda/es/mergeLeft'
  * @public
  */
 declare namespace Bridge {
+  export interface ImageComponentProps<C extends {}, D extends {}> {
+    config: C
+    description: D
+  }
   /**
    * An object used to locate and render images.
    */
@@ -23,7 +27,7 @@ declare namespace Bridge {
     /**
      * The image component to render.
      */
-    Component: ComponentType<{ description: D; config: C }>
+    Component: ComponentType<ImageComponentProps<C, D>>
     /**
      * An async function that returns the description of an image.
      */
