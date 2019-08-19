@@ -1,7 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Attributes } from '@delta/attributes'
 import { defaultTextTransforms } from '@core/Transforms'
 import { Endpoint } from './Endpoint'
 import { Transforms } from './Transforms'
+import { ComponentType } from 'react'
+import mergeLeft from 'ramda/es/mergeLeft'
 
 /**
  * A set of definitions related to the {@link (Bridge:class)} class.
@@ -9,11 +12,34 @@ import { Transforms } from './Transforms'
  * @public
  */
 declare namespace Bridge {
-  export interface Config {
+  /**
+   * An object used to locate and render images.
+   */
+  export interface ImageLocationService<C extends {}, D extends {}> {
+    /**
+     * A static configuration object that will be passed to ImageLocationService.Component
+     */
+    config: C
+    /**
+     * The image component to render.
+     */
+    Component: ComponentType<{ description: D; config: C }>
+    /**
+     * An async function that returns the description of an image.
+     */
+    pickOneImage: () => Promise<D>
+  }
+  export interface Config<C extends {}, D extends {}> {
     /**
      * A list of {@link (Transforms:namespace).GenericSpec | specs} which will be used to map text attributes with styles.
      */
-    textTransformSpecs?: Transforms.GenericSpec<Attributes.TextValue, 'text'>[]
+    textTransformSpecs: Transforms.GenericSpec<Attributes.TextValue, 'text'>[]
+    /**
+     * An object describing the behavior to locate and render images.
+     *
+     * @remarks If this parameter is not provided, images interactions are disabled in the related {@link (Sheet:type)}.
+     */
+    imageLocatorService: ImageLocationService<C, D>
   }
   /**
    * An event which signals the intent to modify the content touched by current selection.
@@ -138,6 +164,25 @@ declare namespace Bridge {
   }
 }
 
+const dummyImageLocator: Bridge.ImageLocationService<{}, {}> = {
+  Component: () => {
+    throw new Error(
+      `Typeskill won't chose a React component to render images for you. You must provide your own imageLocatorService in Bridge constructor config parameter.`,
+    )
+  },
+  config: {},
+  async pickOneImage() {
+    throw new Error(
+      `Typeskill won't chose an image picker for you. You must provide your own imageLocatorService in Bridge constructor config parameter.`,
+    )
+  },
+}
+
+const defaultConfig: Bridge.Config<any, any> = {
+  textTransformSpecs: defaultTextTransforms,
+  imageLocatorService: dummyImageLocator,
+}
+
 /**
  * An abstraction responsible for event dispatching between the {@link (Sheet:type)} and external controls.
  *
@@ -151,6 +196,7 @@ class Bridge {
   private innerEndpoint = new Endpoint<Bridge.SheetEvent>()
   private outerEndpoint = new Endpoint<Bridge.ControlEvent>()
   private transforms: Transforms
+  private imageLocatorService: Bridge.ImageLocationService<any, any>
 
   private controlEventDom: Bridge.ControlEventDomain = {
     insertOrReplaceAtSelection: (element: string | Bridge.Block) => {
@@ -190,8 +236,9 @@ class Bridge {
    *
    * @param config - An object to customize bridge behavior
    */
-  public constructor(config: Bridge.Config) {
-    const { textTransformSpecs } = config
+  public constructor(config?: Partial<Bridge.Config<any, any>>) {
+    const { textTransformSpecs, imageLocatorService } = mergeLeft(config, defaultConfig)
+    this.imageLocatorService = imageLocatorService
     this.transforms = new Transforms(textTransformSpecs || defaultTextTransforms)
     this.sheetEventDom = Object.freeze(this.sheetEventDom)
     this.controlEventDom = Object.freeze(this.controlEventDom)
@@ -222,6 +269,13 @@ class Bridge {
    */
   public getTransforms(): Transforms {
     return this.transforms
+  }
+
+  /**
+   * Get image locator, if exists
+   */
+  public getImageLocator(): Bridge.ImageLocationService<any, any> {
+    return this.imageLocatorService
   }
 
   /**

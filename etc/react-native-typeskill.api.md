@@ -29,6 +29,11 @@ export namespace Bridge {
         // (undocumented)
         type: string;
     }
+    // (undocumented)
+    export interface Config<C extends {}, D extends {}> {
+        imageLocatorService: ImageLocationService<C, D>;
+        textTransformSpecs: Transforms.GenericSpec<Attributes.TextValue, 'text'>[];
+    }
     export type ControlEvent = 'APPLY_ATTRIBUTES_TO_SELECTION' | 'APPLY_LINE_TYPE_TO_SELECTION' | 'INSERT_OR_REPLACE_AT_SELECTION';
     export interface ControlEventDomain {
         addSelectedAttributesChangeListener: (owner: object, listener: SelectedAttributesChangeListener) => void;
@@ -38,6 +43,14 @@ export namespace Bridge {
         release: (owner: object) => void;
     }
     export type Element = Block | string;
+    export interface ImageLocationService<C extends {}, D extends {}> {
+        Component: ComponentType<{
+            description: D;
+            config: C;
+        }>;
+        config: C;
+        pickOneImage: () => Promise<D>;
+    }
     // @internal (undocumented)
     export type InsertOrReplaceAtSelectionListener = (element: Element) => void;
     export type LineTypeOverrideListener = (lineType: Attributes.LineType) => void;
@@ -57,8 +70,9 @@ export namespace Bridge {
 
 // @public
 export class Bridge {
-    constructor(textTransformSpecs?: Transforms.GenericSpec<Attributes.TextValue, 'text'>[]);
+    constructor(config?: Partial<Bridge.Config<any, any>>);
     getControlEventDomain(): Bridge.ControlEventDomain;
+    getImageLocator(): Bridge.ImageLocationService<any, any>;
     // @internal
     getSheetEventDomain(): Bridge.SheetEventDomain;
     getTransforms(): Transforms;

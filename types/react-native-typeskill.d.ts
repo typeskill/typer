@@ -82,6 +82,38 @@ export declare namespace Attributes {
  */
 export declare namespace Bridge {
     /**
+     * An object used to locate and render images.
+     */
+    export interface ImageLocationService<C extends {}, D extends {}> {
+        /**
+         * A static configuration object that will be passed to ImageLocationService.Component
+         */
+        config: C;
+        /**
+         * The image component to render.
+         */
+        Component: ComponentType<{
+            description: D;
+            config: C;
+        }>;
+        /**
+         * An async function that returns the description of an image.
+         */
+        pickOneImage: () => Promise<D>;
+    }
+    export interface Config<C extends {}, D extends {}> {
+        /**
+         * A list of {@link (Transforms:namespace).GenericSpec | specs} which will be used to map text attributes with styles.
+         */
+        textTransformSpecs: Transforms.GenericSpec<Attributes.TextValue, 'text'>[];
+        /**
+         * An object describing the behavior to locate and render images.
+         *
+         * @remarks If this parameter is not provided, images interactions are disabled in the related {@link (Sheet:type)}.
+         */
+        imageLocatorService: ImageLocationService<C, D>;
+    }
+    /**
      * An event which signals the intent to modify the content touched by current selection.
      */
     export type ControlEvent = 'APPLY_ATTRIBUTES_TO_SELECTION' | 'APPLY_LINE_TYPE_TO_SELECTION' | 'INSERT_OR_REPLACE_AT_SELECTION';
@@ -197,13 +229,14 @@ export declare class Bridge {
     private innerEndpoint;
     private outerEndpoint;
     private transforms;
+    private imageLocatorService;
     private controlEventDom;
     private sheetEventDom;
     /**
      *
-     * @param textTransformSpecs - A list of {@link (Transforms:namespace).GenericSpec | specs} which will be used to map text attributes with styles.
+     * @param config - An object to customize bridge behavior
      */
-    constructor(textTransformSpecs?: Transforms.GenericSpec<Attributes.TextValue, 'text'>[]);
+    constructor(config?: Partial<Bridge.Config<any, any>>);
     /**
      * Get {@link (Bridge:namespace).SheetEventDomain | sheetEventDom}.
      *
@@ -222,6 +255,10 @@ export declare class Bridge {
      * Get transforms.
      */
     getTransforms(): Transforms;
+    /**
+     * Get image locator, if exists
+     */
+    getImageLocator(): Bridge.ImageLocationService<any, any>;
     /**
      * End of the bridge's lifecycle.
      *
