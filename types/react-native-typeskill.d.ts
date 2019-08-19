@@ -81,6 +81,10 @@ export declare namespace Attributes {
  * @public
  */
 export declare namespace Bridge {
+    export interface ImageComponentProps<C extends {}, D extends {}> {
+        config: C;
+        description: D;
+    }
     /**
      * An object used to locate and render images.
      */
@@ -92,10 +96,7 @@ export declare namespace Bridge {
         /**
          * The image component to render.
          */
-        Component: ComponentType<{
-            description: D;
-            config: C;
-        }>;
+        Component: ComponentType<ImageComponentProps<C, D>>;
         /**
          * An async function that returns the description of an image.
          */
@@ -109,7 +110,7 @@ export declare namespace Bridge {
         /**
          * An object describing the behavior to locate and render images.
          *
-         * @remarks If this parameter is not provided, images interactions are disabled in the related {@link (Sheet:type)}.
+         * @remarks Were this parameter not provided, images interactions will be disabled in the related {@link (Sheet:type)}.
          */
         imageLocatorService: ImageLocationService<C, D>;
     }
@@ -124,13 +125,18 @@ export declare namespace Bridge {
     /**
      * Block content to insert.
      */
-    export interface Block {
-        type: string;
+    export interface ImageElement<D extends {}> {
+        type: 'image';
+        description: D;
+    }
+    export interface TextElement {
+        type: 'text';
+        content: string;
     }
     /**
      * Content to insert.
      */
-    export type Element = Block | string;
+    export type Element<D extends {}> = ImageElement<D> | TextElement;
     /**
      * Listener to selected text attributes changes.
      */
@@ -149,7 +155,7 @@ export declare namespace Bridge {
      *
      * @internal
      */
-    export type InsertOrReplaceAtSelectionListener = (element: Element) => void;
+    export type InsertOrReplaceAtSelectionListener = <D extends {}>(element: Element<D>) => void;
     /**
      * An object representing an area of events happening by the mean of external controls.
      *
@@ -157,13 +163,13 @@ export declare namespace Bridge {
      *
      * This object exposes methods to trigger such events, and react to internal events.
      */
-    export interface ControlEventDomain {
+    export interface ControlEventDomain<D extends {}> {
         /**
          * Insert an element at cursor or replace if selection exists.
          *
          * @internal
          */
-        insertOrReplaceAtSelection: (element: Element) => void;
+        insertOrReplaceAtSelection: (element: Element<D>) => void;
         /**
          * Switch the given attribute's value depending on the current selection.
          *
@@ -225,7 +231,7 @@ export declare namespace Bridge {
  *
  * @public
  */
-export declare class Bridge {
+export declare class Bridge<D extends {} = {}> {
     private innerEndpoint;
     private outerEndpoint;
     private transforms;
@@ -250,7 +256,7 @@ export declare class Bridge {
      *
      * The returned object can be used to react from and trigger {@link (Sheet:type)} events.
      */
-    getControlEventDomain(): Bridge.ControlEventDomain;
+    getControlEventDomain(): Bridge.ControlEventDomain<D>;
     /**
      * Get transforms.
      */
@@ -310,7 +316,11 @@ export declare enum ControlAction {
     /**
      * Switch strikethrough formatting in the selected text.
      */
-    SELECT_TEXT_STRIKETHROUGH = 3
+    SELECT_TEXT_STRIKETHROUGH = 3,
+    /**
+     * Insert an image at selection.
+     */
+    INSERT_IMAGE_AT_SELECTION = 4
 }
 
 /**
@@ -567,11 +577,15 @@ export declare namespace Toolbar {
     /**
      * Props of the {@link (Toolbar:type)} component.
      */
-    export interface Props {
+    export interface Props<D extends {}> {
         /**
          * The instance to be shared with the {@link (Sheet:type)}.
          */
-        bridge: Bridge;
+        bridge: Bridge<D>;
+        /**
+         * A callback fired when inserting an image results in an error.
+         */
+        onInsertImageError?: (e: Error) => void;
         /**
          * An array describing the resulting layout of this component.
          */
@@ -656,9 +670,9 @@ export declare namespace Toolbar {
  *
  * This type trick is aimed at preventing from exporting the component State which should be out of API surface.
  */
-export declare type Toolbar = ComponentClass<Toolbar.Props>;
+export declare type Toolbar<D extends {}> = ComponentClass<Toolbar.Props<D>>;
 
-export declare const Toolbar: React.ComponentClass<Toolbar.Props, any>;
+export declare const Toolbar: React.ComponentClass<Toolbar.Props<any>, any>;
 
 /**
  * A set of definitions related to text and arbitrary content transforms.

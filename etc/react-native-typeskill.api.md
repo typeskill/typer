@@ -25,34 +25,40 @@ export namespace Attributes {
 // @public
 export namespace Bridge {
     export type AttributesOverrideListener = (attributeName: string, attributeValue: Attributes.GenericValue) => void;
-    export interface Block {
-        // (undocumented)
-        type: string;
-    }
     // (undocumented)
     export interface Config<C extends {}, D extends {}> {
         imageLocatorService: ImageLocationService<C, D>;
         textTransformSpecs: Transforms.GenericSpec<Attributes.TextValue, 'text'>[];
     }
     export type ControlEvent = 'APPLY_ATTRIBUTES_TO_SELECTION' | 'APPLY_LINE_TYPE_TO_SELECTION' | 'INSERT_OR_REPLACE_AT_SELECTION';
-    export interface ControlEventDomain {
+    export interface ControlEventDomain<D extends {}> {
         addSelectedAttributesChangeListener: (owner: object, listener: SelectedAttributesChangeListener) => void;
         applyTextTransformToSelection: (attributeName: string, attributeValue: Attributes.TextValue) => void;
         // @internal
-        insertOrReplaceAtSelection: (element: Element) => void;
+        insertOrReplaceAtSelection: (element: Element<D>) => void;
         release: (owner: object) => void;
     }
-    export type Element = Block | string;
+    export type Element<D extends {}> = ImageElement<D> | TextElement;
+    // (undocumented)
+    export interface ImageComponentProps<C extends {}, D extends {}> {
+        // (undocumented)
+        config: C;
+        // (undocumented)
+        description: D;
+    }
+    export interface ImageElement<D extends {}> {
+        // (undocumented)
+        description: D;
+        // (undocumented)
+        type: 'image';
+    }
     export interface ImageLocationService<C extends {}, D extends {}> {
-        Component: ComponentType<{
-            description: D;
-            config: C;
-        }>;
+        Component: ComponentType<ImageComponentProps<C, D>>;
         config: C;
         pickOneImage: () => Promise<D>;
     }
     // @internal (undocumented)
-    export type InsertOrReplaceAtSelectionListener = (element: Element) => void;
+    export type InsertOrReplaceAtSelectionListener = <D extends {}>(element: Element<D>) => void;
     export type LineTypeOverrideListener = (lineType: Attributes.LineType) => void;
     export type SelectedAttributesChangeListener = (selectedAttributes: Attributes.Map) => void;
     export type SheetEvent = 'SELECTED_ATTRIBUTES_CHANGE' | 'SELECTED_LINE_TYPE_CHANGE';
@@ -66,12 +72,19 @@ export namespace Bridge {
         notifySelectedTextAttributesChange: (attributesMap: Attributes.Map) => void;
         release: (owner: object) => void;
     }
+    // (undocumented)
+    export interface TextElement {
+        // (undocumented)
+        content: string;
+        // (undocumented)
+        type: 'text';
+    }
 }
 
 // @public
-export class Bridge {
+export class Bridge<D extends {} = {}> {
     constructor(config?: Partial<Bridge.Config<any, any>>);
-    getControlEventDomain(): Bridge.ControlEventDomain;
+    getControlEventDomain(): Bridge.ControlEventDomain<D>;
     getImageLocator(): Bridge.ImageLocationService<any, any>;
     // @internal
     getSheetEventDomain(): Bridge.SheetEventDomain;
@@ -87,6 +100,7 @@ export const CONTROL_SEPARATOR: unique symbol;
 
 // @public
 export enum ControlAction {
+    INSERT_IMAGE_AT_SELECTION = 4,
     SELECT_TEXT_BOLD = 0,
     SELECT_TEXT_ITALIC = 1,
     SELECT_TEXT_STRIKETHROUGH = 3,
@@ -167,16 +181,17 @@ export namespace Toolbar {
         iconProps?: T extends Toolbar.VectorIconMinimalProps ? Toolbar.VectorIconMinimalProps : Partial<T>;
     }
     export type Layout = (ControlSpec<any> | typeof CONTROL_SEPARATOR)[];
-    export interface Props {
+    export interface Props<D extends {}> {
         activeButtonBackgroundColor?: string;
         activeButtonColor?: string;
-        bridge: Bridge;
+        bridge: Bridge<D>;
         buttonSpacing?: number;
         contentContainerStyle?: StyleProp<ViewStyle>;
         iconSize?: number;
         inactiveButtonBackgroundColor?: string;
         inactiveButtonColor?: string;
         layout: Layout;
+        onInsertImageError?: (e: Error) => void;
         separatorColor?: string;
         style?: StyleProp<ViewStyle>;
     }
@@ -190,10 +205,10 @@ export namespace Toolbar {
 }
 
 // @public
-export type Toolbar = ComponentClass<Toolbar.Props>;
+export type Toolbar<D extends {}> = ComponentClass<Toolbar.Props<D>>;
 
 // @public (undocumented)
-export const Toolbar: React.ComponentClass<Toolbar.Props, any>;
+export const Toolbar: React.ComponentClass<Toolbar.Props<any>, any>;
 
 // @public
 export namespace Transforms {

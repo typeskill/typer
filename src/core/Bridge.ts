@@ -61,14 +61,20 @@ declare namespace Bridge {
   /**
    * Block content to insert.
    */
-  export interface Block {
-    type: string
+  export interface ImageElement<D extends {}> {
+    type: 'image'
+    description: D
+  }
+
+  export interface TextElement {
+    type: 'text'
+    content: string
   }
 
   /**
    * Content to insert.
    */
-  export type Element = Block | string
+  export type Element<D extends {}> = ImageElement<D> | TextElement
 
   /**
    * Listener to selected text attributes changes.
@@ -91,7 +97,7 @@ declare namespace Bridge {
    *
    * @internal
    */
-  export type InsertOrReplaceAtSelectionListener = (element: Element) => void
+  export type InsertOrReplaceAtSelectionListener = <D extends {}>(element: Element<D>) => void
 
   /**
    * An object representing an area of events happening by the mean of external controls.
@@ -100,13 +106,13 @@ declare namespace Bridge {
    *
    * This object exposes methods to trigger such events, and react to internal events.
    */
-  export interface ControlEventDomain {
+  export interface ControlEventDomain<D extends {}> {
     /**
      * Insert an element at cursor or replace if selection exists.
      *
      * @internal
      */
-    insertOrReplaceAtSelection: (element: Element) => void
+    insertOrReplaceAtSelection: (element: Element<D>) => void
 
     /**
      * Switch the given attribute's value depending on the current selection.
@@ -196,14 +202,14 @@ const defaultConfig: Bridge.Config<any, any> = {
  *
  * @public
  */
-class Bridge {
+class Bridge<D extends {} = {}> {
   private innerEndpoint = new Endpoint<Bridge.SheetEvent>()
   private outerEndpoint = new Endpoint<Bridge.ControlEvent>()
   private transforms: Transforms
-  private imageLocatorService: Bridge.ImageLocationService<any, any>
+  private imageLocatorService: Bridge.ImageLocationService<any, D>
 
-  private controlEventDom: Bridge.ControlEventDomain = {
-    insertOrReplaceAtSelection: (element: string | Bridge.Block) => {
+  private controlEventDom: Bridge.ControlEventDomain<D> = {
+    insertOrReplaceAtSelection: (element: Bridge.Element<D>) => {
       this.outerEndpoint.emit('INSERT_OR_REPLACE_AT_SELECTION', element)
     },
     applyTextTransformToSelection: (attributeName: string, attributeValue: Attributes.GenericValue) => {
@@ -264,7 +270,7 @@ class Bridge {
    *
    * The returned object can be used to react from and trigger {@link (Sheet:type)} events.
    */
-  public getControlEventDomain(): Bridge.ControlEventDomain {
+  public getControlEventDomain(): Bridge.ControlEventDomain<D> {
     return this.controlEventDom
   }
 

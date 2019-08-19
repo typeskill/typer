@@ -36,6 +36,10 @@ export enum ControlAction {
    * Switch strikethrough formatting in the selected text.
    */
   SELECT_TEXT_STRIKETHROUGH,
+  /**
+   * Insert an image at selection.
+   */
+  INSERT_IMAGE_AT_SELECTION,
 }
 
 /**
@@ -76,11 +80,15 @@ declare namespace Toolbar {
   /**
    * Props of the {@link (Toolbar:type)} component.
    */
-  export interface Props {
+  export interface Props<D extends {}> {
     /**
      * The instance to be shared with the {@link (Sheet:type)}.
      */
-    bridge: Bridge
+    bridge: Bridge<D>
+    /**
+     * A callback fired when inserting an image results in an error.
+     */
+    onInsertImageError?: (e: Error) => void
     /**
      * An array describing the resulting layout of this component.
      */
@@ -183,10 +191,11 @@ const styles = StyleSheet.create({
 })
 
 // eslint-disable-next-line @typescript-eslint/class-name-casing
-class _Toolbar extends PureComponent<Toolbar.Props, ToolbarState> {
+class _Toolbar<D extends {}> extends PureComponent<Toolbar.Props<D>, ToolbarState> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public static propTypes: Record<keyof Toolbar.Props, any> = {
+  public static propTypes: Record<keyof Toolbar.Props<any>, any> = {
     bridge: PropTypes.instanceOf(Bridge).isRequired,
+    onInsertImageError: PropTypes.func,
     layout: ToolbarLayoutPropType,
     inactiveButtonBackgroundColor: PropTypes.string,
     inactiveButtonColor: PropTypes.string,
@@ -200,7 +209,7 @@ class _Toolbar extends PureComponent<Toolbar.Props, ToolbarState> {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public static defaultProps: Partial<Record<keyof Toolbar.Props, any>> = {
+  public static defaultProps: Partial<Record<keyof Toolbar.Props<any>, any>> = {
     inactiveButtonBackgroundColor: 'transparent',
     inactiveButtonColor: '#3a404c',
     activeButtonBackgroundColor: 'transparent',
@@ -209,17 +218,18 @@ class _Toolbar extends PureComponent<Toolbar.Props, ToolbarState> {
     iconSize: DEFAULT_ICON_SIZE,
   }
 
-  private controlEventDom: Bridge.ControlEventDomain
+  private controlEventDom: Bridge.ControlEventDomain<D>
 
   public state: ToolbarState = {
     selectedAttributes: {},
     selectedLineType: 'normal',
   }
 
-  public constructor(props: Toolbar.Props) {
+  public constructor(props: Toolbar.Props<D>) {
     super(props)
     invariant(props.bridge != null, 'bridge prop is required')
     this.controlEventDom = props.bridge.getControlEventDomain()
+    this.insertImageAtSelection = this.insertImageAtSelection.bind(this)
   }
 
   private Separator: SFC<{}> = () =>
@@ -256,6 +266,15 @@ class _Toolbar extends PureComponent<Toolbar.Props, ToolbarState> {
     }
   }
 
+  private async insertImageAtSelection() {
+    try {
+      const description = await this.props.bridge.getImageLocator().pickOneImage()
+      this.controlEventDom.insertOrReplaceAtSelection({ type: 'image', description })
+    } catch (e) {
+      this.props.onInsertImageError && this.props.onInsertImageError(e)
+    }
+  }
+
   private applyTextTransformToSelection(
     attributeName: Transforms.TextAttributeName,
     activeAttributeValue: Attributes.TextValue,
@@ -269,6 +288,19 @@ class _Toolbar extends PureComponent<Toolbar.Props, ToolbarState> {
 
   private computeIconSpacing() {
     return typeof this.props.buttonSpacing === 'number' ? this.props.buttonSpacing : (this.props.iconSize as number) / 3
+  }
+
+  private renderInsertImageController(textControlSpec: Toolbar.ControlSpec, last: boolean = false) {
+    const IconButton = this.IconButton
+    return (
+      <IconButton
+        selected={false}
+        style={last ? undefined : { marginRight: this.computeIconSpacing() }}
+        IconComponent={textControlSpec.IconComponent}
+        iconProps={textControlSpec.iconProps}
+        onPress={this.insertImageAtSelection}
+      />
+    )
   }
 
   private renderTextTransformController(
@@ -300,6 +332,8 @@ class _Toolbar extends PureComponent<Toolbar.Props, ToolbarState> {
         return this.renderTextTransformController('textDecoration', 'underline', textControlSpec, last)
       case ControlAction.SELECT_TEXT_STRIKETHROUGH:
         return this.renderTextTransformController('textDecoration', 'strikethrough', textControlSpec, last)
+      case ControlAction.INSERT_IMAGE_AT_SELECTION:
+        return this.renderInsertImageController(textControlSpec, last)
     }
   }
 
@@ -321,7 +355,7 @@ class _Toolbar extends PureComponent<Toolbar.Props, ToolbarState> {
     })
   }
 
-  public componentWillReceiveProps(nextProps: Toolbar.Props) {
+  public componentWillReceiveProps(nextProps: Toolbar.Props<D>) {
     invariant(nextProps.bridge === this.props.bridge, "bridge prop cannot be changed during Toolbar's lifetime.")
   }
 
@@ -379,8 +413,8 @@ export function buildVectorIconControlSpec<T extends Toolbar.VectorIconMinimalPr
  *
  * This type trick is aimed at preventing from exporting the component State which should be out of API surface.
  */
-type Toolbar = ComponentClass<Toolbar.Props>
+type Toolbar<D extends {}> = ComponentClass<Toolbar.Props<D>>
 
-const Toolbar = _Toolbar as Toolbar
+const Toolbar = _Toolbar as Toolbar<any>
 
 export { Toolbar }
