@@ -37,7 +37,7 @@ declare namespace Bridge {
     /**
      * An object describing the behavior to locate and render images.
      *
-     * @remarks If this parameter is not provided, images interactions are disabled in the related {@link (Sheet:type)}.
+     * @remarks Were this parameter not provided, images interactions will be disabled in the related {@link (Sheet:type)}.
      */
     imageLocatorService: ImageLocationService<C, D>
   }
