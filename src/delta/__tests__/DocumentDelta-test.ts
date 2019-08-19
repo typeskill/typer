@@ -187,7 +187,7 @@ describe('@delta/DocumentDelta', () => {
         { insert: 'test', attributes: { textDecoration: 'underline', bold: true } },
         { insert: 'suffix', attributes: { untouched: true } },
       ])
-      const selection = Selection.fromObject({
+      const selection = Selection.fromData({
         start: 6,
         end: 14,
       })
@@ -206,7 +206,7 @@ describe('@delta/DocumentDelta', () => {
         { insert: 'test', attributes: { textDecoration: 'strikethrough' } },
         { insert: 'suffix', attributes: { untouched: true } },
       ])
-      const selection: Selection = Selection.fromObject({
+      const selection: Selection = Selection.fromData({
         start: 6,
         end: 14,
       })
@@ -224,7 +224,7 @@ describe('@delta/DocumentDelta', () => {
         { insert: 'test', attributes: {} },
         { insert: 'suffix', attributes: { untouched: true } },
       ])
-      const selection: Selection = Selection.fromObject({
+      const selection: Selection = Selection.fromData({
         start: 6,
         end: 14,
       })
@@ -243,7 +243,7 @@ describe('@delta/DocumentDelta', () => {
         { insert: 'test', attributes: {} },
         { insert: 'suffix', attributes: { untouched: true } },
       ])
-      const selection: Selection = Selection.fromObject({
+      const selection: Selection = Selection.fromData({
         start: 6,
         end: 18,
       })
@@ -263,7 +263,7 @@ describe('@delta/DocumentDelta', () => {
         { insert: 'test', attributes: { italic: true } },
         { insert: 'suffix', attributes: { untouched: true } },
       ])
-      const selection: Selection = Selection.fromObject({
+      const selection: Selection = Selection.fromData({
         start: 6,
         end: 14,
       })
@@ -277,7 +277,7 @@ describe('@delta/DocumentDelta', () => {
         { insert: 'test', attributes: { bold: undefined } },
         { insert: 'suffix', attributes: { untouched: true } },
       ])
-      const selection: Selection = Selection.fromObject({
+      const selection: Selection = Selection.fromData({
         start: 6,
         end: 14,
       })
@@ -291,7 +291,7 @@ describe('@delta/DocumentDelta', () => {
         { insert: 'test' },
         { insert: 'suffix', attributes: { untouched: true } },
       ])
-      const selection: Selection = Selection.fromObject({
+      const selection: Selection = Selection.fromData({
         start: 6,
         end: 14,
       })
@@ -305,7 +305,7 @@ describe('@delta/DocumentDelta', () => {
         { insert: 'test', attributes: { textDecoration: 'strike' } },
         { insert: 'suffix', attributes: { untouched: true } },
       ])
-      const selection: Selection = Selection.fromObject({
+      const selection: Selection = Selection.fromData({
         start: 6,
         end: 14,
       })
@@ -319,7 +319,7 @@ describe('@delta/DocumentDelta', () => {
         { insert: 'test', attributes: { textDecoration: 'strike' } },
         { insert: 'suffix', attributes: { untouched: true } },
       ])
-      const selection: Selection = Selection.fromObject({
+      const selection: Selection = Selection.fromData({
         start: 6,
         end: 14,
       })
@@ -332,7 +332,7 @@ describe('@delta/DocumentDelta', () => {
         { insert: 'test\ntest\n', attributes: { bold: true } },
         { insert: 'suffix', attributes: { untouched: true } },
       ])
-      const selection: Selection = Selection.fromObject({
+      const selection: Selection = Selection.fromData({
         start: 7,
         end: 17,
       })

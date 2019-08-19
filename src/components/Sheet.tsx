@@ -3,13 +3,14 @@ import React, { PureComponent, ComponentClass } from 'react'
 import { View, StyleSheet, StyleProp, TextStyle, ViewStyle, ViewPropTypes } from 'react-native'
 import { Bridge } from '@core/Bridge'
 import { Document } from '@model/Document'
-import { TextBlock } from '@model/TextBlock'
 import { boundMethod } from 'autobind-decorator'
-import { Store, getStoreInitialState } from '@model/Store'
-import { RichContent } from '@model/RichContent'
+import { Store } from '@model/Store'
 import PropTypes from 'prop-types'
-import { RichContentPropType } from './types'
+import { DocumentContentPropType } from './types'
 import { GenericBlockController } from './GenericBlockController'
+import { BlockDescriptor, groupOpsByBlocks } from '@model/blocks'
+import slice from 'ramda/es/slice'
+import { SelectionData } from '@delta/Selection'
 
 const styles = StyleSheet.create({
   root: {
@@ -40,13 +41,13 @@ declare namespace Sheet {
      */
     textStyle?: StyleProp<TextStyle>
     /**
-     * The rich content to display.
+     * The {@link (Document:namespace).Content | document content} to display.
      */
-    initialRichContent?: RichContent
+    documentContent: Document.Content
     /**
-     * Handler to receive {@link (RichContent:class)} updates.
+     * Handler to receive {@link (Document:namespace).Content | document content} updates.
      */
-    onRichContentUpdate?: (richText: RichContent) => void
+    onDocumentContentUpdate?: (documentContent: Document.Content) => void
     /**
      * Style applied to the container.
      */
@@ -55,18 +56,17 @@ declare namespace Sheet {
 }
 
 // eslint-disable-next-line @typescript-eslint/class-name-casing
-class _Sheet extends PureComponent<Sheet.Props, Store.State> {
+class _Sheet extends PureComponent<Sheet.Props> {
   private document: Document
   private docConsumer: Document.Consumer
 
-  public state: Store.State = getStoreInitialState()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public static propTypes: Record<keyof Sheet.Props, any> = {
     bridge: PropTypes.instanceOf(Bridge).isRequired,
     contentContainerStyle: ViewPropTypes.style,
     textStyle: PropTypes.any,
-    initialRichContent: RichContentPropType,
-    onRichContentUpdate: PropTypes.func,
+    documentContent: DocumentContentPropType.isRequired,
+    onDocumentContentUpdate: PropTypes.func,
   }
 
   public constructor(props: Sheet.Props) {
@@ -86,16 +86,39 @@ class _Sheet extends PureComponent<Sheet.Props, Store.State> {
     this.docConsumer = Object.freeze(docConsumer)
   }
 
+  private createScopedContentUpdater = (descriptor: BlockDescriptor) => {
+    const sliceHead = slice(0, descriptor.startSliceIndex)
+    const sliceTail = slice(descriptor.endSliceIndex, Infinity)
+    return (scopedContent: Partial<Document.Content>) => {
+      const { onDocumentContentUpdate, documentContent } = this.props
+      const ops = scopedContent.ops
+        ? [...sliceHead(documentContent.ops), ...scopedContent.ops, ...sliceTail(documentContent.ops)]
+        : documentContent.ops
+      const currentSelection: SelectionData = scopedContent.currentSelection
+        ? {
+            start: descriptor.selectableUnitsOffset + scopedContent.currentSelection.start,
+            end: descriptor.selectableUnitsOffset + scopedContent.currentSelection.end,
+          }
+        : documentContent.currentSelection
+      onDocumentContentUpdate &&
+        onDocumentContentUpdate({
+          ops,
+          currentSelection,
+        })
+    }
+  }
+
   @boundMethod
-  private renderBlockController(blockInstanceNumber: number) {
-    const block: TextBlock = this.document.getBlock(blockInstanceNumber) as TextBlock
-    const key = `block-controller-${blockInstanceNumber}`
+  private renderBlockController(descriptor: BlockDescriptor) {
+    const { textStyle, bridge } = this.props
+    const updateScopedContent = this.createScopedContentUpdater(descriptor)
     return (
       <GenericBlockController
-        textStyle={this.props.textStyle}
-        imageLocatorService={this.props.bridge.getImageLocator()}
-        key={key}
-        block={block}
+        updateScopedContent={updateScopedContent}
+        textStyle={textStyle}
+        imageLocatorService={bridge.getImageLocator()}
+        key={`block-${descriptor.kind}-${descriptor.blockIndex}`}
+        descriptor={descriptor}
         grow={true}
       />
     )
@@ -109,22 +132,20 @@ class _Sheet extends PureComponent<Sheet.Props, Store.State> {
     this.document.releaseConsumer(this.docConsumer)
   }
 
-  public componentDidUpdate(oldProps: Sheet.Props, oldState: Store.State) {
+  public componentDidUpdate(oldProps: Sheet.Props) {
     invariant(oldProps.bridge === this.props.bridge, 'bridge prop cannot be changed after instantiation')
-    if (
-      this.state.selectedBlockInstanceNumber !== oldState.selectedBlockInstanceNumber &&
-      this.state.selectedBlockInstanceNumber !== null
-    ) {
-      this.document.emitToBlock('FOCUS_REQUEST', this.state.selectedBlockInstanceNumber)
-    }
+    // if (
+    //   this.state.selectedBlockInstanceNumber !== oldState.selectedBlockInstanceNumber &&
+    //   this.state.selectedBlockInstanceNumber !== null
+    // ) {
+    //   this.document.emitToBlock('FOCUS_REQUEST', this.state.selectedBlockInstanceNumber)
+    // }
   }
 
   public render() {
-    return (
-      <View style={[styles.root, this.props.contentContainerStyle]}>
-        {this.state.blockOrders.map(instanceNumber => this.renderBlockController(instanceNumber))}
-      </View>
-    )
+    const { ops } = this.props.documentContent
+    const groups = groupOpsByBlocks(ops)
+    return <View style={[styles.root, this.props.contentContainerStyle]}>{groups.map(this.renderBlockController)}</View>
   }
 }
 

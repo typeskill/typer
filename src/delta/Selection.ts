@@ -1,11 +1,16 @@
 import invariant from 'invariant'
 
+export interface SelectionData {
+  readonly start: number
+  readonly end: number
+}
+
 /**
  * A class representing a range of character indexes.
  * This range can represent a selection of those characters.
  *
  */
-export class Selection {
+export class Selection implements SelectionData {
   public readonly start: number
   public readonly end: number
   private constructor(start: number, end?: number) {
@@ -22,7 +27,7 @@ export class Selection {
     return new Selection(start, end)
   }
 
-  public static fromObject({ start, end }: { start: number; end: number }) {
+  public static fromData({ start, end }: SelectionData) {
     return new Selection(start, end)
   }
 

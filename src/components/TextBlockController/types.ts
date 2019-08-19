@@ -3,9 +3,10 @@ import { StyleProp, TextStyle } from 'react-native'
 import { Selection } from '@delta/Selection'
 import { GenericRichContent } from '@delta/generic'
 import PCancelable from 'p-cancelable'
+import { TextOp } from '@delta/operations'
 
 export interface TextBlockControllerProps {
-  block: TextBlock
+  textOps: TextOp[]
   grow?: boolean
   textStyle?: StyleProp<TextStyle>
 }

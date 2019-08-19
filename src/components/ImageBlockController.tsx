@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { PureComponent } from 'react'
-import { ImageBlock } from '@model/ImageBlock'
 import { Bridge } from '@core/Bridge'
+import { ImageOp } from '@delta/operations'
 
 export interface ImageBlockControllerProps {
-  block: ImageBlock<any>
+  imageOp: ImageOp
   grow: boolean
   imageLocatorService: Bridge.ImageLocationService<any>
 }
@@ -12,6 +12,6 @@ export interface ImageBlockControllerProps {
 export class ImageBlockController extends PureComponent<ImageBlockControllerProps> {
   public render() {
     const { Component } = this.props.imageLocatorService
-    return React.createElement(Component, this.props.block.getImageDescription())
+    return React.createElement(Component, this.props.imageOp.attributes)
   }
 }

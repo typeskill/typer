@@ -1,4 +1,6 @@
 import { Attributes } from './attributes'
+import { Op } from 'quill-delta'
+import reduce from 'ramda/es/reduce'
 
 /**
  * An atomic operation representing changes to a document.
@@ -48,6 +50,8 @@ export interface TextOp extends GenericOp {
   readonly attributes?: Attributes.Map
 }
 
+export type ImageOp = BlockOp<{ kind: 'image' }>
+
 export interface BlockOp<T extends object> extends GenericOp {
   /**
    * {@inheritdoc GenericOp.insert}
@@ -62,3 +66,5 @@ export interface BlockOp<T extends object> extends GenericOp {
 export function isTextOp(op: GenericOp): op is TextOp {
   return typeof op.insert === 'string'
 }
+
+export const computeOpsLength = reduce((curr: number, prev: GenericOp) => Op.length(prev) + curr, 0 as number)

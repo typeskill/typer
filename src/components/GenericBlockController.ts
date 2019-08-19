@@ -1,29 +1,36 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { PureComponent } from 'react'
-import { Block } from '@model/Block'
 import { TextBlockController } from './TextBlockController'
-import { TextBlock } from '@model/TextBlock'
 import { StyleProp, TextStyle } from 'react-native'
 import { Bridge } from '@core/Bridge'
 import { ImageBlockController } from './ImageBlockController'
-import { ImageBlock } from '@model/ImageBlock'
+import { BlockDescriptor } from '@model/blocks'
+import { TextOp, ImageOp } from '@delta/operations'
+import invariant from 'invariant'
+import { Document } from '@model/Document'
 
 export interface GenericBlockControllerProps {
-  block: Block
+  descriptor: BlockDescriptor
   textStyle?: StyleProp<TextStyle>
   grow: boolean
   imageLocatorService: Bridge.ImageLocationService<any>
+  updateScopedContent: (scopedContent: Partial<Document.Content>) => void
 }
 
 export class GenericBlockController extends PureComponent<GenericBlockControllerProps> {
   public render() {
-    const { block, textStyle, imageLocatorService, ...otherProps } = this.props
-    if (block instanceof TextBlock) {
-      return React.createElement(TextBlockController, { block, textStyle, ...otherProps })
+    const { descriptor, textStyle, imageLocatorService, ...otherProps } = this.props
+    if (descriptor.kind === 'text') {
+      return React.createElement(TextBlockController, {
+        textOps: descriptor.opsSlice as TextOp[],
+        textStyle,
+        ...otherProps,
+      })
     }
-    if (block instanceof ImageBlock) {
+    if (descriptor.kind === 'image') {
+      invariant(descriptor.opsSlice.length === 1, `Image blocks must be grouped alone.`)
       return React.createElement(ImageBlockController, {
-        block,
+        imageOp: descriptor.opsSlice[0] as ImageOp,
         imageLocatorService,
         ...otherProps,
       })

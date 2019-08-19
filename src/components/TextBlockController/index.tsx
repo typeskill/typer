@@ -4,7 +4,6 @@ import {
   View,
   TextInput,
   NativeSyntheticEvent,
-  TextInputKeyPressEventData,
   StyleSheet,
   TextInputProps,
   TextInputSelectionChangeEventData,
@@ -52,7 +51,7 @@ const constantTextInputProps: TextInputProps = {
 export class TextBlockController extends Component<TextBlockControllerProps, TextBlockControllerState>
   implements SyncSubject {
   private textInputRef: TextInput | null = null
-  private synchronizer: Synchronizer
+  // private synchronizer: Synchronizer
 
   public state: TextBlockControllerState = {
     isControlingState: false,
@@ -63,17 +62,13 @@ export class TextBlockController extends Component<TextBlockControllerProps, Tex
 
   public constructor(props: TextBlockControllerProps) {
     super(props)
-    invariant(props.block != null, INVARIANT_MANDATORY_TEXT_BLOCK_PROP)
-    this.synchronizer = new Synchronizer(this)
-  }
-
-  private get blockControllerInterface(): Orchestrator.BlockControllerInterface {
-    return this.props.block.getControllerInterface()
+    invariant(props.textOps != null, INVARIANT_MANDATORY_TEXT_BLOCK_PROP)
+    // this.synchronizer = new Synchronizer(this)
   }
 
   @boundMethod
   private handleOnSheetDomainTextChanged(text: string) {
-    this.synchronizer.handleOnSheetDomainTextChanged(text)
+    // this.synchronizer.handleOnSheetDomainTextChanged(text)
   }
 
   @boundMethod
@@ -92,17 +87,8 @@ export class TextBlockController extends Component<TextBlockControllerProps, Tex
   }
 
   @boundMethod
-  private handleOnKeyPressed({ nativeEvent: { key } }: NativeSyntheticEvent<TextInputKeyPressEventData>) {
-    this.getTextBlock().handleOnKeyPress(key)
-  }
-
-  @boundMethod
   private handleOnFocusRequest() {
     this.textInputRef && this.textInputRef.focus()
-  }
-
-  public getTextBlock() {
-    return this.props.block
   }
 
   public async setStateAsync(stateFragment: Partial<TextBlockControllerState>): PCancelable<void> {
@@ -145,11 +131,8 @@ export class TextBlockController extends Component<TextBlockControllerProps, Tex
   }
 
   public render() {
-    const { grow, textStyle, block: textBlock } = this.props
-    const { overridingSelection, richContent } = this.state
-    const textComponent = richContent ? (
-      <RichText textStyle={textStyle} transforms={textBlock.getTextTransformsRegistry()} richContent={richContent} />
-    ) : null
+    const { grow, textStyle, textOps } = this.props
+    const { overridingSelection } = this.state
     return (
       <View style={[grow ? styles.grow : undefined]}>
         <TextInput
@@ -161,7 +144,7 @@ export class TextBlockController extends Component<TextBlockControllerProps, Tex
           ref={this.handleOnTextinputRef}
           {...constantTextInputProps}
         >
-          {textComponent}
+          <RichText textStyle={textStyle} transforms={textBlock.getTextTransformsRegistry()} textOps={textOps} />
         </TextInput>
       </View>
     )

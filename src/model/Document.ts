@@ -7,8 +7,14 @@ import { Orchestrator } from '@model/Orchestrator'
 import { Store } from './Store'
 import { mergeAttributesLeft, Attributes } from '@delta/attributes'
 import { ImageBlock } from './ImageBlock'
+import { SelectionData } from '@delta/Selection'
+import { GenericOp } from '@delta/operations'
 
 declare namespace Document {
+  export interface Content {
+    ops: GenericOp[]
+    currentSelection: SelectionData
+  }
   export interface BlockInterface {
     readonly sheetEventDom: Bridge.SheetEventDomain
     readonly orchestrator: Orchestrator

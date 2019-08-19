@@ -5,10 +5,9 @@ import { Transforms } from '@core/Transforms'
 import invariant from 'invariant'
 import { boundMethod } from 'autobind-decorator'
 import { LineWalker } from '@delta/LineWalker'
-import { GenericRichContent } from '@delta/generic'
 import { Attributes } from '@delta/attributes'
 import PropTypes from 'prop-types'
-import { RichContentPropType } from './types'
+import { OpsPropType } from './types'
 
 /**
  * A set of definitions related to the {@link (RichText:type)} component.
@@ -23,7 +22,7 @@ declare namespace RichText {
     /**
      * The content to display.
      */
-    richContent: GenericRichContent
+    textOps: TextOp[]
     /**
      * An object describing how to convert attributes to style properties.
      *
@@ -70,7 +69,7 @@ class _RichText extends Component<RichText.Props> {
   private transforms: Transforms
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public static propTypes: Record<keyof RichText.Props, any> = {
-    richContent: RichContentPropType,
+    textOps: OpsPropType,
     textStyle: PropTypes.any,
     transforms: PropTypes.instanceOf(Transforms),
   }
@@ -95,9 +94,9 @@ class _RichText extends Component<RichText.Props> {
   }
 
   private renderLines() {
-    const { richContent } = this.props
+    const { textOps } = this.props
     const children: ReactNode[][] = []
-    new LineWalker(richContent).eachLine(({ lineType, delta: lineDelta, index }) => {
+    new LineWalker(textOps).eachLine(({ lineType, delta: lineDelta, index }) => {
       children.push([
         <Text style={getLineStyle(lineType)} key={`line-${index}`}>
           {lineDelta.ops.map((l, elIndex) => this.renderOperation(l, index, elIndex))}

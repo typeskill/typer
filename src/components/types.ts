@@ -1,7 +1,10 @@
 import PropTypes from 'prop-types'
 
-export const RichContentPropType = PropTypes.shape({
-  ops: PropTypes.arrayOf(PropTypes.object),
+export const OpsPropType = PropTypes.arrayOf(PropTypes.object)
+
+export const DocumentContentPropType = PropTypes.shape({
+  ops: OpsPropType,
+  currentSelection: PropTypes.object,
 })
 
 export const ToolbarLayoutPropType = PropTypes.arrayOf(
