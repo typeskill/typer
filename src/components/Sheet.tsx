@@ -76,12 +76,14 @@ class _Sheet extends PureComponent<Sheet.Props, Store.State> {
     invariant(bridge instanceof Bridge, 'bridge prop must be an instance of Bridge class')
     const sheetEventDom = bridge.getSheetEventDomain()
     this.document = new Document()
-    this.docConsumer = Object.freeze({
+    const docConsumer: Document.Consumer = {
       sheetEventDom,
       handleOnDocumentStateUpdate: (state: Store.State) => {
         this.setState(state, () => this.forceUpdate())
       },
-    })
+      imageLocationService: bridge.getImageLocator(),
+    }
+    this.docConsumer = Object.freeze(docConsumer)
   }
 
   @boundMethod

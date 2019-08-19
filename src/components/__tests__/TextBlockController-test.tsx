@@ -4,7 +4,7 @@ import React from 'react'
 // Test renderer must be required after react-native.
 import renderer from 'react-test-renderer'
 import { Document } from '@model/Document'
-import { Bridge } from '@core/Bridge'
+import { Bridge, dummyImageLocator } from '@core/Bridge'
 import { TextBlock } from '@model/TextBlock'
 import { RichText } from '@components/RichText'
 import {
@@ -24,6 +24,7 @@ function buildDocumentConsumer() {
   const docConsumer: Document.Consumer = {
     handleOnDocumentStateUpdate,
     sheetEventDom: bridge.getSheetEventDomain(),
+    imageLocationService: dummyImageLocator,
   }
   return {
     bridge,
@@ -40,6 +41,7 @@ function getTextInputDefaultProps(): TextBlockControllerProps {
   document.registerConsumer({
     handleOnDocumentStateUpdate: () => ({}),
     sheetEventDom: bridge.getSheetEventDomain(),
+    imageLocationService: dummyImageLocator,
   })
   return {
     block: document.getActiveBlock() as TextBlock,

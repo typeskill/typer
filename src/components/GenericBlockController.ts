@@ -12,7 +12,7 @@ export interface GenericBlockControllerProps {
   block: Block
   textStyle?: StyleProp<TextStyle>
   grow: boolean
-  imageLocatorService: Bridge.ImageLocationService<any, any>
+  imageLocatorService: Bridge.ImageLocationService<any>
 }
 
 export class GenericBlockController extends PureComponent<GenericBlockControllerProps> {

@@ -6,12 +6,12 @@ import { Bridge } from '@core/Bridge'
 export interface ImageBlockControllerProps {
   block: ImageBlock<any>
   grow: boolean
-  imageLocatorService: Bridge.ImageLocationService<any, any>
+  imageLocatorService: Bridge.ImageLocationService<any>
 }
 
 export class ImageBlockController extends PureComponent<ImageBlockControllerProps> {
   public render() {
-    const { config, Component } = this.props.imageLocatorService
-    return React.createElement(Component, { config, description: this.props.block.getImageDescription() })
+    const { Component } = this.props.imageLocatorService
+    return React.createElement(Component, this.props.block.getImageDescription())
   }
 }

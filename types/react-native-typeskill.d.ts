@@ -81,28 +81,28 @@ export declare namespace Attributes {
  * @public
  */
 export declare namespace Bridge {
-    export interface ImageComponentProps<C extends {}, D extends {}> {
-        config: C;
-        description: D;
-    }
     /**
      * An object used to locate and render images.
      */
-    export interface ImageLocationService<C extends {}, D extends {}> {
-        /**
-         * A static configuration object that will be passed to ImageLocationService.Component
-         */
-        config: C;
+    export interface ImageLocationService<D extends {}> {
         /**
          * The image component to render.
          */
-        Component: ComponentType<ImageComponentProps<C, D>>;
+        Component: ComponentType<D>;
         /**
          * An async function that returns the description of an image.
          */
         pickOneImage: () => Promise<D>;
+        /**
+         * Callback fired when an image has been successfully inserted.
+         */
+        onImageAddedEvent?: (description: D) => void;
+        /**
+         * Callback fired when an image has been removed through user interactions.
+         */
+        onImageRemovedEvent?: (description: D) => void;
     }
-    export interface Config<C extends {}, D extends {}> {
+    export interface Config<D extends {}> {
         /**
          * A list of {@link (Transforms:namespace).GenericSpec | specs} which will be used to map text attributes with styles.
          */
@@ -112,7 +112,7 @@ export declare namespace Bridge {
          *
          * @remarks Were this parameter not provided, images interactions will be disabled in the related {@link (Sheet:type)}.
          */
-        imageLocatorService: ImageLocationService<C, D>;
+        imageLocatorService: ImageLocationService<D>;
     }
     /**
      * An event which signals the intent to modify the content touched by current selection.
@@ -242,7 +242,7 @@ export declare class Bridge<D extends {} = {}> {
      *
      * @param config - An object to customize bridge behavior
      */
-    constructor(config?: Partial<Bridge.Config<any, any>>);
+    constructor(config?: Partial<Bridge.Config<any>>);
     /**
      * Get {@link (Bridge:namespace).SheetEventDomain | sheetEventDom}.
      *
@@ -264,7 +264,7 @@ export declare class Bridge<D extends {} = {}> {
     /**
      * Get image locator, if exists
      */
-    getImageLocator(): Bridge.ImageLocationService<any, any>;
+    getImageLocator(): Bridge.ImageLocationService<any>;
     /**
      * End of the bridge's lifecycle.
      *

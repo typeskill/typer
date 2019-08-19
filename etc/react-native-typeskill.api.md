@@ -26,8 +26,8 @@ export namespace Attributes {
 export namespace Bridge {
     export type AttributesOverrideListener = (attributeName: string, attributeValue: Attributes.GenericValue) => void;
     // (undocumented)
-    export interface Config<C extends {}, D extends {}> {
-        imageLocatorService: ImageLocationService<C, D>;
+    export interface Config<D extends {}> {
+        imageLocatorService: ImageLocationService<D>;
         textTransformSpecs: Transforms.GenericSpec<Attributes.TextValue, 'text'>[];
     }
     export type ControlEvent = 'APPLY_ATTRIBUTES_TO_SELECTION' | 'APPLY_LINE_TYPE_TO_SELECTION' | 'INSERT_OR_REPLACE_AT_SELECTION';
@@ -39,22 +39,16 @@ export namespace Bridge {
         release: (owner: object) => void;
     }
     export type Element<D extends {}> = ImageElement<D> | TextElement;
-    // (undocumented)
-    export interface ImageComponentProps<C extends {}, D extends {}> {
-        // (undocumented)
-        config: C;
-        // (undocumented)
-        description: D;
-    }
     export interface ImageElement<D extends {}> {
         // (undocumented)
         description: D;
         // (undocumented)
         type: 'image';
     }
-    export interface ImageLocationService<C extends {}, D extends {}> {
-        Component: ComponentType<ImageComponentProps<C, D>>;
-        config: C;
+    export interface ImageLocationService<D extends {}> {
+        Component: ComponentType<D>;
+        onImageAddedEvent?: (description: D) => void;
+        onImageRemovedEvent?: (description: D) => void;
         pickOneImage: () => Promise<D>;
     }
     // @internal (undocumented)
@@ -83,9 +77,9 @@ export namespace Bridge {
 
 // @public
 export class Bridge<D extends {} = {}> {
-    constructor(config?: Partial<Bridge.Config<any, any>>);
+    constructor(config?: Partial<Bridge.Config<any>>);
     getControlEventDomain(): Bridge.ControlEventDomain<D>;
-    getImageLocator(): Bridge.ImageLocationService<any, any>;
+    getImageLocator(): Bridge.ImageLocationService<any>;
     // @internal
     getSheetEventDomain(): Bridge.SheetEventDomain;
     getTransforms(): Transforms;

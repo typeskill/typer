@@ -12,28 +12,28 @@ import mergeLeft from 'ramda/es/mergeLeft'
  * @public
  */
 declare namespace Bridge {
-  export interface ImageComponentProps<C extends {}, D extends {}> {
-    config: C
-    description: D
-  }
   /**
    * An object used to locate and render images.
    */
-  export interface ImageLocationService<C extends {}, D extends {}> {
-    /**
-     * A static configuration object that will be passed to ImageLocationService.Component
-     */
-    config: C
+  export interface ImageLocationService<D extends {}> {
     /**
      * The image component to render.
      */
-    Component: ComponentType<ImageComponentProps<C, D>>
+    Component: ComponentType<D>
     /**
      * An async function that returns the description of an image.
      */
     pickOneImage: () => Promise<D>
+    /**
+     * Callback fired when an image has been successfully inserted.
+     */
+    onImageAddedEvent?: (description: D) => void
+    /**
+     * Callback fired when an image has been removed through user interactions.
+     */
+    onImageRemovedEvent?: (description: D) => void
   }
-  export interface Config<C extends {}, D extends {}> {
+  export interface Config<D extends {}> {
     /**
      * A list of {@link (Transforms:namespace).GenericSpec | specs} which will be used to map text attributes with styles.
      */
@@ -43,7 +43,7 @@ declare namespace Bridge {
      *
      * @remarks Were this parameter not provided, images interactions will be disabled in the related {@link (Sheet:type)}.
      */
-    imageLocatorService: ImageLocationService<C, D>
+    imageLocatorService: ImageLocationService<D>
   }
   /**
    * An event which signals the intent to modify the content touched by current selection.
@@ -174,13 +174,12 @@ declare namespace Bridge {
   }
 }
 
-const dummyImageLocator: Bridge.ImageLocationService<{}, {}> = {
+export const dummyImageLocator: Bridge.ImageLocationService<{}> = {
   Component: () => {
     throw new Error(
       `Typeskill won't chose a React component to render images for you. You must provide your own imageLocatorService in Bridge constructor config parameter.`,
     )
   },
-  config: {},
   async pickOneImage() {
     throw new Error(
       `Typeskill won't chose an image picker for you. You must provide your own imageLocatorService in Bridge constructor config parameter.`,
@@ -188,7 +187,7 @@ const dummyImageLocator: Bridge.ImageLocationService<{}, {}> = {
   },
 }
 
-const defaultConfig: Bridge.Config<any, any> = {
+const defaultConfig: Bridge.Config<any> = {
   textTransformSpecs: defaultTextTransforms,
   imageLocatorService: dummyImageLocator,
 }
@@ -206,7 +205,7 @@ class Bridge<D extends {} = {}> {
   private innerEndpoint = new Endpoint<Bridge.SheetEvent>()
   private outerEndpoint = new Endpoint<Bridge.ControlEvent>()
   private transforms: Transforms
-  private imageLocatorService: Bridge.ImageLocationService<any, D>
+  private imageLocatorService: Bridge.ImageLocationService<D>
 
   private controlEventDom: Bridge.ControlEventDomain<D> = {
     insertOrReplaceAtSelection: (element: Bridge.Element<D>) => {
@@ -246,7 +245,7 @@ class Bridge<D extends {} = {}> {
    *
    * @param config - An object to customize bridge behavior
    */
-  public constructor(config?: Partial<Bridge.Config<any, any>>) {
+  public constructor(config?: Partial<Bridge.Config<any>>) {
     const { textTransformSpecs, imageLocatorService } = mergeLeft(config, defaultConfig)
     this.imageLocatorService = imageLocatorService
     this.transforms = new Transforms(textTransformSpecs || defaultTextTransforms)
@@ -284,7 +283,7 @@ class Bridge<D extends {} = {}> {
   /**
    * Get image locator, if exists
    */
-  public getImageLocator(): Bridge.ImageLocationService<any, any> {
+  public getImageLocator(): Bridge.ImageLocationService<any> {
     return this.imageLocatorService
   }
 

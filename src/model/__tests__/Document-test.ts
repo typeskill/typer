@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Document } from '@model/Document'
 import { TextBlock } from '@model/TextBlock'
-import { Bridge } from '@core/Bridge'
+import { Bridge, dummyImageLocator } from '@core/Bridge'
 import { mockDeltaChangeContext, mockSelection } from '@test/delta'
 import { Selection } from '@delta/Selection'
 import { runUpdates } from '@test/document'
 
-function newConsumer() {
+function newConsumer(): Document.Consumer & { controlEventDom: Bridge.ControlEventDomain<any> } {
   const bridge = new Bridge()
   return {
     controlEventDom: bridge.getControlEventDomain(),
@@ -14,6 +14,7 @@ function newConsumer() {
     handleOnDocumentStateUpdate: () => {
       /** noop */
     },
+    imageLocationService: dummyImageLocator,
   }
 }
 

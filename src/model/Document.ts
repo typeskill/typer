@@ -19,6 +19,7 @@ declare namespace Document {
   export interface Consumer {
     readonly handleOnDocumentStateUpdate: Store.StateUpdateListener
     readonly sheetEventDom: Bridge.SheetEventDomain
+    readonly imageLocationService: Bridge.ImageLocationService<any>
   }
 }
 
@@ -77,6 +78,8 @@ class Document {
         // Insert image
         // TODO insert at selection
         this.insertBlock(ImageBlock, element.description)
+        const { onImageAddedEvent } = consumer.imageLocationService
+        onImageAddedEvent && onImageAddedEvent(element.description)
       }
     })
     consumer.sheetEventDom.addApplyTextTransformToSelectionListener(

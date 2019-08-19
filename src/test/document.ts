@@ -1,5 +1,5 @@
 import { Document } from '@model/Document'
-import { Bridge } from '@core/Bridge'
+import { Bridge, dummyImageLocator } from '@core/Bridge'
 import { defaultTextTransforms } from '@core/Transforms'
 import { Transforms } from '@core/Transforms'
 import { DocumentDelta } from '@delta/DocumentDelta'
@@ -34,6 +34,7 @@ export function mockDocumentBlockInterface(): Document.BlockInterface {
   document.registerConsumer({
     sheetEventDom,
     handleOnDocumentStateUpdate: () => ({}),
+    imageLocationService: dummyImageLocator,
   })
   document.insertBlock(TextBlock)
   return {
