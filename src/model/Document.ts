@@ -6,6 +6,7 @@ import { Bridge } from '@core/Bridge'
 import { Orchestrator } from '@model/Orchestrator'
 import { Store } from './Store'
 import { mergeAttributesLeft, Attributes } from '@delta/attributes'
+import { ImageBlock } from './ImageBlock'
 
 declare namespace Document {
   export interface BlockInterface {
@@ -71,6 +72,13 @@ class Document {
   public registerConsumer(consumer: Document.Consumer) {
     invariant(this.consumer === undefined, 'Only one document consumer can be registered at a time')
     this.store.addListener(consumer.handleOnDocumentStateUpdate)
+    consumer.sheetEventDom.addInsertOrReplaceAtSelectionListener(this, element => {
+      if (element.type === 'image') {
+        // Insert image
+        // TODO insert at selection
+        this.insertBlock(ImageBlock, element.description)
+      }
+    })
     consumer.sheetEventDom.addApplyTextTransformToSelectionListener(
       this,
       (attributeName: string, attributeValue: Attributes.GenericValue) => {
