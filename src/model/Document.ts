@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import invariant from 'invariant'
 import { TextBlock } from './TextBlock'
 import { Block, BlockClass } from './Block'
