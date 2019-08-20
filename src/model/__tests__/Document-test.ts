@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { Document } from '@model/Document'
 import { TextBlock } from '@model/TextBlock'
 import { Bridge, dummyImageLocator } from '@core/Bridge'
 import { mockDeltaChangeContext, mockSelection } from '@test/delta'

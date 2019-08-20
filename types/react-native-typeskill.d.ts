@@ -324,6 +324,17 @@ export declare enum ControlAction {
 }
 
 /**
+ * A serializable object representing the content of a Sheet.
+ *
+ * @public
+ */
+export declare interface DocumentContent {
+    ops: GenericOp[];
+    currentSelection: SelectionShape;
+    textAttributesAtCursor: Attributes.Map;
+}
+
+/**
  * An atomic operation representing changes to a document.
  *
  * @remarks
@@ -443,7 +454,7 @@ export declare namespace RichText {
         /**
          * The content to display.
          */
-        richContent: GenericRichContent;
+        textOps: TextOp[];
         /**
          * An object describing how to convert attributes to style properties.
          *
@@ -478,6 +489,22 @@ export declare type RichText = ComponentClass<RichText.Props>;
 export declare const RichText: React.ComponentClass<RichText.Props, any>;
 
 /**
+ * A serializable object representing a selection of items in the {@link (Sheet:type)}.
+ *
+ * @public
+ */
+export declare interface SelectionShape {
+    /**
+     * **Inclusive** first item index in selection.
+     */
+    readonly start: number;
+    /**
+     * **Exclusive** last item index in selection.
+     */
+    readonly end: number;
+}
+
+/**
  * A set of definitions relative to {@link (Sheet:type)} component.
  *
  * @public
@@ -498,13 +525,13 @@ export declare namespace Sheet {
          */
         textStyle?: StyleProp<TextStyle>;
         /**
-         * The rich content to display.
+         * The {@link DocumentContent | document content} to display.
          */
-        initialRichContent?: RichContent;
+        documentContent: DocumentContent;
         /**
-         * Handler to receive {@link (RichContent:class)} updates.
+         * Handler to receive {@link DocumentContent | document content} updates.
          */
-        onRichContentUpdate?: (richText: RichContent) => void;
+        onDocumentContentUpdate?: (documentContent: DocumentContent) => Promise<void>;
         /**
          * Style applied to the container.
          */

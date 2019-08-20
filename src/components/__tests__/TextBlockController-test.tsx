@@ -3,9 +3,7 @@ import { TextInput } from 'react-native'
 import React from 'react'
 // Test renderer must be required after react-native.
 import renderer from 'react-test-renderer'
-import { Document } from '@model/Document'
 import { Bridge, dummyImageLocator } from '@core/Bridge'
-import { TextBlock } from '@model/TextBlock'
 import { RichText } from '@components/RichText'
 import {
   TextBlockController,
@@ -16,7 +14,6 @@ import { mockSelectionChangeEvent, flattenTextChild } from '@test/vdom'
 
 function buildDocumentConsumer() {
   const bridge = new Bridge()
-  const document = new Document()
   const handleOnDocumentStateUpdate = () => ({
     /** */
   })

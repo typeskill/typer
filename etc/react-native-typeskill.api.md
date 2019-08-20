@@ -102,6 +102,16 @@ export enum ControlAction {
 }
 
 // @public
+export interface DocumentContent {
+    // (undocumented)
+    currentSelection: SelectionShape;
+    // (undocumented)
+    ops: GenericOp[];
+    // (undocumented)
+    textAttributesAtCursor: Attributes.Map;
+}
+
+// @public
 export interface GenericOp {
     readonly attributes?: Attributes.Map;
     // @internal
@@ -132,7 +142,7 @@ export class RichContent implements GenericRichContent {
 // @public
 export namespace RichText {
     export interface Props {
-        richContent: GenericRichContent;
+        textOps: TextOp[];
         textStyle?: StyleProp<TextStyle>;
         transforms: Transforms;
     }
@@ -145,12 +155,18 @@ export type RichText = ComponentClass<RichText.Props>;
 export const RichText: React.ComponentClass<RichText.Props, any>;
 
 // @public
+export interface SelectionShape {
+    readonly end: number;
+    readonly start: number;
+}
+
+// @public
 export namespace Sheet {
     export interface Props {
         bridge: Bridge;
         contentContainerStyle?: StyleProp<ViewStyle>;
-        initialRichContent?: RichContent;
-        onRichContentUpdate?: (richText: RichContent) => void;
+        documentContent: DocumentContent;
+        onDocumentContentUpdate?: (documentContent: DocumentContent) => Promise<void>;
         textStyle?: StyleProp<TextStyle>;
     }
 }

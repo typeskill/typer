@@ -2,7 +2,7 @@ import invariant from 'invariant'
 import React, { PureComponent, ComponentClass } from 'react'
 import { View, StyleSheet, StyleProp, TextStyle, ViewStyle, ViewPropTypes } from 'react-native'
 import { Bridge } from '@core/Bridge'
-import { Document } from '@model/Document'
+import { DocumentContent } from '@model/document'
 import { boundMethod } from 'autobind-decorator'
 import PropTypes from 'prop-types'
 import { DocumentContentPropType } from './types'
@@ -11,7 +11,7 @@ import { BlockDescriptor, groupOpsByBlocks } from '@model/blocks'
 import slice from 'ramda/es/slice'
 import { SelectionShape, Selection } from '@delta/Selection'
 import { DocumentDelta } from '@delta/DocumentDelta'
-import Delta = require('quill-delta')
+import Delta from 'quill-delta/dist/Delta'
 import mergeLeft from 'ramda/es/mergeLeft'
 import { mergeAttributesLeft } from '@delta/attributes'
 
@@ -44,13 +44,13 @@ declare namespace Sheet {
      */
     textStyle?: StyleProp<TextStyle>
     /**
-     * The {@link (Document:namespace).Content | document content} to display.
+     * The {@link DocumentContent | document content} to display.
      */
-    documentContent: Document.Content
+    documentContent: DocumentContent
     /**
-     * Handler to receive {@link (Document:namespace).Content | document content} updates.
+     * Handler to receive {@link DocumentContent | document content} updates.
      */
-    onDocumentContentUpdate?: (documentContent: Document.Content) => Promise<void>
+    onDocumentContentUpdate?: (documentContent: DocumentContent) => Promise<void>
     /**
      * Style applied to the container.
      */
@@ -78,7 +78,7 @@ class _Sheet extends PureComponent<Sheet.Props> {
   private createScopedContentUpdater = (descriptor: BlockDescriptor) => {
     const sliceHead = slice(0, descriptor.startSliceIndex)
     const sliceTail = slice(descriptor.endSliceIndex, Infinity)
-    return (scopedContent: Partial<Document.Content>) => {
+    return (scopedContent: Partial<DocumentContent>) => {
       const { documentContent } = this.props
       const ops = scopedContent.ops
         ? [...sliceHead(documentContent.ops), ...scopedContent.ops, ...sliceTail(documentContent.ops)]
@@ -96,14 +96,11 @@ class _Sheet extends PureComponent<Sheet.Props> {
     }
   }
 
-  private updateDocumentContent(documentUpdate: Partial<Document.Content>): Promise<void> {
+  private updateDocumentContent(documentUpdate: Partial<DocumentContent>): Promise<void> {
     return (
       (this.props.onDocumentContentUpdate &&
         this.props.documentContent &&
-        this.props.onDocumentContentUpdate(mergeLeft(
-          documentUpdate,
-          this.props.documentContent,
-        ) as Document.Content)) ||
+        this.props.onDocumentContentUpdate(mergeLeft(documentUpdate, this.props.documentContent) as DocumentContent)) ||
       Promise.resolve()
     )
   }

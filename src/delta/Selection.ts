@@ -1,7 +1,18 @@
 import invariant from 'invariant'
 
+/**
+ * A serializable object representing a selection of items in the {@link (Sheet:type)}.
+ *
+ * @public
+ */
 export interface SelectionShape {
+  /**
+   * **Inclusive** first item index in selection.
+   */
   readonly start: number
+  /**
+   * **Exclusive** last item index in selection.
+   */
   readonly end: number
 }
 

@@ -19,7 +19,7 @@ import { Selection } from '@delta/Selection'
 import { TextOp } from '@delta/operations'
 import { Attributes } from '@delta/attributes'
 import { Transforms } from '@core/Transforms'
-import { Document } from '@model/Document'
+import { DocumentContent } from '@model/document'
 
 const styles = StyleSheet.create({
   grow: {
@@ -36,7 +36,7 @@ export interface TextBlockControllerProps {
   grow?: boolean
   textStyle?: StyleProp<TextStyle>
   isFocused: boolean
-  updateScopedContent: (scopedContent: Partial<Document.Content>) => Promise<void>
+  updateScopedContent: (scopedContent: Partial<DocumentContent>) => Promise<void>
   textTransforms: Transforms
 }
 
