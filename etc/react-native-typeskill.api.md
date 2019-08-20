@@ -93,6 +93,9 @@ export function buildInitialDocContent(): DocumentContent;
 export function buildVectorIconControlSpec<T extends Toolbar.VectorIconMinimalProps>(IconComponent: ComponentType<T & Toolbar.TextControlMinimalIconProps>, actionType: ControlAction, name: string): Toolbar.ControlSpec<T>;
 
 // @public
+export function cloneDocContent(content: DocumentContent): DocumentContent;
+
+// @public
 export const CONTROL_SEPARATOR: unique symbol;
 
 // @public
@@ -107,11 +110,11 @@ export enum ControlAction {
 // @public
 export interface DocumentContent {
     // (undocumented)
-    currentSelection: SelectionShape;
+    readonly currentSelection: SelectionShape;
     // (undocumented)
-    ops: GenericOp[];
+    readonly ops: GenericOp[];
     // (undocumented)
-    textAttributesAtCursor: Attributes.Map;
+    readonly textAttributesAtCursor: Attributes.Map;
 }
 
 // @public

@@ -2,6 +2,7 @@
 import { Attributes } from '@delta/attributes'
 import { SelectionShape } from '@delta/Selection'
 import { GenericOp } from '@delta/operations'
+import clone from 'ramda/es/clone'
 
 /**
  * A serializable object representing the content of a Sheet.
@@ -9,9 +10,9 @@ import { GenericOp } from '@delta/operations'
  * @public
  */
 export interface DocumentContent {
-  ops: GenericOp[]
-  currentSelection: SelectionShape
-  textAttributesAtCursor: Attributes.Map
+  readonly ops: GenericOp[]
+  readonly currentSelection: SelectionShape
+  readonly textAttributesAtCursor: Attributes.Map
 }
 
 /**
@@ -24,5 +25,20 @@ export function buildInitialDocContent(): DocumentContent {
     currentSelection: { start: 0, end: 0 },
     ops: [{ insert: '' }],
     textAttributesAtCursor: {},
+  }
+}
+
+/**
+ * Clone a peace of {@link DocumentContent | document content}.
+ *
+ * @param content - The content to clone
+ *
+ * @public
+ */
+export function cloneDocContent(content: DocumentContent): DocumentContent {
+  return {
+    ops: clone(content.ops),
+    currentSelection: content.currentSelection,
+    textAttributesAtCursor: content.textAttributesAtCursor,
   }
 }

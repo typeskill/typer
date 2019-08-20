@@ -296,6 +296,15 @@ export declare function buildInitialDocContent(): DocumentContent;
 export declare function buildVectorIconControlSpec<T extends Toolbar.VectorIconMinimalProps>(IconComponent: ComponentType<T & Toolbar.TextControlMinimalIconProps>, actionType: ControlAction, name: string): Toolbar.ControlSpec<T>;
 
 /**
+ * Clone a peace of {@link DocumentContent | document content}.
+ *
+ * @param content - The content to clone
+ *
+ * @public
+ */
+export declare function cloneDocContent(content: DocumentContent): DocumentContent;
+
+/**
  * Constant used within a {@link (Toolbar:namespace).Layout} to denote a separator.
  *
  * @public
@@ -336,9 +345,9 @@ export declare enum ControlAction {
  * @public
  */
 export declare interface DocumentContent {
-    ops: GenericOp[];
-    currentSelection: SelectionShape;
-    textAttributesAtCursor: Attributes.Map;
+    readonly ops: GenericOp[];
+    readonly currentSelection: SelectionShape;
+    readonly textAttributesAtCursor: Attributes.Map;
 }
 
 /**
