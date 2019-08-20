@@ -28,7 +28,7 @@ export interface BlockDescriptor {
 }
 
 const reduceOps = reduce((acc: BlockDescriptor[], currentValue: GenericOp) => {
-  if (!currentValue.insert) {
+  if (currentValue.insert === undefined) {
     return acc
   }
   const kind: BlockType = typeof currentValue.insert === 'string' ? 'text' : 'image'

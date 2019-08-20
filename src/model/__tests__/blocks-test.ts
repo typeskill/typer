@@ -42,6 +42,21 @@ describe('@model/blocks', () => {
         },
       ] as BlockDescriptor[])
     })
+    it('should handle empty ops', () => {
+      const blocks = groupOpsByBlocks([buildTextOp('')])
+      expect(blocks.length).toBe(1)
+      expect(blocks).toMatchObject([
+        {
+          blockIndex: 0,
+          kind: 'text',
+          startSliceIndex: 0,
+          endSliceIndex: 1,
+          opsSlice: [buildTextOp('')],
+          numOfSelectableUnits: 0,
+          selectableUnitsOffset: 0,
+        },
+      ] as BlockDescriptor[])
+    })
     it('should create a new group for each sibling image', () => {
       const blocks = groupOpsByBlocks([buildImageOp({ test: 1 }), buildImageOp({ test: 2 })])
       expect(blocks.length).toBe(2)

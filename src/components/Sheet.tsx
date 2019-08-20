@@ -175,7 +175,6 @@ class _Sheet extends PureComponent<Sheet.Props> {
   public render() {
     const { ops } = this.props.documentContent
     const groups = groupOpsByBlocks(ops)
-    console.info('GROUPS', groups)
     return <View style={[styles.root, this.props.contentContainerStyle]}>{groups.map(this.renderBlockController)}</View>
   }
 }
