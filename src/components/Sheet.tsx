@@ -109,6 +109,7 @@ class _Sheet extends PureComponent<Sheet.Props> {
   private renderBlockController(descriptor: BlockDescriptor) {
     const { textStyle, bridge } = this.props
     const updateScopedContent = this.createScopedContentUpdater(descriptor)
+    console.info('RENDERING', descriptor)
     return (
       <GenericBlockController
         updateScopedContent={updateScopedContent}
