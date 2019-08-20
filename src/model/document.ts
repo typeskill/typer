@@ -13,3 +13,16 @@ export interface DocumentContent {
   currentSelection: SelectionShape
   textAttributesAtCursor: Attributes.Map
 }
+
+/**
+ * Build the initial document content.
+ *
+ * @public
+ */
+export function buildInitialDocContent(): DocumentContent {
+  return {
+    currentSelection: { start: 0, end: 0 },
+    ops: [{ insert: '' }],
+    textAttributesAtCursor: {},
+  }
+}

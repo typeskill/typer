@@ -87,6 +87,9 @@ export class Bridge<D extends {} = {}> {
     }
 
 // @public
+export function buildInitialDocContent(): DocumentContent;
+
+// @public
 export function buildVectorIconControlSpec<T extends Toolbar.VectorIconMinimalProps>(IconComponent: ComponentType<T & Toolbar.TextControlMinimalIconProps>, actionType: ControlAction, name: string): Toolbar.ControlSpec<T>;
 
 // @public

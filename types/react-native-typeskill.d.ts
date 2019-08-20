@@ -276,6 +276,13 @@ export declare class Bridge<D extends {} = {}> {
 }
 
 /**
+ * Build the initial document content.
+ *
+ * @public
+ */
+export declare function buildInitialDocContent(): DocumentContent;
+
+/**
  * Utility function to build {@link (Toolbar:type)} controls from {@link https://www.npmjs.com/package/react-native-vector-icons | react-native-vector-icons}.
  *
  * @param IconComponent - The icon {@link react#ComponentType} such as `MaterialCommunityIcons`
