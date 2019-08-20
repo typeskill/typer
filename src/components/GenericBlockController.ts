@@ -8,13 +8,18 @@ import { BlockDescriptor } from '@model/blocks'
 import { TextOp, ImageOp } from '@delta/operations'
 import invariant from 'invariant'
 import { Document } from '@model/Document'
+import { Transforms } from '@core/Transforms'
+import { Attributes } from '@delta/attributes'
 
 export interface GenericBlockControllerProps {
   descriptor: BlockDescriptor
   textStyle?: StyleProp<TextStyle>
   grow: boolean
   imageLocatorService: Bridge.ImageLocationService<any>
-  updateScopedContent: (scopedContent: Partial<Document.Content>) => void
+  updateScopedContent: (scopedContent: Partial<Document.Content>) => Promise<void>
+  isFocused: boolean
+  textTransforms: Transforms
+  textAttributesAtCursor: Attributes.Map
 }
 
 export class GenericBlockController extends PureComponent<GenericBlockControllerProps> {

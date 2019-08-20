@@ -1,5 +1,5 @@
 import { Attributes } from './attributes'
-import { Op } from 'quill-delta'
+import Op from 'quill-delta/dist/Op'
 import reduce from 'ramda/es/reduce'
 
 /**

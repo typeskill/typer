@@ -1,14 +1,22 @@
-import { boundMethod } from 'autobind-decorator'
 import { TextChangeSession } from './TextChangeSession'
 import { Selection } from '@delta/Selection'
-import { SyncSubject } from './types'
 import { NativeSyntheticEvent, TextInputSelectionChangeEventData } from 'react-native'
-import PCancelable from 'p-cancelable'
 import { DocumentDeltaAtomicUpdate } from '@delta/DocumentDeltaAtomicUpdate'
-import { TextBlock } from '@model/TextBlock'
 import AsyncLock from 'async-lock'
+import { DocumentDelta } from '@delta/DocumentDelta'
+import { TextOp } from '@delta/operations'
+import { Attributes } from '@delta/attributes'
 
 const LOCK_NAME = 'Sync'
+
+export interface SyncSubject {
+  overrideSelection: (overridingSelection: Selection) => Promise<void>
+  updateSelection: (updatedSelection: Selection) => Promise<void>
+  updateOps: (textOps: TextOp[]) => Promise<void>
+  getCurrentSelection: () => Selection
+  getTextAttributesAtCursor: () => Attributes.Map
+  getOps: () => TextOp[]
+}
 
 /**
  * An entity responsible for granting state consistency in the {@link TextBlockController} component.
@@ -72,26 +80,18 @@ export class Synchronizer {
   private nextSelectionOverride: (() => void) | null = null
   private lock = new AsyncLock()
 
-  @boundMethod
-  private onCancelActiveSerialUpdate() {
-    this.nextSelectionOverride = null
-  }
-
-  private get textBlock(): TextBlock {
-    return this.subject.getTextBlock()
-  }
-
   private async acquireLock(executee: () => Promise<void>): Promise<void> {
     await this.lock.acquire(LOCK_NAME, executee)
   }
 
   private async overrideSelection(overridingSelection: Selection) {
-    return this.subject.setStateAsync({ overridingSelection })
+    return this.subject.overrideSelection(overridingSelection)
   }
 
   private async performAtomicUpdate(atomicDeltaUpdate: DocumentDeltaAtomicUpdate): Promise<void> {
-    await this.subject.setStateAsync({ richContent: atomicDeltaUpdate.delta })
+    await this.subject.updateOps(atomicDeltaUpdate.delta.ops as TextOp[])
     const overridingSelection = atomicDeltaUpdate.overridingSelection
+    console.info('HAS OVERRIDING SELECTION', overridingSelection)
     if (overridingSelection) {
       let hasCalledSelUpdate = false
       return Promise.race([
@@ -114,26 +114,6 @@ export class Synchronizer {
     }
   }
 
-  private performSerialUpdate(serialUpdatesGenerator: IterableIterator<DocumentDeltaAtomicUpdate>): Promise<void> {
-    return this.acquireLock(() => {
-      return new PCancelable((res, rej, onCancel) => {
-        onCancel(this.onCancelActiveSerialUpdate)
-        onCancel.shouldReject = false
-        ;(async () => {
-          for (const update of serialUpdatesGenerator) {
-            await this.performAtomicUpdate(update)
-          }
-        })()
-          .then(res)
-          .catch(e => {
-            if (!(e instanceof PCancelable.CancelError)) {
-              rej(e)
-            }
-          })
-      })
-    })
-  }
-
   public constructor(syncSubject: SyncSubject) {
     this.subject = syncSubject
   }
@@ -148,7 +128,7 @@ export class Synchronizer {
     if (!this.lock.isBusy()) {
       this.textChangeSession = new TextChangeSession()
       this.textChangeSession.setTextAfterChange(nextText)
-      this.textChangeSession.setSelectionBeforeChange(this.textBlock.getSelection())
+      this.textChangeSession.setSelectionBeforeChange(this.subject.getCurrentSelection())
     }
   }
 
@@ -171,14 +151,16 @@ export class Synchronizer {
     }
     if (this.textChangeSession !== null) {
       this.textChangeSession.setSelectionAfterChange(nextSelection)
-      const iterator = this.textBlock.createSerialUpdateGenerator(
+      const ops = this.subject.getOps()
+      const documentDeltaUpdate = new DocumentDelta(ops).applyTextDiff(
         this.textChangeSession.getTextAfterChange(),
         this.textChangeSession.getDeltaChangeContext(),
+        this.subject.getTextAttributesAtCursor(),
       )
-      promise = this.performSerialUpdate(iterator)
+      promise = this.performAtomicUpdate(documentDeltaUpdate)
       this.textChangeSession = null
     } else {
-      this.textBlock.handleOnSelectionChange(nextSelection)
+      promise = this.subject.updateSelection(nextSelection)
     }
     return promise
   }

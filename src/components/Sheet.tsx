@@ -4,13 +4,16 @@ import { View, StyleSheet, StyleProp, TextStyle, ViewStyle, ViewPropTypes } from
 import { Bridge } from '@core/Bridge'
 import { Document } from '@model/Document'
 import { boundMethod } from 'autobind-decorator'
-import { Store } from '@model/Store'
 import PropTypes from 'prop-types'
 import { DocumentContentPropType } from './types'
 import { GenericBlockController } from './GenericBlockController'
 import { BlockDescriptor, groupOpsByBlocks } from '@model/blocks'
 import slice from 'ramda/es/slice'
-import { SelectionData } from '@delta/Selection'
+import { SelectionShape, Selection } from '@delta/Selection'
+import { DocumentDelta } from '@delta/DocumentDelta'
+import Delta = require('quill-delta')
+import mergeLeft from 'ramda/es/mergeLeft'
+import { mergeAttributesLeft } from '@delta/attributes'
 
 const styles = StyleSheet.create({
   root: {
@@ -47,7 +50,7 @@ declare namespace Sheet {
     /**
      * Handler to receive {@link (Document:namespace).Content | document content} updates.
      */
-    onDocumentContentUpdate?: (documentContent: Document.Content) => void
+    onDocumentContentUpdate?: (documentContent: Document.Content) => Promise<void>
     /**
      * Style applied to the container.
      */
@@ -57,10 +60,6 @@ declare namespace Sheet {
 
 // eslint-disable-next-line @typescript-eslint/class-name-casing
 class _Sheet extends PureComponent<Sheet.Props> {
-  private document: Document
-  private docConsumer: Document.Consumer
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public static propTypes: Record<keyof Sheet.Props, any> = {
     bridge: PropTypes.instanceOf(Bridge).isRequired,
     contentContainerStyle: ViewPropTypes.style,
@@ -74,38 +73,39 @@ class _Sheet extends PureComponent<Sheet.Props> {
     const { bridge } = this.props
     invariant(bridge != null, 'bridge prop is required')
     invariant(bridge instanceof Bridge, 'bridge prop must be an instance of Bridge class')
-    const sheetEventDom = bridge.getSheetEventDomain()
-    this.document = new Document()
-    const docConsumer: Document.Consumer = {
-      sheetEventDom,
-      handleOnDocumentStateUpdate: (state: Store.State) => {
-        this.setState(state, () => this.forceUpdate())
-      },
-      imageLocationService: bridge.getImageLocator(),
-    }
-    this.docConsumer = Object.freeze(docConsumer)
   }
 
   private createScopedContentUpdater = (descriptor: BlockDescriptor) => {
     const sliceHead = slice(0, descriptor.startSliceIndex)
     const sliceTail = slice(descriptor.endSliceIndex, Infinity)
     return (scopedContent: Partial<Document.Content>) => {
-      const { onDocumentContentUpdate, documentContent } = this.props
+      const { documentContent } = this.props
       const ops = scopedContent.ops
         ? [...sliceHead(documentContent.ops), ...scopedContent.ops, ...sliceTail(documentContent.ops)]
         : documentContent.ops
-      const currentSelection: SelectionData = scopedContent.currentSelection
+      const currentSelection: SelectionShape = scopedContent.currentSelection
         ? {
             start: descriptor.selectableUnitsOffset + scopedContent.currentSelection.start,
             end: descriptor.selectableUnitsOffset + scopedContent.currentSelection.end,
           }
         : documentContent.currentSelection
-      onDocumentContentUpdate &&
-        onDocumentContentUpdate({
-          ops,
-          currentSelection,
-        })
+      return this.updateDocumentContent({
+        ops,
+        currentSelection,
+      })
     }
+  }
+
+  private updateDocumentContent(documentUpdate: Partial<Document.Content>): Promise<void> {
+    return (
+      (this.props.onDocumentContentUpdate &&
+        this.props.documentContent &&
+        this.props.onDocumentContentUpdate(mergeLeft(
+          documentUpdate,
+          this.props.documentContent,
+        ) as Document.Content)) ||
+      Promise.resolve()
+    )
   }
 
   @boundMethod
@@ -115,31 +115,63 @@ class _Sheet extends PureComponent<Sheet.Props> {
     return (
       <GenericBlockController
         updateScopedContent={updateScopedContent}
+        isFocused={false}
         textStyle={textStyle}
         imageLocatorService={bridge.getImageLocator()}
         key={`block-${descriptor.kind}-${descriptor.blockIndex}`}
         descriptor={descriptor}
         grow={true}
+        textAttributesAtCursor={this.props.documentContent.textAttributesAtCursor}
+        textTransforms={this.props.bridge.getTransforms()}
       />
     )
   }
 
   public componentDidMount() {
-    this.document.registerConsumer(this.docConsumer)
+    const sheetEventDom = this.props.bridge.getSheetEventDomain()
+    sheetEventDom.addApplyTextTransformToSelectionListener(this, async (attributeName, attributeValue) => {
+      const { currentSelection, ops, textAttributesAtCursor } = this.props.documentContent
+      const delta = new DocumentDelta(ops)
+      const selection = Selection.fromShape(currentSelection)
+      // Apply transforms to selection range
+      const userAttributes = { [attributeName]: attributeValue }
+      const atomicUpdate = delta.applyTextTransformToSelection(selection, attributeName, attributeValue)
+      const deltaAttributes = atomicUpdate.delta.getSelectedTextAttributes(selection)
+      const mergedCursorAttributes = mergeLeft(userAttributes, textAttributesAtCursor)
+      const selectedAttributes = mergeAttributesLeft(deltaAttributes, mergedCursorAttributes)
+      await this.updateDocumentContent({
+        textAttributesAtCursor: mergedCursorAttributes,
+        ops: atomicUpdate.delta.ops,
+      })
+      this.props.bridge.getSheetEventDomain().notifySelectedTextAttributesChange(selectedAttributes)
+    })
+    sheetEventDom.addInsertOrReplaceAtSelectionListener(this, element => {
+      if (element.type === 'image') {
+        const { onImageAddedEvent } = this.props.bridge.getImageLocator()
+        const { ops, currentSelection } = this.props.documentContent
+        const selection = Selection.fromShape(currentSelection)
+        const delta = new DocumentDelta(ops)
+        const diff = new Delta()
+          .retain(currentSelection.start)
+          .delete(selection.length())
+          .insert(
+            {
+              kind: 'image',
+            },
+            element.description,
+          )
+        this.updateDocumentContent({ ops: delta.compose(diff).ops })
+        onImageAddedEvent && onImageAddedEvent(element.description)
+      }
+    })
   }
 
   public componentWillUnmount() {
-    this.document.releaseConsumer(this.docConsumer)
+    this.props.bridge.getControlEventDomain().release(this)
   }
 
   public componentDidUpdate(oldProps: Sheet.Props) {
     invariant(oldProps.bridge === this.props.bridge, 'bridge prop cannot be changed after instantiation')
-    // if (
-    //   this.state.selectedBlockInstanceNumber !== oldState.selectedBlockInstanceNumber &&
-    //   this.state.selectedBlockInstanceNumber !== null
-    // ) {
-    //   this.document.emitToBlock('FOCUS_REQUEST', this.state.selectedBlockInstanceNumber)
-    // }
   }
 
   public render() {

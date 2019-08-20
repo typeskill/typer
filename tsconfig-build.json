@@ -9,6 +9,7 @@
               "exclude": ["*"]
           }
       ],
+      "esModuleInterop": true,
       "noEmit": false,
       "allowJs": false,
       "declaration": true,

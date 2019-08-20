@@ -1,10 +1,8 @@
-import { Document } from '@model/Document'
-import { Bridge, dummyImageLocator } from '@core/Bridge'
+import { Bridge } from '@core/Bridge'
 import { defaultTextTransforms } from '@core/Transforms'
 import { Transforms } from '@core/Transforms'
 import { DocumentDelta } from '@delta/DocumentDelta'
 import { GenericOp } from '@delta/operations'
-import { TextBlock } from '@model/TextBlock'
 import { Selection } from '@delta/Selection'
 import { DocumentDeltaAtomicUpdate } from '@delta/DocumentDeltaAtomicUpdate'
 
@@ -27,24 +25,6 @@ export function mockDocumentDeltaAtomicUpdate(ops?: GenericOp[]): DocumentDeltaA
   const delta = mockDocumentDelta(ops)
   return new DocumentDeltaAtomicUpdate(delta, Selection.fromBounds(delta.length()))
 }
-
-export function mockDocumentBlockInterface(): Document.BlockInterface {
-  const document = new Document()
-  const sheetEventDom = mokBridgeSheetEventDomain()
-  document.registerConsumer({
-    sheetEventDom,
-    handleOnDocumentStateUpdate: () => ({}),
-    imageLocationService: dummyImageLocator,
-  })
-  document.insertBlock(TextBlock)
-  return {
-    sheetEventDom,
-    orchestrator: document['orchestrator'],
-    onPressBackspaceFromOrigin: () => ({}),
-    onPressEnter: () => ({}),
-  }
-}
-
 export function runUpdates(iterator: IterableIterator<DocumentDeltaAtomicUpdate>) {
   while (!iterator.next().done) {}
 }

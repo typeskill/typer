@@ -7,16 +7,19 @@ import {
   StyleSheet,
   TextInputProps,
   TextInputSelectionChangeEventData,
+  TextInputKeyPressEventData,
+  StyleProp,
+  TextStyle,
 } from 'react-native'
 import { RichText, richTextStyles } from '@components/RichText'
-import { Orchestrator } from '@model/Orchestrator'
 import { boundMethod } from 'autobind-decorator'
-import { TextBlockControllerProps, TextBlockControllerState, SyncSubject } from './types'
-import { Synchronizer } from './Synchronizer'
 import PCancelable from 'p-cancelable'
-import { DocumentDeltaAtomicUpdate } from '@delta/DocumentDeltaAtomicUpdate'
-
-export { TextBlockControllerProps }
+import { Synchronizer, SyncSubject } from './Synchronizer'
+import { Selection } from '@delta/Selection'
+import { TextOp } from '@delta/operations'
+import { Attributes } from '@delta/attributes'
+import { Transforms } from '@core/Transforms'
+import { Document } from '@model/Document'
 
 const styles = StyleSheet.create({
   grow: {
@@ -26,6 +29,16 @@ const styles = StyleSheet.create({
     textAlignVertical: 'top',
   },
 })
+
+export interface TextBlockControllerProps {
+  textOps: TextOp[]
+  textAttributesAtCursor: Attributes.Map
+  grow?: boolean
+  textStyle?: StyleProp<TextStyle>
+  isFocused: boolean
+  updateScopedContent: (scopedContent: Partial<Document.Content>) => Promise<void>
+  textTransforms: Transforms
+}
 
 export const INVARIANT_MANDATORY_TEXT_BLOCK_PROP = 'textBlock prop is mandatory'
 
@@ -41,6 +54,10 @@ const constantTextInputProps: TextInputProps = {
   blurOnSubmit: false,
 } as TextInputProps
 
+interface TextBlockControllerState {
+  overridingSelection: Selection | null
+}
+
 /**
  * A component which is responsible for providing a user interface to edit {@link RichContent}.
  *
@@ -51,34 +68,27 @@ const constantTextInputProps: TextInputProps = {
 export class TextBlockController extends Component<TextBlockControllerProps, TextBlockControllerState>
   implements SyncSubject {
   private textInputRef: TextInput | null = null
-  // private synchronizer: Synchronizer
+  private synchronizer: Synchronizer
+  private currentSelection = Selection.fromShape({ start: 0, end: 0 })
 
   public state: TextBlockControllerState = {
-    isControlingState: false,
     overridingSelection: null,
-    richContent: null,
-    disableEdition: false,
   }
 
   public constructor(props: TextBlockControllerProps) {
     super(props)
     invariant(props.textOps != null, INVARIANT_MANDATORY_TEXT_BLOCK_PROP)
-    // this.synchronizer = new Synchronizer(this)
+    this.synchronizer = new Synchronizer(this)
   }
 
   @boundMethod
-  private handleOnSheetDomainTextChanged(text: string) {
-    // this.synchronizer.handleOnSheetDomainTextChanged(text)
+  private handleOnTextChanged(text: string) {
+    this.synchronizer.handleOnSheetDomainTextChanged(text)
   }
 
   @boundMethod
-  private async handleOnSheetDomainSelectionChange(e: NativeSyntheticEvent<TextInputSelectionChangeEventData>) {
+  private handleOnSelectionChanged(e: NativeSyntheticEvent<TextInputSelectionChangeEventData>) {
     return this.synchronizer.handleOnSheetDomainSelectionChange(e)
-  }
-
-  @boundMethod
-  private handleControlDomainContentChange(contentChange: DocumentDeltaAtomicUpdate) {
-    this.synchronizer.handleControlDomainContentChange(contentChange)
   }
 
   @boundMethod
@@ -91,7 +101,7 @@ export class TextBlockController extends Component<TextBlockControllerProps, Tex
     this.textInputRef && this.textInputRef.focus()
   }
 
-  public async setStateAsync(stateFragment: Partial<TextBlockControllerState>): PCancelable<void> {
+  private async setStateAsync(stateFragment: Partial<TextBlockControllerState>): PCancelable<void> {
     return new PCancelable(res => {
       this.setState(stateFragment as TextBlockControllerState, res)
     })
@@ -99,25 +109,48 @@ export class TextBlockController extends Component<TextBlockControllerProps, Tex
 
   public shouldComponentUpdate(nextProps: TextBlockControllerProps, nextState: TextBlockControllerState) {
     return (
-      nextState.richContent !== this.state.richContent ||
       nextProps.grow !== this.props.grow ||
-      nextState.isControlingState !== this.state.isControlingState ||
-      nextState.overridingSelection !== this.state.overridingSelection
+      nextState.overridingSelection !== this.state.overridingSelection ||
+      nextProps.textOps !== this.props.textOps ||
+      nextProps.isFocused !== this.props.isFocused
     )
   }
 
-  public componentDidMount() {
-    this.blockControllerInterface.addListener('FOCUS_REQUEST', this.handleOnFocusRequest)
-    this.blockControllerInterface.addListener('CONTROL_DOMAIN_CONTENT_CHANGE', this.handleControlDomainContentChange)
+  public async updateSelection(updatedSelection: Selection) {
+    this.currentSelection = updatedSelection
   }
 
-  public componentDidUpdate(_oldProps: TextBlockControllerProps, oldState: TextBlockControllerState) {
+  public getTextAttributesAtCursor() {
+    return this.props.textAttributesAtCursor
+  }
+
+  public updateOps(textOps: TextOp[]) {
+    return this.props.updateScopedContent({ ops: textOps })
+  }
+
+  public overrideSelection(overridingSelection: Selection) {
+    return this.setStateAsync({ overridingSelection })
+  }
+
+  public getCurrentSelection() {
+    return this.currentSelection
+  }
+
+  public getOps() {
+    return this.props.textOps
+  }
+
+  public handleOnKeyPressed(e: NativeSyntheticEvent<TextInputKeyPressEventData>) {
+    console.log(e.nativeEvent.key)
+  }
+
+  public componentDidUpdate(oldProps: TextBlockControllerProps) {
     // We must change the state to null to avoid forcing selection in TextInput component.
     if (this.state.overridingSelection) {
       this.setState({ overridingSelection: null })
     }
-    if (oldState.richContent !== this.state.richContent && this.state.richContent) {
-      console.info(`UPDATES RICH CONTENT ${JSON.stringify(this.state.richContent.ops, null, 2)}`)
+    if (!oldProps.isFocused && this.props.isFocused) {
+      this.handleOnFocusRequest()
     }
   }
 
@@ -127,11 +160,10 @@ export class TextBlockController extends Component<TextBlockControllerProps, Tex
 
   public componentWillUnmount() {
     this.synchronizer.release()
-    this.blockControllerInterface.release()
   }
 
   public render() {
-    const { grow, textStyle, textOps } = this.props
+    const { grow, textStyle, textOps, textTransforms } = this.props
     const { overridingSelection } = this.state
     return (
       <View style={[grow ? styles.grow : undefined]}>
@@ -139,12 +171,12 @@ export class TextBlockController extends Component<TextBlockControllerProps, Tex
           selection={overridingSelection ? overridingSelection : undefined}
           style={[grow ? styles.grow : undefined, styles.textInput, richTextStyles.defaultText]}
           onKeyPress={this.handleOnKeyPressed}
-          onSelectionChange={this.handleOnSheetDomainSelectionChange}
-          onChangeText={this.handleOnSheetDomainTextChanged}
+          onSelectionChange={this.handleOnSelectionChanged}
+          onChangeText={this.handleOnTextChanged}
           ref={this.handleOnTextinputRef}
           {...constantTextInputProps}
         >
-          <RichText textStyle={textStyle} transforms={textBlock.getTextTransformsRegistry()} textOps={textOps} />
+          <RichText textStyle={textStyle} transforms={textTransforms} textOps={textOps} />
         </TextInput>
       </View>
     )

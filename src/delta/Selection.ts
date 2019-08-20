@@ -1,6 +1,6 @@
 import invariant from 'invariant'
 
-export interface SelectionData {
+export interface SelectionShape {
   readonly start: number
   readonly end: number
 }
@@ -10,7 +10,7 @@ export interface SelectionData {
  * This range can represent a selection of those characters.
  *
  */
-export class Selection implements SelectionData {
+export class Selection implements SelectionShape {
   public readonly start: number
   public readonly end: number
   private constructor(start: number, end?: number) {
@@ -27,7 +27,7 @@ export class Selection implements SelectionData {
     return new Selection(start, end)
   }
 
-  public static fromData({ start, end }: SelectionData) {
+  public static fromShape({ start, end }: SelectionShape) {
     return new Selection(start, end)
   }
 

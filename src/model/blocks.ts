@@ -1,6 +1,6 @@
 import { GenericOp } from '@delta/operations'
 import last from 'ramda/es/last'
-import { Op } from 'quill-delta'
+import Op from 'quill-delta/dist/Op'
 import reduce from 'ramda/es/reduce'
 
 export type BlockType = 'image' | 'text'
