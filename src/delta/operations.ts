@@ -68,3 +68,19 @@ export function isTextOp(op: GenericOp): op is TextOp {
 }
 
 export const computeOpsLength = reduce((curr: number, prev: GenericOp) => Op.length(prev) + curr, 0 as number)
+
+export function buildTextOp(text: string, attributes?: Attributes.Map) {
+  return {
+    insert: text,
+    attributes,
+  }
+}
+
+export function buildImageOp(attributes?: Attributes.Map): ImageOp {
+  return {
+    attributes,
+    insert: {
+      kind: 'image',
+    },
+  }
+}

@@ -27,13 +27,15 @@ export interface BlockDescriptor {
   opsSlice: GenericOp[]
 }
 
-export const groupOpsByBlocks = reduce(
-  (acc: BlockDescriptor[], currentValue: GenericOp) => {
-    if (!currentValue.insert) {
-      return acc
-    }
-    const kind: BlockType = typeof currentValue.insert === 'string' ? 'text' : 'image'
-    const lastGroup: BlockDescriptor = last(acc) || {
+const reduceOps = reduce((acc: BlockDescriptor[], currentValue: GenericOp) => {
+  if (!currentValue.insert) {
+    return acc
+  }
+  const kind: BlockType = typeof currentValue.insert === 'string' ? 'text' : 'image'
+  let lastGroup: BlockDescriptor = last(acc) as BlockDescriptor
+  const isFirstGroup = !lastGroup
+  if (isFirstGroup) {
+    lastGroup = {
       kind,
       opsSlice: [],
       startSliceIndex: 0,
@@ -42,24 +44,26 @@ export const groupOpsByBlocks = reduce(
       selectableUnitsOffset: 0,
       blockIndex: 0,
     }
-    if (lastGroup.kind !== kind) {
-      const kindOps = [currentValue]
-      const newGroup: BlockDescriptor = {
-        kind,
-        opsSlice: kindOps,
-        numOfSelectableUnits: Op.length(currentValue),
-        startSliceIndex: lastGroup.endSliceIndex,
-        endSliceIndex: lastGroup.endSliceIndex + 1,
-        blockIndex: lastGroup.blockIndex + 1,
-        selectableUnitsOffset: lastGroup.numOfSelectableUnits + lastGroup.selectableUnitsOffset,
-      }
-      acc.push(newGroup)
-    } else {
-      lastGroup.opsSlice.push(currentValue)
-      lastGroup.numOfSelectableUnits += Op.length(currentValue)
-      lastGroup.endSliceIndex += 1
+    acc.push(lastGroup)
+  }
+  if (lastGroup.kind !== kind || (kind === 'image' && !isFirstGroup)) {
+    const kindOps = [currentValue]
+    const newGroup: BlockDescriptor = {
+      kind,
+      opsSlice: kindOps,
+      numOfSelectableUnits: Op.length(currentValue),
+      startSliceIndex: lastGroup.endSliceIndex,
+      endSliceIndex: lastGroup.endSliceIndex + 1,
+      blockIndex: lastGroup.blockIndex + 1,
+      selectableUnitsOffset: lastGroup.numOfSelectableUnits + lastGroup.selectableUnitsOffset + 1,
     }
-    return acc
-  },
-  [] as BlockDescriptor[],
-)
+    acc.push(newGroup)
+  } else {
+    lastGroup.opsSlice.push(currentValue)
+    lastGroup.numOfSelectableUnits += Op.length(currentValue)
+    lastGroup.endSliceIndex += 1
+  }
+  return acc
+})
+
+export const groupOpsByBlocks = (ops: GenericOp[]) => reduceOps([], ops)
