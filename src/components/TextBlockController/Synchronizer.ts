@@ -12,7 +12,7 @@ const LOCK_NAME = 'Sync'
 export interface SyncSubject {
   overrideSelection: (overridingSelection: Selection) => Promise<void>
   updateSelection: (updatedSelection: Selection) => Promise<void>
-  updateOps: (textOps: TextOp[]) => Promise<void>
+  updateOps: (textOps: TextOp[], selection: Selection) => Promise<void>
   getCurrentSelection: () => Selection
   getTextAttributesAtCursor: () => Attributes.Map
   getOps: () => TextOp[]
@@ -89,9 +89,8 @@ export class Synchronizer {
   }
 
   private async performAtomicUpdate(atomicDeltaUpdate: DocumentDeltaAtomicUpdate): Promise<void> {
-    await this.subject.updateOps(atomicDeltaUpdate.delta.ops as TextOp[])
+    await this.subject.updateOps(atomicDeltaUpdate.delta.ops as TextOp[], atomicDeltaUpdate.selectionAfterChange)
     const overridingSelection = atomicDeltaUpdate.overridingSelection
-    console.info('HAS OVERRIDING SELECTION', overridingSelection)
     if (overridingSelection) {
       let hasCalledSelUpdate = false
       return Promise.race([

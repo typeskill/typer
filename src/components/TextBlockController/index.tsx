@@ -118,15 +118,15 @@ export class TextBlockController extends Component<TextBlockControllerProps, Tex
 
   public async updateSelection(currentSelection: Selection) {
     this.currentSelection = currentSelection
-    this.props.updateScopedContent({ currentSelection })
+    return this.props.updateScopedContent({ currentSelection })
   }
 
   public getTextAttributesAtCursor() {
     return this.props.textAttributesAtCursor
   }
 
-  public updateOps(textOps: TextOp[]) {
-    return this.props.updateScopedContent({ ops: textOps })
+  public updateOps(textOps: TextOp[], currentSelection: Selection) {
+    return this.props.updateScopedContent({ currentSelection, ops: textOps })
   }
 
   public overrideSelection(overridingSelection: Selection) {
