@@ -39,7 +39,6 @@ export class GenericBlockController extends PureComponent<GenericBlockController
         imageLocatorService,
         ...otherProps,
       }
-      console.info('IMAGE PROPS', imageProps)
       return React.createElement(ImageBlockController, imageProps)
     }
     return null
