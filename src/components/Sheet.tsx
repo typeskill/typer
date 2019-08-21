@@ -7,13 +7,13 @@ import { boundMethod } from 'autobind-decorator'
 import PropTypes from 'prop-types'
 import { DocumentContentPropType } from './types'
 import { GenericBlockController } from './GenericBlockController'
-import { BlockDescriptor, groupOpsByBlocks } from '@model/blocks'
-import slice from 'ramda/es/slice'
-import { SelectionShape, Selection } from '@delta/Selection'
+import { BlockDescriptor, groupOpsByBlocks, createScopedContentMerger } from '@model/blocks'
+import { Selection } from '@delta/Selection'
 import { DocumentDelta } from '@delta/DocumentDelta'
 import Delta from 'quill-delta/dist/Delta'
 import mergeLeft from 'ramda/es/mergeLeft'
 import { mergeAttributesLeft } from '@delta/attributes'
+import { buildImageOp } from '@delta/operations'
 
 const styles = StyleSheet.create({
   root: {
@@ -76,27 +76,13 @@ class _Sheet extends PureComponent<Sheet.Props> {
   }
 
   private createScopedContentUpdater = (descriptor: BlockDescriptor) => {
-    const sliceHead = slice(0, descriptor.startSliceIndex)
-    const sliceTail = slice(descriptor.endSliceIndex, Infinity)
-    return (scopedContent: Partial<DocumentContent>) => {
-      const { documentContent } = this.props
-      const ops = scopedContent.ops
-        ? [...sliceHead(documentContent.ops), ...scopedContent.ops, ...sliceTail(documentContent.ops)]
-        : documentContent.ops
-      const currentSelection: SelectionShape = scopedContent.currentSelection
-        ? {
-            start: descriptor.selectableUnitsOffset + scopedContent.currentSelection.start,
-            end: descriptor.selectableUnitsOffset + scopedContent.currentSelection.end,
-          }
-        : documentContent.currentSelection
-      return this.updateDocumentContent({
-        ops,
-        currentSelection,
-      })
-    }
+    const merger = createScopedContentMerger(descriptor)
+    return (scopedContent: Partial<DocumentContent>) =>
+      this.updateDocumentContent(merger(scopedContent, this.props.documentContent))
   }
 
   private updateDocumentContent(documentUpdate: Partial<DocumentContent>): Promise<void> {
+    console.info('DOC UPDATE', documentUpdate)
     return (
       (this.props.onDocumentContentUpdate &&
         this.props.documentContent &&
@@ -143,7 +129,7 @@ class _Sheet extends PureComponent<Sheet.Props> {
       })
       this.props.bridge.getSheetEventDomain().notifySelectedTextAttributesChange(selectedAttributes)
     })
-    sheetEventDom.addInsertOrReplaceAtSelectionListener(this, element => {
+    sheetEventDom.addInsertOrReplaceAtSelectionListener(this, async element => {
       if (element.type === 'image') {
         const { onImageAddedEvent } = this.props.bridge.getImageLocator()
         const { ops, currentSelection } = this.props.documentContent
@@ -152,13 +138,8 @@ class _Sheet extends PureComponent<Sheet.Props> {
         const diff = new Delta()
           .retain(currentSelection.start)
           .delete(selection.length())
-          .insert(
-            {
-              kind: 'image',
-            },
-            element.description,
-          )
-        this.updateDocumentContent({ ops: delta.compose(diff).ops })
+          .insert(buildImageOp(element.description))
+        await this.updateDocumentContent({ ops: delta.compose(diff).ops })
         onImageAddedEvent && onImageAddedEvent(element.description)
       }
     })

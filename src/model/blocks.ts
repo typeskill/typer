@@ -2,6 +2,9 @@ import { GenericOp } from '@delta/operations'
 import last from 'ramda/es/last'
 import Op from 'quill-delta/dist/Op'
 import reduce from 'ramda/es/reduce'
+import slice from 'ramda/es/slice'
+import { SelectionShape } from '@delta/Selection'
+import { DocumentContent } from './document'
 
 export type BlockType = 'image' | 'text'
 
@@ -55,7 +58,7 @@ const reduceOps = reduce((acc: BlockDescriptor[], currentValue: GenericOp) => {
       startSliceIndex: lastGroup.endSliceIndex,
       endSliceIndex: lastGroup.endSliceIndex + 1,
       blockIndex: lastGroup.blockIndex + 1,
-      selectableUnitsOffset: lastGroup.numOfSelectableUnits + lastGroup.selectableUnitsOffset + 1,
+      selectableUnitsOffset: lastGroup.numOfSelectableUnits + lastGroup.selectableUnitsOffset,
     }
     acc.push(newGroup)
   } else {
@@ -67,3 +70,27 @@ const reduceOps = reduce((acc: BlockDescriptor[], currentValue: GenericOp) => {
 })
 
 export const groupOpsByBlocks = (ops: GenericOp[]) => reduceOps([], ops)
+
+/**
+ *
+ * @param descriptor - A description of a block to render.
+ */
+export function createScopedContentMerger(descriptor: BlockDescriptor) {
+  const sliceHead = slice(0, descriptor.startSliceIndex)
+  const sliceTail = slice(descriptor.endSliceIndex, Infinity)
+  return (scopedContent: Partial<DocumentContent>, documentContent: DocumentContent): Partial<DocumentContent> => {
+    const ops = scopedContent.ops
+      ? [...sliceHead(documentContent.ops), ...scopedContent.ops, ...sliceTail(documentContent.ops)]
+      : documentContent.ops
+    const currentSelection: SelectionShape = scopedContent.currentSelection
+      ? {
+          start: descriptor.selectableUnitsOffset + scopedContent.currentSelection.start,
+          end: descriptor.selectableUnitsOffset + scopedContent.currentSelection.end,
+        }
+      : documentContent.currentSelection
+    return {
+      ops,
+      currentSelection,
+    }
+  }
+}

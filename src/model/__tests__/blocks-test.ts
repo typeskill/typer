@@ -1,5 +1,6 @@
-import { groupOpsByBlocks, BlockDescriptor } from '@model/blocks'
+import { groupOpsByBlocks, BlockDescriptor, createScopedContentMerger } from '@model/blocks'
 import { buildImageOp, buildTextOp } from '@delta/operations'
+import { DocumentContent } from '@model/document'
 
 describe('@model/blocks', () => {
   describe('groupOpsByBlocks', () => {
@@ -38,7 +39,7 @@ describe('@model/blocks', () => {
           endSliceIndex: 3,
           opsSlice: [buildImageOp({ test: 1 })],
           numOfSelectableUnits: 1,
-          selectableUnitsOffset: 11,
+          selectableUnitsOffset: 10,
         },
       ] as BlockDescriptor[])
     })
@@ -77,9 +78,44 @@ describe('@model/blocks', () => {
           endSliceIndex: 2,
           opsSlice: [buildImageOp({ test: 2 })],
           numOfSelectableUnits: 1,
-          selectableUnitsOffset: 2,
+          selectableUnitsOffset: 1,
         },
       ] as BlockDescriptor[])
+    })
+  })
+  describe('createScopedContentMerger', () => {
+    it('should merge selection of last block appropriately', () => {
+      const ops = [buildTextOp('Hello'), buildImageOp({ test: 1 }), buildTextOp('Great')]
+      const blocks = groupOpsByBlocks(ops)
+      const document: DocumentContent = {
+        currentSelection: { start: 0, end: 0 },
+        ops,
+        textAttributesAtCursor: {},
+      }
+      expect(blocks.length).toBe(3)
+      const lastBlockMerger = createScopedContentMerger(blocks[2])
+      const expectedObj: Partial<DocumentContent> = {
+        currentSelection: {
+          start: 6,
+          end: 9,
+        },
+      }
+      expect(lastBlockMerger({ currentSelection: { start: 0, end: 3 } }, document)).toMatchObject(expectedObj)
+    })
+    it('should merge ops appropriately', () => {
+      const ops = [buildTextOp('Hello'), buildImageOp({ test: 1 }), buildTextOp('Great')]
+      const blocks = groupOpsByBlocks(ops)
+      const document: DocumentContent = {
+        currentSelection: { start: 0, end: 0 },
+        ops,
+        textAttributesAtCursor: {},
+      }
+      expect(blocks.length).toBe(3)
+      const middleBlockMerger = createScopedContentMerger(blocks[1])
+      const expectedObj: Partial<DocumentContent> = {
+        ops: [buildTextOp('Hello'), buildImageOp({ test: 1, width: 10 }), buildTextOp('Great')],
+      }
+      expect(middleBlockMerger({ ops: [buildImageOp({ test: 1, width: 10 })] }, document)).toMatchObject(expectedObj)
     })
   })
 })
