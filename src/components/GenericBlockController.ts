@@ -34,11 +34,13 @@ export class GenericBlockController extends PureComponent<GenericBlockController
     }
     if (descriptor.kind === 'image') {
       invariant(descriptor.opsSlice.length === 1, `Image blocks must be grouped alone.`)
-      return React.createElement(ImageBlockController, {
+      const imageProps = {
         imageOp: descriptor.opsSlice[0] as ImageOp,
         imageLocatorService,
         ...otherProps,
-      })
+      }
+      console.info('IMAGE PROPS', imageProps)
+      return React.createElement(ImageBlockController, imageProps)
     }
     return null
   }

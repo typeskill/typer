@@ -82,7 +82,6 @@ class _Sheet extends PureComponent<Sheet.Props> {
   }
 
   private updateDocumentContent(documentUpdate: Partial<DocumentContent>): Promise<void> {
-    console.info('DOC UPDATE', documentUpdate)
     return (
       (this.props.onDocumentContentUpdate &&
         this.props.documentContent &&
