@@ -93,7 +93,6 @@ class _Sheet extends PureComponent<Sheet.Props> {
   private renderBlockController(descriptor: BlockDescriptor) {
     const { textStyle, bridge } = this.props
     const updateScopedContent = this.createScopedContentUpdater(descriptor)
-    console.info('RENDERING', descriptor)
     return (
       <GenericBlockController
         updateScopedContent={updateScopedContent}
@@ -147,8 +146,20 @@ class _Sheet extends PureComponent<Sheet.Props> {
     this.props.bridge.getControlEventDomain().release(this)
   }
 
-  public componentDidUpdate(oldProps: Sheet.Props) {
+  public async componentDidUpdate(oldProps: Sheet.Props) {
     invariant(oldProps.bridge === this.props.bridge, 'bridge prop cannot be changed after instantiation')
+    const { currentSelection, ops } = this.props.documentContent
+    if (
+      oldProps.documentContent.currentSelection !== currentSelection &&
+      currentSelection.start !== currentSelection.end
+    ) {
+      const delta = new DocumentDelta(ops)
+      const nextAttributes = delta.getSelectedTextAttributes(Selection.fromShape(currentSelection))
+      await this.updateDocumentContent({
+        textAttributesAtCursor: nextAttributes,
+      })
+      this.props.bridge.getSheetEventDomain().notifySelectedTextAttributesChange(nextAttributes)
+    }
   }
 
   public render() {
