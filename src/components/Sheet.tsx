@@ -13,7 +13,6 @@ import { DocumentDelta } from '@delta/DocumentDelta'
 import Delta from 'quill-delta/dist/Delta'
 import mergeLeft from 'ramda/es/mergeLeft'
 import { mergeAttributesLeft } from '@delta/attributes'
-import { buildImageOp } from '@delta/operations'
 
 const styles = StyleSheet.create({
   root: {
@@ -137,7 +136,7 @@ class _Sheet extends PureComponent<Sheet.Props> {
         const diff = new Delta()
           .retain(currentSelection.start)
           .delete(selection.length())
-          .insert(buildImageOp(element.description))
+          .insert({ kind: 'image' }, element.description)
         await this.updateDocumentContent({ ops: delta.compose(diff).ops })
         onImageAddedEvent && onImageAddedEvent(element.description)
       }

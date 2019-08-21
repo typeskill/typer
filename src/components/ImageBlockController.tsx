@@ -15,7 +15,6 @@ export interface ImageBlockControllerProps {
 export class ImageBlockController extends PureComponent<ImageBlockControllerProps> {
   public render() {
     const { Component } = this.props.imageLocatorService
-    console.info('ATTRIBUTES', this.props.imageOp.attributes)
     return React.createElement(Component, this.props.imageOp.attributes)
   }
 }
