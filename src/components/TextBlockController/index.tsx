@@ -107,6 +107,7 @@ export class TextBlockController extends Component<TextBlockControllerProps, Tex
         this.textChangeSession.getDeltaChangeContext(),
         this.props.textAttributesAtCursor,
       )
+      console.info('DELTA CHANGE CONTEXT', this.textChangeSession.getDeltaChangeContext())
       this.textChangeSession = null
       this.updateOps(documentDeltaUpdate.delta.ops as TextOp[], documentDeltaUpdate.selectionAfterChange)
     } else {
