@@ -74,7 +74,6 @@ declare namespace Toolbar {
   /**
    * Declaratively describes the layout of the {@link (Toolbar:type)} component.
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   export type Layout = (ControlSpec<any> | typeof CONTROL_SEPARATOR)[]
 
   /**
@@ -85,6 +84,12 @@ declare namespace Toolbar {
      * The instance to be shared with the {@link (Sheet:type)}.
      */
     bridge: Bridge<D>
+    /**
+     * The attributes actives in selection.
+     *
+     * @remarks You should provide those of your {@link DocumentContent | `documentContent`} instance.
+     */
+    selectedAttributes: Attributes.Map
     /**
      * A callback fired when inserting an image results in an error.
      */
@@ -191,10 +196,10 @@ const styles = StyleSheet.create({
 })
 
 // eslint-disable-next-line @typescript-eslint/class-name-casing
-class _Toolbar<D extends {}> extends PureComponent<Toolbar.Props<D>, ToolbarState> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+class _Toolbar<D extends {}> extends PureComponent<Toolbar.Props<D>, {}> {
   public static propTypes: Record<keyof Toolbar.Props<any>, any> = {
     bridge: PropTypes.instanceOf(Bridge).isRequired,
+    selectedAttributes: PropTypes.object.isRequired,
     onInsertImageError: PropTypes.func,
     layout: ToolbarLayoutPropType,
     inactiveButtonBackgroundColor: PropTypes.string,
@@ -280,7 +285,7 @@ class _Toolbar<D extends {}> extends PureComponent<Toolbar.Props<D>, ToolbarStat
     activeAttributeValue: Attributes.TextValue,
   ) {
     const nextAttributeValue =
-      this.state.selectedAttributes[attributeName] === activeAttributeValue ? null : activeAttributeValue
+      this.props.selectedAttributes[attributeName] === activeAttributeValue ? null : activeAttributeValue
     return () => {
       this.controlEventDom.applyTextTransformToSelection(attributeName, nextAttributeValue)
     }
@@ -309,7 +314,7 @@ class _Toolbar<D extends {}> extends PureComponent<Toolbar.Props<D>, ToolbarStat
     textControlSpec: Toolbar.ControlSpec,
     last: boolean = false,
   ) {
-    const { selectedAttributes } = this.state
+    const { selectedAttributes } = this.props
     const IconButton = this.IconButton
     return (
       <IconButton
@@ -349,28 +354,15 @@ class _Toolbar<D extends {}> extends PureComponent<Toolbar.Props<D>, ToolbarStat
     })
   }
 
-  public componentDidMount() {
-    this.controlEventDom.addSelectedAttributesChangeListener(this, selectedAttributes => {
-      this.setState({ selectedAttributes })
-    })
-  }
-
-  public componentWillReceiveProps(nextProps: Toolbar.Props<D>) {
+  public componentDidReceiveProps(nextProps: Toolbar.Props<D>) {
     invariant(nextProps.bridge === this.props.bridge, "bridge prop cannot be changed during Toolbar's lifetime.")
   }
 
-  public componentWillUnmount() {
-    this.controlEventDom.release(this)
-  }
-
   public render() {
+    const dynamicStyles = { paddingHorizontal: this.computeIconSpacing() }
     return (
       <View style={[{ flexDirection: 'row', justifyContent: 'center' }, this.props.style]}>
-        <View
-          style={[
-            [{ paddingHorizontal: this.computeIconSpacing() }, styles.container, this.props.contentContainerStyle],
-          ]}
-        >
+        <View style={[[dynamicStyles, styles.container, this.props.contentContainerStyle]]}>
           {this.renderIconControlsMap()}
         </View>
       </View>

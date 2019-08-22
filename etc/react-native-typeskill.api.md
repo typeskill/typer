@@ -32,11 +32,9 @@ export namespace Bridge {
     }
     export type ControlEvent = 'APPLY_ATTRIBUTES_TO_SELECTION' | 'APPLY_LINE_TYPE_TO_SELECTION' | 'INSERT_OR_REPLACE_AT_SELECTION';
     export interface ControlEventDomain<D extends {}> {
-        addSelectedAttributesChangeListener: (owner: object, listener: SelectedAttributesChangeListener) => void;
         applyTextTransformToSelection: (attributeName: string, attributeValue: Attributes.TextValue) => void;
         // @internal
         insertOrReplaceAtSelection: (element: Element<D>) => void;
-        release: (owner: object) => void;
     }
     export type Element<D extends {}> = ImageElement<D> | TextElement;
     export interface ImageElement<D extends {}> {
@@ -55,15 +53,12 @@ export namespace Bridge {
     export type InsertOrReplaceAtSelectionListener = <D extends {}>(element: Element<D>) => void;
     export type LineTypeOverrideListener = (lineType: Attributes.LineType) => void;
     export type SelectedAttributesChangeListener = (selectedAttributes: Attributes.Map) => void;
-    export type SheetEvent = 'SELECTED_ATTRIBUTES_CHANGE' | 'SELECTED_LINE_TYPE_CHANGE';
     // @internal
     export interface SheetEventDomain {
         addApplyTextTransformToSelectionListener: (owner: object, listener: AttributesOverrideListener) => void;
         addInsertOrReplaceAtSelectionListener: (owner: object, listener: InsertOrReplaceAtSelectionListener) => void;
         // (undocumented)
         getTransforms(): Transforms;
-        notifySelectedLineTypeChange: (selectionLineType: Attributes.LineType) => void;
-        notifySelectedTextAttributesChange: (attributesMap: Attributes.Map) => void;
         release: (owner: object) => void;
     }
     // (undocumented)
@@ -109,13 +104,14 @@ export enum ControlAction {
 
 // @public
 export interface DocumentContent {
-    // (undocumented)
     readonly currentSelection: SelectionShape;
-    // (undocumented)
     readonly ops: GenericOp[];
-    // (undocumented)
+    readonly selectedTextAttributes: Attributes.Map;
     readonly textAttributesAtCursor: Attributes.Map;
 }
+
+// @public
+export type DocumentContentUpdater = (diffowContent: Partial<DocumentContent>) => Promise<void>;
 
 // @public
 export interface GenericOp {
@@ -172,7 +168,7 @@ export namespace Sheet {
         bridge: Bridge;
         contentContainerStyle?: StyleProp<ViewStyle>;
         documentContent: DocumentContent;
-        onDocumentContentUpdate?: (documentContent: DocumentContent) => Promise<void>;
+        onDocumentContentUpdate?: DocumentContentUpdater;
         textStyle?: StyleProp<TextStyle>;
     }
 }
@@ -208,6 +204,7 @@ export namespace Toolbar {
         inactiveButtonColor?: string;
         layout: Layout;
         onInsertImageError?: (e: Error) => void;
+        selectedAttributes: Attributes.Map;
         separatorColor?: string;
         style?: StyleProp<ViewStyle>;
     }

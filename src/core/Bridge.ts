@@ -54,11 +54,6 @@ declare namespace Bridge {
     | 'INSERT_OR_REPLACE_AT_SELECTION'
 
   /**
-   * An event which informs from selection changes resulting from interactions happening within the {@link (Sheet:type)} component.
-   */
-  export type SheetEvent = 'SELECTED_ATTRIBUTES_CHANGE' | 'SELECTED_LINE_TYPE_CHANGE'
-
-  /**
    * Block content to insert.
    */
   export interface ImageElement<D extends {}> {
@@ -121,16 +116,6 @@ declare namespace Bridge {
      * @param attributeValue - The value of the attribute to edit. Assigning `null` clears any former truthy value.
      */
     applyTextTransformToSelection: (attributeName: string, attributeValue: Attributes.TextValue) => void
-
-    /**
-     * Listen to attributes changes in selection.
-     */
-    addSelectedAttributesChangeListener: (owner: object, listener: SelectedAttributesChangeListener) => void
-
-    /**
-     * Dereference all listeners registered for this owner.
-     */
-    release: (owner: object) => void
   }
 
   /**
@@ -152,18 +137,6 @@ declare namespace Bridge {
      * Listen to insertions of text or blocks at selection.
      */
     addInsertOrReplaceAtSelectionListener: (owner: object, listener: InsertOrReplaceAtSelectionListener) => void
-
-    /**
-     * Notify selected text attributes update.
-     *
-     */
-    notifySelectedTextAttributesChange: (attributesMap: Attributes.Map) => void
-
-    /**
-     * Notify selected line type update.
-     *
-     */
-    notifySelectedLineTypeChange: (selectionLineType: Attributes.LineType) => void
 
     /**
      * Dereference all listeners registered for this owner.
@@ -202,7 +175,6 @@ const defaultConfig: Bridge.Config<any> = {
  * @public
  */
 class Bridge<D extends {} = {}> {
-  private innerEndpoint = new Endpoint<Bridge.SheetEvent>()
   private outerEndpoint = new Endpoint<Bridge.ControlEvent>()
   private transforms: Transforms
   private imageLocatorService: Bridge.ImageLocationService<D>
@@ -214,12 +186,6 @@ class Bridge<D extends {} = {}> {
     applyTextTransformToSelection: (attributeName: string, attributeValue: Attributes.GenericValue) => {
       this.outerEndpoint.emit('APPLY_ATTRIBUTES_TO_SELECTION', attributeName, attributeValue)
     },
-    addSelectedAttributesChangeListener: (owner: object, listener: Bridge.SelectedAttributesChangeListener) => {
-      this.innerEndpoint.addListener(owner, 'SELECTED_ATTRIBUTES_CHANGE', listener)
-    },
-    release: (owner: object) => {
-      this.innerEndpoint.release(owner)
-    },
   }
 
   private sheetEventDom: Bridge.SheetEventDomain = {
@@ -228,12 +194,6 @@ class Bridge<D extends {} = {}> {
     },
     addInsertOrReplaceAtSelectionListener: (owner: object, listener: Bridge.InsertOrReplaceAtSelectionListener) => {
       this.outerEndpoint.addListener(owner, 'INSERT_OR_REPLACE_AT_SELECTION', listener)
-    },
-    notifySelectedTextAttributesChange: (attributes: Attributes.Map) => {
-      this.innerEndpoint.emit('SELECTED_ATTRIBUTES_CHANGE', attributes)
-    },
-    notifySelectedLineTypeChange: (lineType: Attributes.LineType) => {
-      this.innerEndpoint.emit('SELECTED_LINE_TYPE_CHANGE', lineType)
     },
     release: (owner: object) => {
       this.outerEndpoint.release(owner)
@@ -295,7 +255,6 @@ class Bridge<D extends {} = {}> {
    * One would typically call this method during `componentWillUnmout` hook.
    */
   public release() {
-    this.innerEndpoint.removeAllListeners()
     this.outerEndpoint.removeAllListeners()
   }
 }

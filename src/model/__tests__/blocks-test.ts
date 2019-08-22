@@ -91,6 +91,7 @@ describe('@model/blocks', () => {
         currentSelection: { start: 0, end: 0 },
         ops,
         textAttributesAtCursor: {},
+        selectedTextAttributes: {},
       }
       expect(blocks.length).toBe(3)
       const lastBlockMerger = createScopedContentMerger(blocks[2])
@@ -109,6 +110,7 @@ describe('@model/blocks', () => {
         currentSelection: { start: 0, end: 0 },
         ops,
         textAttributesAtCursor: {},
+        selectedTextAttributes: {},
       }
       expect(blocks.length).toBe(3)
       const middleBlockMerger = createScopedContentMerger(blocks[1])

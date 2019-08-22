@@ -119,10 +119,6 @@ export declare namespace Bridge {
      */
     export type ControlEvent = 'APPLY_ATTRIBUTES_TO_SELECTION' | 'APPLY_LINE_TYPE_TO_SELECTION' | 'INSERT_OR_REPLACE_AT_SELECTION';
     /**
-     * An event which informs from selection changes resulting from interactions happening within the {@link (Sheet:type)} component.
-     */
-    export type SheetEvent = 'SELECTED_ATTRIBUTES_CHANGE' | 'SELECTED_LINE_TYPE_CHANGE';
-    /**
      * Block content to insert.
      */
     export interface ImageElement<D extends {}> {
@@ -177,14 +173,6 @@ export declare namespace Bridge {
          * @param attributeValue - The value of the attribute to edit. Assigning `null` clears any former truthy value.
          */
         applyTextTransformToSelection: (attributeName: string, attributeValue: Attributes.TextValue) => void;
-        /**
-         * Listen to attributes changes in selection.
-         */
-        addSelectedAttributesChangeListener: (owner: object, listener: SelectedAttributesChangeListener) => void;
-        /**
-         * Dereference all listeners registered for this owner.
-         */
-        release: (owner: object) => void;
     }
     /**
      * An object representing an area of events happening inside the {@link (Sheet:type)}.
@@ -205,16 +193,6 @@ export declare namespace Bridge {
          */
         addInsertOrReplaceAtSelectionListener: (owner: object, listener: InsertOrReplaceAtSelectionListener) => void;
         /**
-         * Notify selected text attributes update.
-         *
-         */
-        notifySelectedTextAttributesChange: (attributesMap: Attributes.Map) => void;
-        /**
-         * Notify selected line type update.
-         *
-         */
-        notifySelectedLineTypeChange: (selectionLineType: Attributes.LineType) => void;
-        /**
          * Dereference all listeners registered for this owner.
          */
         release: (owner: object) => void;
@@ -232,7 +210,6 @@ export declare namespace Bridge {
  * @public
  */
 export declare class Bridge<D extends {} = {}> {
-    private innerEndpoint;
     private outerEndpoint;
     private transforms;
     private imageLocatorService;
@@ -345,10 +322,32 @@ export declare enum ControlAction {
  * @public
  */
 export declare interface DocumentContent {
+    /**
+     * A list of operations as per deltajs definition.
+     */
     readonly ops: GenericOp[];
+    /**
+     * A contiguous range of selectable items.
+     */
     readonly currentSelection: SelectionShape;
+    /**
+     * The attributes ...
+     */
     readonly textAttributesAtCursor: Attributes.Map;
+    /**
+     * The attributes encompassed by {@link DocumentContent.currentSelection}.
+     */
+    readonly selectedTextAttributes: Attributes.Map;
 }
+
+/**
+ * An async callback aimed at updating the document state.
+ *
+ * @param diffowContent - This partial state should be shallow-merged with current `documentContent`.
+ *
+ * @public
+ */
+export declare type DocumentContentUpdater = (diffowContent: Partial<DocumentContent>) => Promise<void>;
 
 /**
  * An atomic operation representing changes to a document.
@@ -547,7 +546,7 @@ export declare namespace Sheet {
         /**
          * Handler to receive {@link DocumentContent | document content} updates.
          */
-        onDocumentContentUpdate?: (documentContent: DocumentContent) => Promise<void>;
+        onDocumentContentUpdate?: DocumentContentUpdater;
         /**
          * Style applied to the container.
          */
@@ -625,6 +624,12 @@ export declare namespace Toolbar {
          * The instance to be shared with the {@link (Sheet:type)}.
          */
         bridge: Bridge<D>;
+        /**
+         * The attributes actives in selection.
+         *
+         * @remarks You should provide those of your {@link DocumentContent | `documentContent`} instance.
+         */
+        selectedAttributes: Attributes.Map;
         /**
          * A callback fired when inserting an image results in an error.
          */

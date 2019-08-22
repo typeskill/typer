@@ -10,10 +10,32 @@ import clone from 'ramda/es/clone'
  * @public
  */
 export interface DocumentContent {
+  /**
+   * A list of operations as per deltajs definition.
+   */
   readonly ops: GenericOp[]
+  /**
+   * A contiguous range of selectable items.
+   */
   readonly currentSelection: SelectionShape
+  /**
+   * The attributes ...
+   */
   readonly textAttributesAtCursor: Attributes.Map
+  /**
+   * The attributes encompassed by {@link DocumentContent.currentSelection}.
+   */
+  readonly selectedTextAttributes: Attributes.Map
 }
+
+/**
+ * An async callback aimed at updating the document state.
+ *
+ * @param diffowContent - This partial state should be shallow-merged with current `documentContent`.
+ *
+ * @public
+ */
+export type DocumentContentUpdater = (diffowContent: Partial<DocumentContent>) => Promise<void>
 
 /**
  * Build the initial document content.
@@ -25,6 +47,7 @@ export function buildInitialDocContent(): DocumentContent {
     currentSelection: { start: 0, end: 0 },
     ops: [{ insert: '' }],
     textAttributesAtCursor: {},
+    selectedTextAttributes: {},
   }
 }
 
@@ -40,5 +63,6 @@ export function cloneDocContent(content: DocumentContent): DocumentContent {
     ops: clone(content.ops),
     currentSelection: content.currentSelection,
     textAttributesAtCursor: content.textAttributesAtCursor,
+    selectedTextAttributes: content.selectedTextAttributes,
   }
 }

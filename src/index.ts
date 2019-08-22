@@ -38,7 +38,7 @@ import { GenericRichContent } from '@delta/generic'
 import { RichContent } from '@model/RichContent'
 import { GenericOp, TextOp } from '@delta/operations'
 import { Transforms } from '@core/Transforms'
-import { DocumentContent, buildInitialDocContent, cloneDocContent } from '@model/document'
+import { DocumentContent, buildInitialDocContent, cloneDocContent, DocumentContentUpdater } from '@model/document'
 import { SelectionShape } from '@delta/Selection'
 
 export {
@@ -59,6 +59,7 @@ export {
   Attributes,
   Transforms,
   DocumentContent,
+  DocumentContentUpdater,
   buildInitialDocContent,
   cloneDocContent,
 }

@@ -2,7 +2,7 @@ import invariant from 'invariant'
 import React, { PureComponent, ComponentClass } from 'react'
 import { View, StyleSheet, StyleProp, TextStyle, ViewStyle, ViewPropTypes } from 'react-native'
 import { Bridge } from '@core/Bridge'
-import { DocumentContent } from '@model/document'
+import { DocumentContent, DocumentContentUpdater } from '@model/document'
 import { boundMethod } from 'autobind-decorator'
 import PropTypes from 'prop-types'
 import { DocumentContentPropType } from './types'
@@ -49,7 +49,7 @@ declare namespace Sheet {
     /**
      * Handler to receive {@link DocumentContent | document content} updates.
      */
-    onDocumentContentUpdate?: (documentContent: DocumentContent) => Promise<void>
+    onDocumentContentUpdate?: DocumentContentUpdater
     /**
      * Style applied to the container.
      */
@@ -84,7 +84,7 @@ class _Sheet extends PureComponent<Sheet.Props> {
     return (
       (this.props.onDocumentContentUpdate &&
         this.props.documentContent &&
-        this.props.onDocumentContentUpdate(mergeLeft(documentUpdate, this.props.documentContent) as DocumentContent)) ||
+        this.props.onDocumentContentUpdate(documentUpdate)) ||
       Promise.resolve()
     )
   }
@@ -121,10 +121,10 @@ class _Sheet extends PureComponent<Sheet.Props> {
       const mergedCursorAttributes = mergeLeft(userAttributes, textAttributesAtCursor)
       const selectedAttributes = mergeAttributesLeft(deltaAttributes, mergedCursorAttributes)
       await this.updateDocumentContent({
+        selectedTextAttributes: selectedAttributes,
         textAttributesAtCursor: mergedCursorAttributes,
         ops: atomicUpdate.delta.ops,
       })
-      this.props.bridge.getSheetEventDomain().notifySelectedTextAttributesChange(selectedAttributes)
     })
     sheetEventDom.addInsertOrReplaceAtSelectionListener(this, async element => {
       if (element.type === 'image') {
@@ -143,22 +143,19 @@ class _Sheet extends PureComponent<Sheet.Props> {
   }
 
   public componentWillUnmount() {
-    this.props.bridge.getControlEventDomain().release(this)
+    this.props.bridge.getSheetEventDomain().release(this)
   }
 
   public async componentDidUpdate(oldProps: Sheet.Props) {
     invariant(oldProps.bridge === this.props.bridge, 'bridge prop cannot be changed after instantiation')
     const { currentSelection, ops } = this.props.documentContent
-    if (
-      oldProps.documentContent.currentSelection !== currentSelection &&
-      currentSelection.start !== currentSelection.end
-    ) {
+    if (oldProps.documentContent.currentSelection !== currentSelection) {
       const delta = new DocumentDelta(ops)
       const nextAttributes = delta.getSelectedTextAttributes(Selection.fromShape(currentSelection))
       await this.updateDocumentContent({
         textAttributesAtCursor: nextAttributes,
+        selectedTextAttributes: nextAttributes,
       })
-      this.props.bridge.getSheetEventDomain().notifySelectedTextAttributesChange(nextAttributes)
     }
   }
 
