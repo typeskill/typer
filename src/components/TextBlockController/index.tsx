@@ -14,12 +14,13 @@ import {
 import { RichText, richTextStyles } from '@components/RichText'
 import { boundMethod } from 'autobind-decorator'
 import PCancelable from 'p-cancelable'
-import { Synchronizer, SyncSubject } from './Synchronizer'
 import { Selection } from '@delta/Selection'
 import { TextOp } from '@delta/operations'
 import { Attributes } from '@delta/attributes'
 import { Transforms } from '@core/Transforms'
 import { DocumentContent } from '@model/document'
+import { TextChangeSession } from './TextChangeSession'
+import { DocumentDelta } from '@delta/DocumentDelta'
 
 const styles = StyleSheet.create({
   grow: {
@@ -65,10 +66,9 @@ interface TextBlockControllerState {
  *
  * Read the {@link Synchronizer} documentation to understand the implementation challenges of this component.
  */
-export class TextBlockController extends Component<TextBlockControllerProps, TextBlockControllerState>
-  implements SyncSubject {
+export class TextBlockController extends Component<TextBlockControllerProps, TextBlockControllerState> {
+  private textChangeSession: TextChangeSession | null = null
   private textInputRef: TextInput | null = null
-  private synchronizer: Synchronizer
   private currentSelection = Selection.fromShape({ start: 0, end: 0 })
 
   public state: TextBlockControllerState = {
@@ -78,17 +78,37 @@ export class TextBlockController extends Component<TextBlockControllerProps, Tex
   public constructor(props: TextBlockControllerProps) {
     super(props)
     invariant(props.textOps != null, INVARIANT_MANDATORY_TEXT_BLOCK_PROP)
-    this.synchronizer = new Synchronizer(this)
+  }
+
+  /**
+   * **Preconditions**: this method must be called before handleOnSelectionChange
+   * This is the current TextInput behavior.
+   *
+   * @param nextText
+   */
+  @boundMethod
+  private handleOnTextChanged(nextText: string) {
+    this.textChangeSession = new TextChangeSession()
+    this.textChangeSession.setTextAfterChange(nextText)
+    this.textChangeSession.setSelectionBeforeChange(this.currentSelection)
   }
 
   @boundMethod
-  private handleOnTextChanged(text: string) {
-    this.synchronizer.handleOnSheetDomainTextChanged(text)
-  }
-
-  @boundMethod
-  private handleOnSelectionChanged(e: NativeSyntheticEvent<TextInputSelectionChangeEventData>) {
-    return this.synchronizer.handleOnSheetDomainSelectionChange(e)
+  private handleOnSelectionChanged({
+    nativeEvent: { selection },
+  }: NativeSyntheticEvent<TextInputSelectionChangeEventData>) {
+    const nextSelection = Selection.between(selection.start, selection.end)
+    if (this.textChangeSession !== null) {
+      this.textChangeSession.setSelectionAfterChange(nextSelection)
+      const ops = this.props.textOps
+      const documentDeltaUpdate = new DocumentDelta(ops).applyTextDiff(
+        this.textChangeSession.getTextAfterChange(),
+        this.textChangeSession.getDeltaChangeContext(),
+        this.props.textAttributesAtCursor,
+      )
+      this.textChangeSession = null
+      this.updateOps(documentDeltaUpdate.delta.ops as TextOp[], documentDeltaUpdate.selectionAfterChange)
+    }
   }
 
   @boundMethod
@@ -125,7 +145,7 @@ export class TextBlockController extends Component<TextBlockControllerProps, Tex
     return this.props.textAttributesAtCursor
   }
 
-  public updateOps(textOps: TextOp[], currentSelection: Selection) {
+  private updateOps(textOps: TextOp[], currentSelection: Selection) {
     return this.props.updateScopedContent({ currentSelection, ops: textOps })
   }
 
@@ -157,10 +177,6 @@ export class TextBlockController extends Component<TextBlockControllerProps, Tex
 
   public componentDidCatch(error: {}, info: {}) {
     console.warn(error, info)
-  }
-
-  public componentWillUnmount() {
-    this.synchronizer.release()
   }
 
   public render() {
