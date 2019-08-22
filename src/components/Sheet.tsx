@@ -12,7 +12,7 @@ import { Selection } from '@delta/Selection'
 import { DocumentDelta } from '@delta/DocumentDelta'
 import Delta from 'quill-delta/dist/Delta'
 import mergeLeft from 'ramda/es/mergeLeft'
-import { mergeAttributesLeft } from '@delta/attributes'
+import { mergeAttributesRight } from '@delta/attributes'
 
 const styles = StyleSheet.create({
   root: {
@@ -120,11 +120,11 @@ class _Sheet extends PureComponent<Sheet.Props> {
       const userAttributes = { [attributeName]: attributeValue }
       const atomicUpdate = delta.applyTextTransformToSelection(selection, attributeName, attributeValue)
       const deltaAttributes = atomicUpdate.delta.getSelectedTextAttributes(selection)
-      const mergedCursorAttributes = mergeLeft(userAttributes, textAttributesAtCursor)
-      const selectedAttributes = mergeAttributesLeft(deltaAttributes, mergedCursorAttributes)
+      const nextAttributesAtCursor = mergeLeft(userAttributes, textAttributesAtCursor)
+      const nextSelectedAttributes = mergeAttributesRight(deltaAttributes, nextAttributesAtCursor)
       await this.updateDocumentContent({
-        selectedTextAttributes: selectedAttributes,
-        textAttributesAtCursor: mergedCursorAttributes,
+        selectedTextAttributes: nextSelectedAttributes,
+        textAttributesAtCursor: nextAttributesAtCursor,
         ops: atomicUpdate.delta.ops,
       })
     })
@@ -155,7 +155,6 @@ class _Sheet extends PureComponent<Sheet.Props> {
       const delta = new DocumentDelta(ops)
       const nextAttributes = delta.getSelectedTextAttributes(Selection.fromShape(currentSelection))
       await this.updateDocumentContent({
-        textAttributesAtCursor: nextAttributes,
         selectedTextAttributes: nextAttributes,
       })
     }

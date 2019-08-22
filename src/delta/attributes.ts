@@ -49,7 +49,8 @@ export declare namespace Attributes {
 }
 
 /**
- * Recursively merge objects from right to left.
+ * Create a new object with the own properties of the first object merged with the own properties of the second object and so on.
+ * If a key exists in both objects, the value from the endmost object will be used.
  *
  * @remarks
  *
@@ -57,7 +58,7 @@ export declare namespace Attributes {
  *
  * @param attributes - the attributes object to merge
  */
-export function mergeAttributesLeft(...attributes: Attributes.Map[]): Attributes.Map {
+export function mergeAttributesRight(...attributes: Attributes.Map[]): Attributes.Map {
   return reject(isNil)(mergeAll<Attributes.Map>(attributes))
 }
 
