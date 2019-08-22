@@ -156,6 +156,7 @@ class _Sheet extends PureComponent<Sheet.Props> {
       const nextAttributes = delta.getSelectedTextAttributes(Selection.fromShape(currentSelection))
       await this.updateDocumentContent({
         selectedTextAttributes: nextAttributes,
+        textAttributesAtCursor: nextAttributes,
       })
     }
   }
