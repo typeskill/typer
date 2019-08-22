@@ -354,8 +354,8 @@ class _Toolbar<D extends {}> extends PureComponent<Toolbar.Props<D>, {}> {
     })
   }
 
-  public componentDidReceiveProps(nextProps: Toolbar.Props<D>) {
-    invariant(nextProps.bridge === this.props.bridge, "bridge prop cannot be changed during Toolbar's lifetime.")
+  public componentDidUpdate(oldProps: Toolbar.Props<D>) {
+    invariant(oldProps.bridge === this.props.bridge, "bridge prop cannot be changed during Toolbar's lifetime.")
   }
 
   public render() {
