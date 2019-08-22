@@ -128,17 +128,6 @@ export interface GenericRichContent {
 }
 
 // @public
-export class RichContent implements GenericRichContent {
-    static fromJSON(serializedContent: string): RichContent;
-    static fromOps(ops?: GenericOp[]): RichContent;
-    // (undocumented)
-    length(): number;
-    readonly ops: GenericOp[];
-    toJSON(): string;
-    toText(): string;
-}
-
-// @public
 export namespace RichText {
     export interface Props {
         textOps: TextOp[];

@@ -35,7 +35,6 @@ import { Bridge } from '@core/Bridge'
 import { Toolbar, ControlAction, CONTROL_SEPARATOR, buildVectorIconControlSpec } from '@components/Toolbar'
 import { Attributes } from '@delta/attributes'
 import { GenericRichContent } from '@delta/generic'
-import { RichContent } from '@model/RichContent'
 import { GenericOp, TextOp } from '@delta/operations'
 import { Transforms } from '@core/Transforms'
 import { DocumentContent, buildInitialDocContent, cloneDocContent } from '@model/document'
@@ -51,7 +50,6 @@ export {
   buildVectorIconControlSpec,
   // Model related
   Bridge,
-  RichContent,
   GenericRichContent,
   GenericOp,
   SelectionShape,

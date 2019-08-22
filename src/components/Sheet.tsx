@@ -169,7 +169,7 @@ class _Sheet extends PureComponent<Sheet.Props> {
 }
 
 /**
- * A component solely responsible for displaying and editing {@link (RichContent:class)}.
+ * A component solely responsible for editing {@link DocumentContent}.
  *
  * @public
  *

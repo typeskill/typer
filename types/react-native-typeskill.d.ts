@@ -390,64 +390,6 @@ export declare interface GenericRichContent {
 }
 
 /**
- * An entity representing rich text content.
- *
- * @remarks
- *
- * The constructor is not meant to be directly invoked.
- * Instead, use {@link RichContent.fromJSON} or {@link RichContent.fromOps}.
- *
- * @public
- */
-export declare class RichContent implements GenericRichContent {
-    /**
-     * {@inheritdoc GenericRichContent.ops}
-     */
-    readonly ops: GenericOp[];
-    private constructor();
-    private static inspectUnmarshalled;
-    /**
-     * {@inheritdoc GenericRichContent.length}
-     */
-    length(): number;
-    /**
-     * Extract the raw text from its array of operations.
-     *
-     * @returns The underlying raw text.
-     */
-    toText(): string;
-    /**
-     * Serialize this instance.
-     *
-     * @returns The serialized JSON object.
-     */
-    toJSON(): string;
-    /**
-     * Creates an instance from a serialized JSON array of operations.
-     *
-     * @remarks
-     *
-     * This method throws on multiple occasions:
-     *
-     * - `SyntaxError` when the `serialized` param is not valid JSON
-     * - `TypeError` when the unmarshaleld object doesn't have the expected shape
-     *
-     * @param serializedContent - The serialized JSON reprenting rich content.
-     *
-     * @returns The unmarshalled instance.
-     */
-    static fromJSON(serializedContent: string): RichContent;
-    /**
-     * Creates an instance from an array of operations.
-     *
-     * @param ops - The array of operations.
-     *
-     * @returns The resulting instance.
-     */
-    static fromOps(ops?: GenericOp[]): RichContent;
-}
-
-/**
  * A set of definitions related to the {@link (RichText:type)} component.
  *
  * @public
@@ -548,7 +490,7 @@ export declare namespace Sheet {
 }
 
 /**
- * A component solely responsible for displaying and editing {@link (RichContent:class)}.
+ * A component solely responsible for editing {@link DocumentContent}.
  *
  * @public
  *
