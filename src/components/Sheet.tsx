@@ -94,16 +94,24 @@ class _Sheet extends PureComponent<Sheet.Props> {
   private renderBlockController(descriptor: BlockDescriptor) {
     const { textStyle, bridge } = this.props
     const updateScopedContent = this.createScopedContentUpdater(descriptor)
+    const { textAttributesAtCursor, currentSelection } = this.props.documentContent
+    const isFocused =
+      Selection.fromShape(currentSelection).intersection(
+        Selection.fromBounds(
+          descriptor.selectableUnitsOffset,
+          descriptor.selectableUnitsOffset + descriptor.numOfSelectableUnits,
+        ),
+      ) !== null
     return (
       <GenericBlockController
         updateScopedContent={updateScopedContent}
-        isFocused={false}
+        isFocused={isFocused}
         textStyle={textStyle}
         imageLocatorService={bridge.getImageLocator()}
         key={`block-${descriptor.kind}-${descriptor.blockIndex}`}
         descriptor={descriptor}
         grow={true}
-        textAttributesAtCursor={this.props.documentContent.textAttributesAtCursor}
+        textAttributesAtCursor={textAttributesAtCursor}
         textTransforms={this.props.bridge.getTransforms()}
       />
     )
@@ -126,7 +134,11 @@ class _Sheet extends PureComponent<Sheet.Props> {
           .retain(currentSelection.start)
           .delete(selection.length())
           .insert({ kind: 'image' }, element.description)
-        await this.updateDocumentContent({ ops: delta.compose(diff).ops })
+        const nextPosition = diff.transformPosition(currentSelection.start)
+        await this.updateDocumentContent({
+          ops: delta.compose(diff).ops,
+          currentSelection: { start: nextPosition, end: nextPosition },
+        })
         onImageAddedEvent && onImageAddedEvent(element.description)
       }
     })

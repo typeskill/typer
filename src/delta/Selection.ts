@@ -49,11 +49,11 @@ export class Selection implements SelectionShape {
    *
    * ```ts
    * const selection = Selection.fromBounds(1, 3)
-   * selection.containsIndex(0) // false
-   * selection.containsIndex(1) // true
-   * selection.containsIndex(2) // true
-   * selection.containsIndex(3) // true
-   * selection.containsIndex(4) // false
+   * selection.touchesIndex(0) // false
+   * selection.touchesIndex(1) // true
+   * selection.touchesIndex(2) // true
+   * selection.touchesIndex(3) // true
+   * selection.touchesIndex(4) // false
    * ```
    *
    * @param selectionIndex - The index to test.
