@@ -12,7 +12,6 @@ import { Selection } from '@delta/Selection'
 import { DocumentDelta } from '@delta/DocumentDelta'
 import Delta from 'quill-delta/dist/Delta'
 import mergeLeft from 'ramda/es/mergeLeft'
-import { mergeAttributesRight } from '@delta/attributes'
 
 const styles = StyleSheet.create({
   root: {
