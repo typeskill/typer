@@ -150,6 +150,7 @@ export class TextBlockController extends Component<TextBlockControllerProps, Tex
   }
 
   private updateOps(textOps: TextOp[], currentSelection: Selection) {
+    this.currentSelection = currentSelection
     return this.props.updateScopedContent({ currentSelection, ops: textOps })
   }
 
