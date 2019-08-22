@@ -14,6 +14,7 @@ import {
 import { RichText, richTextStyles } from '@components/RichText'
 import { boundMethod } from 'autobind-decorator'
 import PCancelable from 'p-cancelable'
+import { SyncSubject } from './Synchronizer'
 import { Selection } from '@delta/Selection'
 import { TextOp } from '@delta/operations'
 import { Attributes } from '@delta/attributes'
@@ -108,6 +109,8 @@ export class TextBlockController extends Component<TextBlockControllerProps, Tex
       )
       this.textChangeSession = null
       this.updateOps(documentDeltaUpdate.delta.ops as TextOp[], documentDeltaUpdate.selectionAfterChange)
+    } else {
+      this.updateSelection(nextSelection)
     }
   }
 

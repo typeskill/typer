@@ -126,11 +126,8 @@ class _RichText extends Component<RichText.Props> {
   /**
    * @internal
    */
-  public componentWillReceiveProps(nextProps: RichText.Props) {
-    invariant(
-      nextProps.transforms === this.props.transforms,
-      'textTransformsReg prop cannot be changed after instantiation',
-    )
+  public componentDidUpdate(oldProps: RichText.Props) {
+    invariant(oldProps.transforms === this.props.transforms, 'transforms prop cannot be changed after instantiation')
   }
 
   /**
