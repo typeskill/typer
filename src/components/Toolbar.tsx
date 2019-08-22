@@ -196,7 +196,7 @@ const styles = StyleSheet.create({
 })
 
 // eslint-disable-next-line @typescript-eslint/class-name-casing
-class _Toolbar<D extends {}> extends PureComponent<Toolbar.Props<D>, {}> {
+class _Toolbar<D extends {}> extends PureComponent<Toolbar.Props<D>> {
   public static propTypes: Record<keyof Toolbar.Props<any>, any> = {
     bridge: PropTypes.instanceOf(Bridge).isRequired,
     selectedTextAttributes: PropTypes.object.isRequired,
