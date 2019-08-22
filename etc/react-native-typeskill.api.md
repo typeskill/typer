@@ -165,7 +165,7 @@ export namespace Sheet {
         bridge: Bridge;
         contentContainerStyle?: StyleProp<ViewStyle>;
         documentContent: DocumentContent;
-        onDocumentContentUpdate?: (diffUpdate: DocumentContent) => Promise<void>;
+        onDocumentContentUpdate?: (nextDocumentContent: DocumentContent) => Promise<void>;
         textStyle?: StyleProp<TextStyle>;
     }
 }
@@ -201,7 +201,7 @@ export namespace Toolbar {
         inactiveButtonColor?: string;
         layout: Layout;
         onInsertImageError?: (e: Error) => void;
-        selectedAttributes: Attributes.Map;
+        selectedTextAttributes: Attributes.Map;
         separatorColor?: string;
         style?: StyleProp<ViewStyle>;
     }

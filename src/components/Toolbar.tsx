@@ -89,7 +89,7 @@ declare namespace Toolbar {
      *
      * @remarks You should provide those of your {@link DocumentContent | `documentContent`} instance.
      */
-    selectedAttributes: Attributes.Map
+    selectedTextAttributes: Attributes.Map
     /**
      * A callback fired when inserting an image results in an error.
      */
@@ -199,7 +199,7 @@ const styles = StyleSheet.create({
 class _Toolbar<D extends {}> extends PureComponent<Toolbar.Props<D>, {}> {
   public static propTypes: Record<keyof Toolbar.Props<any>, any> = {
     bridge: PropTypes.instanceOf(Bridge).isRequired,
-    selectedAttributes: PropTypes.object.isRequired,
+    selectedTextAttributes: PropTypes.object.isRequired,
     onInsertImageError: PropTypes.func,
     layout: ToolbarLayoutPropType,
     inactiveButtonBackgroundColor: PropTypes.string,
@@ -285,7 +285,7 @@ class _Toolbar<D extends {}> extends PureComponent<Toolbar.Props<D>, {}> {
     activeAttributeValue: Attributes.TextValue,
   ) {
     const nextAttributeValue =
-      this.props.selectedAttributes[attributeName] === activeAttributeValue ? null : activeAttributeValue
+      this.props.selectedTextAttributes[attributeName] === activeAttributeValue ? null : activeAttributeValue
     return () => {
       this.controlEventDom.applyTextTransformToSelection(attributeName, nextAttributeValue)
     }
@@ -314,7 +314,7 @@ class _Toolbar<D extends {}> extends PureComponent<Toolbar.Props<D>, {}> {
     textControlSpec: Toolbar.ControlSpec,
     last: boolean = false,
   ) {
-    const { selectedAttributes } = this.props
+    const { selectedTextAttributes: selectedAttributes } = this.props
     const IconButton = this.IconButton
     return (
       <IconButton

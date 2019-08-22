@@ -539,7 +539,7 @@ export declare namespace Sheet {
          *
          * @remarks This callback is expected to return a promise. This promise MUST resolve when the update had been proceeded.
          */
-        onDocumentContentUpdate?: (diffUpdate: DocumentContent) => Promise<void>;
+        onDocumentContentUpdate?: (nextDocumentContent: DocumentContent) => Promise<void>;
         /**
          * Style applied to the container.
          */
@@ -622,7 +622,7 @@ export declare namespace Toolbar {
          *
          * @remarks You should provide those of your {@link DocumentContent | `documentContent`} instance.
          */
-        selectedAttributes: Attributes.Map;
+        selectedTextAttributes: Attributes.Map;
         /**
          * A callback fired when inserting an image results in an error.
          */
