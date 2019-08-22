@@ -341,15 +341,6 @@ export declare interface DocumentContent {
 }
 
 /**
- * An async callback aimed at updating the document state.
- *
- * @param diffowContent - This partial state should be shallow-merged with current `documentContent`.
- *
- * @public
- */
-export declare type DocumentContentUpdater = (diffowContent: Partial<DocumentContent>) => Promise<void>;
-
-/**
  * An atomic operation representing changes to a document.
  *
  * @remarks
@@ -545,8 +536,10 @@ export declare namespace Sheet {
         documentContent: DocumentContent;
         /**
          * Handler to receive {@link DocumentContent | document content} updates.
+         *
+         * @remarks This callback is expected to return a promise. This promise MUST resolve when the update had been proceeded.
          */
-        onDocumentContentUpdate?: DocumentContentUpdater;
+        onDocumentContentUpdate?: (diffUpdate: DocumentContent) => Promise<void>;
         /**
          * Style applied to the container.
          */

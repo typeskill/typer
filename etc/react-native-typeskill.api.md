@@ -111,9 +111,6 @@ export interface DocumentContent {
 }
 
 // @public
-export type DocumentContentUpdater = (diffowContent: Partial<DocumentContent>) => Promise<void>;
-
-// @public
 export interface GenericOp {
     readonly attributes?: Attributes.Map;
     // @internal
@@ -168,7 +165,7 @@ export namespace Sheet {
         bridge: Bridge;
         contentContainerStyle?: StyleProp<ViewStyle>;
         documentContent: DocumentContent;
-        onDocumentContentUpdate?: DocumentContentUpdater;
+        onDocumentContentUpdate?: (diffUpdate: DocumentContent) => Promise<void>;
         textStyle?: StyleProp<TextStyle>;
     }
 }

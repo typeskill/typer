@@ -2,7 +2,7 @@ import invariant from 'invariant'
 import React, { PureComponent, ComponentClass } from 'react'
 import { View, StyleSheet, StyleProp, TextStyle, ViewStyle, ViewPropTypes } from 'react-native'
 import { Bridge } from '@core/Bridge'
-import { DocumentContent, DocumentContentUpdater } from '@model/document'
+import { DocumentContent } from '@model/document'
 import { boundMethod } from 'autobind-decorator'
 import PropTypes from 'prop-types'
 import { DocumentContentPropType } from './types'
@@ -48,8 +48,10 @@ declare namespace Sheet {
     documentContent: DocumentContent
     /**
      * Handler to receive {@link DocumentContent | document content} updates.
+     *
+     * @remarks This callback is expected to return a promise. This promise MUST resolve when the update had been proceeded.
      */
-    onDocumentContentUpdate?: DocumentContentUpdater
+    onDocumentContentUpdate?: (nextDocumentContent: DocumentContent) => Promise<void>
     /**
      * Style applied to the container.
      */
@@ -84,7 +86,7 @@ class _Sheet extends PureComponent<Sheet.Props> {
     return (
       (this.props.onDocumentContentUpdate &&
         this.props.documentContent &&
-        this.props.onDocumentContentUpdate(documentUpdate)) ||
+        this.props.onDocumentContentUpdate(mergeLeft(documentUpdate, this.props.documentContent) as DocumentContent)) ||
       Promise.resolve()
     )
   }
