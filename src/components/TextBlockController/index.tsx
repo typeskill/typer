@@ -14,7 +14,6 @@ import {
 import { RichText, richTextStyles } from '@components/RichText'
 import { boundMethod } from 'autobind-decorator'
 import PCancelable from 'p-cancelable'
-import { SyncSubject } from './Synchronizer'
 import { Selection } from '@delta/Selection'
 import { TextOp } from '@delta/operations'
 import { Attributes } from '@delta/attributes'
@@ -125,8 +124,8 @@ export class TextBlockController extends Component<TextBlockControllerProps, Tex
     this.textInputRef && this.textInputRef.focus()
   }
 
-  private async setStateAsync(stateFragment: Partial<TextBlockControllerState>): PCancelable<void> {
-    return new PCancelable(res => {
+  private async setStateAsync(stateFragment: Partial<TextBlockControllerState>): Promise<void> {
+    return new Promise(res => {
       this.setState(stateFragment as TextBlockControllerState, res)
     })
   }
