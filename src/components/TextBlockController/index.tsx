@@ -13,7 +13,6 @@ import {
 } from 'react-native'
 import { RichText, richTextStyles } from '@components/RichText'
 import { boundMethod } from 'autobind-decorator'
-import PCancelable from 'p-cancelable'
 import { Selection } from '@delta/Selection'
 import { TextOp } from '@delta/operations'
 import { Attributes } from '@delta/attributes'
