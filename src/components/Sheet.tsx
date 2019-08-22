@@ -2,7 +2,7 @@ import invariant from 'invariant'
 import React, { PureComponent, ComponentClass } from 'react'
 import { View, StyleSheet, StyleProp, TextStyle, ViewStyle, ViewPropTypes } from 'react-native'
 import { Bridge } from '@core/Bridge'
-import { DocumentContent } from '@model/document'
+import { DocumentContent, applyTextTransformToSelection } from '@model/document'
 import { boundMethod } from 'autobind-decorator'
 import PropTypes from 'prop-types'
 import { DocumentContentPropType } from './types'
@@ -113,20 +113,9 @@ class _Sheet extends PureComponent<Sheet.Props> {
   public componentDidMount() {
     const sheetEventDom = this.props.bridge.getSheetEventDomain()
     sheetEventDom.addApplyTextTransformToSelectionListener(this, async (attributeName, attributeValue) => {
-      const { currentSelection, ops, textAttributesAtCursor } = this.props.documentContent
-      const delta = new DocumentDelta(ops)
-      const selection = Selection.fromShape(currentSelection)
-      // Apply transforms to selection range
-      const userAttributes = { [attributeName]: attributeValue }
-      const atomicUpdate = delta.applyTextTransformToSelection(selection, attributeName, attributeValue)
-      const deltaAttributes = atomicUpdate.delta.getSelectedTextAttributes(selection)
-      const nextAttributesAtCursor = mergeLeft(userAttributes, textAttributesAtCursor)
-      const nextSelectedAttributes = mergeAttributesRight(deltaAttributes, nextAttributesAtCursor)
-      await this.updateDocumentContent({
-        selectedTextAttributes: nextSelectedAttributes,
-        textAttributesAtCursor: nextAttributesAtCursor,
-        ops: atomicUpdate.delta.ops,
-      })
+      return this.updateDocumentContent(
+        applyTextTransformToSelection(attributeName, attributeValue, this.props.documentContent),
+      )
     })
     sheetEventDom.addInsertOrReplaceAtSelectionListener(this, async element => {
       if (element.type === 'image') {
