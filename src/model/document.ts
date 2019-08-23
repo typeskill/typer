@@ -47,7 +47,7 @@ export type DocumentContentUpdater = (diffowContent: Partial<DocumentContent>) =
 export function buildInitialDocContent(): DocumentContent {
   return {
     currentSelection: { start: 0, end: 0 },
-    ops: [{ insert: '' }],
+    ops: [{ insert: '\n' }],
     textAttributesAtCursor: {},
     selectedTextAttributes: {},
   }

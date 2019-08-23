@@ -133,6 +133,7 @@ class _Sheet extends PureComponent<Sheet.Props> {
         const diff = new Delta()
           .retain(currentSelection.start)
           .delete(selection.length())
+          .insert('\n')
           .insert({ kind: 'image' }, element.description)
         const nextPosition = diff.transformPosition(currentSelection.start)
         await this.updateDocumentContent({
