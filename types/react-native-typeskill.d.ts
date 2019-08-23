@@ -81,14 +81,17 @@ export declare namespace Attributes {
  * @public
  */
 export declare namespace Bridge {
+    export interface MinimalImageProps {
+        containerWidth: number;
+    }
     /**
      * An object used to locate and render images.
      */
-    export interface ImageLocationService<D extends {}> {
+    export interface ImageLocationService<D> {
         /**
          * The image component to render.
          */
-        Component: ComponentType<D>;
+        Component: ComponentType<D & MinimalImageProps>;
         /**
          * An async function that returns the description of an image.
          */
@@ -209,7 +212,7 @@ export declare namespace Bridge {
  *
  * @public
  */
-export declare class Bridge<D extends {} = {}> {
+export declare class Bridge<D extends {} = Bridge.MinimalImageProps> {
     private outerEndpoint;
     private transforms;
     private imageLocatorService;

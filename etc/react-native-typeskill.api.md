@@ -43,8 +43,8 @@ export namespace Bridge {
         // (undocumented)
         type: 'image';
     }
-    export interface ImageLocationService<D extends {}> {
-        Component: ComponentType<D>;
+    export interface ImageLocationService<D> {
+        Component: ComponentType<D & MinimalImageProps>;
         onImageAddedEvent?: (description: D) => void;
         onImageRemovedEvent?: (description: D) => void;
         pickOneImage: () => Promise<D>;
@@ -52,6 +52,11 @@ export namespace Bridge {
     // @internal (undocumented)
     export type InsertOrReplaceAtSelectionListener = <D extends {}>(element: Element<D>) => void;
     export type LineTypeOverrideListener = (lineType: Attributes.LineType) => void;
+    // (undocumented)
+    export interface MinimalImageProps {
+        // (undocumented)
+        containerWidth: number;
+    }
     export type SelectedAttributesChangeListener = (selectedAttributes: Attributes.Map) => void;
     // @internal
     export interface SheetEventDomain {
@@ -71,7 +76,7 @@ export namespace Bridge {
 }
 
 // @public
-export class Bridge<D extends {} = {}> {
+export class Bridge<D extends {} = Bridge.MinimalImageProps> {
     constructor(config?: Partial<Bridge.Config<any>>);
     getControlEventDomain(): Bridge.ControlEventDomain<D>;
     getImageLocator(): Bridge.ImageLocationService<any>;

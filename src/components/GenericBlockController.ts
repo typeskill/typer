@@ -20,12 +20,12 @@ export interface GenericBlockControllerProps {
   isFocused: boolean
   textTransforms: Transforms
   textAttributesAtCursor: Attributes.Map
-  containerWidth: null | number
+  contentWidth: null | number
 }
 
 export class GenericBlockController extends PureComponent<GenericBlockControllerProps> {
   public render() {
-    const { descriptor, textStyle, imageLocatorService, containerWidth, ...otherProps } = this.props
+    const { descriptor, textStyle, imageLocatorService, contentWidth: containerWidth, ...otherProps } = this.props
     if (descriptor.kind === 'text') {
       return React.createElement(TextBlockController, {
         textOps: descriptor.opsSlice as TextOp[],

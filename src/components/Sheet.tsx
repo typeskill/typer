@@ -14,10 +14,41 @@ import Delta from 'quill-delta/dist/Delta'
 import mergeLeft from 'ramda/es/mergeLeft'
 
 const styles = StyleSheet.create({
+  contentContainer: {
+    flex: 1,
+  },
+  /**
+   * As of React Native 0.60, merging padding algorithm doesn't
+   * allow more specific spacing attributes to override more
+   * generic ones. As such, we must override all.
+   */
+  overridingContentStyles: {
+    margin: 0,
+    marginBottom: 0,
+    marginEnd: 0,
+    marginHorizontal: 0,
+    marginLeft: 0,
+    marginRight: 0,
+    marginStart: 0,
+    marginTop: 0,
+    marginVertical: 0,
+    padding: 0,
+    paddingBottom: 0,
+    paddingEnd: 0,
+    paddingHorizontal: 0,
+    paddingLeft: 0,
+    paddingRight: 0,
+    paddingStart: 0,
+    paddingTop: 0,
+    paddingVertical: 0,
+  },
   root: {
     flex: 1,
+    flexDirection: 'row',
     alignSelf: 'stretch',
     padding: 10,
+    justifyContent: 'center',
+    alignItems: 'stretch',
   },
 })
 
@@ -38,9 +69,13 @@ declare namespace Sheet {
     /**
      * The {@link (Bridge:class)} instance.
      *
-     * **Warning** This property cannot be changed after instantiation.
+     * @remarks This property MUST NOT be changed after instantiation.
      */
     bridge: Bridge
+    /**
+     * Component styles.
+     */
+    style?: StyleProp<ViewStyle>
     /**
      * Default text style.
      */
@@ -56,7 +91,10 @@ declare namespace Sheet {
      */
     onDocumentContentUpdate?: (nextDocumentContent: DocumentContent) => Promise<void>
     /**
-     * Style applied to the container.
+     * Style applied to the content container.
+     *
+     * @remarks This prop MUST NOT contain padding or margin rules. Such spacing rules will be zero-ed.
+     * Apply padding to the {@link (Sheet:namespace).Props.style | `style`} prop instead.
      */
     contentContainerStyle?: StyleProp<ViewStyle>
   }
@@ -66,6 +104,7 @@ declare namespace Sheet {
 class _Sheet extends PureComponent<Sheet.Props, SheetState> {
   public static propTypes: Record<keyof Sheet.Props, any> = {
     bridge: PropTypes.instanceOf(Bridge).isRequired,
+    style: ViewPropTypes.style,
     contentContainerStyle: ViewPropTypes.style,
     textStyle: PropTypes.any,
     documentContent: DocumentContentPropType.isRequired,
@@ -119,7 +158,7 @@ class _Sheet extends PureComponent<Sheet.Props, SheetState> {
     return (
       <GenericBlockController
         updateScopedContent={updateScopedContent}
-        containerWidth={this.state.containerWidth}
+        contentWidth={this.state.containerWidth}
         isFocused={isFocused}
         textStyle={textStyle}
         imageLocatorService={bridge.getImageLocator()}
@@ -181,8 +220,13 @@ class _Sheet extends PureComponent<Sheet.Props, SheetState> {
     const { ops } = this.props.documentContent
     const groups = groupOpsByBlocks(ops)
     return (
-      <View onLayout={this.handleOnContainerLayout} style={[styles.root, this.props.contentContainerStyle]}>
-        {groups.map(this.renderBlockController)}
+      <View style={[styles.root, this.props.style]}>
+        <View
+          style={[styles.contentContainer, this.props.contentContainerStyle, styles.overridingContentStyles]}
+          onLayout={this.handleOnContainerLayout}
+        >
+          {groups.map(this.renderBlockController)}
+        </View>
       </View>
     )
   }

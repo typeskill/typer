@@ -13,16 +13,16 @@ import mergeLeft from 'ramda/es/mergeLeft'
  */
 declare namespace Bridge {
   export interface MinimalImageProps {
-    containerWidth: number
+    contentWidth: number
   }
   /**
    * An object used to locate and render images.
    */
-  export interface ImageLocationService<D extends MinimalImageProps> {
+  export interface ImageLocationService<D> {
     /**
      * The image component to render.
      */
-    Component: ComponentType<D>
+    Component: ComponentType<D & MinimalImageProps>
     /**
      * An async function that returns the description of an image.
      */
@@ -36,7 +36,7 @@ declare namespace Bridge {
      */
     onImageRemovedEvent?: (description: D) => void
   }
-  export interface Config<D extends MinimalImageProps> {
+  export interface Config<D extends {}> {
     /**
      * A list of {@link (Transforms:namespace).GenericSpec | specs} which will be used to map text attributes with styles.
      */
@@ -177,7 +177,7 @@ const defaultConfig: Bridge.Config<any> = {
  *
  * @public
  */
-class Bridge<D extends Bridge.MinimalImageProps = Bridge.MinimalImageProps> {
+class Bridge<D extends {} = Bridge.MinimalImageProps> {
   private outerEndpoint = new Endpoint<Bridge.ControlEvent>()
   private transforms: Transforms
   private imageLocatorService: Bridge.ImageLocationService<D>
