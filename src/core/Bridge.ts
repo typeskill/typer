@@ -12,10 +12,13 @@ import mergeLeft from 'ramda/es/mergeLeft'
  * @public
  */
 declare namespace Bridge {
+  export interface MinimalImageProps {
+    containerWidth: number
+  }
   /**
    * An object used to locate and render images.
    */
-  export interface ImageLocationService<D extends {}> {
+  export interface ImageLocationService<D extends MinimalImageProps> {
     /**
      * The image component to render.
      */
@@ -33,7 +36,7 @@ declare namespace Bridge {
      */
     onImageRemovedEvent?: (description: D) => void
   }
-  export interface Config<D extends {}> {
+  export interface Config<D extends MinimalImageProps> {
     /**
      * A list of {@link (Transforms:namespace).GenericSpec | specs} which will be used to map text attributes with styles.
      */
@@ -147,7 +150,7 @@ declare namespace Bridge {
   }
 }
 
-export const dummyImageLocator: Bridge.ImageLocationService<{}> = {
+export const dummyImageLocator: Bridge.ImageLocationService<Bridge.MinimalImageProps> = {
   Component: () => {
     throw new Error(
       `Typeskill won't chose a React component to render images for you. You must provide your own imageLocatorService in Bridge constructor config parameter.`,
@@ -174,7 +177,7 @@ const defaultConfig: Bridge.Config<any> = {
  *
  * @public
  */
-class Bridge<D extends {} = {}> {
+class Bridge<D extends Bridge.MinimalImageProps = Bridge.MinimalImageProps> {
   private outerEndpoint = new Endpoint<Bridge.ControlEvent>()
   private transforms: Transforms
   private imageLocatorService: Bridge.ImageLocationService<D>

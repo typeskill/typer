@@ -10,11 +10,13 @@ export interface ImageBlockControllerProps {
   imageLocatorService: Bridge.ImageLocationService<any>
   isFocused: boolean
   updateScopedContent: (scopedContent: Partial<DocumentContent>) => Promise<void>
+  containerWidth: number
 }
 
 export class ImageBlockController extends PureComponent<ImageBlockControllerProps> {
   public render() {
+    const { containerWidth } = this.props
     const { Component } = this.props.imageLocatorService
-    return React.createElement(Component, this.props.imageOp.attributes)
+    return React.createElement(Component, { containerWidth, ...this.props.imageOp.attributes })
   }
 }

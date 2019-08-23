@@ -1,6 +1,6 @@
 import invariant from 'invariant'
 import React, { PureComponent, ComponentClass } from 'react'
-import { View, StyleSheet, StyleProp, TextStyle, ViewStyle, ViewPropTypes } from 'react-native'
+import { View, StyleSheet, StyleProp, TextStyle, ViewStyle, ViewPropTypes, LayoutChangeEvent } from 'react-native'
 import { Bridge } from '@core/Bridge'
 import { DocumentContent, applyTextTransformToSelection } from '@model/document'
 import { boundMethod } from 'autobind-decorator'
@@ -20,6 +20,10 @@ const styles = StyleSheet.create({
     padding: 10,
   },
 })
+
+interface SheetState {
+  containerWidth: number | null
+}
 
 /**
  * A set of definitions relative to {@link (Sheet:type)} component.
@@ -59,7 +63,7 @@ declare namespace Sheet {
 }
 
 // eslint-disable-next-line @typescript-eslint/class-name-casing
-class _Sheet extends PureComponent<Sheet.Props> {
+class _Sheet extends PureComponent<Sheet.Props, SheetState> {
   public static propTypes: Record<keyof Sheet.Props, any> = {
     bridge: PropTypes.instanceOf(Bridge).isRequired,
     contentContainerStyle: ViewPropTypes.style,
@@ -68,11 +72,21 @@ class _Sheet extends PureComponent<Sheet.Props> {
     onDocumentContentUpdate: PropTypes.func,
   }
 
+  public state: SheetState = {
+    containerWidth: null,
+  }
+
   public constructor(props: Sheet.Props) {
     super(props)
     const { bridge } = this.props
     invariant(bridge != null, 'bridge prop is required')
     invariant(bridge instanceof Bridge, 'bridge prop must be an instance of Bridge class')
+  }
+
+  private handleOnContainerLayout = (layoutEvent: LayoutChangeEvent) => {
+    this.setState({
+      containerWidth: layoutEvent.nativeEvent.layout.width,
+    })
   }
 
   private createScopedContentUpdater = (descriptor: BlockDescriptor) => {
@@ -105,6 +119,7 @@ class _Sheet extends PureComponent<Sheet.Props> {
     return (
       <GenericBlockController
         updateScopedContent={updateScopedContent}
+        containerWidth={this.state.containerWidth}
         isFocused={isFocused}
         textStyle={textStyle}
         imageLocatorService={bridge.getImageLocator()}
@@ -165,7 +180,11 @@ class _Sheet extends PureComponent<Sheet.Props> {
   public render() {
     const { ops } = this.props.documentContent
     const groups = groupOpsByBlocks(ops)
-    return <View style={[styles.root, this.props.contentContainerStyle]}>{groups.map(this.renderBlockController)}</View>
+    return (
+      <View onLayout={this.handleOnContainerLayout} style={[styles.root, this.props.contentContainerStyle]}>
+        {groups.map(this.renderBlockController)}
+      </View>
+    )
   }
 }
 

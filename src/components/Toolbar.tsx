@@ -79,7 +79,7 @@ declare namespace Toolbar {
   /**
    * Props of the {@link (Toolbar:type)} component.
    */
-  export interface Props<D extends {}> {
+  export interface Props<D extends Bridge.MinimalImageProps> {
     /**
      * The instance to be shared with the {@link (Sheet:type)}.
      */
@@ -196,7 +196,7 @@ const styles = StyleSheet.create({
 })
 
 // eslint-disable-next-line @typescript-eslint/class-name-casing
-class _Toolbar<D extends {}> extends PureComponent<Toolbar.Props<D>> {
+class _Toolbar<D extends Bridge.MinimalImageProps> extends PureComponent<Toolbar.Props<D>> {
   public static propTypes: Record<keyof Toolbar.Props<any>, any> = {
     bridge: PropTypes.instanceOf(Bridge).isRequired,
     selectedTextAttributes: PropTypes.object.isRequired,
@@ -405,7 +405,7 @@ export function buildVectorIconControlSpec<T extends Toolbar.VectorIconMinimalPr
  *
  * This type trick is aimed at preventing from exporting the component State which should be out of API surface.
  */
-type Toolbar<D extends {}> = ComponentClass<Toolbar.Props<D>>
+type Toolbar<D extends Bridge.MinimalImageProps> = ComponentClass<Toolbar.Props<D>>
 
 const Toolbar = _Toolbar as Toolbar<any>
 

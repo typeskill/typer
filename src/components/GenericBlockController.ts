@@ -20,11 +20,12 @@ export interface GenericBlockControllerProps {
   isFocused: boolean
   textTransforms: Transforms
   textAttributesAtCursor: Attributes.Map
+  containerWidth: null | number
 }
 
 export class GenericBlockController extends PureComponent<GenericBlockControllerProps> {
   public render() {
-    const { descriptor, textStyle, imageLocatorService, ...otherProps } = this.props
+    const { descriptor, textStyle, imageLocatorService, containerWidth, ...otherProps } = this.props
     if (descriptor.kind === 'text') {
       return React.createElement(TextBlockController, {
         textOps: descriptor.opsSlice as TextOp[],
@@ -32,11 +33,12 @@ export class GenericBlockController extends PureComponent<GenericBlockController
         ...otherProps,
       })
     }
-    if (descriptor.kind === 'image') {
+    if (descriptor.kind === 'image' && containerWidth !== null) {
       invariant(descriptor.opsSlice.length === 1, `Image blocks must be grouped alone.`)
       const imageProps = {
         imageOp: descriptor.opsSlice[0] as ImageOp,
         imageLocatorService,
+        containerWidth,
         ...otherProps,
       }
       return React.createElement(ImageBlockController, imageProps)
