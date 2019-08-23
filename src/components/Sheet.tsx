@@ -130,8 +130,9 @@ class _Sheet extends PureComponent<Sheet.Props, SheetState> {
 
   private createScopedContentUpdater = (descriptor: BlockDescriptor) => {
     const merger = createScopedContentMerger(descriptor)
-    return (scopedContent: Partial<DocumentContent>) =>
+    return async (scopedContent: Partial<DocumentContent> | Delta) => {
       this.updateDocumentContent(merger(scopedContent, this.props.documentContent))
+    }
   }
 
   private updateDocumentContent(documentUpdate: Partial<DocumentContent>): Promise<void> {
@@ -144,27 +145,74 @@ class _Sheet extends PureComponent<Sheet.Props, SheetState> {
   }
 
   @boundMethod
-  private renderBlockController(descriptor: BlockDescriptor) {
+  private renderBlockController(descriptor: BlockDescriptor, blockIndex: number, array: BlockDescriptor[]) {
     const { textStyle, bridge } = this.props
+    const isFirst = descriptor.blockIndex === 0
+    const isLast = descriptor.blockIndex === array.length - 1
+    const { textAttributesAtCursor, currentSelection, ops } = this.props.documentContent
+    const selectionAfterBlock = {
+      start: currentSelection.end + 1,
+      end: currentSelection.end + 1,
+    }
+    const selectionBeforeBlock = {
+      start: currentSelection.start - 1,
+      end: currentSelection.start - 1,
+    }
     const updateScopedContent = this.createScopedContentUpdater(descriptor)
-    const { textAttributesAtCursor, currentSelection } = this.props.documentContent
+    const moveAfterBlock = () => {
+      if (isLast) {
+        updateScopedContent({ ops: [...ops, { insert: '\n' }], currentSelection: selectionAfterBlock })
+      } else {
+        updateScopedContent({ currentSelection: selectionAfterBlock })
+      }
+    }
+    const moveBeforeBlock = () => {
+      if (!isFirst) {
+        updateScopedContent({ currentSelection: selectionBeforeBlock })
+      }
+    }
+    const insertAfterBlock = (character: string) => {
+      if (isLast) {
+        updateScopedContent({ ops: [...ops, { insert: `${character}\n` }], currentSelection: selectionAfterBlock })
+      } else {
+        const nextKind = array[blockIndex].kind
+        if (nextKind === 'text') {
+          updateScopedContent({ ops: [...ops, { insert: character }], currentSelection: selectionAfterBlock })
+        } else {
+          updateScopedContent({ ops: [...ops, { insert: `${character}\n` }], currentSelection: selectionAfterBlock })
+        }
+      }
+    }
+    const removeCurrentBlock = () => {
+      updateScopedContent(
+        isFirst
+          ? {
+              ops: [{ insert: '\n' }],
+              currentSelection: { start: 0, end: 0 },
+            }
+          : { ops: [], currentSelection: { start: -1, end: -1 } },
+      )
+    }
+    const key = `block-${descriptor.kind}-${descriptor.blockIndex}`
+    const offset = descriptor.selectableUnitsOffset
     const isFocused =
-      Selection.fromShape(currentSelection).intersection(
-        Selection.fromBounds(
-          descriptor.selectableUnitsOffset,
-          descriptor.selectableUnitsOffset + descriptor.numOfSelectableUnits,
-        ),
-      ) !== null
+      currentSelection.start >= offset && currentSelection.start <= offset + descriptor.numOfSelectableUnits
+    // console.warn(`${key} ${isFocused}`)
     return (
       <GenericBlockController
         updateScopedContent={updateScopedContent}
         contentWidth={this.state.containerWidth}
+        removeCurrentBlock={removeCurrentBlock}
+        insertAfterBlock={insertAfterBlock}
+        moveAfterBlock={moveAfterBlock}
+        moveBeforeBlock={moveBeforeBlock}
         isFocused={isFocused}
         textStyle={textStyle}
         imageLocatorService={bridge.getImageLocator()}
-        key={`block-${descriptor.kind}-${descriptor.blockIndex}`}
+        key={key}
         descriptor={descriptor}
-        grow={true}
+        isFirst={isFirst}
+        isLast={isLast}
         textAttributesAtCursor={textAttributesAtCursor}
         textTransforms={this.props.bridge.getTransforms()}
       />
@@ -189,6 +237,7 @@ class _Sheet extends PureComponent<Sheet.Props, SheetState> {
           .delete(selection.length())
           .insert('\n')
           .insert({ kind: 'image' }, element.description)
+          .delete(1)
         const nextPosition = diff.transformPosition(currentSelection.start)
         await this.updateDocumentContent({
           ops: delta.compose(diff).ops,

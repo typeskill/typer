@@ -81,8 +81,13 @@ export declare namespace Attributes {
  * @public
  */
 export declare namespace Bridge {
-    export interface MinimalImageProps {
-        containerWidth: number;
+    export interface Dimensions {
+        width: number;
+        height: number;
+    }
+    export interface ImageComponentProps<D> {
+        dimensions: Dimensions;
+        params: D;
     }
     /**
      * An object used to locate and render images.
@@ -90,8 +95,14 @@ export declare namespace Bridge {
     export interface ImageLocationService<D> {
         /**
          * The image component to render.
+         *
+         * @remarks The component MUST fit within the provided dimensions properties.
          */
-        Component: ComponentType<D & MinimalImageProps>;
+        Component: ComponentType<ImageComponentProps<D>>;
+        /**
+         * Compute display dimensions from image info and content width.
+         */
+        computeImageDimensions: (params: D, contentWidth: number) => Dimensions;
         /**
          * An async function that returns the description of an image.
          */
@@ -212,7 +223,7 @@ export declare namespace Bridge {
  *
  * @public
  */
-export declare class Bridge<D extends {} = Bridge.MinimalImageProps> {
+export declare class Bridge<D extends {} = {}> {
     private outerEndpoint;
     private transforms;
     private imageLocatorService;
@@ -468,9 +479,13 @@ export declare namespace Sheet {
         /**
          * The {@link (Bridge:class)} instance.
          *
-         * **Warning** This property cannot be changed after instantiation.
+         * @remarks This property MUST NOT be changed after instantiation.
          */
         bridge: Bridge;
+        /**
+         * Component styles.
+         */
+        style?: StyleProp<ViewStyle>;
         /**
          * Default text style.
          */
@@ -486,7 +501,10 @@ export declare namespace Sheet {
          */
         onDocumentContentUpdate?: (nextDocumentContent: DocumentContent) => Promise<void>;
         /**
-         * Style applied to the container.
+         * Style applied to the content container.
+         *
+         * @remarks This prop MUST NOT contain padding or margin rules. Such spacing rules will be zero-ed.
+         * Apply padding to the {@link (Sheet:namespace).Props.style | `style`} prop instead.
          */
         contentContainerStyle?: StyleProp<ViewStyle>;
     }

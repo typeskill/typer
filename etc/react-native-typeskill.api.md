@@ -36,7 +36,21 @@ export namespace Bridge {
         // @internal
         insertOrReplaceAtSelection: (element: Element<D>) => void;
     }
+    // (undocumented)
+    export interface Dimensions {
+        // (undocumented)
+        height: number;
+        // (undocumented)
+        width: number;
+    }
     export type Element<D extends {}> = ImageElement<D> | TextElement;
+    // (undocumented)
+    export interface ImageComponentProps<D> {
+        // (undocumented)
+        dimensions: Dimensions;
+        // (undocumented)
+        params: D;
+    }
     export interface ImageElement<D extends {}> {
         // (undocumented)
         description: D;
@@ -44,7 +58,8 @@ export namespace Bridge {
         type: 'image';
     }
     export interface ImageLocationService<D> {
-        Component: ComponentType<D & MinimalImageProps>;
+        Component: ComponentType<ImageComponentProps<D>>;
+        computeImageDimensions: (params: D, contentWidth: number) => Dimensions;
         onImageAddedEvent?: (description: D) => void;
         onImageRemovedEvent?: (description: D) => void;
         pickOneImage: () => Promise<D>;
@@ -52,11 +67,6 @@ export namespace Bridge {
     // @internal (undocumented)
     export type InsertOrReplaceAtSelectionListener = <D extends {}>(element: Element<D>) => void;
     export type LineTypeOverrideListener = (lineType: Attributes.LineType) => void;
-    // (undocumented)
-    export interface MinimalImageProps {
-        // (undocumented)
-        containerWidth: number;
-    }
     export type SelectedAttributesChangeListener = (selectedAttributes: Attributes.Map) => void;
     // @internal
     export interface SheetEventDomain {
@@ -76,7 +86,7 @@ export namespace Bridge {
 }
 
 // @public
-export class Bridge<D extends {} = Bridge.MinimalImageProps> {
+export class Bridge<D extends {} = {}> {
     constructor(config?: Partial<Bridge.Config<any>>);
     getControlEventDomain(): Bridge.ControlEventDomain<D>;
     getImageLocator(): Bridge.ImageLocationService<any>;
@@ -160,6 +170,7 @@ export namespace Sheet {
         contentContainerStyle?: StyleProp<ViewStyle>;
         documentContent: DocumentContent;
         onDocumentContentUpdate?: (nextDocumentContent: DocumentContent) => Promise<void>;
+        style?: StyleProp<ViewStyle>;
         textStyle?: StyleProp<TextStyle>;
     }
 }

@@ -11,13 +11,21 @@ import { DocumentContent } from '@model/document'
 import { Transforms } from '@core/Transforms'
 import { Attributes } from '@delta/attributes'
 
-export interface GenericBlockControllerProps {
+export interface StandardBlockControllerProps {
   descriptor: BlockDescriptor
-  textStyle?: StyleProp<TextStyle>
-  grow: boolean
-  imageLocatorService: Bridge.ImageLocationService<any>
+  isFirst: boolean
+  isLast: boolean
   updateScopedContent: (scopedContent: Partial<DocumentContent>) => Promise<void>
+  removeCurrentBlock: () => void
+  insertAfterBlock: (text: string) => void
+  moveAfterBlock: () => void
+  moveBeforeBlock: () => void
   isFocused: boolean
+}
+
+export interface GenericBlockControllerProps extends StandardBlockControllerProps {
+  textStyle?: StyleProp<TextStyle>
+  imageLocatorService: Bridge.ImageLocationService<any>
   textTransforms: Transforms
   textAttributesAtCursor: Attributes.Map
   contentWidth: null | number
@@ -25,20 +33,22 @@ export interface GenericBlockControllerProps {
 
 export class GenericBlockController extends PureComponent<GenericBlockControllerProps> {
   public render() {
-    const { descriptor, textStyle, imageLocatorService, contentWidth: containerWidth, ...otherProps } = this.props
+    const { descriptor, textStyle, imageLocatorService, contentWidth, ...otherProps } = this.props
     if (descriptor.kind === 'text') {
       return React.createElement(TextBlockController, {
-        textOps: descriptor.opsSlice as TextOp[],
+        descriptor,
         textStyle,
+        textOps: descriptor.opsSlice as TextOp[],
         ...otherProps,
       })
     }
-    if (descriptor.kind === 'image' && containerWidth !== null) {
+    if (descriptor.kind === 'image' && contentWidth !== null) {
       invariant(descriptor.opsSlice.length === 1, `Image blocks must be grouped alone.`)
       const imageProps = {
+        descriptor,
         imageOp: descriptor.opsSlice[0] as ImageOp,
         imageLocatorService,
-        containerWidth,
+        contentWidth,
         ...otherProps,
       }
       return React.createElement(ImageBlockController, imageProps)

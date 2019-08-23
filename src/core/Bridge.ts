@@ -12,8 +12,14 @@ import mergeLeft from 'ramda/es/mergeLeft'
  * @public
  */
 declare namespace Bridge {
-  export interface MinimalImageProps {
-    contentWidth: number
+  export interface Dimensions {
+    width: number
+    height: number
+  }
+
+  export interface ImageComponentProps<D> {
+    dimensions: Dimensions
+    params: D
   }
   /**
    * An object used to locate and render images.
@@ -21,8 +27,14 @@ declare namespace Bridge {
   export interface ImageLocationService<D> {
     /**
      * The image component to render.
+     *
+     * @remarks The component MUST fit within the provided dimensions properties.
      */
-    Component: ComponentType<D & MinimalImageProps>
+    Component: ComponentType<ImageComponentProps<D>>
+    /**
+     * Compute display dimensions from image info and content width.
+     */
+    computeImageDimensions: (params: D, contentWidth: number) => Dimensions
     /**
      * An async function that returns the description of an image.
      */
@@ -150,12 +162,13 @@ declare namespace Bridge {
   }
 }
 
-export const dummyImageLocator: Bridge.ImageLocationService<Bridge.MinimalImageProps> = {
+export const dummyImageLocator: Bridge.ImageLocationService<any> = {
   Component: () => {
     throw new Error(
       `Typeskill won't chose a React component to render images for you. You must provide your own imageLocatorService in Bridge constructor config parameter.`,
     )
   },
+  computeImageDimensions: () => ({ width: 0, height: 0 }),
   async pickOneImage() {
     throw new Error(
       `Typeskill won't chose an image picker for you. You must provide your own imageLocatorService in Bridge constructor config parameter.`,
@@ -177,7 +190,7 @@ const defaultConfig: Bridge.Config<any> = {
  *
  * @public
  */
-class Bridge<D extends {} = Bridge.MinimalImageProps> {
+class Bridge<D extends {} = {}> {
   private outerEndpoint = new Endpoint<Bridge.ControlEvent>()
   private transforms: Transforms
   private imageLocatorService: Bridge.ImageLocationService<D>

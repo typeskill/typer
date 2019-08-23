@@ -92,6 +92,22 @@ export class Selection implements SelectionShape {
     return null
   }
 
+  public move(position: number): SelectionShape {
+    const { start, end } = this
+    return {
+      start: start + position,
+      end: end + position,
+    }
+  }
+
+  public toShape(): SelectionShape {
+    const { start, end } = this
+    return {
+      start,
+      end,
+    }
+  }
+
   public length(): number {
     return this.end - this.start
   }

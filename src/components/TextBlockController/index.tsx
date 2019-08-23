@@ -17,9 +17,9 @@ import { Selection } from '@delta/Selection'
 import { TextOp } from '@delta/operations'
 import { Attributes } from '@delta/attributes'
 import { Transforms } from '@core/Transforms'
-import { DocumentContent } from '@model/document'
 import { TextChangeSession } from './TextChangeSession'
 import { DocumentDelta } from '@delta/DocumentDelta'
+import { StandardBlockControllerProps } from '@components/GenericBlockController'
 
 const styles = StyleSheet.create({
   grow: {
@@ -30,13 +30,10 @@ const styles = StyleSheet.create({
   },
 })
 
-export interface TextBlockControllerProps {
+export interface TextBlockControllerProps extends StandardBlockControllerProps {
   textOps: TextOp[]
   textAttributesAtCursor: Attributes.Map
-  grow?: boolean
   textStyle?: StyleProp<TextStyle>
-  isFocused: boolean
-  updateScopedContent: (scopedContent: Partial<DocumentContent>) => Promise<void>
   textTransforms: Transforms
 }
 
@@ -67,7 +64,7 @@ interface TextBlockControllerState {
  */
 export class TextBlockController extends Component<TextBlockControllerProps, TextBlockControllerState> {
   private textChangeSession: TextChangeSession | null = null
-  private textInputRef: TextInput | null = null
+  private textInputRef = React.createRef<TextInput>()
   private currentSelection = Selection.fromShape({ start: 0, end: 0 })
 
   public state: TextBlockControllerState = {
@@ -105,7 +102,6 @@ export class TextBlockController extends Component<TextBlockControllerProps, Tex
         this.textChangeSession.getDeltaChangeContext(),
         this.props.textAttributesAtCursor,
       )
-      console.info('DELTA CHANGE CONTEXT', this.textChangeSession.getDeltaChangeContext())
       this.textChangeSession = null
       this.updateOps(documentDeltaUpdate.delta.ops as TextOp[], documentDeltaUpdate.selectionAfterChange)
     } else {
@@ -114,13 +110,9 @@ export class TextBlockController extends Component<TextBlockControllerProps, Tex
   }
 
   @boundMethod
-  private handleOnTextinputRef(ref: TextInput | null) {
-    this.textInputRef = ref
-  }
-
-  @boundMethod
-  private handleOnFocusRequest() {
-    this.textInputRef && this.textInputRef.focus()
+  private focus() {
+    this.textInputRef.current && this.textInputRef.current.focus()
+    console.warn('FOCUS TEXT BLOC')
   }
 
   private async setStateAsync(stateFragment: Partial<TextBlockControllerState>): Promise<void> {
@@ -131,7 +123,6 @@ export class TextBlockController extends Component<TextBlockControllerProps, Tex
 
   public shouldComponentUpdate(nextProps: TextBlockControllerProps, nextState: TextBlockControllerState) {
     return (
-      nextProps.grow !== this.props.grow ||
       nextState.overridingSelection !== this.state.overridingSelection ||
       nextProps.textOps !== this.props.textOps ||
       nextProps.isFocused !== this.props.isFocused
@@ -164,8 +155,18 @@ export class TextBlockController extends Component<TextBlockControllerProps, Tex
     return this.props.textOps
   }
 
+  @boundMethod
   public handleOnKeyPressed(e: NativeSyntheticEvent<TextInputKeyPressEventData>) {
-    console.log(e.nativeEvent.key)
+    const key = e.nativeEvent.key
+    if (key === 'Backspace' && this.currentSelection.start === 0 && this.currentSelection.end === 0) {
+      this.props.moveBeforeBlock()
+    }
+  }
+
+  public componentDidMount() {
+    if (this.props.isFocused) {
+      this.focus()
+    }
   }
 
   public componentDidUpdate(oldProps: TextBlockControllerProps) {
@@ -174,7 +175,7 @@ export class TextBlockController extends Component<TextBlockControllerProps, Tex
       this.setState({ overridingSelection: null })
     }
     if (!oldProps.isFocused && this.props.isFocused) {
-      this.handleOnFocusRequest()
+      this.focus()
     }
   }
 
@@ -183,17 +184,17 @@ export class TextBlockController extends Component<TextBlockControllerProps, Tex
   }
 
   public render() {
-    const { grow, textStyle, textOps, textTransforms } = this.props
+    const { textStyle, textOps, textTransforms } = this.props
     const { overridingSelection } = this.state
     return (
-      <View style={[grow ? styles.grow : undefined]}>
+      <View style={styles.grow}>
         <TextInput
           selection={overridingSelection ? overridingSelection : undefined}
-          style={[grow ? styles.grow : undefined, styles.textInput, richTextStyles.defaultText]}
+          style={[styles.grow, styles.textInput, richTextStyles.defaultText]}
           onKeyPress={this.handleOnKeyPressed}
           onSelectionChange={this.handleOnSelectionChanged}
           onChangeText={this.handleOnTextChanged}
-          ref={this.handleOnTextinputRef}
+          ref={this.textInputRef}
           {...constantTextInputProps}
         >
           <RichText textStyle={textStyle} transforms={textTransforms} textOps={textOps} />

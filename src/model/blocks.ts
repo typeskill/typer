@@ -5,6 +5,7 @@ import reduce from 'ramda/es/reduce'
 import slice from 'ramda/es/slice'
 import { SelectionShape } from '@delta/Selection'
 import { DocumentContent } from './document'
+import Delta = require('quill-delta')
 
 export type BlockType = 'image' | 'text'
 
@@ -80,7 +81,9 @@ export function createScopedContentMerger(descriptor: BlockDescriptor) {
   const sliceTail = slice(descriptor.endSliceIndex, Infinity)
   return (scopedContent: Partial<DocumentContent>, documentContent: DocumentContent): Partial<DocumentContent> => {
     const ops = scopedContent.ops
-      ? [...sliceHead(documentContent.ops), ...scopedContent.ops, ...sliceTail(documentContent.ops)]
+      ? new Delta(sliceHead(documentContent.ops))
+          .concat(new Delta(scopedContent.ops))
+          .concat(new Delta(sliceTail(documentContent.ops))).ops
       : documentContent.ops
     const currentSelection: SelectionShape = scopedContent.currentSelection
       ? {
