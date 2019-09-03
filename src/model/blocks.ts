@@ -5,7 +5,7 @@ import reduce from 'ramda/es/reduce'
 import slice from 'ramda/es/slice'
 import { SelectionShape } from '@delta/Selection'
 import { DocumentContent } from './document'
-import Delta = require('quill-delta')
+import Delta from 'quill-delta'
 
 export type BlockType = 'image' | 'text'
 

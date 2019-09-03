@@ -112,7 +112,6 @@ export class TextBlockController extends Component<TextBlockControllerProps, Tex
   @boundMethod
   private focus() {
     this.textInputRef.current && this.textInputRef.current.focus()
-    console.warn('FOCUS TEXT BLOC')
   }
 
   private async setStateAsync(stateFragment: Partial<TextBlockControllerState>): Promise<void> {
