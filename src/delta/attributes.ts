@@ -1,11 +1,7 @@
-import Delta from 'quill-delta'
 import mergeAll from 'ramda/es/mergeAll'
 import reject from 'ramda/es/reject'
 import isNil from 'ramda/es/isNil'
-import { GenericOp } from './operations'
-import find from 'ramda/es/find'
 import omit from 'ramda/es/omit'
-import { GenericRichContent } from './generic'
 
 /**
  * A set of definitions for {@link GenericOp} attributes.
@@ -48,6 +44,8 @@ export declare namespace Attributes {
   export type LineType = 'normal' | 'quoted'
 }
 
+const rejectNil = reject(isNil)
+
 /**
  * Create a new object with the own properties of the first object merged with the own properties of the second object and so on.
  * If a key exists in both objects, the value from the endmost object will be used.
@@ -59,28 +57,7 @@ export declare namespace Attributes {
  * @param attributes - the attributes object to merge
  */
 export function mergeAttributesRight(...attributes: Attributes.Map[]): Attributes.Map {
-  return reject(isNil)(mergeAll<Attributes.Map>(attributes))
+  return rejectNil(mergeAll<Attributes.Map>(attributes))
 }
 
 export const getTextAttributes = omit(['$type'])
-
-/**
- * This function returns attributes of the closest character before cursor.
- *
- * @param delta The full rich text representation
- * @param cursorPosition
- */
-export function getTextAttributesAtCursor(delta: GenericRichContent, cursorPosition: number): Attributes.Map {
-  let lowerBound = 0
-  const matchedOp = find((op: GenericOp) => {
-    const len = Delta.Op.length(op)
-    const upperBound = len + lowerBound
-    const match = cursorPosition <= upperBound && cursorPosition >= lowerBound
-    lowerBound = upperBound
-    return match
-  })(delta.ops)
-  if (!matchedOp) {
-    return {}
-  }
-  return getTextAttributes(matchedOp.attributes) || {}
-}

@@ -158,6 +158,9 @@ export const strikethroughTransform: Transforms.GenericSpec<'strikethrough', 'te
   },
 }
 
+/**
+ * @public
+ */
 export const defaultTextTransforms: Transforms.GenericSpec<Attributes.TextValue, 'text'>[] = [
   boldTransform,
   italicTransform,

@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { Attributes, mergeAttributesRight } from '@delta/attributes'
+import { Attributes } from '@delta/attributes'
 import { SelectionShape, Selection } from '@delta/Selection'
 import { GenericOp } from '@delta/operations'
 import clone from 'ramda/es/clone'
@@ -21,11 +20,8 @@ export interface DocumentContent {
    */
   readonly currentSelection: SelectionShape
   /**
-   * The attributes ...
-   */
-  readonly textAttributesAtCursor: Attributes.Map
-  /**
-   * The attributes encompassed by {@link DocumentContent.currentSelection}.
+   * The attributes encompassed by {@link DocumentContent.currentSelection} or the attributes at cursor.
+   * `null` values represent attributes to be removed.
    */
   readonly selectedTextAttributes: Attributes.Map
 }
@@ -48,7 +44,6 @@ export function buildInitialDocContent(): DocumentContent {
   return {
     currentSelection: { start: 0, end: 0 },
     ops: [{ insert: '\n' }],
-    textAttributesAtCursor: {},
     selectedTextAttributes: {},
   }
 }
@@ -64,7 +59,6 @@ export function cloneDocContent(content: DocumentContent): DocumentContent {
   return {
     ops: clone(content.ops),
     currentSelection: content.currentSelection,
-    textAttributesAtCursor: content.textAttributesAtCursor,
     selectedTextAttributes: content.selectedTextAttributes,
   }
 }
@@ -73,19 +67,16 @@ export function applyTextTransformToSelection(
   attributeName: string,
   attributeValue: Attributes.GenericValue,
   documentContent: DocumentContent,
-): Pick<DocumentContent, 'ops' | 'selectedTextAttributes' | 'textAttributesAtCursor'> {
-  const { currentSelection, ops, textAttributesAtCursor } = documentContent
+): Pick<DocumentContent, 'ops' | 'selectedTextAttributes'> {
+  const { currentSelection, ops, selectedTextAttributes } = documentContent
   const delta = new DocumentDelta(ops)
   const selection = Selection.fromShape(currentSelection)
   // Apply transforms to selection range
   const userAttributes = { [attributeName]: attributeValue }
   const atomicUpdate = delta.applyTextTransformToSelection(selection, attributeName, attributeValue)
-  const deltaAttributes = atomicUpdate.delta.getSelectedTextAttributes(selection)
-  const nextAttributesAtCursor = mergeLeft(userAttributes, textAttributesAtCursor)
-  const nextSelectedAttributes = mergeAttributesRight(deltaAttributes, nextAttributesAtCursor)
+  const nextSelectedAttributes = mergeLeft(userAttributes, selectedTextAttributes)
   return {
     selectedTextAttributes: nextSelectedAttributes,
-    textAttributesAtCursor: nextAttributesAtCursor,
     ops: atomicUpdate.delta.ops,
   }
 }

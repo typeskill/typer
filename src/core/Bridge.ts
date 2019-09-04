@@ -1,10 +1,8 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Attributes } from '@delta/attributes'
-import { defaultTextTransforms } from '@core/Transforms'
 import { Endpoint } from './Endpoint'
-import { Transforms } from './Transforms'
-import { ComponentType } from 'react'
+import { Gen, defaultRenderConfig } from './Gen'
 import mergeLeft from 'ramda/es/mergeLeft'
+import { Transforms } from './Transforms'
 
 /**
  * A set of definitions related to the {@link (Bridge:class)} class.
@@ -12,54 +10,6 @@ import mergeLeft from 'ramda/es/mergeLeft'
  * @public
  */
 declare namespace Bridge {
-  export interface Dimensions {
-    width: number
-    height: number
-  }
-
-  export interface ImageComponentProps<D> {
-    dimensions: Dimensions
-    params: D
-  }
-  /**
-   * An object used to locate and render images.
-   */
-  export interface ImageLocationService<D> {
-    /**
-     * The image component to render.
-     *
-     * @remarks The component MUST fit within the provided dimensions properties.
-     */
-    Component: ComponentType<ImageComponentProps<D>>
-    /**
-     * Compute display dimensions from image info and content width.
-     */
-    computeImageDimensions: (params: D, contentWidth: number) => Dimensions
-    /**
-     * An async function that returns the description of an image.
-     */
-    pickOneImage: () => Promise<D>
-    /**
-     * Callback fired when an image has been successfully inserted.
-     */
-    onImageAddedEvent?: (description: D) => void
-    /**
-     * Callback fired when an image has been removed through user interactions.
-     */
-    onImageRemovedEvent?: (description: D) => void
-  }
-  export interface Config<D extends {}> {
-    /**
-     * A list of {@link (Transforms:namespace).GenericSpec | specs} which will be used to map text attributes with styles.
-     */
-    textTransformSpecs: Transforms.GenericSpec<Attributes.TextValue, 'text'>[]
-    /**
-     * An object describing the behavior to locate and render images.
-     *
-     * @remarks Were this parameter not provided, images interactions will be disabled in the related {@link (Sheet:type)}.
-     */
-    imageLocatorService: ImageLocationService<D>
-  }
   /**
    * An event which signals the intent to modify the content touched by current selection.
    */
@@ -157,32 +107,13 @@ declare namespace Bridge {
      * Dereference all listeners registered for this owner.
      */
     release: (owner: object) => void
-
-    getTransforms(): Transforms
   }
-}
-
-export const dummyImageLocator: Bridge.ImageLocationService<any> = {
-  Component: () => {
-    throw new Error(
-      `Typeskill won't chose a React component to render images for you. You must provide your own imageLocatorService in Bridge constructor config parameter.`,
-    )
-  },
-  computeImageDimensions: () => ({ width: 0, height: 0 }),
-  async pickOneImage() {
-    throw new Error(
-      `Typeskill won't chose an image picker for you. You must provide your own imageLocatorService in Bridge constructor config parameter.`,
-    )
-  },
-}
-
-const defaultConfig: Bridge.Config<any> = {
-  textTransformSpecs: defaultTextTransforms,
-  imageLocatorService: dummyImageLocator,
 }
 
 /**
  * An abstraction responsible for event dispatching between the {@link (Sheet:type)} and external controls.
+ *
+ * @remarks It also provide a uniform access to custom rendering logic.
  *
  * @internalRemarks
  *
@@ -192,8 +123,7 @@ const defaultConfig: Bridge.Config<any> = {
  */
 class Bridge<D extends {} = {}> {
   private outerEndpoint = new Endpoint<Bridge.ControlEvent>()
-  private transforms: Transforms
-  private imageLocatorService: Bridge.ImageLocationService<D>
+  private genService: Gen.Service
 
   private controlEventDom: Bridge.ControlEventDomain<D> = {
     insertOrReplaceAtSelection: (element: Bridge.Element<D>) => {
@@ -214,19 +144,19 @@ class Bridge<D extends {} = {}> {
     release: (owner: object) => {
       this.outerEndpoint.release(owner)
     },
-    getTransforms: () => this.transforms,
   }
 
   /**
-   *
-   * @param config - An object to customize bridge behavior
+   * @param genConfig - A configuration object describing content generation behaviors.
    */
-  public constructor(config?: Partial<Bridge.Config<any>>) {
-    const { textTransformSpecs, imageLocatorService } = mergeLeft(config, defaultConfig)
-    this.imageLocatorService = imageLocatorService
-    this.transforms = new Transforms(textTransformSpecs || defaultTextTransforms)
+  public constructor(genConfig?: Partial<Gen.Config<D>>) {
     this.sheetEventDom = Object.freeze(this.sheetEventDom)
     this.controlEventDom = Object.freeze(this.controlEventDom)
+    const finalRendererConfig = mergeLeft(genConfig, defaultRenderConfig)
+    this.genService = {
+      imageLocator: finalRendererConfig.imageLocatorService,
+      textTransforms: new Transforms(finalRendererConfig.textTransformSpecs),
+    }
   }
 
   /**
@@ -250,17 +180,10 @@ class Bridge<D extends {} = {}> {
   }
 
   /**
-   * Get transforms.
+   * @returns The gen service, responsible for content generation.
    */
-  public getTransforms(): Transforms {
-    return this.transforms
-  }
-
-  /**
-   * Get image locator, if exists
-   */
-  public getImageLocator(): Bridge.ImageLocationService<any> {
-    return this.imageLocatorService
+  public getGenService(): Gen.Service {
+    return this.genService
   }
 
   /**

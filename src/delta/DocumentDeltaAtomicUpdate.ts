@@ -1,18 +1,18 @@
 import { Selection } from './Selection'
 import { DocumentDelta } from './DocumentDelta'
+import Delta from 'quill-delta'
 
 export class DocumentDeltaAtomicUpdate {
-  public readonly delta: DocumentDelta
   private readonly _selectionAfterChange: Selection
-  public readonly overridingSelection: Selection | null
-
-  public constructor(delta: DocumentDelta, selectionAfterChange: Selection, overridingSelection?: Selection) {
-    this.delta = delta
+  public readonly delta: DocumentDelta
+  public readonly diff: Delta
+  public constructor(delta: DocumentDelta, diff: Delta, selectionAfterChange: Selection) {
     this._selectionAfterChange = selectionAfterChange
-    this.overridingSelection = overridingSelection || null
+    this.delta = delta
+    this.diff = diff
   }
 
   public get selectionAfterChange() {
-    return this.overridingSelection || this._selectionAfterChange
+    return this._selectionAfterChange
   }
 }

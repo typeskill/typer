@@ -1,21 +1,39 @@
 import invariant from 'invariant'
 import React, { PureComponent, ComponentClass } from 'react'
-import { View, StyleSheet, StyleProp, TextStyle, ViewStyle, ViewPropTypes, LayoutChangeEvent } from 'react-native'
+import {
+  StyleSheet,
+  StyleProp,
+  TextStyle,
+  ViewStyle,
+  ViewPropTypes,
+  ScrollView,
+  View,
+  LayoutChangeEvent,
+} from 'react-native'
 import { Bridge } from '@core/Bridge'
-import { DocumentContent, applyTextTransformToSelection } from '@model/document'
+import { DocumentContent } from '@model/documents'
 import { boundMethod } from 'autobind-decorator'
 import PropTypes from 'prop-types'
 import { DocumentContentPropType } from './types'
 import { GenericBlockController } from './GenericBlockController'
-import { BlockDescriptor, groupOpsByBlocks, createScopedContentMerger } from '@model/blocks'
-import { Selection } from '@delta/Selection'
-import { DocumentDelta } from '@delta/DocumentDelta'
-import Delta from 'quill-delta/dist/Delta'
 import mergeLeft from 'ramda/es/mergeLeft'
+import { Block } from '@model/Block'
+import { DocumentProvider, DocumentController } from './DocumentController'
+import { Document } from '@model/Document'
+import { SelectionShape, Selection } from '@delta/Selection'
+import { ScrollIntoView, wrapScrollView } from 'react-native-scroll-into-view'
+import { Gen } from '@core/Gen'
+
+const AutoScrollView = wrapScrollView(ScrollView)
 
 const styles = StyleSheet.create({
+  scroll: {
+    flex: 1,
+  },
   contentContainer: {
     flex: 1,
+    justifyContent: 'center',
+    alignItems: 'stretch',
   },
   /**
    * As of React Native 0.60, merging padding algorithm doesn't
@@ -47,13 +65,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignSelf: 'stretch',
     padding: 10,
-    justifyContent: 'center',
-    alignItems: 'stretch',
   },
 })
 
 interface SheetState {
   containerWidth: number | null
+  overridingScopedSelection: SelectionShape | null
 }
 
 /**
@@ -65,21 +82,13 @@ declare namespace Sheet {
   /**
    * {@link (Sheet:type)} properties.
    */
-  export interface Props {
+  export interface Props<D extends {} = {}> {
     /**
      * The {@link (Bridge:class)} instance.
      *
      * @remarks This property MUST NOT be changed after instantiation.
      */
     bridge: Bridge
-    /**
-     * Component styles.
-     */
-    style?: StyleProp<ViewStyle>
-    /**
-     * Default text style.
-     */
-    textStyle?: StyleProp<TextStyle>
     /**
      * The {@link DocumentContent | document content} to display.
      */
@@ -90,6 +99,15 @@ declare namespace Sheet {
      * @remarks This callback is expected to return a promise. This promise MUST resolve when the update had been proceeded.
      */
     onDocumentContentUpdate?: (nextDocumentContent: DocumentContent) => Promise<void>
+
+    /**
+     * Component styles.
+     */
+    style?: StyleProp<ViewStyle>
+    /**
+     * Default text style.
+     */
+    textStyle?: StyleProp<TextStyle>
     /**
      * Style applied to the content container.
      *
@@ -97,11 +115,19 @@ declare namespace Sheet {
      * Apply padding to the {@link (Sheet:namespace).Props.style | `style`} prop instead.
      */
     contentContainerStyle?: StyleProp<ViewStyle>
+    /**
+     * Customize the color of image controls upon activation.
+     */
+    underlayColor?: string
+    /**
+     * In debug mode, active block will be highlighted.
+     */
+    debug?: boolean
   }
 }
 
 // eslint-disable-next-line @typescript-eslint/class-name-casing
-class _Sheet extends PureComponent<Sheet.Props, SheetState> {
+class _Sheet extends PureComponent<Sheet.Props, SheetState> implements DocumentProvider {
   public static propTypes: Record<keyof Sheet.Props, any> = {
     bridge: PropTypes.instanceOf(Bridge).isRequired,
     style: ViewPropTypes.style,
@@ -109,17 +135,32 @@ class _Sheet extends PureComponent<Sheet.Props, SheetState> {
     textStyle: PropTypes.any,
     documentContent: DocumentContentPropType.isRequired,
     onDocumentContentUpdate: PropTypes.func,
+    debug: PropTypes.bool,
+    underlayColor: PropTypes.string,
   }
+
+  public static defaultProps: Partial<Sheet.Props> = {}
+
+  private genService: Gen.Service
+  private doc: Document
 
   public state: SheetState = {
     containerWidth: null,
+    overridingScopedSelection: null,
   }
 
   public constructor(props: Sheet.Props) {
     super(props)
-    const { bridge } = this.props
+    const { bridge } = props
     invariant(bridge != null, 'bridge prop is required')
     invariant(bridge instanceof Bridge, 'bridge prop must be an instance of Bridge class')
+    this.doc = new Document(props.documentContent)
+    this.genService = props.bridge.getGenService()
+  }
+
+  @boundMethod
+  private clearSelection() {
+    this.setState({ overridingScopedSelection: null })
   }
 
   private handleOnContainerLayout = (layoutEvent: LayoutChangeEvent) => {
@@ -128,14 +169,7 @@ class _Sheet extends PureComponent<Sheet.Props, SheetState> {
     })
   }
 
-  private createScopedContentUpdater = (descriptor: BlockDescriptor) => {
-    const merger = createScopedContentMerger(descriptor)
-    return async (scopedContent: Partial<DocumentContent> | Delta) => {
-      this.updateDocumentContent(merger(scopedContent, this.props.documentContent))
-    }
-  }
-
-  private updateDocumentContent(documentUpdate: Partial<DocumentContent>): Promise<void> {
+  public updateDocumentContent(documentUpdate: Partial<DocumentContent>): Promise<void> {
     return (
       (this.props.onDocumentContentUpdate &&
         this.props.documentContent &&
@@ -144,105 +178,56 @@ class _Sheet extends PureComponent<Sheet.Props, SheetState> {
     )
   }
 
-  @boundMethod
-  private renderBlockController(descriptor: BlockDescriptor, blockIndex: number, array: BlockDescriptor[]) {
-    const { textStyle, bridge } = this.props
-    const isFirst = descriptor.blockIndex === 0
-    const isLast = descriptor.blockIndex === array.length - 1
-    const { textAttributesAtCursor, currentSelection, ops } = this.props.documentContent
-    const selectionAfterBlock = {
-      start: currentSelection.end + 1,
-      end: currentSelection.end + 1,
-    }
-    const selectionBeforeBlock = {
-      start: currentSelection.start - 1,
-      end: currentSelection.start - 1,
-    }
-    const updateScopedContent = this.createScopedContentUpdater(descriptor)
-    const moveAfterBlock = () => {
-      if (isLast) {
-        updateScopedContent({ ops: [...ops, { insert: '\n' }], currentSelection: selectionAfterBlock })
-      } else {
-        updateScopedContent({ currentSelection: selectionAfterBlock })
-      }
-    }
-    const moveBeforeBlock = () => {
-      if (!isFirst) {
-        updateScopedContent({ currentSelection: selectionBeforeBlock })
-      }
-    }
-    const insertAfterBlock = (character: string) => {
-      if (isLast) {
-        updateScopedContent({ ops: [...ops, { insert: `${character}\n` }], currentSelection: selectionAfterBlock })
-      } else {
-        const nextKind = array[blockIndex].kind
-        if (nextKind === 'text') {
-          updateScopedContent({ ops: [...ops, { insert: character }], currentSelection: selectionAfterBlock })
-        } else {
-          updateScopedContent({ ops: [...ops, { insert: `${character}\n` }], currentSelection: selectionAfterBlock })
-        }
-      }
-    }
-    const removeCurrentBlock = () => {
-      updateScopedContent(
-        isFirst
-          ? {
-              ops: [{ insert: '\n' }],
-              currentSelection: { start: 0, end: 0 },
-            }
-          : { ops: [], currentSelection: { start: -1, end: -1 } },
-      )
-    }
-    const key = `block-${descriptor.kind}-${descriptor.blockIndex}`
-    const offset = descriptor.selectableUnitsOffset
-    const isFocused =
-      currentSelection.start >= offset && currentSelection.start <= offset + descriptor.numOfSelectableUnits
-    // console.warn(`${key} ${isFocused}`)
-    return (
-      <GenericBlockController
-        updateScopedContent={updateScopedContent}
-        contentWidth={this.state.containerWidth}
-        removeCurrentBlock={removeCurrentBlock}
-        insertAfterBlock={insertAfterBlock}
-        moveAfterBlock={moveAfterBlock}
-        moveBeforeBlock={moveBeforeBlock}
-        isFocused={isFocused}
-        textStyle={textStyle}
-        imageLocatorService={bridge.getImageLocator()}
-        key={key}
-        descriptor={descriptor}
-        isFirst={isFirst}
-        isLast={isLast}
-        textAttributesAtCursor={textAttributesAtCursor}
-        textTransforms={this.props.bridge.getTransforms()}
-      />
-    )
+  public getRendererService() {
+    return this.genService
   }
 
+  public getDocumentContent() {
+    return this.props.documentContent
+  }
+
+  @boundMethod
+  private renderBlockController(block: Block) {
+    const descriptor = block.descriptor
+    const { overridingScopedSelection: overridingSelection } = this.state
+    const { textStyle, debug } = this.props
+    const { selectedTextAttributes } = this.props.documentContent
+    const key = `block-${descriptor.kind}-${descriptor.blockIndex}`
+    // TODO use weak map to memoize controller
+    const controller = new DocumentController(block, this)
+    const isFocused = block.isFocused(this.props.documentContent)
+    return (
+      <ScrollIntoView enabled={isFocused} key={key}>
+        <GenericBlockController
+          hightlightOnFocus={!!debug}
+          isFocused={isFocused}
+          controller={controller}
+          contentWidth={this.state.containerWidth}
+          textStyle={textStyle}
+          imageLocatorService={this.genService.imageLocator}
+          descriptor={descriptor}
+          blockScopedSelection={block.getScopedSelection(this.props.documentContent)}
+          overridingScopedSelection={isFocused ? overridingSelection : null}
+          textAttributesAtCursor={selectedTextAttributes}
+          textTransforms={this.genService.textTransforms}
+        />
+      </ScrollIntoView>
+    )
+  }
   public componentDidMount() {
     const sheetEventDom = this.props.bridge.getSheetEventDomain()
     sheetEventDom.addApplyTextTransformToSelectionListener(this, async (attributeName, attributeValue) => {
-      return this.updateDocumentContent(
-        applyTextTransformToSelection(attributeName, attributeValue, this.props.documentContent),
-      )
+      const currentSelection = this.props.documentContent.currentSelection
+      await this.updateDocumentContent(this.doc.applyTextTransformToSelection(attributeName, attributeValue))
+      // Force the current selection to allow multiple edits.
+      if (Selection.fromShape(currentSelection).length() > 0) {
+        this.setState({ overridingScopedSelection: this.doc.getActiveBlockScopedSelection() })
+      }
     })
     sheetEventDom.addInsertOrReplaceAtSelectionListener(this, async element => {
+      await this.updateDocumentContent(this.doc.insertOrReplaceAtSelection(element))
       if (element.type === 'image') {
-        const { onImageAddedEvent } = this.props.bridge.getImageLocator()
-        const { ops, currentSelection } = this.props.documentContent
-        const selection = Selection.fromShape(currentSelection)
-        const delta = new DocumentDelta(ops)
-        const diff = new Delta()
-          .retain(currentSelection.start)
-          .delete(selection.length())
-          .insert('\n')
-          .insert({ kind: 'image' }, element.description)
-          .delete(1)
-        const nextPosition = diff.transformPosition(currentSelection.start)
-        await this.updateDocumentContent({
-          ops: delta.compose(diff).ops,
-          currentSelection: { start: nextPosition, end: nextPosition },
-        })
+        const { onImageAddedEvent } = this.genService.imageLocator
         onImageAddedEvent && onImageAddedEvent(element.description)
       }
     })
@@ -254,29 +239,28 @@ class _Sheet extends PureComponent<Sheet.Props, SheetState> {
 
   public async componentDidUpdate(oldProps: Sheet.Props) {
     invariant(oldProps.bridge === this.props.bridge, 'bridge prop cannot be changed after instantiation')
-    const { currentSelection, ops } = this.props.documentContent
+    const currentSelection = this.props.documentContent.currentSelection
     if (oldProps.documentContent.currentSelection !== currentSelection) {
-      const delta = new DocumentDelta(ops)
-      const nextAttributes = delta.getSelectedTextAttributes(Selection.fromShape(currentSelection))
-      await this.updateDocumentContent({
-        selectedTextAttributes: nextAttributes,
-        textAttributesAtCursor: nextAttributes,
-      })
+      await this.updateDocumentContent(this.doc.updateTextAttributesAtSelection())
+    }
+    if (this.state.overridingScopedSelection !== null) {
+      setTimeout(this.clearSelection, 0)
     }
   }
 
   public render() {
-    const { ops } = this.props.documentContent
-    const groups = groupOpsByBlocks(ops)
+    this.doc = new Document(this.props.documentContent)
     return (
-      <View style={[styles.root, this.props.style]}>
-        <View
-          style={[styles.contentContainer, this.props.contentContainerStyle, styles.overridingContentStyles]}
-          onLayout={this.handleOnContainerLayout}
-        >
-          {groups.map(this.renderBlockController)}
+      <AutoScrollView style={[styles.scroll, this.props.style]} keyboardShouldPersistTaps="always">
+        <View style={styles.root}>
+          <View
+            style={[styles.contentContainer, this.props.contentContainerStyle, styles.overridingContentStyles]}
+            onLayout={this.handleOnContainerLayout}
+          >
+            {this.doc.getBlocks().map(this.renderBlockController)}
+          </View>
         </View>
-      </View>
+      </AutoScrollView>
     )
   }
 }

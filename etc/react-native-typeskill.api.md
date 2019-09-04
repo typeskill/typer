@@ -6,6 +6,7 @@
 
 import { ComponentClass } from 'react';
 import { ComponentType } from 'react';
+import { ImageSourcePropType } from 'react-native';
 import React from 'react';
 import { StyleProp } from 'react-native';
 import { TextStyle } from 'react-native';
@@ -25,44 +26,18 @@ export namespace Attributes {
 // @public
 export namespace Bridge {
     export type AttributesOverrideListener = (attributeName: string, attributeValue: Attributes.GenericValue) => void;
-    // (undocumented)
-    export interface Config<D extends {}> {
-        imageLocatorService: ImageLocationService<D>;
-        textTransformSpecs: Transforms.GenericSpec<Attributes.TextValue, 'text'>[];
-    }
     export type ControlEvent = 'APPLY_ATTRIBUTES_TO_SELECTION' | 'APPLY_LINE_TYPE_TO_SELECTION' | 'INSERT_OR_REPLACE_AT_SELECTION';
     export interface ControlEventDomain<D extends {}> {
         applyTextTransformToSelection: (attributeName: string, attributeValue: Attributes.TextValue) => void;
         // @internal
         insertOrReplaceAtSelection: (element: Element<D>) => void;
     }
-    // (undocumented)
-    export interface Dimensions {
-        // (undocumented)
-        height: number;
-        // (undocumented)
-        width: number;
-    }
     export type Element<D extends {}> = ImageElement<D> | TextElement;
-    // (undocumented)
-    export interface ImageComponentProps<D> {
-        // (undocumented)
-        dimensions: Dimensions;
-        // (undocumented)
-        params: D;
-    }
     export interface ImageElement<D extends {}> {
         // (undocumented)
         description: D;
         // (undocumented)
         type: 'image';
-    }
-    export interface ImageLocationService<D> {
-        Component: ComponentType<ImageComponentProps<D>>;
-        computeImageDimensions: (params: D, contentWidth: number) => Dimensions;
-        onImageAddedEvent?: (description: D) => void;
-        onImageRemovedEvent?: (description: D) => void;
-        pickOneImage: () => Promise<D>;
     }
     // @internal (undocumented)
     export type InsertOrReplaceAtSelectionListener = <D extends {}>(element: Element<D>) => void;
@@ -72,8 +47,6 @@ export namespace Bridge {
     export interface SheetEventDomain {
         addApplyTextTransformToSelectionListener: (owner: object, listener: AttributesOverrideListener) => void;
         addInsertOrReplaceAtSelectionListener: (owner: object, listener: InsertOrReplaceAtSelectionListener) => void;
-        // (undocumented)
-        getTransforms(): Transforms;
         release: (owner: object) => void;
     }
     // (undocumented)
@@ -87,12 +60,12 @@ export namespace Bridge {
 
 // @public
 export class Bridge<D extends {} = {}> {
-    constructor(config?: Partial<Bridge.Config<any>>);
+    constructor(genConfig?: Partial<Gen.Config<D>>);
     getControlEventDomain(): Bridge.ControlEventDomain<D>;
-    getImageLocator(): Bridge.ImageLocationService<any>;
+    // (undocumented)
+    getGenService(): Gen.Service;
     // @internal
     getSheetEventDomain(): Bridge.SheetEventDomain;
-    getTransforms(): Transforms;
     release(): void;
     }
 
@@ -117,12 +90,31 @@ export enum ControlAction {
     SELECT_TEXT_UNDERLINE = 2
 }
 
+// @public (undocumented)
+export const defaultImageLocator: Image.LocationService<Image.StandardDefinition>;
+
+// @public (undocumented)
+export const defaultTextTransforms: Transforms.GenericSpec<Attributes.TextValue, 'text'>[];
+
 // @public
 export interface DocumentContent {
     readonly currentSelection: SelectionShape;
     readonly ops: GenericOp[];
     readonly selectedTextAttributes: Attributes.Map;
-    readonly textAttributesAtCursor: Attributes.Map;
+}
+
+// @public
+export namespace Gen {
+    export interface Config<D extends {}> {
+        imageLocatorService: Image.LocationService<D>;
+        textTransformSpecs: Transforms.GenericSpec<Attributes.TextValue, 'text'>[];
+    }
+    export interface Service {
+        // (undocumented)
+        imageLocator: Image.LocationService<any>;
+        // (undocumented)
+        textTransforms: Transforms;
+    }
 }
 
 // @public
@@ -140,6 +132,40 @@ export interface GenericRichContent {
     // (undocumented)
     readonly length: () => number;
     readonly ops: GenericOp[];
+}
+
+// @public
+export namespace Image {
+    // (undocumented)
+    export interface ComponentProps<D> {
+        // (undocumented)
+        readonly dimensions: Dimensions;
+        // (undocumented)
+        readonly params: D;
+    }
+    // (undocumented)
+    export interface Dimensions {
+        // (undocumented)
+        readonly height: number;
+        // (undocumented)
+        readonly width: number;
+    }
+    export interface LocationService<D> {
+        readonly Component: ComponentType<ComponentProps<D>>;
+        readonly computeImageDimensions: (params: D, contentWidth: number) => Dimensions;
+        readonly onImageAddedEvent?: (description: D) => void;
+        readonly onImageRemovedEvent?: (description: D) => void;
+        readonly pickOneImage: () => Promise<D>;
+    }
+    // (undocumented)
+    export interface StandardDefinition {
+        // (undocumented)
+        readonly height: number;
+        // (undocumented)
+        readonly source: ImageSourcePropType;
+        // (undocumented)
+        readonly width: number;
+    }
 }
 
 // @public
@@ -165,13 +191,15 @@ export interface SelectionShape {
 
 // @public
 export namespace Sheet {
-    export interface Props {
+    export interface Props<D extends {} = {}> {
         bridge: Bridge;
         contentContainerStyle?: StyleProp<ViewStyle>;
+        debug?: boolean;
         documentContent: DocumentContent;
         onDocumentContentUpdate?: (nextDocumentContent: DocumentContent) => Promise<void>;
         style?: StyleProp<ViewStyle>;
         textStyle?: StyleProp<TextStyle>;
+        underlayColor?: string;
     }
 }
 
@@ -179,7 +207,7 @@ export namespace Sheet {
 export type Sheet = ComponentClass<Sheet.Props>;
 
 // @public (undocumented)
-export const Sheet: React.ComponentClass<Sheet.Props, any>;
+export const Sheet: React.ComponentClass<Sheet.Props<{}>, any>;
 
 // @public
 export interface TextOp extends GenericOp {

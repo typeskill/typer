@@ -50,7 +50,11 @@ export interface TextOp extends GenericOp {
   readonly attributes?: Attributes.Map
 }
 
-export type ImageOp = BlockOp<{ kind: 'image' }>
+export interface ImageKind {
+  kind: 'image'
+}
+
+export type ImageOp = BlockOp<ImageKind>
 
 export interface BlockOp<T extends object> extends GenericOp {
   /**
@@ -70,10 +74,12 @@ export function isTextOp(op: GenericOp): op is TextOp {
 export const computeOpsLength = reduce((curr: number, prev: GenericOp) => Op.length(prev) + curr, 0 as number)
 
 export function buildTextOp(text: string, attributes?: Attributes.Map) {
-  return {
-    insert: text,
-    attributes,
-  }
+  return attributes
+    ? {
+        insert: text,
+        attributes,
+      }
+    : { insert: text }
 }
 
 export function buildImageOp(attributes?: Attributes.Map): ImageOp {

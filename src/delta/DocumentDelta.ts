@@ -1,6 +1,6 @@
 import Delta from 'quill-delta'
-import { getTextAttributesAtCursor, getTextAttributes, Attributes } from './attributes'
-import { Selection } from './Selection'
+import { getTextAttributes, Attributes } from './attributes'
+import { Selection, SelectionShape } from './Selection'
 import { GenericOp } from './operations'
 import mergeRight from 'ramda/es/mergeRight'
 import pickBy from 'ramda/es/pickBy'
@@ -59,7 +59,7 @@ export class DocumentDelta implements GenericRichContent {
    * @returns The DocumentDelta representing selection
    *
    */
-  private getSelected(selection: Selection): DocumentDelta {
+  public getSelected(selection: Selection): DocumentDelta {
     return this.create(this.delta.slice(selection.start, selection.end))
   }
 
@@ -113,7 +113,7 @@ export class DocumentDelta implements GenericRichContent {
       this,
     )
     const { delta } = computer.toDeltaDiffReport()
-    return new DocumentDeltaAtomicUpdate(this.compose(delta), deltaChangeContext.selectionAfterChange)
+    return new DocumentDeltaAtomicUpdate(this.compose(delta), delta, deltaChangeContext.selectionAfterChange)
   }
 
   /**
@@ -172,11 +172,15 @@ export class DocumentDelta implements GenericRichContent {
    * @param selection - the selection from which text attributes should be extracted
    * @returns The resulting merged object
    */
-  public getSelectedTextAttributes(selection: Selection): Attributes.Map {
+  public getSelectedTextAttributes(selection: SelectionShape): Attributes.Map {
+    let realSelection = Selection.fromShape(selection)
     if (selection.start === selection.end) {
-      return getTextAttributesAtCursor(this, selection.start)
+      if (selection.start === 0) {
+        return {}
+      }
+      realSelection = Selection.fromBounds(selection.start - 1, selection.end)
     }
-    const deltaSelection = this.getSelected(selection)
+    const deltaSelection = this.getSelected(realSelection)
     const attributesList = deltaSelection.delta
       .filter(op => typeof op.insert === 'string' && op.insert !== '\n')
       .map(op => op.attributes || {})
@@ -205,16 +209,15 @@ export class DocumentDelta implements GenericRichContent {
     const allOperationsMatchAttributeValue = this.getSelected(selectionBeforeChange).ops.every(
       op => !!op.attributes && op.attributes[attributeName] === attributeValue,
     )
-    const overridingSelection = selectionBeforeChange.length() ? selectionBeforeChange : undefined
     if (allOperationsMatchAttributeValue) {
       const clearAllDelta = new Delta()
       clearAllDelta.retain(selectionBeforeChange.start)
       clearAllDelta.retain(selectionBeforeChange.length(), { [attributeName]: null })
-      return new DocumentDeltaAtomicUpdate(this.compose(clearAllDelta), selectionBeforeChange)
+      return new DocumentDeltaAtomicUpdate(this.compose(clearAllDelta), clearAllDelta, selectionBeforeChange)
     }
     const replaceAllDelta = new Delta()
     replaceAllDelta.retain(selectionBeforeChange.start)
     replaceAllDelta.retain(selectionBeforeChange.length(), { [attributeName]: attributeValue })
-    return new DocumentDeltaAtomicUpdate(this.compose(replaceAllDelta), selectionBeforeChange, overridingSelection)
+    return new DocumentDeltaAtomicUpdate(this.compose(replaceAllDelta), replaceAllDelta, selectionBeforeChange)
   }
 }

@@ -25,10 +25,6 @@ declare namespace RichText {
     textOps: TextOp[]
     /**
      * An object describing how to convert attributes to style properties.
-     *
-     * @remarks
-     *
-     * You can use {@link (Bridge:class).getTransforms} and pass it to this component.
      */
     transforms: Transforms
     /**

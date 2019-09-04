@@ -32,6 +32,7 @@
 
 import { ComponentClass } from 'react';
 import { ComponentType } from 'react';
+import { ImageSourcePropType } from 'react-native';
 import React from 'react';
 import { StyleProp } from 'react-native';
 import { TextStyle } from 'react-native';
@@ -81,53 +82,6 @@ export declare namespace Attributes {
  * @public
  */
 export declare namespace Bridge {
-    export interface Dimensions {
-        width: number;
-        height: number;
-    }
-    export interface ImageComponentProps<D> {
-        dimensions: Dimensions;
-        params: D;
-    }
-    /**
-     * An object used to locate and render images.
-     */
-    export interface ImageLocationService<D> {
-        /**
-         * The image component to render.
-         *
-         * @remarks The component MUST fit within the provided dimensions properties.
-         */
-        Component: ComponentType<ImageComponentProps<D>>;
-        /**
-         * Compute display dimensions from image info and content width.
-         */
-        computeImageDimensions: (params: D, contentWidth: number) => Dimensions;
-        /**
-         * An async function that returns the description of an image.
-         */
-        pickOneImage: () => Promise<D>;
-        /**
-         * Callback fired when an image has been successfully inserted.
-         */
-        onImageAddedEvent?: (description: D) => void;
-        /**
-         * Callback fired when an image has been removed through user interactions.
-         */
-        onImageRemovedEvent?: (description: D) => void;
-    }
-    export interface Config<D extends {}> {
-        /**
-         * A list of {@link (Transforms:namespace).GenericSpec | specs} which will be used to map text attributes with styles.
-         */
-        textTransformSpecs: Transforms.GenericSpec<Attributes.TextValue, 'text'>[];
-        /**
-         * An object describing the behavior to locate and render images.
-         *
-         * @remarks Were this parameter not provided, images interactions will be disabled in the related {@link (Sheet:type)}.
-         */
-        imageLocatorService: ImageLocationService<D>;
-    }
     /**
      * An event which signals the intent to modify the content touched by current selection.
      */
@@ -210,12 +164,13 @@ export declare namespace Bridge {
          * Dereference all listeners registered for this owner.
          */
         release: (owner: object) => void;
-        getTransforms(): Transforms;
     }
 }
 
 /**
  * An abstraction responsible for event dispatching between the {@link (Sheet:type)} and external controls.
+ *
+ * @remarks It also provide a uniform access to custom rendering logic.
  *
  * @internalRemarks
  *
@@ -225,15 +180,13 @@ export declare namespace Bridge {
  */
 export declare class Bridge<D extends {} = {}> {
     private outerEndpoint;
-    private transforms;
-    private imageLocatorService;
+    private genService;
     private controlEventDom;
     private sheetEventDom;
     /**
-     *
-     * @param config - An object to customize bridge behavior
+     * @param genConfig - A configuration object describing content generation behaviors.
      */
-    constructor(config?: Partial<Bridge.Config<any>>);
+    constructor(genConfig?: Partial<Gen.Config<D>>);
     /**
      * Get {@link (Bridge:namespace).SheetEventDomain | sheetEventDom}.
      *
@@ -249,13 +202,9 @@ export declare class Bridge<D extends {} = {}> {
      */
     getControlEventDomain(): Bridge.ControlEventDomain<D>;
     /**
-     * Get transforms.
+     * @returns The gen service, responsible for content generation.
      */
-    getTransforms(): Transforms;
-    /**
-     * Get image locator, if exists
-     */
-    getImageLocator(): Bridge.ImageLocationService<any>;
+    getGenService(): Gen.Service;
     /**
      * End of the bridge's lifecycle.
      *
@@ -331,6 +280,16 @@ export declare enum ControlAction {
 }
 
 /**
+ * @public
+ */
+export declare const defaultImageLocator: Image.LocationService<Image.StandardDefinition>;
+
+/**
+ * @public
+ */
+export declare const defaultTextTransforms: Transforms.GenericSpec<Attributes.TextValue, 'text'>[];
+
+/**
  * A serializable object representing the content of a Sheet.
  *
  * @public
@@ -345,13 +304,42 @@ export declare interface DocumentContent {
      */
     readonly currentSelection: SelectionShape;
     /**
-     * The attributes ...
-     */
-    readonly textAttributesAtCursor: Attributes.Map;
-    /**
-     * The attributes encompassed by {@link DocumentContent.currentSelection}.
+     * The attributes encompassed by {@link DocumentContent.currentSelection} or the attributes at cursor.
+     * `null` values represent attributes to be removed.
      */
     readonly selectedTextAttributes: Attributes.Map;
+}
+
+/**
+ * A set of definitions related to rich content generation.
+ *
+ * @public
+ */
+export declare namespace Gen {
+    /**
+     * An object defining custom rendering behaviors.
+     *
+     * @public
+     */
+    export interface Config<D extends {}> {
+        /**
+         * A list of {@link (Transforms:namespace).GenericSpec | specs} which will be used to map text attributes with styles.
+         */
+        textTransformSpecs: Transforms.GenericSpec<Attributes.TextValue, 'text'>[];
+        /**
+         * An object describing the behavior to locate and render images.
+         *
+         * @remarks Were this parameter not provided, images interactions will be disabled in the related {@link (Sheet:type)}.
+         */
+        imageLocatorService: Image.LocationService<D>;
+    }
+    /**
+     * A service providing rendering behviors.
+     */
+    export interface Service {
+        imageLocator: Image.LocationService<any>;
+        textTransforms: Transforms;
+    }
 }
 
 /**
@@ -404,6 +392,54 @@ export declare interface GenericRichContent {
 }
 
 /**
+ * A set of definitions related to images.
+ *
+ * @public
+ */
+export declare namespace Image {
+    export interface StandardDefinition {
+        readonly source: ImageSourcePropType;
+        readonly width: number;
+        readonly height: number;
+    }
+    export interface Dimensions {
+        readonly width: number;
+        readonly height: number;
+    }
+    export interface ComponentProps<D> {
+        readonly dimensions: Dimensions;
+        readonly params: D;
+    }
+    /**
+     * An object used to locate and render images.
+     */
+    export interface LocationService<D> {
+        /**
+         * The image component to render.
+         *
+         * @remarks The component MUST fit within the provided dimensions properties.
+         */
+        readonly Component: ComponentType<ComponentProps<D>>;
+        /**
+         * Compute display dimensions from image info and content width.
+         */
+        readonly computeImageDimensions: (params: D, contentWidth: number) => Dimensions;
+        /**
+         * An async function that returns the description of an image.
+         */
+        readonly pickOneImage: () => Promise<D>;
+        /**
+         * Callback fired when an image has been successfully inserted.
+         */
+        readonly onImageAddedEvent?: (description: D) => void;
+        /**
+         * Callback fired when an image has been removed.
+         */
+        readonly onImageRemovedEvent?: (description: D) => void;
+    }
+}
+
+/**
  * A set of definitions related to the {@link (RichText:type)} component.
  *
  * @public
@@ -419,10 +455,6 @@ export declare namespace RichText {
         textOps: TextOp[];
         /**
          * An object describing how to convert attributes to style properties.
-         *
-         * @remarks
-         *
-         * You can use {@link (Bridge:class).getTransforms} and pass it to this component.
          */
         transforms: Transforms;
         /**
@@ -475,21 +507,13 @@ export declare namespace Sheet {
     /**
      * {@link (Sheet:type)} properties.
      */
-    export interface Props {
+    export interface Props<D extends {} = {}> {
         /**
          * The {@link (Bridge:class)} instance.
          *
          * @remarks This property MUST NOT be changed after instantiation.
          */
         bridge: Bridge;
-        /**
-         * Component styles.
-         */
-        style?: StyleProp<ViewStyle>;
-        /**
-         * Default text style.
-         */
-        textStyle?: StyleProp<TextStyle>;
         /**
          * The {@link DocumentContent | document content} to display.
          */
@@ -501,12 +525,28 @@ export declare namespace Sheet {
          */
         onDocumentContentUpdate?: (nextDocumentContent: DocumentContent) => Promise<void>;
         /**
+         * Component styles.
+         */
+        style?: StyleProp<ViewStyle>;
+        /**
+         * Default text style.
+         */
+        textStyle?: StyleProp<TextStyle>;
+        /**
          * Style applied to the content container.
          *
          * @remarks This prop MUST NOT contain padding or margin rules. Such spacing rules will be zero-ed.
          * Apply padding to the {@link (Sheet:namespace).Props.style | `style`} prop instead.
          */
         contentContainerStyle?: StyleProp<ViewStyle>;
+        /**
+         * Customize the color of image controls upon activation.
+         */
+        underlayColor?: string;
+        /**
+         * In debug mode, active block will be highlighted.
+         */
+        debug?: boolean;
     }
 }
 
@@ -521,7 +561,7 @@ export declare namespace Sheet {
  */
 export declare type Sheet = ComponentClass<Sheet.Props>;
 
-export declare const Sheet: React.ComponentClass<Sheet.Props, any>;
+export declare const Sheet: React.ComponentClass<Sheet.Props<{}>, any>;
 
 /**
  * An operation containing text.

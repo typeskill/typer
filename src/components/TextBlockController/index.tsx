@@ -20,6 +20,7 @@ import { Transforms } from '@core/Transforms'
 import { TextChangeSession } from './TextChangeSession'
 import { DocumentDelta } from '@delta/DocumentDelta'
 import { StandardBlockControllerProps } from '@components/GenericBlockController'
+import { DocumentDeltaAtomicUpdate } from '@delta/DocumentDeltaAtomicUpdate'
 
 const styles = StyleSheet.create({
   grow: {
@@ -51,25 +52,14 @@ const constantTextInputProps: TextInputProps = {
   blurOnSubmit: false,
 } as TextInputProps
 
-interface TextBlockControllerState {
-  overridingSelection: Selection | null
-}
-
 /**
  * A component which is responsible for providing a user interface to edit {@link RichContent}.
  *
- * @privateRemarks
- *
- * Read the {@link Synchronizer} documentation to understand the implementation challenges of this component.
  */
-export class TextBlockController extends Component<TextBlockControllerProps, TextBlockControllerState> {
+export class TextBlockController extends Component<TextBlockControllerProps> {
   private textChangeSession: TextChangeSession | null = null
   private textInputRef = React.createRef<TextInput>()
-  private currentSelection = Selection.fromShape({ start: 0, end: 0 })
-
-  public state: TextBlockControllerState = {
-    overridingSelection: null,
-  }
+  private blockScopedSelection = Selection.fromShape({ start: 0, end: 0 })
 
   public constructor(props: TextBlockControllerProps) {
     super(props)
@@ -86,7 +76,7 @@ export class TextBlockController extends Component<TextBlockControllerProps, Tex
   private handleOnTextChanged(nextText: string) {
     this.textChangeSession = new TextChangeSession()
     this.textChangeSession.setTextAfterChange(nextText)
-    this.textChangeSession.setSelectionBeforeChange(this.currentSelection)
+    this.textChangeSession.setSelectionBeforeChange(this.blockScopedSelection)
   }
 
   @boundMethod
@@ -103,7 +93,7 @@ export class TextBlockController extends Component<TextBlockControllerProps, Tex
         this.props.textAttributesAtCursor,
       )
       this.textChangeSession = null
-      this.updateOps(documentDeltaUpdate.delta.ops as TextOp[], documentDeltaUpdate.selectionAfterChange)
+      this.updateOps(documentDeltaUpdate)
     } else {
       this.updateSelection(nextSelection)
     }
@@ -114,40 +104,31 @@ export class TextBlockController extends Component<TextBlockControllerProps, Tex
     this.textInputRef.current && this.textInputRef.current.focus()
   }
 
-  private async setStateAsync(stateFragment: Partial<TextBlockControllerState>): Promise<void> {
-    return new Promise(res => {
-      this.setState(stateFragment as TextBlockControllerState, res)
-    })
+  @boundMethod
+  private handleOnFocus() {
+    this.updateSelection(this.blockScopedSelection)
   }
 
-  public shouldComponentUpdate(nextProps: TextBlockControllerProps, nextState: TextBlockControllerState) {
+  public shouldComponentUpdate(nextProps: TextBlockControllerProps) {
     return (
-      nextState.overridingSelection !== this.state.overridingSelection ||
+      nextProps.overridingScopedSelection !== this.props.overridingScopedSelection ||
       nextProps.textOps !== this.props.textOps ||
       nextProps.isFocused !== this.props.isFocused
     )
   }
 
   public async updateSelection(currentSelection: Selection) {
-    this.currentSelection = currentSelection
-    return this.props.updateScopedContent({ currentSelection })
+    this.blockScopedSelection = currentSelection
+    return this.props.controller.updateSelectionInBlock(currentSelection)
   }
 
-  public getTextAttributesAtCursor() {
-    return this.props.textAttributesAtCursor
-  }
-
-  private updateOps(textOps: TextOp[], currentSelection: Selection) {
-    this.currentSelection = currentSelection
-    return this.props.updateScopedContent({ currentSelection, ops: textOps })
-  }
-
-  public overrideSelection(overridingSelection: Selection) {
-    return this.setStateAsync({ overridingSelection })
+  private updateOps(documentDeltaUpdate: DocumentDeltaAtomicUpdate) {
+    this.blockScopedSelection = documentDeltaUpdate.selectionAfterChange
+    return this.props.controller.applyDiffInBlock(documentDeltaUpdate.diff)
   }
 
   public getCurrentSelection() {
-    return this.currentSelection
+    return this.blockScopedSelection
   }
 
   public getOps() {
@@ -157,8 +138,8 @@ export class TextBlockController extends Component<TextBlockControllerProps, Tex
   @boundMethod
   public handleOnKeyPressed(e: NativeSyntheticEvent<TextInputKeyPressEventData>) {
     const key = e.nativeEvent.key
-    if (key === 'Backspace' && this.currentSelection.start === 0 && this.currentSelection.end === 0) {
-      this.props.moveBeforeBlock()
+    if (key === 'Backspace' && this.blockScopedSelection.start === 0 && this.blockScopedSelection.end === 0) {
+      this.props.controller.removeOneBeforeBlock()
     }
   }
 
@@ -169,12 +150,11 @@ export class TextBlockController extends Component<TextBlockControllerProps, Tex
   }
 
   public componentDidUpdate(oldProps: TextBlockControllerProps) {
-    // We must change the state to null to avoid forcing selection in TextInput component.
-    if (this.state.overridingSelection) {
-      this.setState({ overridingSelection: null })
+    if (this.props.isFocused && !oldProps.isFocused) {
+      setTimeout(this.focus, 0)
     }
-    if (!oldProps.isFocused && this.props.isFocused) {
-      this.focus()
+    if (this.props.overridingScopedSelection !== null) {
+      this.blockScopedSelection = Selection.fromShape(this.props.overridingScopedSelection)
     }
   }
 
@@ -183,8 +163,7 @@ export class TextBlockController extends Component<TextBlockControllerProps, Tex
   }
 
   public render() {
-    const { textStyle, textOps, textTransforms } = this.props
-    const { overridingSelection } = this.state
+    const { textStyle, textOps, textTransforms, overridingScopedSelection: overridingSelection } = this.props
     return (
       <View style={styles.grow}>
         <TextInput
@@ -193,6 +172,7 @@ export class TextBlockController extends Component<TextBlockControllerProps, Tex
           onKeyPress={this.handleOnKeyPressed}
           onSelectionChange={this.handleOnSelectionChanged}
           onChangeText={this.handleOnTextChanged}
+          onFocus={this.handleOnFocus}
           ref={this.textInputRef}
           {...constantTextInputProps}
         >

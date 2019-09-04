@@ -39,7 +39,8 @@ describe('@delta/DocumentDelta', () => {
       const newText = 'Hello worl\n'
       const originalDelta = mockDocumentDelta([{ insert: 'Hello world\n' }])
       const changeContext = mockDeltaChangeContext(11, 10)
-      const { delta } = originalDelta.applyTextDiff(newText, changeContext)
+      const diff = originalDelta.applyTextDiff(newText, changeContext)
+      const { delta } = diff
       expect(delta.ops).toEqual([{ insert: newText }])
     })
     it('should reproduce a delete operation when two or more characters were deleted', () => {
@@ -118,9 +119,9 @@ describe('@delta/DocumentDelta', () => {
       const { delta } = originalDelta.applyTextDiff(newText, changeContext)
       expect(delta.ops).toEqual([{ insert: 'A' }, { insert: '\n', attributes: { $type: 'custom' } }])
     })
-    it('should append a newline character to delta after inserting a character at the begening of a newline', () => {
-      const newText = 'Hello world\nH'
-      const changeContext = mockDeltaChangeContext(12, 13)
+    it('should not append a newline character to delta after inserting a character at the begening of a newline', () => {
+      const newText = 'Hello world\nH\n'
+      const changeContext = mockDeltaChangeContext(11, 12)
       const originalDelta = mockDocumentDelta([{ insert: 'Hello world\n' }])
       const { delta } = originalDelta.applyTextDiff(newText, changeContext)
       expect(delta.ops).toEqual([{ insert: 'Hello world\nH\n' }])

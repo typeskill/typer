@@ -6,6 +6,7 @@ import { Transforms } from '@core/Transforms'
 import { Bridge } from '@core/Bridge'
 import { Attributes } from '@delta/attributes'
 import { ToolbarLayoutPropType } from './types'
+import { Gen } from '@core/Gen'
 
 /**
  * Constant used within a {@link (Toolbar:namespace).Layout} to denote a separator.
@@ -213,7 +214,6 @@ class _Toolbar<D extends {}> extends PureComponent<Toolbar.Props<D>> {
     buttonSpacing: PropTypes.number,
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public static defaultProps: Partial<Record<keyof Toolbar.Props<any>, any>> = {
     inactiveButtonBackgroundColor: 'transparent',
     inactiveButtonColor: '#3a404c',
@@ -224,6 +224,7 @@ class _Toolbar<D extends {}> extends PureComponent<Toolbar.Props<D>> {
   }
 
   private controlEventDom: Bridge.ControlEventDomain<D>
+  private genService: Gen.Service
 
   public state: ToolbarState = {
     selectedAttributes: {},
@@ -234,6 +235,7 @@ class _Toolbar<D extends {}> extends PureComponent<Toolbar.Props<D>> {
     super(props)
     invariant(props.bridge != null, 'bridge prop is required')
     this.controlEventDom = props.bridge.getControlEventDomain()
+    this.genService = props.bridge.getGenService()
     this.insertImageAtSelection = this.insertImageAtSelection.bind(this)
   }
 
@@ -273,7 +275,7 @@ class _Toolbar<D extends {}> extends PureComponent<Toolbar.Props<D>> {
 
   private async insertImageAtSelection() {
     try {
-      const description = await this.props.bridge.getImageLocator().pickOneImage()
+      const description = await this.genService.imageLocator.pickOneImage()
       this.controlEventDom.insertOrReplaceAtSelection({ type: 'image', description })
     } catch (e) {
       this.props.onInsertImageError && this.props.onInsertImageError(e)

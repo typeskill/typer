@@ -36,9 +36,11 @@ import { Toolbar, ControlAction, CONTROL_SEPARATOR, buildVectorIconControlSpec }
 import { Attributes } from '@delta/attributes'
 import { GenericRichContent } from '@delta/generic'
 import { GenericOp, TextOp } from '@delta/operations'
-import { Transforms } from '@core/Transforms'
-import { DocumentContent, buildInitialDocContent, cloneDocContent } from '@model/document'
+import { Transforms, defaultTextTransforms } from '@core/Transforms'
+import { DocumentContent, buildInitialDocContent, cloneDocContent } from '@model/documents'
 import { SelectionShape } from '@delta/Selection'
+import { defaultImageLocator, Image } from '@core/Image'
+import { Gen } from '@core/Gen'
 
 export {
   // Components related
@@ -50,6 +52,8 @@ export {
   buildVectorIconControlSpec,
   // Model related
   Bridge,
+  Gen,
+  Image,
   GenericRichContent,
   GenericOp,
   SelectionShape,
@@ -57,6 +61,10 @@ export {
   Attributes,
   Transforms,
   DocumentContent,
+  // Generation
   buildInitialDocContent,
   cloneDocContent,
+  // Customization
+  defaultImageLocator,
+  defaultTextTransforms,
 }

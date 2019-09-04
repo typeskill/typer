@@ -80,7 +80,7 @@ export class DeltaDiffComputer {
     replacedLines.forEach(([lineBefore, lineAfter]) => {
       const lineDelta = makeDiffDelta(lineBefore.text, lineAfter.text, textAttributes)
       if (originalText.charAt(lineBefore.lineRange.end) !== '\n') {
-        lineDelta.insert('\n', {})
+        // Noop
       } else {
         lineDelta.retain(1) // Keep first newline
         shouldDeleteNextNewline =
