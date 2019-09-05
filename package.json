@@ -7,7 +7,7 @@
   "private": false,
   "license": "MIT",
   "scripts": {
-    "autolint": "tslint 'src/**/*?(.d).ts?(x)' --fix",
+    "autolint": "eslint --ext .ts --ext .tsx 'src/' --fix",
     "build": "npm run build:clean; npm run build:types && npm run build:js && npm run build:api",
     "build:clean": "rimraf lib",
     "build:types": "ttsc --project tsconfig-build.json",
