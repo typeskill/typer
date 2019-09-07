@@ -1,11 +1,12 @@
 import { PureComponent } from 'react'
-import { Bridge, Gen } from 'index'
 import { DocumentContentPropType } from './types'
 import PropTypes from 'prop-types'
 import { DocumentContent } from '@model/documents'
 import { StyleSheet, StyleProp, ViewStyle, TextStyle, ViewPropTypes, LayoutChangeEvent } from 'react-native'
 import invariant from 'invariant'
 import { Document } from '@model/Document'
+import { Bridge } from '@core/Bridge'
+import { Gen } from '@core/Gen'
 
 export interface ContentRendererState {
   containerWidth: number | null

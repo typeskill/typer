@@ -3,21 +3,13 @@ import React, { PureComponent } from 'react'
 import { TextBlockInput } from './TextBlockInput'
 import { StyleProp, TextStyle, View } from 'react-native'
 import { ImageBlockInput } from './ImageBlockInput'
-import { BlockDescriptor } from '@model/blocks'
 import { TextOp, ImageOp } from '@delta/operations'
 import invariant from 'invariant'
 import { Transforms } from '@core/Transforms'
 import { Attributes } from '@delta/attributes'
-import { DocumentController } from '../DocumentController'
 import { SelectionShape } from '@delta/Selection'
 import { Images } from '@core/Images'
-
-export interface StandardBlockInputProps {
-  descriptor: BlockDescriptor
-  controller: DocumentController
-  isFocused: boolean
-  overridingScopedSelection: SelectionShape | null
-}
+import { StandardBlockInputProps } from './types'
 
 export interface GenericBlockInputProps extends StandardBlockInputProps {
   textStyle?: StyleProp<TextStyle>

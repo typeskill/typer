@@ -2,7 +2,7 @@ import React, { PureComponent } from 'react'
 import { View } from 'react-native'
 import { Images } from '@core/Images'
 import { ImageOp } from '@delta/operations'
-import { StandardBlockViewProps } from '.'
+import { StandardBlockViewProps } from './types'
 
 export interface ImageBlockViewProps extends StandardBlockViewProps {
   imageLocatorService: Images.LocationService<any>

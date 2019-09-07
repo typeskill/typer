@@ -10,8 +10,7 @@ import { DocumentProvider, DocumentController } from './DocumentController'
 import { Document } from '@model/Document'
 import { SelectionShape, Selection } from '@delta/Selection'
 import { ScrollIntoView, wrapScrollView } from 'react-native-scroll-into-view'
-import { Print } from './Print'
-import { ContentRenderer, contentRendererStyles } from './ContentRenderer'
+import { ContentRenderer, ContentRendererProps, contentRendererStyles } from './ContentRenderer'
 
 const AutoScrollView = wrapScrollView(ScrollView)
 
@@ -29,7 +28,7 @@ declare namespace Typer {
   /**
    * {@link (Typer:type)} properties.
    */
-  export interface Props<D extends {} = {}> extends Print.Props {
+  export interface Props<D extends {} = {}> extends ContentRendererProps {
     /**
      * Handler to receive {@link DocumentContent | document content} updates.
      *
@@ -60,6 +59,10 @@ class _Typer extends ContentRenderer<Typer.Props, TyperState> implements Documen
   public state: TyperState = {
     containerWidth: null,
     overridingScopedSelection: null,
+  }
+
+  public constructor(props: Typer.Props) {
+    super(props)
   }
 
   @boundMethod

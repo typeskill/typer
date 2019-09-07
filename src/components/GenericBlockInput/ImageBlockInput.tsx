@@ -12,9 +12,9 @@ import {
 } from 'react-native'
 import { ImageOp } from '@delta/operations'
 import { boundMethod } from 'autobind-decorator'
-import { StandardBlockInputProps } from '.'
 import { SelectionShape } from '@delta/Selection'
 import { Images } from '@core/Images'
+import { StandardBlockInputProps } from './types'
 
 export interface ImageBlockInputProps extends StandardBlockInputProps {
   imageOp: ImageOp

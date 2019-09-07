@@ -3,24 +3,20 @@ import React, { PureComponent } from 'react'
 import { TextBlockView } from './TextBlockView'
 import { StyleProp, TextStyle } from 'react-native'
 import { ImageBlockView } from './ImageBlockView'
-import { BlockDescriptor } from '@model/blocks'
 import { TextOp, ImageOp } from '@delta/operations'
 import invariant from 'invariant'
 import { Transforms } from '@core/Transforms'
 import { Images } from '@core/Images'
+import { StandardBlockViewProps } from './types'
 
-export interface StandardBlockViewProps {
-  descriptor: BlockDescriptor
-}
-
-export interface GenericBlockInputProps extends StandardBlockViewProps {
+export interface GenericBlockViewProps extends StandardBlockViewProps {
   textStyle?: StyleProp<TextStyle>
   imageLocatorService: Images.LocationService<any>
   textTransforms: Transforms
   contentWidth: null | number
 }
 
-export class GenericBlockView extends PureComponent<GenericBlockInputProps> {
+export class GenericBlockView extends PureComponent<GenericBlockViewProps> {
   public render() {
     const { descriptor, textStyle, imageLocatorService, contentWidth, ...otherProps } = this.props
     let block = null

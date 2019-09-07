@@ -19,8 +19,8 @@ import { Attributes } from '@delta/attributes'
 import { Transforms } from '@core/Transforms'
 import { TextChangeSession } from './TextChangeSession'
 import { DocumentDelta } from '@delta/DocumentDelta'
-import { StandardBlockInputProps } from '@components/GenericBlockInput'
 import { DocumentDeltaAtomicUpdate } from '@delta/DocumentDeltaAtomicUpdate'
+import { StandardBlockInputProps } from '../types'
 
 const styles = StyleSheet.create({
   grow: {

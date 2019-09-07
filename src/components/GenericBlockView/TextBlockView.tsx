@@ -2,8 +2,8 @@ import React, { PureComponent } from 'react'
 import { Transforms } from '@core/Transforms'
 import { StyleProp, TextStyle } from 'react-native'
 import { TextOp } from '@delta/operations'
-import { StandardBlockViewProps } from '.'
 import { RichText } from '@components/RichText'
+import { StandardBlockViewProps } from './types'
 
 export interface TextBlockViewProps extends StandardBlockViewProps {
   textTransforms: Transforms
