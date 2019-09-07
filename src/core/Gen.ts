@@ -1,6 +1,6 @@
 import { Attributes } from '@delta/attributes'
 import { Transforms, defaultTextTransforms } from './Transforms'
-import { Image, defaultImageLocator } from './Image'
+import { Images, defaultImageLocator } from './Images'
 
 /**
  * A set of definitions related to rich content generation.
@@ -23,13 +23,13 @@ export declare namespace Gen {
      *
      * @remarks Were this parameter not provided, images interactions will be disabled in the related {@link (Typer:type)}.
      */
-    imageLocatorService: Image.LocationService<D>
+    imageLocatorService: Images.LocationService<D>
   }
   /**
    * A service providing rendering behviors.
    */
   export interface Service {
-    imageLocator: Image.LocationService<any>
+    imageLocator: Images.LocationService<any>
     textTransforms: Transforms
   }
 }

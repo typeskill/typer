@@ -6,7 +6,7 @@ import { DocumentDelta } from '@delta/DocumentDelta'
 import { mergeLeft } from 'ramda'
 
 /**
- * A serializable object representing the content of a Sheet.
+ * A serializable object representing rich content.
  *
  * @public
  */

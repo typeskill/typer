@@ -19,7 +19,7 @@ import { Attributes } from '@delta/attributes'
 import { Transforms } from '@core/Transforms'
 import { TextChangeSession } from './TextChangeSession'
 import { DocumentDelta } from '@delta/DocumentDelta'
-import { StandardBlockControllerProps } from '@components/GenericBlockController'
+import { StandardBlockInputProps } from '@components/GenericBlockInput'
 import { DocumentDeltaAtomicUpdate } from '@delta/DocumentDeltaAtomicUpdate'
 
 const styles = StyleSheet.create({
@@ -31,7 +31,7 @@ const styles = StyleSheet.create({
   },
 })
 
-export interface TextBlockControllerProps extends StandardBlockControllerProps {
+export interface TextBlockInputProps extends StandardBlockInputProps {
   textOps: TextOp[]
   textAttributesAtCursor: Attributes.Map
   textStyle?: StyleProp<TextStyle>
@@ -56,12 +56,12 @@ const constantTextInputProps: TextInputProps = {
  * A component which is responsible for providing a user interface to edit {@link RichContent}.
  *
  */
-export class TextBlockController extends Component<TextBlockControllerProps> {
+export class TextBlockInput extends Component<TextBlockInputProps> {
   private textChangeSession: TextChangeSession | null = null
   private textInputRef = React.createRef<TextInput>()
   private blockScopedSelection = Selection.fromShape({ start: 0, end: 0 })
 
-  public constructor(props: TextBlockControllerProps) {
+  public constructor(props: TextBlockInputProps) {
     super(props)
     invariant(props.textOps != null, INVARIANT_MANDATORY_TEXT_BLOCK_PROP)
   }
@@ -109,7 +109,7 @@ export class TextBlockController extends Component<TextBlockControllerProps> {
     this.updateSelection(this.blockScopedSelection)
   }
 
-  public shouldComponentUpdate(nextProps: TextBlockControllerProps) {
+  public shouldComponentUpdate(nextProps: TextBlockInputProps) {
     return (
       nextProps.overridingScopedSelection !== this.props.overridingScopedSelection ||
       nextProps.textOps !== this.props.textOps ||
@@ -149,7 +149,7 @@ export class TextBlockController extends Component<TextBlockControllerProps> {
     }
   }
 
-  public componentDidUpdate(oldProps: TextBlockControllerProps) {
+  public componentDidUpdate(oldProps: TextBlockInputProps) {
     if (this.props.isFocused && !oldProps.isFocused) {
       setTimeout(this.focus, 0)
     }

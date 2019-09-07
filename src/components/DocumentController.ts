@@ -7,7 +7,7 @@ import { Gen } from '@core/Gen'
 export interface DocumentProvider {
   getDocumentContent: () => DocumentContent
   updateDocumentContent: (documentContent: DocumentContent) => void
-  getRendererService: () => Gen.Service
+  getGenService: () => Gen.Service
 }
 
 export class DocumentController {
@@ -24,7 +24,7 @@ export class DocumentController {
   private onBlockDeletion() {
     if (this.block.kind === 'image') {
       const [imageOp] = this.block.getSelectedOps(this.getDocumentContent())
-      const locator = this.provider.getRendererService().imageLocator
+      const locator = this.provider.getGenService().imageLocator
       locator.onImageRemovedEvent && locator.onImageRemovedEvent(imageOp.attributes)
     }
   }

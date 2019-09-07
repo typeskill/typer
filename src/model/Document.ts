@@ -7,7 +7,7 @@ import { DocumentDelta } from '@delta/DocumentDelta'
 import { SelectionShape } from '@delta/Selection'
 
 /**
- * An object representing the content of a Sheet, and providing an interface to operate.
+ * An object representing an interface to operate over rich content.
  */
 export class Document {
   private blocks: Block[]

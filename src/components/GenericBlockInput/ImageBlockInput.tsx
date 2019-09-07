@@ -12,14 +12,14 @@ import {
 } from 'react-native'
 import { ImageOp } from '@delta/operations'
 import { boundMethod } from 'autobind-decorator'
-import { StandardBlockControllerProps } from './GenericBlockController'
+import { StandardBlockInputProps } from '.'
 import { SelectionShape } from '@delta/Selection'
-import { Image } from '@core/Image'
+import { Images } from '@core/Images'
 
-export interface ImageBlockControllerProps extends StandardBlockControllerProps {
+export interface ImageBlockInputProps extends StandardBlockInputProps {
   imageOp: ImageOp
   blockScopedSelection: SelectionShape
-  imageLocatorService: Image.LocationService<any>
+  imageLocatorService: Images.LocationService<any>
   contentWidth: number
   underlayColor?: string
 }
@@ -44,7 +44,7 @@ const styles = StyleSheet.create({
   imageContainer: { position: 'relative', flexDirection: 'row' },
 })
 
-export class ImageBlockController extends PureComponent<ImageBlockControllerProps> {
+export class ImageBlockInput extends PureComponent<ImageBlockInputProps> {
   private rightInput = React.createRef<TextInput>()
   private leftInput = React.createRef<TextInput>()
   private computeDimensions(contentWidth: number) {
@@ -92,8 +92,8 @@ export class ImageBlockController extends PureComponent<ImageBlockControllerProp
   }
 
   private renderImage(
-    imageDimensions: Image.Dimensions,
-    containerDimensions: Image.Dimensions,
+    imageDimensions: Images.Dimensions,
+    containerDimensions: Images.Dimensions,
     spareWidthOnSides: number,
     handlerWidth: number,
   ) {
@@ -163,7 +163,7 @@ export class ImageBlockController extends PureComponent<ImageBlockControllerProp
     }
   }
 
-  private renderTextInput({ height }: Image.Dimensions, ref: React.RefObject<TextInput>) {
+  private renderTextInput({ height }: Images.Dimensions, ref: React.RefObject<TextInput>) {
     const dynamicStyle: TextStyle = {
       width: TEXT_INPUT_WIDTH,
       height: height,
@@ -190,7 +190,7 @@ export class ImageBlockController extends PureComponent<ImageBlockControllerProp
     }
   }
 
-  public componentDidUpdate(oldProps: ImageBlockControllerProps) {
+  public componentDidUpdate(oldProps: ImageBlockInputProps) {
     if (
       (this.props.isFocused && !oldProps.isFocused) ||
       ((oldProps.blockScopedSelection.start !== this.props.blockScopedSelection.start ||

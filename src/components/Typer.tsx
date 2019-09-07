@@ -1,74 +1,21 @@
-import invariant from 'invariant'
-import React, { PureComponent, ComponentClass } from 'react'
-import {
-  StyleSheet,
-  StyleProp,
-  TextStyle,
-  ViewStyle,
-  ViewPropTypes,
-  ScrollView,
-  View,
-  LayoutChangeEvent,
-} from 'react-native'
-import { Bridge } from '@core/Bridge'
+import React, { ComponentClass } from 'react'
+import { ScrollView, View } from 'react-native'
 import { DocumentContent } from '@model/documents'
 import { boundMethod } from 'autobind-decorator'
 import PropTypes from 'prop-types'
-import { DocumentContentPropType } from './types'
-import { GenericBlockController } from './GenericBlockController'
+import { GenericBlockInput } from './GenericBlockInput'
 import mergeLeft from 'ramda/es/mergeLeft'
 import { Block } from '@model/Block'
 import { DocumentProvider, DocumentController } from './DocumentController'
 import { Document } from '@model/Document'
 import { SelectionShape, Selection } from '@delta/Selection'
 import { ScrollIntoView, wrapScrollView } from 'react-native-scroll-into-view'
-import { Gen } from '@core/Gen'
+import { Print } from './Print'
+import { ContentRenderer, contentRendererStyles } from './ContentRenderer'
 
 const AutoScrollView = wrapScrollView(ScrollView)
 
-const styles = StyleSheet.create({
-  scroll: {
-    flex: 1,
-  },
-  contentContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'stretch',
-  },
-  /**
-   * As of React Native 0.60, merging padding algorithm doesn't
-   * allow more specific spacing attributes to override more
-   * generic ones. As such, we must override all.
-   */
-  overridingContentStyles: {
-    margin: 0,
-    marginBottom: 0,
-    marginEnd: 0,
-    marginHorizontal: 0,
-    marginLeft: 0,
-    marginRight: 0,
-    marginStart: 0,
-    marginTop: 0,
-    marginVertical: 0,
-    padding: 0,
-    paddingBottom: 0,
-    paddingEnd: 0,
-    paddingHorizontal: 0,
-    paddingLeft: 0,
-    paddingRight: 0,
-    paddingStart: 0,
-    paddingTop: 0,
-    paddingVertical: 0,
-  },
-  root: {
-    flex: 1,
-    flexDirection: 'row',
-    alignSelf: 'stretch',
-    padding: 10,
-  },
-})
-
-interface SheetState {
+interface TyperState {
   containerWidth: number | null
   overridingScopedSelection: SelectionShape | null
 }
@@ -82,17 +29,7 @@ declare namespace Typer {
   /**
    * {@link (Typer:type)} properties.
    */
-  export interface Props<D extends {} = {}> {
-    /**
-     * The {@link (Bridge:class)} instance.
-     *
-     * @remarks This property MUST NOT be changed after instantiation.
-     */
-    bridge: Bridge
-    /**
-     * The {@link DocumentContent | document content} to display.
-     */
-    documentContent: DocumentContent
+  export interface Props<D extends {} = {}> extends Print.Props {
     /**
      * Handler to receive {@link DocumentContent | document content} updates.
      *
@@ -100,21 +37,6 @@ declare namespace Typer {
      */
     onDocumentContentUpdate?: (nextDocumentContent: DocumentContent) => Promise<void>
 
-    /**
-     * Component styles.
-     */
-    style?: StyleProp<ViewStyle>
-    /**
-     * Default text style.
-     */
-    textStyle?: StyleProp<TextStyle>
-    /**
-     * Style applied to the content container.
-     *
-     * @remarks This prop MUST NOT contain padding or margin rules. Such spacing rules will be zero-ed.
-     * Apply padding to the {@link (Typer:namespace).Props.style | `style`} prop instead.
-     */
-    contentContainerStyle?: StyleProp<ViewStyle>
     /**
      * Customize the color of image controls upon activation.
      */
@@ -127,35 +49,17 @@ declare namespace Typer {
 }
 
 // eslint-disable-next-line @typescript-eslint/class-name-casing
-class _Typer extends PureComponent<Typer.Props, SheetState> implements DocumentProvider {
+class _Typer extends ContentRenderer<Typer.Props, TyperState> implements DocumentProvider {
   public static propTypes: Record<keyof Typer.Props, any> = {
-    bridge: PropTypes.instanceOf(Bridge).isRequired,
-    style: ViewPropTypes.style,
-    contentContainerStyle: ViewPropTypes.style,
-    textStyle: PropTypes.any,
-    documentContent: DocumentContentPropType.isRequired,
+    ...ContentRenderer.propTypes,
     onDocumentContentUpdate: PropTypes.func,
     debug: PropTypes.bool,
     underlayColor: PropTypes.string,
   }
 
-  public static defaultProps: Partial<Typer.Props> = {}
-
-  private genService: Gen.Service
-  private doc: Document
-
-  public state: SheetState = {
+  public state: TyperState = {
     containerWidth: null,
     overridingScopedSelection: null,
-  }
-
-  public constructor(props: Typer.Props) {
-    super(props)
-    const { bridge } = props
-    invariant(bridge != null, 'bridge prop is required')
-    invariant(bridge instanceof Bridge, 'bridge prop must be an instance of Bridge class')
-    this.doc = new Document(props.documentContent)
-    this.genService = props.bridge.getGenService()
   }
 
   @boundMethod
@@ -163,10 +67,12 @@ class _Typer extends PureComponent<Typer.Props, SheetState> implements DocumentP
     this.setState({ overridingScopedSelection: null })
   }
 
-  private handleOnContainerLayout = (layoutEvent: LayoutChangeEvent) => {
-    this.setState({
-      containerWidth: layoutEvent.nativeEvent.layout.width,
-    })
+  public getGenService() {
+    return this.genService
+  }
+
+  public getDocumentContent() {
+    return this.props.documentContent
   }
 
   public updateDocumentContent(documentUpdate: Partial<DocumentContent>): Promise<void> {
@@ -176,14 +82,6 @@ class _Typer extends PureComponent<Typer.Props, SheetState> implements DocumentP
         this.props.onDocumentContentUpdate(mergeLeft(documentUpdate, this.props.documentContent) as DocumentContent)) ||
       Promise.resolve()
     )
-  }
-
-  public getRendererService() {
-    return this.genService
-  }
-
-  public getDocumentContent() {
-    return this.props.documentContent
   }
 
   @boundMethod
@@ -198,7 +96,7 @@ class _Typer extends PureComponent<Typer.Props, SheetState> implements DocumentP
     const isFocused = block.isFocused(this.props.documentContent)
     return (
       <ScrollIntoView enabled={isFocused} key={key}>
-        <GenericBlockController
+        <GenericBlockInput
           hightlightOnFocus={!!debug}
           isFocused={isFocused}
           controller={controller}
@@ -238,7 +136,7 @@ class _Typer extends PureComponent<Typer.Props, SheetState> implements DocumentP
   }
 
   public async componentDidUpdate(oldProps: Typer.Props) {
-    invariant(oldProps.bridge === this.props.bridge, 'bridge prop cannot be changed after instantiation')
+    super.componentDidUpdate(oldProps)
     const currentSelection = this.props.documentContent.currentSelection
     if (oldProps.documentContent.currentSelection !== currentSelection) {
       await this.updateDocumentContent(this.doc.updateTextAttributesAtSelection())
@@ -251,10 +149,14 @@ class _Typer extends PureComponent<Typer.Props, SheetState> implements DocumentP
   public render() {
     this.doc = new Document(this.props.documentContent)
     return (
-      <AutoScrollView style={[styles.scroll, this.props.style]} keyboardShouldPersistTaps="always">
-        <View style={styles.root}>
+      <AutoScrollView style={[contentRendererStyles.scroll, this.props.style]} keyboardShouldPersistTaps="always">
+        <View style={contentRendererStyles.root}>
           <View
-            style={[styles.contentContainer, this.props.contentContainerStyle, styles.overridingContentStyles]}
+            style={[
+              contentRendererStyles.contentContainer,
+              this.props.contentContainerStyle,
+              contentRendererStyles.overridingContentStyles,
+            ]}
             onLayout={this.handleOnContainerLayout}
           >
             {this.doc.getBlocks().map(this.renderBlockController)}
@@ -266,7 +168,7 @@ class _Typer extends PureComponent<Typer.Props, SheetState> implements DocumentP
 }
 
 /**
- * A component solely responsible for editing {@link DocumentContent}.
+ * A component solely responsible for editing {@link DocumentContent | document content}.
  *
  * @public
  *

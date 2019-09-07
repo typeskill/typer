@@ -29,6 +29,7 @@
  * @packageDocumentation
  */
 
+import { Bridge as Bridge_2 } from 'index';
 import { ComponentClass } from 'react';
 import { ComponentType } from 'react';
 import { ImageSourcePropType } from 'react-native';
@@ -244,6 +245,39 @@ export declare function buildVectorIconControlSpec<T extends Toolbar.VectorIconM
 export declare function cloneDocContent(content: DocumentContent): DocumentContent;
 
 /**
+ * A generic interface for components displaying {@link DocumentContent | document content}.
+ *
+ * @public
+ */
+export declare interface ContentRendererProps {
+    /**
+     * The {@link (Bridge:class)} instance.
+     *
+     * @remarks This property MUST NOT be changed after instantiation.
+     */
+    bridge: Bridge_2;
+    /**
+     * The {@link DocumentContent | document content} to display.
+     */
+    documentContent: DocumentContent;
+    /**
+     * Component styles.
+     */
+    style?: StyleProp<ViewStyle>;
+    /**
+     * Default text style.
+     */
+    textStyle?: StyleProp<TextStyle>;
+    /**
+     * Style applied to the content container.
+     *
+     * @remarks This prop MUST NOT contain padding or margin rules. Such spacing rules will be zero-ed.
+     * Apply padding to the {@link ContentRendererProps.style | `style`} prop instead.
+     */
+    contentContainerStyle?: StyleProp<ViewStyle>;
+}
+
+/**
  * Constant used within a {@link (Toolbar:namespace).Layout} to denote a separator.
  *
  * @public
@@ -281,7 +315,7 @@ export declare enum ControlAction {
 /**
  * @public
  */
-export declare const defaultImageLocator: Image.LocationService<Image.StandardDefinition>;
+export declare const defaultImageLocator: Images.LocationService<Images.StandardDefinition>;
 
 /**
  * @public
@@ -289,7 +323,7 @@ export declare const defaultImageLocator: Image.LocationService<Image.StandardDe
 export declare const defaultTextTransforms: Transforms.GenericSpec<Attributes.TextValue, 'text'>[];
 
 /**
- * A serializable object representing the content of a Sheet.
+ * A serializable object representing rich content.
  *
  * @public
  */
@@ -330,13 +364,13 @@ export declare namespace Gen {
          *
          * @remarks Were this parameter not provided, images interactions will be disabled in the related {@link (Typer:type)}.
          */
-        imageLocatorService: Image.LocationService<D>;
+        imageLocatorService: Images.LocationService<D>;
     }
     /**
      * A service providing rendering behviors.
      */
     export interface Service {
-        imageLocator: Image.LocationService<any>;
+        imageLocator: Images.LocationService<any>;
         textTransforms: Transforms;
     }
 }
@@ -395,7 +429,7 @@ export declare interface GenericRichContent {
  *
  * @public
  */
-export declare namespace Image {
+export declare namespace Images {
     export interface StandardDefinition {
         readonly source: ImageSourcePropType;
         readonly width: number;
@@ -439,47 +473,29 @@ export declare namespace Image {
 }
 
 /**
- * A set of definitions related to the {@link (RichText:type)} component.
- *
+ * A set of definitions relative to {@link (Print:type)} component.
+
  * @public
  */
-export declare namespace RichText {
+export declare namespace Print {
     /**
-     * Properties for the {@link (RichText:type)} component.
+     * {@link (Print:type)} properties.
      */
-    export interface Props {
-        /**
-         * The content to display.
-         */
-        textOps: TextOp[];
-        /**
-         * An object describing how to convert attributes to style properties.
-         */
-        transforms: Transforms;
-        /**
-         * Default text style.
-         *
-         * @remarks
-         *
-         * Text style can be overriden depending on attributes applying to an {@link GenericOp | operation}.
-         * The mapped styled are dictated by the `textTransformsReg` property.
-         */
-        textStyle?: StyleProp<TextStyle>;
-    }
+    export type Props = ContentRendererProps;
 }
 
 /**
- * A component to display rich content.
+ * A component solely responsible for viewing {@link DocumentContent | document content}.
  *
  * @public
  *
  * @internalRemarks
  *
- * This type trick is aimed at preventing from exporting members which should be out of API surface.
+ * This type trick is aimed at preventing from exporting the component State which should be out of API surface.
  */
-export declare type RichText = ComponentClass<RichText.Props>;
+export declare type Print = ComponentClass<Print.Props>;
 
-export declare const RichText: React.ComponentClass<RichText.Props, any>;
+export declare const Print: React.ComponentClass<ContentRendererProps, any>;
 
 /**
  * A serializable object representing a selection of items in the {@link (Typer:type)}.
@@ -734,38 +750,13 @@ export declare namespace Typer {
     /**
      * {@link (Typer:type)} properties.
      */
-    export interface Props<D extends {} = {}> {
-        /**
-         * The {@link (Bridge:class)} instance.
-         *
-         * @remarks This property MUST NOT be changed after instantiation.
-         */
-        bridge: Bridge;
-        /**
-         * The {@link DocumentContent | document content} to display.
-         */
-        documentContent: DocumentContent;
+    export interface Props<D extends {} = {}> extends Print.Props {
         /**
          * Handler to receive {@link DocumentContent | document content} updates.
          *
          * @remarks This callback is expected to return a promise. This promise MUST resolve when the update had been proceeded.
          */
         onDocumentContentUpdate?: (nextDocumentContent: DocumentContent) => Promise<void>;
-        /**
-         * Component styles.
-         */
-        style?: StyleProp<ViewStyle>;
-        /**
-         * Default text style.
-         */
-        textStyle?: StyleProp<TextStyle>;
-        /**
-         * Style applied to the content container.
-         *
-         * @remarks This prop MUST NOT contain padding or margin rules. Such spacing rules will be zero-ed.
-         * Apply padding to the {@link (Typer:namespace).Props.style | `style`} prop instead.
-         */
-        contentContainerStyle?: StyleProp<ViewStyle>;
         /**
          * Customize the color of image controls upon activation.
          */
@@ -778,7 +769,7 @@ export declare namespace Typer {
 }
 
 /**
- * A component solely responsible for editing {@link DocumentContent}.
+ * A component solely responsible for editing {@link DocumentContent | document content}.
  *
  * @public
  *

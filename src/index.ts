@@ -29,7 +29,6 @@
  * @packageDocumentation
  */
 import { Typer } from '@components/Typer'
-import { RichText } from '@components/RichText'
 import { Bridge } from '@core/Bridge'
 import { Toolbar, ControlAction, CONTROL_SEPARATOR, buildVectorIconControlSpec } from '@components/Toolbar'
 import { Attributes } from '@delta/attributes'
@@ -38,21 +37,24 @@ import { GenericOp, TextOp } from '@delta/operations'
 import { Transforms, defaultTextTransforms } from '@core/Transforms'
 import { DocumentContent, buildInitialDocContent, cloneDocContent } from '@model/documents'
 import { SelectionShape } from '@delta/Selection'
-import { defaultImageLocator, Image } from '@core/Image'
+import { defaultImageLocator, Images } from '@core/Images'
 import { Gen } from '@core/Gen'
+import { Print } from '@components/Print'
+import { ContentRendererProps } from '@components/ContentRenderer'
 
 export {
   // Components related
   Typer,
-  RichText,
+  Print,
   Toolbar,
   ControlAction,
   CONTROL_SEPARATOR,
   buildVectorIconControlSpec,
+  ContentRendererProps,
   // Model related
   Bridge,
   Gen,
-  Image,
+  Images,
   GenericRichContent,
   GenericOp,
   SelectionShape,

@@ -6,7 +6,7 @@ import { Typer } from '@components/Typer'
 import { Bridge } from '@core/Bridge'
 import { buildInitialDocContent } from '@model/documents'
 
-describe('@components/<Sheet>', () => {
+describe('@components/<Print>', () => {
   it('should renders without crashing when a bridge instance is provided', () => {
     const bridge = new Bridge()
     expect(() => {

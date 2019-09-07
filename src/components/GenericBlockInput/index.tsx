@@ -1,27 +1,27 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { PureComponent } from 'react'
-import { TextBlockController } from './TextBlockController'
+import { TextBlockInput } from './TextBlockInput'
 import { StyleProp, TextStyle, View } from 'react-native'
-import { ImageBlockController } from './ImageBlockController'
+import { ImageBlockInput } from './ImageBlockInput'
 import { BlockDescriptor } from '@model/blocks'
 import { TextOp, ImageOp } from '@delta/operations'
 import invariant from 'invariant'
 import { Transforms } from '@core/Transforms'
 import { Attributes } from '@delta/attributes'
-import { DocumentController } from './DocumentController'
+import { DocumentController } from '../DocumentController'
 import { SelectionShape } from '@delta/Selection'
-import { Image } from '@core/Image'
+import { Images } from '@core/Images'
 
-export interface StandardBlockControllerProps {
+export interface StandardBlockInputProps {
   descriptor: BlockDescriptor
   controller: DocumentController
   isFocused: boolean
   overridingScopedSelection: SelectionShape | null
 }
 
-export interface GenericBlockControllerProps extends StandardBlockControllerProps {
+export interface GenericBlockInputProps extends StandardBlockInputProps {
   textStyle?: StyleProp<TextStyle>
-  imageLocatorService: Image.LocationService<any>
+  imageLocatorService: Images.LocationService<any>
   textTransforms: Transforms
   textAttributesAtCursor: Attributes.Map
   contentWidth: null | number
@@ -29,7 +29,7 @@ export interface GenericBlockControllerProps extends StandardBlockControllerProp
   hightlightOnFocus: boolean
 }
 
-export class GenericBlockController extends PureComponent<GenericBlockControllerProps> {
+export class GenericBlockInput extends PureComponent<GenericBlockInputProps> {
   private getStyles() {
     if (this.props.hightlightOnFocus) {
       return this.props.isFocused ? { borderColor: 'red', borderWidth: 1 } : { borderColor: 'gray', borderWidth: 1 }
@@ -43,7 +43,7 @@ export class GenericBlockController extends PureComponent<GenericBlockController
       ? this.props.contentWidth - (this.props.hightlightOnFocus ? 2 : 0)
       : null
     if (descriptor.kind === 'text') {
-      block = React.createElement(TextBlockController, {
+      block = React.createElement(TextBlockInput, {
         descriptor,
         textStyle,
         textOps: descriptor.opsSlice as TextOp[],
@@ -58,7 +58,7 @@ export class GenericBlockController extends PureComponent<GenericBlockController
         contentWidth: realContentWidth,
         ...otherProps,
       }
-      block = React.createElement(ImageBlockController, imageProps)
+      block = React.createElement(ImageBlockInput, imageProps)
     }
     return <View style={this.getStyles()}>{block}</View>
   }

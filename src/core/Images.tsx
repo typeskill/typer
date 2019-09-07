@@ -4,8 +4,8 @@ import { Image as RNImage, ImageSourcePropType } from 'react-native'
 /**
  * @public
  */
-export const defaultImageLocator: Image.LocationService<Image.StandardDefinition> = {
-  Component({ params, dimensions }: Image.ComponentProps<Image.StandardDefinition>) {
+export const defaultImageLocator: Images.LocationService<Images.StandardDefinition> = {
+  Component({ params, dimensions }: Images.ComponentProps<Images.StandardDefinition>) {
     return <RNImage style={dimensions} source={params.source} {...dimensions} />
   },
   computeImageDimensions({ width, height }, containerWidth) {
@@ -25,7 +25,7 @@ export const defaultImageLocator: Image.LocationService<Image.StandardDefinition
  *
  * @public
  */
-export declare namespace Image {
+export declare namespace Images {
   export interface StandardDefinition {
     readonly source: ImageSourcePropType
     readonly width: number

@@ -4,6 +4,7 @@
 
 ```ts
 
+import { Bridge as Bridge_2 } from 'index';
 import { ComponentClass } from 'react';
 import { ComponentType } from 'react';
 import { ImageSourcePropType } from 'react-native';
@@ -79,6 +80,15 @@ export function buildVectorIconControlSpec<T extends Toolbar.VectorIconMinimalPr
 export function cloneDocContent(content: DocumentContent): DocumentContent;
 
 // @public
+export interface ContentRendererProps {
+    bridge: Bridge_2;
+    contentContainerStyle?: StyleProp<ViewStyle>;
+    documentContent: DocumentContent;
+    style?: StyleProp<ViewStyle>;
+    textStyle?: StyleProp<TextStyle>;
+}
+
+// @public
 export const CONTROL_SEPARATOR: unique symbol;
 
 // @public
@@ -91,7 +101,7 @@ export enum ControlAction {
 }
 
 // @public (undocumented)
-export const defaultImageLocator: Image.LocationService<Image.StandardDefinition>;
+export const defaultImageLocator: Images.LocationService<Images.StandardDefinition>;
 
 // @public (undocumented)
 export const defaultTextTransforms: Transforms.GenericSpec<Attributes.TextValue, 'text'>[];
@@ -106,12 +116,12 @@ export interface DocumentContent {
 // @public
 export namespace Gen {
     export interface Config<D extends {}> {
-        imageLocatorService: Image.LocationService<D>;
+        imageLocatorService: Images.LocationService<D>;
         textTransformSpecs: Transforms.GenericSpec<Attributes.TextValue, 'text'>[];
     }
     export interface Service {
         // (undocumented)
-        imageLocator: Image.LocationService<any>;
+        imageLocator: Images.LocationService<any>;
         // (undocumented)
         textTransforms: Transforms;
     }
@@ -135,7 +145,7 @@ export interface GenericRichContent {
 }
 
 // @public
-export namespace Image {
+export namespace Images {
     // (undocumented)
     export interface ComponentProps<D> {
         // (undocumented)
@@ -169,19 +179,15 @@ export namespace Image {
 }
 
 // @public
-export namespace RichText {
-    export interface Props {
-        textOps: TextOp[];
-        textStyle?: StyleProp<TextStyle>;
-        transforms: Transforms;
-    }
+export namespace Print {
+    export type Props = ContentRendererProps;
 }
 
 // @public
-export type RichText = ComponentClass<RichText.Props>;
+export type Print = ComponentClass<Print.Props>;
 
 // @public (undocumented)
-export const RichText: React.ComponentClass<RichText.Props, any>;
+export const Print: React.ComponentClass<ContentRendererProps, any>;
 
 // @public
 export interface SelectionShape {
@@ -259,14 +265,9 @@ export class Transforms {
 
 // @public
 export namespace Typer {
-    export interface Props<D extends {} = {}> {
-        bridge: Bridge;
-        contentContainerStyle?: StyleProp<ViewStyle>;
+    export interface Props<D extends {} = {}> extends Print.Props {
         debug?: boolean;
-        documentContent: DocumentContent;
         onDocumentContentUpdate?: (nextDocumentContent: DocumentContent) => Promise<void>;
-        style?: StyleProp<ViewStyle>;
-        textStyle?: StyleProp<TextStyle>;
         underlayColor?: string;
     }
 }
