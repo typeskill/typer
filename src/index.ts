@@ -8,19 +8,18 @@
  *
  * The library exposes:
  *
- * - The {@link (Sheet:type)} component, a support for editing {@link (RichContent:class)}.
- * - The {@link (RichText:class)} component, a display for {@link (RichContent:class)}.
+ * - The {@link (Typer:type)} component, a support for editing {@link (DocumentContent:type)}.
+ * - The {@link (Print:class)} component, a display for {@link (DocumentContent:type)}.
  * - The {@link (Toolbar:type)} component, which permits text transforms on current selection.
  *
  * **Triggering actions from external controls**
  *
- * A {@link (Bridge:class)} instance should be shared between a {@link (Sheet:type)} and any controlling component such as {@link (Toolbar:type)}.
+ * A {@link (Bridge:class)} instance should be shared between a {@link (Typer:type)} and any controlling component such as {@link (Toolbar:type)}.
  * Actions can be triggered with the help of the object returned by {@link (Bridge:class).getControlEventDomain}.
  *
  * Such actions include:
  *
  * - inserting media content;
- * - switching line type (normal, lists);
  * - (un)setting text attributes (bold, italic).
  *
  * Selection change events can also be listened to with `add...Listener` methods.
@@ -29,7 +28,7 @@
  *
  * @packageDocumentation
  */
-import { Sheet } from '@components/Sheet'
+import { Typer } from '@components/Typer'
 import { RichText } from '@components/RichText'
 import { Bridge } from '@core/Bridge'
 import { Toolbar, ControlAction, CONTROL_SEPARATOR, buildVectorIconControlSpec } from '@components/Toolbar'
@@ -44,7 +43,7 @@ import { Gen } from '@core/Gen'
 
 export {
   // Components related
-  Sheet,
+  Typer,
   RichText,
   Toolbar,
   ControlAction,

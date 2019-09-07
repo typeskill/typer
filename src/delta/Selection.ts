@@ -1,7 +1,7 @@
 import invariant from 'invariant'
 
 /**
- * A serializable object representing a selection of items in the {@link (Sheet:type)}.
+ * A serializable object representing a selection of items in the {@link (Typer:type)}.
  *
  * @public
  */

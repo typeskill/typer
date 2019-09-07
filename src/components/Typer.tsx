@@ -74,13 +74,13 @@ interface SheetState {
 }
 
 /**
- * A set of definitions relative to {@link (Sheet:type)} component.
+ * A set of definitions relative to {@link (Typer:type)} component.
  *
  * @public
  */
-declare namespace Sheet {
+declare namespace Typer {
   /**
-   * {@link (Sheet:type)} properties.
+   * {@link (Typer:type)} properties.
    */
   export interface Props<D extends {} = {}> {
     /**
@@ -112,7 +112,7 @@ declare namespace Sheet {
      * Style applied to the content container.
      *
      * @remarks This prop MUST NOT contain padding or margin rules. Such spacing rules will be zero-ed.
-     * Apply padding to the {@link (Sheet:namespace).Props.style | `style`} prop instead.
+     * Apply padding to the {@link (Typer:namespace).Props.style | `style`} prop instead.
      */
     contentContainerStyle?: StyleProp<ViewStyle>
     /**
@@ -127,8 +127,8 @@ declare namespace Sheet {
 }
 
 // eslint-disable-next-line @typescript-eslint/class-name-casing
-class _Sheet extends PureComponent<Sheet.Props, SheetState> implements DocumentProvider {
-  public static propTypes: Record<keyof Sheet.Props, any> = {
+class _Typer extends PureComponent<Typer.Props, SheetState> implements DocumentProvider {
+  public static propTypes: Record<keyof Typer.Props, any> = {
     bridge: PropTypes.instanceOf(Bridge).isRequired,
     style: ViewPropTypes.style,
     contentContainerStyle: ViewPropTypes.style,
@@ -139,7 +139,7 @@ class _Sheet extends PureComponent<Sheet.Props, SheetState> implements DocumentP
     underlayColor: PropTypes.string,
   }
 
-  public static defaultProps: Partial<Sheet.Props> = {}
+  public static defaultProps: Partial<Typer.Props> = {}
 
   private genService: Gen.Service
   private doc: Document
@@ -149,7 +149,7 @@ class _Sheet extends PureComponent<Sheet.Props, SheetState> implements DocumentP
     overridingScopedSelection: null,
   }
 
-  public constructor(props: Sheet.Props) {
+  public constructor(props: Typer.Props) {
     super(props)
     const { bridge } = props
     invariant(bridge != null, 'bridge prop is required')
@@ -237,7 +237,7 @@ class _Sheet extends PureComponent<Sheet.Props, SheetState> implements DocumentP
     this.props.bridge.getSheetEventDomain().release(this)
   }
 
-  public async componentDidUpdate(oldProps: Sheet.Props) {
+  public async componentDidUpdate(oldProps: Typer.Props) {
     invariant(oldProps.bridge === this.props.bridge, 'bridge prop cannot be changed after instantiation')
     const currentSelection = this.props.documentContent.currentSelection
     if (oldProps.documentContent.currentSelection !== currentSelection) {
@@ -274,7 +274,7 @@ class _Sheet extends PureComponent<Sheet.Props, SheetState> implements DocumentP
  *
  * This type trick is aimed at preventing from exporting the component State which should be out of API surface.
  */
-type Sheet = ComponentClass<Sheet.Props>
-const Sheet = _Sheet as Sheet
+type Typer = ComponentClass<Typer.Props>
+const Typer = _Typer as Typer
 
-export { Sheet }
+export { Typer }

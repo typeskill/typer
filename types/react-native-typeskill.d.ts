@@ -8,19 +8,18 @@
  *
  * The library exposes:
  *
- * - The {@link (Sheet:type)} component, a support for editing {@link (RichContent:class)}.
- * - The {@link (RichText:class)} component, a display for {@link (RichContent:class)}.
+ * - The {@link (Typer:type)} component, a support for editing {@link (DocumentContent:type)}.
+ * - The {@link (Print:class)} component, a display for {@link (DocumentContent:type)}.
  * - The {@link (Toolbar:type)} component, which permits text transforms on current selection.
  *
  * **Triggering actions from external controls**
  *
- * A {@link (Bridge:class)} instance should be shared between a {@link (Sheet:type)} and any controlling component such as {@link (Toolbar:type)}.
+ * A {@link (Bridge:class)} instance should be shared between a {@link (Typer:type)} and any controlling component such as {@link (Toolbar:type)}.
  * Actions can be triggered with the help of the object returned by {@link (Bridge:class).getControlEventDomain}.
  *
  * Such actions include:
  *
  * - inserting media content;
- * - switching line type (normal, lists);
  * - (un)setting text attributes (bold, italic).
  *
  * Selection change events can also be listened to with `add...Listener` methods.
@@ -143,7 +142,7 @@ export declare namespace Bridge {
         applyTextTransformToSelection: (attributeName: string, attributeValue: Attributes.TextValue) => void;
     }
     /**
-     * An object representing an area of events happening inside the {@link (Sheet:type)}.
+     * An object representing an area of events happening inside the {@link (Typer:type)}.
      *
      * @privateRemarks
      *
@@ -168,13 +167,13 @@ export declare namespace Bridge {
 }
 
 /**
- * An abstraction responsible for event dispatching between the {@link (Sheet:type)} and external controls.
+ * An abstraction responsible for event dispatching between the {@link (Typer:type)} and external controls.
  *
  * @remarks It also provide a uniform access to custom rendering logic.
  *
  * @internalRemarks
  *
- * The implemententation is isolated and decoupled from the {@link (Sheet:type)} class.
+ * The implemententation is isolated and decoupled from the {@link (Typer:type)} class.
  *
  * @public
  */
@@ -198,7 +197,7 @@ export declare class Bridge<D extends {} = {}> {
      *
      * @remarks
      *
-     * The returned object can be used to react from and trigger {@link (Sheet:type)} events.
+     * The returned object can be used to react from and trigger {@link (Typer:type)} events.
      */
     getControlEventDomain(): Bridge.ControlEventDomain<D>;
     /**
@@ -329,7 +328,7 @@ export declare namespace Gen {
         /**
          * An object describing the behavior to locate and render images.
          *
-         * @remarks Were this parameter not provided, images interactions will be disabled in the related {@link (Sheet:type)}.
+         * @remarks Were this parameter not provided, images interactions will be disabled in the related {@link (Typer:type)}.
          */
         imageLocatorService: Image.LocationService<D>;
     }
@@ -483,7 +482,7 @@ export declare type RichText = ComponentClass<RichText.Props>;
 export declare const RichText: React.ComponentClass<RichText.Props, any>;
 
 /**
- * A serializable object representing a selection of items in the {@link (Sheet:type)}.
+ * A serializable object representing a selection of items in the {@link (Typer:type)}.
  *
  * @public
  */
@@ -497,71 +496,6 @@ export declare interface SelectionShape {
      */
     readonly end: number;
 }
-
-/**
- * A set of definitions relative to {@link (Sheet:type)} component.
- *
- * @public
- */
-export declare namespace Sheet {
-    /**
-     * {@link (Sheet:type)} properties.
-     */
-    export interface Props<D extends {} = {}> {
-        /**
-         * The {@link (Bridge:class)} instance.
-         *
-         * @remarks This property MUST NOT be changed after instantiation.
-         */
-        bridge: Bridge;
-        /**
-         * The {@link DocumentContent | document content} to display.
-         */
-        documentContent: DocumentContent;
-        /**
-         * Handler to receive {@link DocumentContent | document content} updates.
-         *
-         * @remarks This callback is expected to return a promise. This promise MUST resolve when the update had been proceeded.
-         */
-        onDocumentContentUpdate?: (nextDocumentContent: DocumentContent) => Promise<void>;
-        /**
-         * Component styles.
-         */
-        style?: StyleProp<ViewStyle>;
-        /**
-         * Default text style.
-         */
-        textStyle?: StyleProp<TextStyle>;
-        /**
-         * Style applied to the content container.
-         *
-         * @remarks This prop MUST NOT contain padding or margin rules. Such spacing rules will be zero-ed.
-         * Apply padding to the {@link (Sheet:namespace).Props.style | `style`} prop instead.
-         */
-        contentContainerStyle?: StyleProp<ViewStyle>;
-        /**
-         * Customize the color of image controls upon activation.
-         */
-        underlayColor?: string;
-        /**
-         * In debug mode, active block will be highlighted.
-         */
-        debug?: boolean;
-    }
-}
-
-/**
- * A component solely responsible for editing {@link DocumentContent}.
- *
- * @public
- *
- * @internalRemarks
- *
- * This type trick is aimed at preventing from exporting the component State which should be out of API surface.
- */
-export declare type Sheet = ComponentClass<Sheet.Props>;
-
-export declare const Sheet: React.ComponentClass<Sheet.Props<{}>, any>;
 
 /**
  * An operation containing text.
@@ -617,7 +551,7 @@ export declare namespace Toolbar {
      */
     export interface Props<D extends {}> {
         /**
-         * The instance to be shared with the {@link (Sheet:type)}.
+         * The instance to be shared with the {@link (Typer:type)}.
          */
         bridge: Bridge<D>;
         /**
@@ -706,7 +640,7 @@ export declare namespace Toolbar {
 }
 
 /**
- * A component to let user control the {@link (Sheet:type)} through a {@link (Bridge:class)}.
+ * A component to let user control the {@link (Typer:type)} through a {@link (Bridge:class)}.
  *
  * @public
  *
@@ -790,5 +724,70 @@ export declare class Transforms {
      */
     getStylesFromOp(op: TextOp): StyleProp<TextStyle>;
 }
+
+/**
+ * A set of definitions relative to {@link (Typer:type)} component.
+ *
+ * @public
+ */
+export declare namespace Typer {
+    /**
+     * {@link (Typer:type)} properties.
+     */
+    export interface Props<D extends {} = {}> {
+        /**
+         * The {@link (Bridge:class)} instance.
+         *
+         * @remarks This property MUST NOT be changed after instantiation.
+         */
+        bridge: Bridge;
+        /**
+         * The {@link DocumentContent | document content} to display.
+         */
+        documentContent: DocumentContent;
+        /**
+         * Handler to receive {@link DocumentContent | document content} updates.
+         *
+         * @remarks This callback is expected to return a promise. This promise MUST resolve when the update had been proceeded.
+         */
+        onDocumentContentUpdate?: (nextDocumentContent: DocumentContent) => Promise<void>;
+        /**
+         * Component styles.
+         */
+        style?: StyleProp<ViewStyle>;
+        /**
+         * Default text style.
+         */
+        textStyle?: StyleProp<TextStyle>;
+        /**
+         * Style applied to the content container.
+         *
+         * @remarks This prop MUST NOT contain padding or margin rules. Such spacing rules will be zero-ed.
+         * Apply padding to the {@link (Typer:namespace).Props.style | `style`} prop instead.
+         */
+        contentContainerStyle?: StyleProp<ViewStyle>;
+        /**
+         * Customize the color of image controls upon activation.
+         */
+        underlayColor?: string;
+        /**
+         * In debug mode, active block will be highlighted.
+         */
+        debug?: boolean;
+    }
+}
+
+/**
+ * A component solely responsible for editing {@link DocumentContent}.
+ *
+ * @public
+ *
+ * @internalRemarks
+ *
+ * This type trick is aimed at preventing from exporting the component State which should be out of API surface.
+ */
+export declare type Typer = ComponentClass<Typer.Props>;
+
+export declare const Typer: React.ComponentClass<Typer.Props<{}>, any>;
 
 export { }

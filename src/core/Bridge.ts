@@ -84,7 +84,7 @@ declare namespace Bridge {
   }
 
   /**
-   * An object representing an area of events happening inside the {@link (Sheet:type)}.
+   * An object representing an area of events happening inside the {@link (Typer:type)}.
    *
    * @privateRemarks
    *
@@ -111,13 +111,13 @@ declare namespace Bridge {
 }
 
 /**
- * An abstraction responsible for event dispatching between the {@link (Sheet:type)} and external controls.
+ * An abstraction responsible for event dispatching between the {@link (Typer:type)} and external controls.
  *
  * @remarks It also provide a uniform access to custom rendering logic.
  *
  * @internalRemarks
  *
- * The implemententation is isolated and decoupled from the {@link (Sheet:type)} class.
+ * The implemententation is isolated and decoupled from the {@link (Typer:type)} class.
  *
  * @public
  */
@@ -173,7 +173,7 @@ class Bridge<D extends {} = {}> {
    *
    * @remarks
    *
-   * The returned object can be used to react from and trigger {@link (Sheet:type)} events.
+   * The returned object can be used to react from and trigger {@link (Typer:type)} events.
    */
   public getControlEventDomain(): Bridge.ControlEventDomain<D> {
     return this.controlEventDom

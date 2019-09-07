@@ -190,26 +190,6 @@ export interface SelectionShape {
 }
 
 // @public
-export namespace Sheet {
-    export interface Props<D extends {} = {}> {
-        bridge: Bridge;
-        contentContainerStyle?: StyleProp<ViewStyle>;
-        debug?: boolean;
-        documentContent: DocumentContent;
-        onDocumentContentUpdate?: (nextDocumentContent: DocumentContent) => Promise<void>;
-        style?: StyleProp<ViewStyle>;
-        textStyle?: StyleProp<TextStyle>;
-        underlayColor?: string;
-    }
-}
-
-// @public
-export type Sheet = ComponentClass<Sheet.Props>;
-
-// @public (undocumented)
-export const Sheet: React.ComponentClass<Sheet.Props<{}>, any>;
-
-// @public
 export interface TextOp extends GenericOp {
     readonly attributes?: Attributes.Map;
     readonly insert?: string;
@@ -276,6 +256,26 @@ export class Transforms {
     // @internal
     getStylesFromOp(op: TextOp): StyleProp<TextStyle>;
     }
+
+// @public
+export namespace Typer {
+    export interface Props<D extends {} = {}> {
+        bridge: Bridge;
+        contentContainerStyle?: StyleProp<ViewStyle>;
+        debug?: boolean;
+        documentContent: DocumentContent;
+        onDocumentContentUpdate?: (nextDocumentContent: DocumentContent) => Promise<void>;
+        style?: StyleProp<ViewStyle>;
+        textStyle?: StyleProp<TextStyle>;
+        underlayColor?: string;
+    }
+}
+
+// @public
+export type Typer = ComponentClass<Typer.Props>;
+
+// @public (undocumented)
+export const Typer: React.ComponentClass<Typer.Props<{}>, any>;
 
 
 ```

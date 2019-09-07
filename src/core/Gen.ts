@@ -21,7 +21,7 @@ export declare namespace Gen {
     /**
      * An object describing the behavior to locate and render images.
      *
-     * @remarks Were this parameter not provided, images interactions will be disabled in the related {@link (Sheet:type)}.
+     * @remarks Were this parameter not provided, images interactions will be disabled in the related {@link (Typer:type)}.
      */
     imageLocatorService: Image.LocationService<D>
   }

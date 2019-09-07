@@ -82,7 +82,7 @@ declare namespace Toolbar {
    */
   export interface Props<D extends {}> {
     /**
-     * The instance to be shared with the {@link (Sheet:type)}.
+     * The instance to be shared with the {@link (Typer:type)}.
      */
     bridge: Bridge<D>
     /**
@@ -399,7 +399,7 @@ export function buildVectorIconControlSpec<T extends Toolbar.VectorIconMinimalPr
 }
 
 /**
- * A component to let user control the {@link (Sheet:type)} through a {@link (Bridge:class)}.
+ * A component to let user control the {@link (Typer:type)} through a {@link (Bridge:class)}.
  *
  * @public
  *
