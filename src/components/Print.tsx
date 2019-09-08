@@ -33,14 +33,16 @@ class _Print<D> extends ContentRenderer<D, Print.Props<D>> {
   }
 
   @boundMethod
-  private renderBlock(block: Block) {
+  private renderBlock({ descriptor }: Block) {
     const { textStyle } = this.props
+    const key = `edit-block-${descriptor.kind}-${descriptor.blockIndex}`
     return (
       <GenericBlockView
+        key={key}
         contentWidth={this.state.containerWidth}
         textStyle={textStyle}
         imageLocatorService={this.genService.imageLocator}
-        descriptor={block.descriptor}
+        descriptor={descriptor}
         textTransforms={this.genService.textTransforms}
       />
     )

@@ -93,7 +93,7 @@ class _Typer<D> extends ContentRenderer<D, Typer.Props<D>, TyperState> implement
     const { overridingScopedSelection: overridingSelection } = this.state
     const { textStyle, debug } = this.props
     const { selectedTextAttributes } = this.props.documentContent
-    const key = `block-${descriptor.kind}-${descriptor.blockIndex}`
+    const key = `edit-block-${descriptor.kind}-${descriptor.blockIndex}`
     // TODO use weak map to memoize controller
     const controller = new DocumentController(block, this)
     const isFocused = block.isFocused(this.props.documentContent)
