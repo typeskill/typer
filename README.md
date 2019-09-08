@@ -54,9 +54,9 @@
 
 ### Features
 
-- Support for **arbitrary embedded contents**
-- Support for **arbitrary controllers** with the `Bridge` class
-- JSON-**serializable** rich text content
+- Support for **arbitrary embedded contents**;
+- Support for **arbitrary controllers** with the `Bridge` class;
+- JSON-**serializable** rich content.
 
 <a name="trying-locally" />
 
@@ -75,20 +75,47 @@ expo start
 
 ### Introduction
 
-The library exposes a naked `Sheet` component, which you can customize and style.
-The `Sheet` component is solely responsible for displaying and editing rich content.
-This `Sheet` component needs an `innerInterface` object provided by the `Bridge` class to receive actions and notify selection attributes changes.
-The actions to insert media content, change line type (normal, lists) or set text attributes to selection (bold, italic) are triggered with the `outerInterface` from the same `Bridge` instance.
+The library exposes two components to render documents:
+
+- The `Typer` component is responsible for **editing** a document;
+- The `Print` component is responsible for **displaying** a document.
+
+### Definitions
+
+- A *document* is a JSON-serializable object describing rich content;
+- A *document renderer* is any controlled component which renders a document—i.e. `Typer` or `Print`;
+- The *master component* is referred to as the component containing and controlling the document renderer;
+- A *document control* is any controlled component owned by the master component capable of altering the document—i.e. `Typer` or `Toolbar`;
+- An *external [document] control* is any document control which is not a document renderer—i.e. `Toolbar` or any custom control.
+
+### Controlled components
+
+Document renderers and controls are **[controlled components](https://reactjs.org/docs/forms.html#controlled-components)**, which means you need to define how to store the state from a master component, or through a store architecture such as a Redux.
+
+**link to example**
+
+### A domain of shared events
+
+Document renderers need an invariant `Bridge` instance prop.
+The bridge has three responsibilities:
+
+- to convey actions such as *insert an image at selection* or *change text attributes in selection* from external controls;
+- to notify selection attributes changes to external controls;
+- to provide a shared interface for content generation and print behavior.
+
+A `Bridge` instance must be hold by the mater component, and can be shared with any external control such as `Toolbar` to operate on the document. To grasp how the bridge is interfaced with the `Toolbar` component, you can [read its implementation](src/components/Toolbar.tsx).
+
+### Robustness
 
 This decoupled design has the following advantages:
 
 - the logic can be tested independently from React components;
-- the library consumer can integrate the library to fit its UI and architectural design;
-- arbitrary content can be embdedded.
+- the library consumer can integrate the library to fit its graphical and architectural design;
+- support for arbitrary content in the future.
 
 ### Minimal example
 
-Bellow is a simplified snippet [from the expo example](examples/expo/App.tsx) to show you how the `Toolbar` can be interfaced with the `Sheet` component.
+Bellow is a simplified snippet [from the expo example](examples/expo/App.tsx) to show you how the `Toolbar` can be interfaced with the `Typer` component.
 You need a linked `react-native-vector-icons` or `@expo/vector-icons` if you are on expo to make this example work.
 
 ``` jsx
@@ -124,17 +151,6 @@ const toolbarLayout = [
     MaterialCommunityIcons,
     ControlAction.SELECT_TEXT_STRIKETHROUGH,
     'format-strikethrough-variant'
-  ),
-  TEXT_CONTROL_SEPARATOR,
-  buildVectorIconControlSpec(
-    MaterialCommunityIcons,
-    ControlAction.SELECT_LINES_ORDERED_LIST,
-    'format-list-numbered'
-  ),
-  buildVectorIconControlSpec(
-    MaterialCommunityIcons,
-    ControlAction.SELECT_LINES_UNORDERED_LIST,
-    'format-list-bulleted'
   )
 ]
 
@@ -144,7 +160,7 @@ export class RichTextEditor extends Component {
   render() {
     return (
       <View style={{ flex: 1 }}>
-        <Sheet bridgeInnerInterface={this.bridge.getInnerInterface()} />
+        <Typer bridgeInnerInterface={this.bridge.getInnerInterface()} />
         <Toolbar
           layout={toolbarLayout}
           bridgeOuterInferface={this.bridge.getOuterInterface()}
@@ -155,19 +171,13 @@ export class RichTextEditor extends Component {
 }
 ```
 
-**This design gives you a total flexibility on your editor layout and integration with your application**.
-The `outerInterface` smoothly fit in global state architectures such as Redux.
-
-To see how this `outerInterface` is used in the `Toolbar` component, [read its implementation](src/components/Toolbar.tsx). Basically, this outer interface could be used anywhere in your layout, giving you the flexibility of composing multiple controls wherever you want.
-
 ### Lifecycle contract
 
-You need to comply with this contract to avoid resource leakage and bugs.
+You need to comply with this contract to avoid resource leakage and bugs:
 
-First off, some definitions. The root component is referred to as the component containing the `Sheet` component. A controller is a component to which the `outerInterface` prop is passed.
+- The `Bridge` instance should be instantiated by the master component, during its own instantiation or during mount;
+- There should be exactly one `Bridge` instance for one document renderer.
 
-You should follow this set of rules:
+### Integrating images
 
-- the `Bridge` instance should be instanciated by root component, during its own istantiation or during mount;
-- there should be exactly one `Bridge` instance for one rendered `Sheet`;
-- any component (root or controller) which adds listeners to the `outerInterface` should detatch any references with `outerInterface.release(this)` before unmounting (`componentWillUnmount`).
+// To be continued
