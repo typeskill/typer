@@ -90,11 +90,11 @@ class _RichText extends Component<RichText.Props> {
   }
 
   private renderLines() {
-    const { textOps } = this.props
+    const { textOps, textStyle } = this.props
     const children: ReactNode[][] = []
     new LineWalker(textOps).eachLine(({ lineType, delta: lineDelta, index }) => {
       children.push([
-        <Text style={getLineStyle(lineType)} key={`line-${index}`}>
+        <Text style={[textStyle, getLineStyle(lineType)]} key={`line-${index}`}>
           {lineDelta.ops.map((l, elIndex) => this.renderOperation(l, index, elIndex))}
         </Text>,
       ])
