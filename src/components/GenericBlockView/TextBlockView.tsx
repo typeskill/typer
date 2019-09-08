@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react'
 import { Transforms } from '@core/Transforms'
-import { StyleProp, TextStyle } from 'react-native'
+import { StyleProp, TextStyle, Text } from 'react-native'
 import { TextOp } from '@delta/operations'
 import { RichText } from '@components/RichText'
 import { StandardBlockViewProps } from './types'
@@ -14,6 +14,10 @@ export interface TextBlockViewProps extends StandardBlockViewProps {
 export class TextBlockView extends PureComponent<TextBlockViewProps> {
   public render() {
     const { textStyle, textOps, textTransforms } = this.props
-    return <RichText textStyle={textStyle} transforms={textTransforms} textOps={textOps} />
+    return (
+      <Text>
+        <RichText textStyle={textStyle} transforms={textTransforms} textOps={textOps} />
+      </Text>
+    )
   }
 }

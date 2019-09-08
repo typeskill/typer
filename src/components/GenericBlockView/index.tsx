@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { PureComponent } from 'react'
 import { TextBlockView } from './TextBlockView'
-import { StyleProp, TextStyle } from 'react-native'
+import { StyleProp, TextStyle, ViewStyle, View } from 'react-native'
 import { ImageBlockView } from './ImageBlockView'
 import { TextOp, ImageOp } from '@delta/operations'
 import invariant from 'invariant'
@@ -14,11 +14,12 @@ export interface GenericBlockViewProps extends StandardBlockViewProps {
   imageLocatorService: Images.LocationService<any>
   textTransforms: Transforms
   contentWidth: null | number
+  blockStyle?: StyleProp<ViewStyle>
 }
 
 export class GenericBlockView extends PureComponent<GenericBlockViewProps> {
   public render() {
-    const { descriptor, textStyle, imageLocatorService, contentWidth, ...otherProps } = this.props
+    const { descriptor, textStyle, imageLocatorService, contentWidth, blockStyle, ...otherProps } = this.props
     let block = null
     const realContentWidth = this.props.contentWidth
     if (descriptor.kind === 'text') {
@@ -39,6 +40,6 @@ export class GenericBlockView extends PureComponent<GenericBlockViewProps> {
       }
       block = React.createElement(ImageBlockView, imageProps)
     }
-    return block
+    return <View style={blockStyle}>{block}</View>
   }
 }

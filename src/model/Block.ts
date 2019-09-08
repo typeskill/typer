@@ -36,11 +36,11 @@ export class Block {
     this.blocks = blocks
   }
 
-  private isFirst(): boolean {
+  public isFirst(): boolean {
     return this.descriptor.blockIndex === 0
   }
 
-  private isLast(): boolean {
+  public isLast(): boolean {
     return this.descriptor.blockIndex === this.descriptor.maxBlockIndex
   }
 

@@ -33,11 +33,13 @@ class _Print<D> extends DocumentRenderer<D, Print.Props<D>> {
   }
 
   @boundMethod
-  private renderBlockView({ descriptor }: Block) {
+  private renderBlockView(block: Block) {
     const { textStyle } = this.props
+    const { descriptor } = block
     const key = `block-view-${descriptor.kind}-${descriptor.blockIndex}`
     return (
       <GenericBlockView
+        blockStyle={this.getBlockStyle(block)}
         key={key}
         contentWidth={this.state.containerWidth}
         textStyle={textStyle}

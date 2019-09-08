@@ -21,6 +21,7 @@ import { TextChangeSession } from './TextChangeSession'
 import { DocumentDelta } from '@delta/DocumentDelta'
 import { DocumentDeltaAtomicUpdate } from '@delta/DocumentDeltaAtomicUpdate'
 import { StandardBlockInputProps } from '../types'
+import { genericStyles } from '@components/styles'
 
 const styles = StyleSheet.create({
   grow: {
@@ -168,7 +169,7 @@ export class TextBlockInput extends Component<TextBlockInputProps> {
       <View style={styles.grow}>
         <TextInput
           selection={overridingSelection ? overridingSelection : undefined}
-          style={[styles.grow, styles.textInput, richTextStyles.defaultText]}
+          style={[styles.grow, styles.textInput, richTextStyles.defaultText, textStyle, genericStyles.zeroSpacing]}
           onKeyPress={this.handleOnKeyPressed}
           onSelectionChange={this.handleOnSelectionChanged}
           onChangeText={this.handleOnTextChanged}

@@ -7,6 +7,8 @@ import invariant from 'invariant'
 import { BlockAssembler } from '@model/BlockAssembler'
 import { Bridge } from '@core/Bridge'
 import { Gen } from '@core/Gen'
+import { genericStyles } from './styles'
+import { Block } from '@model/Block'
 
 export interface DocumentRendererState {
   containerWidth: number | null
@@ -37,6 +39,15 @@ export interface DocumentRendererProps<D> {
    */
   textStyle?: StyleProp<TextStyle>
   /**
+   * The spacing unit.
+   *
+   * @remarks It is used:
+   *
+   * - between two adjacent blocks;
+   * - to add padding between the container and the rendered document.
+   */
+  spacing?: number
+  /**
    * Style applied to the content container.
    *
    * @remarks This prop MUST NOT contain padding or margin rules. Such spacing rules will be zero-ed.
@@ -45,45 +56,21 @@ export interface DocumentRendererProps<D> {
   contentContainerStyle?: StyleProp<ViewStyle>
 }
 
+const DEFAULT_SPACING = 15
+
 const contentRendererStyles = StyleSheet.create({
   scroll: {
     flex: 1,
   },
   contentContainer: {
-    flex: 1,
-    justifyContent: 'center',
+    flexGrow: 1,
+    justifyContent: 'flex-start',
     alignItems: 'stretch',
-  },
-  /**
-   * As of React Native 0.60, merging padding algorithm doesn't
-   * allow more specific spacing attributes to override more
-   * generic ones. As such, we must override all.
-   */
-  overridingContentStyles: {
-    margin: 0,
-    marginBottom: 0,
-    marginEnd: 0,
-    marginHorizontal: 0,
-    marginLeft: 0,
-    marginRight: 0,
-    marginStart: 0,
-    marginTop: 0,
-    marginVertical: 0,
-    padding: 0,
-    paddingBottom: 0,
-    paddingEnd: 0,
-    paddingHorizontal: 0,
-    paddingLeft: 0,
-    paddingRight: 0,
-    paddingStart: 0,
-    paddingTop: 0,
-    paddingVertical: 0,
   },
   root: {
     flex: 1,
     flexDirection: 'row',
     alignSelf: 'stretch',
-    padding: 10,
   },
 })
 
@@ -101,6 +88,7 @@ export abstract class DocumentRenderer<
     contentContainerStyle: ViewPropTypes.style,
     textStyle: PropTypes.any,
     document: DocumentPropType.isRequired,
+    spacing: PropTypes.number,
   }
 
   protected genService: Gen.Service
@@ -115,6 +103,10 @@ export abstract class DocumentRenderer<
     this.genService = props.bridge.getGenService()
   }
 
+  private getSpacing() {
+    return this.props.spacing || DEFAULT_SPACING
+  }
+
   protected handleOnContainerLayout = (layoutEvent: LayoutChangeEvent) => {
     this.setState({
       containerWidth: layoutEvent.nativeEvent.layout.width,
@@ -126,15 +118,20 @@ export abstract class DocumentRenderer<
   }
 
   protected getRootStyles(): StyleProp<ViewStyle> {
-    return contentRendererStyles.root
+    return [contentRendererStyles.root, { padding: this.getSpacing() }]
   }
 
   protected getContainerStyles(): StyleProp<ViewStyle> {
-    return [
-      contentRendererStyles.contentContainer,
-      this.props.contentContainerStyle,
-      contentRendererStyles.overridingContentStyles,
-    ]
+    return [contentRendererStyles.contentContainer, this.props.contentContainerStyle, genericStyles.zeroSpacing]
+  }
+
+  protected getBlockStyle(block: Block) {
+    if (block.isLast()) {
+      return undefined
+    }
+    return {
+      marginBottom: this.getSpacing(),
+    }
   }
 
   public componentDidUpdate(oldProps: P) {

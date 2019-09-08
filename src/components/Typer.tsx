@@ -100,6 +100,7 @@ class _Typer<D> extends DocumentRenderer<D, Typer.Props<D>, TyperState> implemen
     return (
       <ScrollIntoView enabled={isFocused} key={key}>
         <GenericBlockInput
+          blockStyle={this.getBlockStyle(block)}
           hightlightOnFocus={!!debug}
           isFocused={isFocused}
           controller={controller}

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { PureComponent } from 'react'
 import { TextBlockInput } from './TextBlockInput'
-import { StyleProp, TextStyle, View } from 'react-native'
+import { StyleProp, TextStyle, View, ViewStyle } from 'react-native'
 import { ImageBlockInput } from './ImageBlockInput'
 import { TextOp, ImageOp } from '@delta/operations'
 import invariant from 'invariant'
@@ -19,6 +19,7 @@ export interface GenericBlockInputProps extends StandardBlockInputProps {
   contentWidth: null | number
   blockScopedSelection: SelectionShape
   hightlightOnFocus: boolean
+  blockStyle?: StyleProp<ViewStyle>
 }
 
 export class GenericBlockInput extends PureComponent<GenericBlockInputProps> {
@@ -29,7 +30,7 @@ export class GenericBlockInput extends PureComponent<GenericBlockInputProps> {
     return undefined
   }
   public render() {
-    const { descriptor, textStyle, imageLocatorService, contentWidth, ...otherProps } = this.props
+    const { descriptor, textStyle, imageLocatorService, contentWidth, blockStyle, ...otherProps } = this.props
     let block = null
     const realContentWidth = this.props.contentWidth
       ? this.props.contentWidth - (this.props.hightlightOnFocus ? 2 : 0)
@@ -52,6 +53,6 @@ export class GenericBlockInput extends PureComponent<GenericBlockInputProps> {
       }
       block = React.createElement(ImageBlockInput, imageProps)
     }
-    return <View style={this.getStyles()}>{block}</View>
+    return <View style={[this.getStyles(), blockStyle]}>{block}</View>
   }
 }
