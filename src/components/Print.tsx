@@ -1,5 +1,5 @@
 import React, { ComponentClass } from 'react'
-import { ContentRenderer, ContentRendererProps, contentRendererStyles } from './ContentRenderer'
+import { ContentRenderer, ContentRendererProps, contentRendererStyles, ContentRendererState } from './ContentRenderer'
 import { Document } from '@model/Document'
 import { ScrollView, View } from 'react-native'
 import { boundMethod } from 'autobind-decorator'
@@ -18,9 +18,15 @@ declare namespace Print {
   export type Props<D> = ContentRendererProps<D>
 }
 
+type PrintState = ContentRendererState
+
 // eslint-disable-next-line @typescript-eslint/class-name-casing
 class _Print<D> extends ContentRenderer<D, Print.Props<D>> {
   public static propTypes = ContentRenderer.propTypes
+
+  public state: PrintState = {
+    containerWidth: null,
+  }
 
   public componentDidUpdate(oldProps: Print.Props<D>) {
     super.componentDidUpdate(oldProps)
