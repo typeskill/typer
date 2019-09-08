@@ -15,14 +15,14 @@ declare namespace Print {
   /**
    * {@link (Print:type)} properties.
    */
-  export type Props = ContentRendererProps
+  export type Props<D> = ContentRendererProps<D>
 }
 
 // eslint-disable-next-line @typescript-eslint/class-name-casing
-class _Print extends ContentRenderer<Print.Props> {
+class _Print<D> extends ContentRenderer<D, Print.Props<D>> {
   public static propTypes = ContentRenderer.propTypes
 
-  public componentDidUpdate(oldProps: Print.Props) {
+  public componentDidUpdate(oldProps: Print.Props<D>) {
     super.componentDidUpdate(oldProps)
   }
 
@@ -70,7 +70,7 @@ class _Print extends ContentRenderer<Print.Props> {
  *
  * This type trick is aimed at preventing from exporting the component State which should be out of API surface.
  */
-type Print = ComponentClass<Print.Props>
-const Print = _Print as Print
+type Print<D> = ComponentClass<Print.Props<D>>
+const Print = _Print as Print<any>
 
 export { Print }

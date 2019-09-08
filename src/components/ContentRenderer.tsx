@@ -17,13 +17,13 @@ export interface ContentRendererState {
  *
  * @public
  */
-export interface ContentRendererProps {
+export interface ContentRendererProps<D> {
   /**
    * The {@link (Bridge:class)} instance.
    *
    * @remarks This property MUST NOT be changed after instantiation.
    */
-  bridge: Bridge
+  bridge: Bridge<D>
   /**
    * The {@link DocumentContent | document content} to display.
    */
@@ -91,10 +91,11 @@ export const contentRendererStyles = StyleSheet.create({
  * @internal
  */
 export abstract class ContentRenderer<
-  P extends ContentRendererProps,
+  D,
+  P extends ContentRendererProps<D>,
   S extends ContentRendererState = ContentRendererState
 > extends PureComponent<P, S> {
-  public static propTypes: Record<keyof ContentRendererProps, any> = {
+  public static propTypes: Record<keyof ContentRendererProps<any>, any> = {
     bridge: PropTypes.instanceOf(Bridge).isRequired,
     style: ViewPropTypes.style,
     contentContainerStyle: ViewPropTypes.style,

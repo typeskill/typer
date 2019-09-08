@@ -28,7 +28,7 @@ declare namespace Typer {
   /**
    * {@link (Typer:type)} properties.
    */
-  export interface Props<D extends {} = {}> extends ContentRendererProps {
+  export interface Props<D> extends ContentRendererProps<D> {
     /**
      * Handler to receive {@link DocumentContent | document content} updates.
      *
@@ -48,8 +48,8 @@ declare namespace Typer {
 }
 
 // eslint-disable-next-line @typescript-eslint/class-name-casing
-class _Typer extends ContentRenderer<Typer.Props, TyperState> implements DocumentProvider {
-  public static propTypes: Record<keyof Typer.Props, any> = {
+class _Typer<D> extends ContentRenderer<D, Typer.Props<D>, TyperState> implements DocumentProvider {
+  public static propTypes: Record<keyof Typer.Props<any>, any> = {
     ...ContentRenderer.propTypes,
     onDocumentContentUpdate: PropTypes.func,
     debug: PropTypes.bool,
@@ -61,7 +61,7 @@ class _Typer extends ContentRenderer<Typer.Props, TyperState> implements Documen
     overridingScopedSelection: null,
   }
 
-  public constructor(props: Typer.Props) {
+  public constructor(props: Typer.Props<D>) {
     super(props)
   }
 
@@ -138,7 +138,7 @@ class _Typer extends ContentRenderer<Typer.Props, TyperState> implements Documen
     this.props.bridge.getSheetEventDomain().release(this)
   }
 
-  public async componentDidUpdate(oldProps: Typer.Props) {
+  public async componentDidUpdate(oldProps: Typer.Props<D>) {
     super.componentDidUpdate(oldProps)
     const currentSelection = this.props.documentContent.currentSelection
     if (oldProps.documentContent.currentSelection !== currentSelection) {
@@ -179,7 +179,7 @@ class _Typer extends ContentRenderer<Typer.Props, TyperState> implements Documen
  *
  * This type trick is aimed at preventing from exporting the component State which should be out of API surface.
  */
-type Typer = ComponentClass<Typer.Props>
-const Typer = _Typer as Typer
+type Typer<D> = ComponentClass<Typer.Props<D>>
+const Typer = _Typer as Typer<any>
 
 export { Typer }
