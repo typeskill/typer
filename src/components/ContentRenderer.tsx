@@ -45,7 +45,7 @@ export interface ContentRendererProps<D> {
   contentContainerStyle?: StyleProp<ViewStyle>
 }
 
-export const contentRendererStyles = StyleSheet.create({
+const contentRendererStyles = StyleSheet.create({
   scroll: {
     flex: 1,
   },
@@ -115,13 +115,29 @@ export abstract class ContentRenderer<
     this.genService = props.bridge.getGenService()
   }
 
-  public componentDidUpdate(oldProps: P) {
-    invariant(oldProps.bridge === this.props.bridge, 'bridge prop cannot be changed after instantiation')
-  }
-
   protected handleOnContainerLayout = (layoutEvent: LayoutChangeEvent) => {
     this.setState({
       containerWidth: layoutEvent.nativeEvent.layout.width,
     })
+  }
+
+  protected getScrollStyles(): StyleProp<ViewStyle> {
+    return [contentRendererStyles.scroll, this.props.style]
+  }
+
+  protected getRootStyles(): StyleProp<ViewStyle> {
+    return contentRendererStyles.root
+  }
+
+  protected getContainerStyles(): StyleProp<ViewStyle> {
+    return [
+      contentRendererStyles.contentContainer,
+      this.props.contentContainerStyle,
+      contentRendererStyles.overridingContentStyles,
+    ]
+  }
+
+  public componentDidUpdate(oldProps: P) {
+    invariant(oldProps.bridge === this.props.bridge, 'bridge prop cannot be changed after instantiation')
   }
 }

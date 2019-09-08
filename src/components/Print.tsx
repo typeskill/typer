@@ -1,5 +1,5 @@
 import React, { ComponentClass } from 'react'
-import { ContentRenderer, ContentRendererProps, contentRendererStyles, ContentRendererState } from './ContentRenderer'
+import { ContentRenderer, ContentRendererProps, ContentRendererState } from './ContentRenderer'
 import { Document } from '@model/Document'
 import { ScrollView, View } from 'react-native'
 import { boundMethod } from 'autobind-decorator'
@@ -33,9 +33,9 @@ class _Print<D> extends ContentRenderer<D, Print.Props<D>> {
   }
 
   @boundMethod
-  private renderBlock({ descriptor }: Block) {
+  private renderBlockView({ descriptor }: Block) {
     const { textStyle } = this.props
-    const key = `edit-block-${descriptor.kind}-${descriptor.blockIndex}`
+    const key = `block-view-${descriptor.kind}-${descriptor.blockIndex}`
     return (
       <GenericBlockView
         key={key}
@@ -51,17 +51,10 @@ class _Print<D> extends ContentRenderer<D, Print.Props<D>> {
   public render() {
     this.doc = new Document(this.props.documentContent)
     return (
-      <ScrollView style={[contentRendererStyles.scroll, this.props.style]}>
-        <View style={contentRendererStyles.root}>
-          <View
-            style={[
-              contentRendererStyles.contentContainer,
-              this.props.contentContainerStyle,
-              contentRendererStyles.overridingContentStyles,
-            ]}
-            onLayout={this.handleOnContainerLayout}
-          >
-            {this.doc.getBlocks().map(this.renderBlock)}
+      <ScrollView style={this.getScrollStyles()}>
+        <View style={this.getRootStyles()}>
+          <View style={this.getContainerStyles()} onLayout={this.handleOnContainerLayout}>
+            {this.doc.getBlocks().map(this.renderBlockView)}
           </View>
         </View>
       </ScrollView>

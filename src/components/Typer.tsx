@@ -10,7 +10,7 @@ import { DocumentProvider, DocumentController } from './DocumentController'
 import { Document } from '@model/Document'
 import { SelectionShape, Selection } from '@delta/Selection'
 import { ScrollIntoView, wrapScrollView } from 'react-native-scroll-into-view'
-import { ContentRenderer, ContentRendererProps, contentRendererStyles } from './ContentRenderer'
+import { ContentRenderer, ContentRendererProps } from './ContentRenderer'
 
 const AutoScrollView = wrapScrollView(ScrollView)
 
@@ -88,12 +88,12 @@ class _Typer<D> extends ContentRenderer<D, Typer.Props<D>, TyperState> implement
   }
 
   @boundMethod
-  private renderBlockController(block: Block) {
+  private renderBlockInput(block: Block) {
     const descriptor = block.descriptor
     const { overridingScopedSelection: overridingSelection } = this.state
     const { textStyle, debug } = this.props
     const { selectedTextAttributes } = this.props.documentContent
-    const key = `edit-block-${descriptor.kind}-${descriptor.blockIndex}`
+    const key = `block-input-${descriptor.kind}-${descriptor.blockIndex}`
     // TODO use weak map to memoize controller
     const controller = new DocumentController(block, this)
     const isFocused = block.isFocused(this.props.documentContent)
@@ -152,17 +152,10 @@ class _Typer<D> extends ContentRenderer<D, Typer.Props<D>, TyperState> implement
   public render() {
     this.doc = new Document(this.props.documentContent)
     return (
-      <AutoScrollView style={[contentRendererStyles.scroll, this.props.style]} keyboardShouldPersistTaps="always">
-        <View style={contentRendererStyles.root}>
-          <View
-            style={[
-              contentRendererStyles.contentContainer,
-              this.props.contentContainerStyle,
-              contentRendererStyles.overridingContentStyles,
-            ]}
-            onLayout={this.handleOnContainerLayout}
-          >
-            {this.doc.getBlocks().map(this.renderBlockController)}
+      <AutoScrollView style={this.getScrollStyles()} keyboardShouldPersistTaps="always">
+        <View style={this.getRootStyles()}>
+          <View style={this.getContainerStyles()} onLayout={this.handleOnContainerLayout}>
+            {this.doc.getBlocks().map(this.renderBlockInput)}
           </View>
         </View>
       </AutoScrollView>
