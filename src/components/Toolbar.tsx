@@ -80,7 +80,7 @@ declare namespace Toolbar {
   /**
    * Props of the {@link (Toolbar:type)} component.
    */
-  export interface Props<D extends {}> {
+  export interface Props<D> {
     /**
      * The instance to be shared with the {@link (Typer:type)}.
      */
@@ -407,7 +407,7 @@ export function buildVectorIconControlSpec<T extends Toolbar.VectorIconMinimalPr
  *
  * This type trick is aimed at preventing from exporting the component State which should be out of API surface.
  */
-type Toolbar<D extends {}> = ComponentClass<Toolbar.Props<D>>
+type Toolbar<D> = ComponentClass<Toolbar.Props<D>>
 
 const Toolbar = _Toolbar as Toolbar<any>
 
