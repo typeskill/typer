@@ -8,8 +8,8 @@
  *
  * The library exposes:
  *
- * - The {@link (Typer:type)} component, a support for editing {@link (DocumentContent:type)}.
- * - The {@link (Print:class)} component, a display for {@link (DocumentContent:type)}.
+ * - The {@link (Typer:type)} component, a support for editing {@link (Document:type)}.
+ * - The {@link (Print:type)} component, a display for {@link (Document:type)}.
  * - The {@link (Toolbar:type)} component, which permits text transforms on current selection.
  *
  * **Triggering actions from external controls**
@@ -35,12 +35,12 @@ import { Attributes } from '@delta/attributes'
 import { GenericRichContent } from '@delta/generic'
 import { GenericOp, TextOp } from '@delta/operations'
 import { Transforms, defaultTextTransforms } from '@core/Transforms'
-import { DocumentContent, buildInitialDocContent, cloneDocContent } from '@model/documents'
+import { Document, buildInitialDocContent, cloneDocument } from '@model/document'
 import { SelectionShape } from '@delta/Selection'
 import { defaultImageLocator, Images } from '@core/Images'
 import { Gen } from '@core/Gen'
 import { Print } from '@components/Print'
-import { ContentRendererProps } from '@components/ContentRenderer'
+import { DocumentRendererProps } from '@components/DocumentRenderer'
 
 export {
   // Components related
@@ -50,7 +50,7 @@ export {
   ControlAction,
   CONTROL_SEPARATOR,
   buildVectorIconControlSpec,
-  ContentRendererProps,
+  DocumentRendererProps,
   // Model related
   Bridge,
   Gen,
@@ -61,10 +61,10 @@ export {
   TextOp,
   Attributes,
   Transforms,
-  DocumentContent,
+  Document,
   // Generation
   buildInitialDocContent,
-  cloneDocContent,
+  cloneDocument,
   // Customization
   defaultImageLocator,
   defaultTextTransforms,

@@ -1,6 +1,6 @@
 import React, { ComponentClass } from 'react'
-import { ContentRenderer, ContentRendererProps, ContentRendererState } from './ContentRenderer'
-import { Document } from '@model/Document'
+import { DocumentRenderer, DocumentRendererProps, DocumentRendererState } from './DocumentRenderer'
+import { BlockAssembler } from '@model/BlockAssembler'
 import { ScrollView, View } from 'react-native'
 import { boundMethod } from 'autobind-decorator'
 import { Block } from '@model/Block'
@@ -15,14 +15,14 @@ declare namespace Print {
   /**
    * {@link (Print:type)} properties.
    */
-  export type Props<D> = ContentRendererProps<D>
+  export type Props<D> = DocumentRendererProps<D>
 }
 
-type PrintState = ContentRendererState
+type PrintState = DocumentRendererState
 
 // eslint-disable-next-line @typescript-eslint/class-name-casing
-class _Print<D> extends ContentRenderer<D, Print.Props<D>> {
-  public static propTypes = ContentRenderer.propTypes
+class _Print<D> extends DocumentRenderer<D, Print.Props<D>> {
+  public static propTypes = DocumentRenderer.propTypes
 
   public state: PrintState = {
     containerWidth: null,
@@ -49,12 +49,12 @@ class _Print<D> extends ContentRenderer<D, Print.Props<D>> {
   }
 
   public render() {
-    this.doc = new Document(this.props.documentContent)
+    this.assembler = new BlockAssembler(this.props.document)
     return (
       <ScrollView style={this.getScrollStyles()}>
         <View style={this.getRootStyles()}>
           <View style={this.getContainerStyles()} onLayout={this.handleOnContainerLayout}>
-            {this.doc.getBlocks().map(this.renderBlockView)}
+            {this.assembler.getBlocks().map(this.renderBlockView)}
           </View>
         </View>
       </ScrollView>
@@ -63,7 +63,7 @@ class _Print<D> extends ContentRenderer<D, Print.Props<D>> {
 }
 
 /**
- * A component solely responsible for viewing {@link DocumentContent | document content}.
+ * A component solely responsible for viewing {@link Document | document}.
  *
  * @public
  *

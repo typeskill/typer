@@ -1,16 +1,16 @@
 import React, { ComponentClass } from 'react'
 import { ScrollView, View } from 'react-native'
-import { DocumentContent } from '@model/documents'
+import { Document } from '@model/document'
 import { boundMethod } from 'autobind-decorator'
 import PropTypes from 'prop-types'
 import { GenericBlockInput } from './GenericBlockInput'
 import mergeLeft from 'ramda/es/mergeLeft'
 import { Block } from '@model/Block'
-import { DocumentProvider, DocumentController } from './DocumentController'
-import { Document } from '@model/Document'
+import { DocumentProvider, BlockController } from './BlockController'
+import { BlockAssembler } from '@model/BlockAssembler'
 import { SelectionShape, Selection } from '@delta/Selection'
 import { ScrollIntoView, wrapScrollView } from 'react-native-scroll-into-view'
-import { ContentRenderer, ContentRendererProps } from './ContentRenderer'
+import { DocumentRenderer, DocumentRendererProps } from './DocumentRenderer'
 
 const AutoScrollView = wrapScrollView(ScrollView)
 
@@ -28,13 +28,13 @@ declare namespace Typer {
   /**
    * {@link (Typer:type)} properties.
    */
-  export interface Props<D> extends ContentRendererProps<D> {
+  export interface Props<D> extends DocumentRendererProps<D> {
     /**
-     * Handler to receive {@link DocumentContent | document content} updates.
+     * Handler to receive {@link Document| document} updates.
      *
      * @remarks This callback is expected to return a promise. This promise MUST resolve when the update had been proceeded.
      */
-    onDocumentContentUpdate?: (nextDocumentContent: DocumentContent) => Promise<void>
+    onDocumentUpdate?: (nextDocumentContent: Document) => Promise<void>
 
     /**
      * Customize the color of image controls upon activation.
@@ -48,10 +48,10 @@ declare namespace Typer {
 }
 
 // eslint-disable-next-line @typescript-eslint/class-name-casing
-class _Typer<D> extends ContentRenderer<D, Typer.Props<D>, TyperState> implements DocumentProvider {
+class _Typer<D> extends DocumentRenderer<D, Typer.Props<D>, TyperState> implements DocumentProvider {
   public static propTypes: Record<keyof Typer.Props<any>, any> = {
-    ...ContentRenderer.propTypes,
-    onDocumentContentUpdate: PropTypes.func,
+    ...DocumentRenderer.propTypes,
+    onDocumentUpdate: PropTypes.func,
     debug: PropTypes.bool,
     underlayColor: PropTypes.string,
   }
@@ -74,15 +74,15 @@ class _Typer<D> extends ContentRenderer<D, Typer.Props<D>, TyperState> implement
     return this.genService
   }
 
-  public getDocumentContent() {
-    return this.props.documentContent
+  public getDocument() {
+    return this.props.document
   }
 
-  public updateDocumentContent(documentUpdate: Partial<DocumentContent>): Promise<void> {
+  public updateDocument(documentUpdate: Partial<Document>): Promise<void> {
     return (
-      (this.props.onDocumentContentUpdate &&
-        this.props.documentContent &&
-        this.props.onDocumentContentUpdate(mergeLeft(documentUpdate, this.props.documentContent) as DocumentContent)) ||
+      (this.props.onDocumentUpdate &&
+        this.props.document &&
+        this.props.onDocumentUpdate(mergeLeft(documentUpdate, this.props.document) as Document)) ||
       Promise.resolve()
     )
   }
@@ -92,11 +92,11 @@ class _Typer<D> extends ContentRenderer<D, Typer.Props<D>, TyperState> implement
     const descriptor = block.descriptor
     const { overridingScopedSelection: overridingSelection } = this.state
     const { textStyle, debug } = this.props
-    const { selectedTextAttributes } = this.props.documentContent
+    const { selectedTextAttributes } = this.props.document
     const key = `block-input-${descriptor.kind}-${descriptor.blockIndex}`
     // TODO use weak map to memoize controller
-    const controller = new DocumentController(block, this)
-    const isFocused = block.isFocused(this.props.documentContent)
+    const controller = new BlockController(block, this)
+    const isFocused = block.isFocused(this.props.document)
     return (
       <ScrollIntoView enabled={isFocused} key={key}>
         <GenericBlockInput
@@ -107,7 +107,7 @@ class _Typer<D> extends ContentRenderer<D, Typer.Props<D>, TyperState> implement
           textStyle={textStyle}
           imageLocatorService={this.genService.imageLocator}
           descriptor={descriptor}
-          blockScopedSelection={block.getScopedSelection(this.props.documentContent)}
+          blockScopedSelection={block.getScopedSelection(this.props.document)}
           overridingScopedSelection={isFocused ? overridingSelection : null}
           textAttributesAtCursor={selectedTextAttributes}
           textTransforms={this.genService.textTransforms}
@@ -118,15 +118,15 @@ class _Typer<D> extends ContentRenderer<D, Typer.Props<D>, TyperState> implement
   public componentDidMount() {
     const sheetEventDom = this.props.bridge.getSheetEventDomain()
     sheetEventDom.addApplyTextTransformToSelectionListener(this, async (attributeName, attributeValue) => {
-      const currentSelection = this.props.documentContent.currentSelection
-      await this.updateDocumentContent(this.doc.applyTextTransformToSelection(attributeName, attributeValue))
+      const currentSelection = this.props.document.currentSelection
+      await this.updateDocument(this.assembler.applyTextTransformToSelection(attributeName, attributeValue))
       // Force the current selection to allow multiple edits.
       if (Selection.fromShape(currentSelection).length() > 0) {
-        this.setState({ overridingScopedSelection: this.doc.getActiveBlockScopedSelection() })
+        this.setState({ overridingScopedSelection: this.assembler.getActiveBlockScopedSelection() })
       }
     })
     sheetEventDom.addInsertOrReplaceAtSelectionListener(this, async element => {
-      await this.updateDocumentContent(this.doc.insertOrReplaceAtSelection(element))
+      await this.updateDocument(this.assembler.insertOrReplaceAtSelection(element))
       if (element.type === 'image') {
         const { onImageAddedEvent } = this.genService.imageLocator
         onImageAddedEvent && onImageAddedEvent(element.description)
@@ -140,9 +140,9 @@ class _Typer<D> extends ContentRenderer<D, Typer.Props<D>, TyperState> implement
 
   public async componentDidUpdate(oldProps: Typer.Props<D>) {
     super.componentDidUpdate(oldProps)
-    const currentSelection = this.props.documentContent.currentSelection
-    if (oldProps.documentContent.currentSelection !== currentSelection) {
-      await this.updateDocumentContent(this.doc.updateTextAttributesAtSelection())
+    const currentSelection = this.props.document.currentSelection
+    if (oldProps.document.currentSelection !== currentSelection) {
+      await this.updateDocument(this.assembler.updateTextAttributesAtSelection())
     }
     if (this.state.overridingScopedSelection !== null) {
       setTimeout(this.clearSelection, 0)
@@ -150,12 +150,12 @@ class _Typer<D> extends ContentRenderer<D, Typer.Props<D>, TyperState> implement
   }
 
   public render() {
-    this.doc = new Document(this.props.documentContent)
+    this.assembler = new BlockAssembler(this.props.document)
     return (
       <AutoScrollView style={this.getScrollStyles()} keyboardShouldPersistTaps="always">
         <View style={this.getRootStyles()}>
           <View style={this.getContainerStyles()} onLayout={this.handleOnContainerLayout}>
-            {this.doc.getBlocks().map(this.renderBlockInput)}
+            {this.assembler.getBlocks().map(this.renderBlockInput)}
           </View>
         </View>
       </AutoScrollView>
@@ -164,7 +164,7 @@ class _Typer<D> extends ContentRenderer<D, Typer.Props<D>, TyperState> implement
 }
 
 /**
- * A component solely responsible for editing {@link DocumentContent | document content}.
+ * A component solely responsible for editing {@link Document | document}.
  *
  * @public
  *

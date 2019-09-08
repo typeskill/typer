@@ -3,14 +3,14 @@ import { SelectionShape, Selection } from '@delta/Selection'
 import { GenericOp } from '@delta/operations'
 import clone from 'ramda/es/clone'
 import { DocumentDelta } from '@delta/DocumentDelta'
-import { mergeLeft } from 'ramda'
+import mergeLeft from 'ramda/es/mergeLeft'
 
 /**
  * A serializable object representing rich content.
  *
  * @public
  */
-export interface DocumentContent {
+export interface Document {
   /**
    * A list of operations as per deltajs definition.
    */
@@ -20,27 +20,27 @@ export interface DocumentContent {
    */
   readonly currentSelection: SelectionShape
   /**
-   * The attributes encompassed by {@link DocumentContent.currentSelection} or the attributes at cursor.
+   * The attributes encompassed by {@link Document.currentSelection} or the attributes at cursor.
    * `null` values represent attributes to be removed.
    */
   readonly selectedTextAttributes: Attributes.Map
 }
 
 /**
- * An async callback aimed at updating the document state.
+ * An async callback aimed at updating the document.
  *
- * @param diffowContent - This partial state should be shallow-merged with current `documentContent`.
+ * @param nextDocument - The next document.
  *
  * @public
  */
-export type DocumentContentUpdater = (diffowContent: Partial<DocumentContent>) => Promise<void>
+export type DocumentUpdater = (nextDocument: Document) => Promise<void>
 
 /**
  * Build the initial document content.
  *
  * @public
  */
-export function buildInitialDocContent(): DocumentContent {
+export function buildInitialDocContent(): Document {
   return {
     currentSelection: { start: 0, end: 0 },
     ops: [{ insert: '\n' }],
@@ -49,13 +49,13 @@ export function buildInitialDocContent(): DocumentContent {
 }
 
 /**
- * Clone a peace of {@link DocumentContent | document content}.
+ * Clone a peace of {@link Document | document}.
  *
  * @param content - The content to clone
  *
  * @public
  */
-export function cloneDocContent(content: DocumentContent): DocumentContent {
+export function cloneDocument(content: Document): Document {
   return {
     ops: clone(content.ops),
     currentSelection: content.currentSelection,
@@ -66,9 +66,9 @@ export function cloneDocContent(content: DocumentContent): DocumentContent {
 export function applyTextTransformToSelection(
   attributeName: string,
   attributeValue: Attributes.GenericValue,
-  documentContent: DocumentContent,
-): Pick<DocumentContent, 'ops' | 'selectedTextAttributes'> {
-  const { currentSelection, ops, selectedTextAttributes } = documentContent
+  document: Document,
+): Pick<Document, 'ops' | 'selectedTextAttributes'> {
+  const { currentSelection, ops, selectedTextAttributes } = document
   const delta = new DocumentDelta(ops)
   const selection = Selection.fromShape(currentSelection)
   // Apply transforms to selection range

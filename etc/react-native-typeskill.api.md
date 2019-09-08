@@ -4,7 +4,6 @@
 
 ```ts
 
-import { Bridge as Bridge_2 } from 'index';
 import { ComponentClass } from 'react';
 import { ComponentType } from 'react';
 import { ImageSourcePropType } from 'react-native';
@@ -71,22 +70,13 @@ export class Bridge<D extends {} = {}> {
     }
 
 // @public
-export function buildInitialDocContent(): DocumentContent;
+export function buildInitialDocContent(): Document;
 
 // @public
 export function buildVectorIconControlSpec<T extends Toolbar.VectorIconMinimalProps>(IconComponent: ComponentType<T & Toolbar.TextControlMinimalIconProps>, actionType: ControlAction, name: string): Toolbar.ControlSpec<T>;
 
 // @public
-export function cloneDocContent(content: DocumentContent): DocumentContent;
-
-// @public
-export interface ContentRendererProps {
-    bridge: Bridge_2;
-    contentContainerStyle?: StyleProp<ViewStyle>;
-    documentContent: DocumentContent;
-    style?: StyleProp<ViewStyle>;
-    textStyle?: StyleProp<TextStyle>;
-}
+export function cloneDocument(content: Document): Document;
 
 // @public
 export const CONTROL_SEPARATOR: unique symbol;
@@ -107,10 +97,19 @@ export const defaultImageLocator: Images.LocationService<Images.StandardDefiniti
 export const defaultTextTransforms: Transforms.GenericSpec<Attributes.TextValue, 'text'>[];
 
 // @public
-export interface DocumentContent {
+export interface Document {
     readonly currentSelection: SelectionShape;
     readonly ops: GenericOp[];
     readonly selectedTextAttributes: Attributes.Map;
+}
+
+// @public
+export interface DocumentRendererProps<D> {
+    bridge: Bridge<D>;
+    contentContainerStyle?: StyleProp<ViewStyle>;
+    document: Document;
+    style?: StyleProp<ViewStyle>;
+    textStyle?: StyleProp<TextStyle>;
 }
 
 // @public
@@ -180,14 +179,14 @@ export namespace Images {
 
 // @public
 export namespace Print {
-    export type Props = ContentRendererProps;
+    export type Props<D> = DocumentRendererProps<D>;
 }
 
 // @public
-export type Print = ComponentClass<Print.Props>;
+export type Print<D> = ComponentClass<Print.Props<D>>;
 
 // @public (undocumented)
-export const Print: React.ComponentClass<ContentRendererProps, any>;
+export const Print: React.ComponentClass<DocumentRendererProps<any>, any>;
 
 // @public
 export interface SelectionShape {
@@ -209,7 +208,7 @@ export namespace Toolbar {
         iconProps?: T extends Toolbar.VectorIconMinimalProps ? Toolbar.VectorIconMinimalProps : Partial<T>;
     }
     export type Layout = (ControlSpec<any> | typeof CONTROL_SEPARATOR)[];
-    export interface Props<D extends {}> {
+    export interface Props<D> {
         activeButtonBackgroundColor?: string;
         activeButtonColor?: string;
         bridge: Bridge<D>;
@@ -234,7 +233,7 @@ export namespace Toolbar {
 }
 
 // @public
-export type Toolbar<D extends {}> = ComponentClass<Toolbar.Props<D>>;
+export type Toolbar<D> = ComponentClass<Toolbar.Props<D>>;
 
 // @public (undocumented)
 export const Toolbar: React.ComponentClass<Toolbar.Props<any>, any>;
@@ -265,18 +264,18 @@ export class Transforms {
 
 // @public
 export namespace Typer {
-    export interface Props<D extends {} = {}> extends Print.Props {
+    export interface Props<D> extends DocumentRendererProps<D> {
         debug?: boolean;
-        onDocumentContentUpdate?: (nextDocumentContent: DocumentContent) => Promise<void>;
+        onDocumentUpdate?: (nextDocumentContent: Document) => Promise<void>;
         underlayColor?: string;
     }
 }
 
 // @public
-export type Typer = ComponentClass<Typer.Props>;
+export type Typer<D> = ComponentClass<Typer.Props<D>>;
 
 // @public (undocumented)
-export const Typer: React.ComponentClass<Typer.Props<{}>, any>;
+export const Typer: React.ComponentClass<Typer.Props<any>, any>;
 
 
 ```

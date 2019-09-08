@@ -1,25 +1,25 @@
 import { Block } from './Block'
 import { groupOpsByBlocks } from './blocks'
-import { DocumentContent } from './documents'
+import { Document } from './document'
 import { Bridge } from '@core/Bridge'
 import { Attributes } from '@delta/attributes'
 import { DocumentDelta } from '@delta/DocumentDelta'
 import { SelectionShape } from '@delta/Selection'
 
 /**
- * An object representing an interface to operate over rich content.
+ * An object to manipulate blocks.
  */
-export class Document {
+export class BlockAssembler {
   private blocks: Block[]
-  private documentContent: DocumentContent
-  public constructor(documentContent: DocumentContent) {
-    this.documentContent = documentContent
-    this.blocks = groupOpsByBlocks(documentContent.ops)
+  private document: Document
+  public constructor(document: Document) {
+    this.document = document
+    this.blocks = groupOpsByBlocks(document.ops)
   }
 
   private getActiveBlock(): Block | null {
     for (const block of this.blocks) {
-      if (block.isFocused(this.documentContent)) {
+      if (block.isFocused(this.document)) {
         return block
       }
     }
@@ -30,13 +30,13 @@ export class Document {
     return this.blocks
   }
 
-  public insertOrReplaceAtSelection(element: Bridge.Element<any>): DocumentContent {
+  public insertOrReplaceAtSelection(element: Bridge.Element<any>): Document {
     const activeBlock = this.getActiveBlock() as Block
-    return activeBlock.insertOrReplaceAtSelection(element, this.documentContent)
+    return activeBlock.insertOrReplaceAtSelection(element, this.document)
   }
 
-  public updateTextAttributesAtSelection(): DocumentContent {
-    const document = this.documentContent
+  public updateTextAttributesAtSelection(): Document {
+    const document = this.document
     const docDelta = new DocumentDelta(document.ops)
     const deltaAttributes = docDelta.getSelectedTextAttributes(document.currentSelection)
     return {
@@ -45,16 +45,13 @@ export class Document {
     }
   }
 
-  public applyTextTransformToSelection(
-    attributeName: string,
-    attributeValue: Attributes.GenericValue,
-  ): DocumentContent {
+  public applyTextTransformToSelection(attributeName: string, attributeValue: Attributes.GenericValue): Document {
     const activeBlock = this.getActiveBlock() as Block
-    return activeBlock.applyTextTransformToSelection(attributeName, attributeValue, this.documentContent)
+    return activeBlock.applyTextTransformToSelection(attributeName, attributeValue, this.document)
   }
 
   public getActiveBlockScopedSelection(): SelectionShape {
     const activeBlock = this.getActiveBlock() as Block
-    return activeBlock.getScopedSelection(this.documentContent)
+    return activeBlock.getScopedSelection(this.document)
   }
 }

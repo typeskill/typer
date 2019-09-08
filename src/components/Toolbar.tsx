@@ -88,7 +88,7 @@ declare namespace Toolbar {
     /**
      * The attributes actives in selection.
      *
-     * @remarks You should provide those of your {@link DocumentContent | `documentContent`} instance.
+     * @remarks You should provide those of your {@link Document | document} instance.
      */
     selectedTextAttributes: Attributes.Map
     /**

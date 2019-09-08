@@ -1,5 +1,5 @@
 import { BlockDescriptor } from './blocks'
-import { DocumentContent, applyTextTransformToSelection, buildInitialDocContent } from './documents'
+import { Document, applyTextTransformToSelection, buildInitialDocContent } from './document'
 import { SelectionShape, Selection } from '@delta/Selection'
 import Delta from 'quill-delta'
 import { ImageKind, GenericOp } from '@delta/operations'
@@ -7,16 +7,13 @@ import { DocumentDelta } from '@delta/DocumentDelta'
 import { Attributes } from '@delta/attributes'
 import { Bridge } from '@core/Bridge'
 
-function elementToInsertion(
-  element: Bridge.Element<any>,
-  document: DocumentContent,
-): [ImageKind | string, Attributes.Map] {
+function elementToInsertion(element: Bridge.Element<any>, document: Document): [ImageKind | string, Attributes.Map] {
   return element.type === 'text'
     ? [element.content, document.selectedTextAttributes]
     : [{ kind: 'image' }, element.description]
 }
 
-function getSelectionAfterTransform(diff: Delta, document: DocumentContent): SelectionShape {
+function getSelectionAfterTransform(diff: Delta, document: Document): SelectionShape {
   const nextPosition = diff.transformPosition(document.currentSelection.start)
   return {
     start: nextPosition,
@@ -47,7 +44,7 @@ export class Block {
     return this.descriptor.blockIndex === this.descriptor.maxBlockIndex
   }
 
-  private applyCursorTranslationToDocument(position: number, document: DocumentContent): DocumentContent {
+  private applyCursorTranslationToDocument(position: number, document: Document): Document {
     const nextSelection: SelectionShape = {
       start: position,
       end: position,
@@ -58,7 +55,7 @@ export class Block {
     }
   }
 
-  private applyDiffToDocument(diff: Delta, document: DocumentContent): DocumentContent {
+  private applyDiffToDocument(diff: Delta, document: Document): Document {
     const current = new Delta(document.ops)
     const nextDelta = current.compose(diff)
     const nextOps = nextDelta.ops
@@ -84,14 +81,14 @@ export class Block {
     return this.blocks[this.descriptor.blockIndex + 1]
   }
 
-  public getScopedSelection(document: DocumentContent): SelectionShape {
+  public getScopedSelection(document: Document): SelectionShape {
     return {
       start: document.currentSelection.start - this.descriptor.selectableUnitsOffset,
       end: document.currentSelection.end - this.descriptor.selectableUnitsOffset,
     }
   }
 
-  public getSelectedOps(document: DocumentContent): GenericOp[] {
+  public getSelectedOps(document: Document): GenericOp[] {
     const delta = new DocumentDelta(document.ops)
     return delta.getSelected(Selection.fromShape(document.currentSelection)).ops
   }
@@ -100,7 +97,7 @@ export class Block {
     return this.kind === 'text' || this.descriptor.blockIndex === 0
   }
 
-  public isFocused({ currentSelection }: DocumentContent): boolean {
+  public isFocused({ currentSelection }: Document): boolean {
     const { selectableUnitsOffset, numOfSelectableUnits } = this.descriptor
     const lowerBoundary = selectableUnitsOffset
     const upperBoundary = selectableUnitsOffset + numOfSelectableUnits
@@ -121,7 +118,7 @@ export class Block {
     )
   }
 
-  public isEntirelySelected({ currentSelection: { start, end } }: DocumentContent) {
+  public isEntirelySelected({ currentSelection: { start, end } }: Document) {
     return (
       start === this.descriptor.selectableUnitsOffset &&
       end === this.descriptor.selectableUnitsOffset + this.descriptor.numOfSelectableUnits
@@ -136,12 +133,12 @@ export class Block {
    *
    * @returns The resulting document ops.
    */
-  public applyDiff(diff: Delta, document: DocumentContent): DocumentContent {
+  public applyDiff(diff: Delta, document: Document): Document {
     let fullDiff = new Delta().retain(this.descriptor.selectableUnitsOffset).concat(diff)
     return this.applyDiffToDocument(fullDiff, document)
   }
 
-  public updateTextAttributesAtSelection(document: DocumentContent): DocumentContent {
+  public updateTextAttributesAtSelection(document: Document): Document {
     const docDelta = new DocumentDelta(document.ops)
     const deltaAttributes = docDelta.getSelectedTextAttributes(Selection.fromShape(document.currentSelection))
     return {
@@ -153,8 +150,8 @@ export class Block {
   public applyTextTransformToSelection(
     attributeName: string,
     attributeValue: Attributes.GenericValue,
-    document: DocumentContent,
-  ): DocumentContent {
+    document: Document,
+  ): Document {
     if (this.kind !== 'text') {
       return document
     }
@@ -174,7 +171,7 @@ export class Block {
    *
    * @returns The resulting document.
    */
-  public insertOrReplaceAtSelection(element: Bridge.Element<any>, document: DocumentContent): DocumentContent {
+  public insertOrReplaceAtSelection(element: Bridge.Element<any>, document: Document): Document {
     const deletionLength = document.currentSelection.end - document.currentSelection.start
     const diff = new Delta()
       .retain(document.currentSelection.start)
@@ -188,7 +185,7 @@ export class Block {
    *
    * @param document - The document to which it should apply.
    */
-  public remove(document: DocumentContent): DocumentContent {
+  public remove(document: Document): Document {
     if (this.isFirst() && this.isLast()) {
       return buildInitialDocContent()
     }
@@ -196,7 +193,7 @@ export class Block {
     return this.applyDiffToDocument(diff, document)
   }
 
-  public updateSelection(blockScopedSelection: SelectionShape, document: DocumentContent): DocumentContent {
+  public updateSelection(blockScopedSelection: SelectionShape, document: Document): Document {
     const nextSelection = {
       start: this.descriptor.selectableUnitsOffset + blockScopedSelection.start,
       end: this.descriptor.selectableUnitsOffset + blockScopedSelection.end,
@@ -214,7 +211,7 @@ export class Block {
    *
    * @returns The resulting document.
    */
-  public select(document: DocumentContent): DocumentContent {
+  public select(document: Document): Document {
     const nextSelection = {
       start: this.descriptor.selectableUnitsOffset,
       end: this.descriptor.selectableUnitsOffset + this.descriptor.numOfSelectableUnits,
@@ -232,7 +229,7 @@ export class Block {
    *
    * @returns The resulting document.
    */
-  public removeOneBefore(document: DocumentContent): DocumentContent {
+  public removeOneBefore(document: Document): Document {
     if (this.isFirst()) {
       return document
     }
@@ -244,7 +241,7 @@ export class Block {
     return this.applyDiffToDocument(diff, document)
   }
 
-  public moveBefore(document: DocumentContent): DocumentContent {
+  public moveBefore(document: Document): Document {
     if (this.isFirst()) {
       return document
     }
@@ -252,7 +249,7 @@ export class Block {
     return this.applyCursorTranslationToDocument(positionBeforeBlock, document)
   }
 
-  public moveAfter(document: DocumentContent): DocumentContent {
+  public moveAfter(document: Document): Document {
     if (this.isLast()) {
       return document
     }

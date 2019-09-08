@@ -1,9 +1,9 @@
-import { buildInitialDocContent, DocumentContent } from '@model/documents'
+import { buildInitialDocContent, Document } from '@model/document'
 import { buildTextOp, buildImageOp, GenericOp } from '@delta/operations'
 import { groupOpsByBlocks } from '@model/blocks'
 
 describe('@model/Block', () => {
-  function buildDocContentWithSel(start: number, end: number, ops?: GenericOp[]): DocumentContent {
+  function buildDocContentWithSel(start: number, end: number, ops?: GenericOp[]): Document {
     const obj = {
       ...buildInitialDocContent(),
       currentSelection: { start, end },
@@ -11,7 +11,7 @@ describe('@model/Block', () => {
     return ops ? { ...obj, ops } : obj
   }
   function createContext(start: number, end: number, ops: GenericOp[]) {
-    const doc: DocumentContent = buildDocContentWithSel(start, end, ops)
+    const doc: Document = buildDocContentWithSel(start, end, ops)
     const blocks = groupOpsByBlocks(ops)
     return {
       doc,

@@ -1,23 +1,23 @@
 import { PureComponent } from 'react'
-import { DocumentContentPropType } from './types'
+import { DocumentPropType } from './types'
 import PropTypes from 'prop-types'
-import { DocumentContent } from '@model/documents'
+import { Document } from '@model/document'
 import { StyleSheet, StyleProp, ViewStyle, TextStyle, ViewPropTypes, LayoutChangeEvent } from 'react-native'
 import invariant from 'invariant'
-import { Document } from '@model/Document'
+import { BlockAssembler } from '@model/BlockAssembler'
 import { Bridge } from '@core/Bridge'
 import { Gen } from '@core/Gen'
 
-export interface ContentRendererState {
+export interface DocumentRendererState {
   containerWidth: number | null
 }
 
 /**
- * A generic interface for components displaying {@link DocumentContent | document content}.
+ * A generic interface for components displaying {@link Document | document}.
  *
  * @public
  */
-export interface ContentRendererProps<D> {
+export interface DocumentRendererProps<D> {
   /**
    * The {@link (Bridge:class)} instance.
    *
@@ -25,9 +25,9 @@ export interface ContentRendererProps<D> {
    */
   bridge: Bridge<D>
   /**
-   * The {@link DocumentContent | document content} to display.
+   * The {@link Document | document} to display.
    */
-  documentContent: DocumentContent
+  document: Document
   /**
    * Component styles.
    */
@@ -40,7 +40,7 @@ export interface ContentRendererProps<D> {
    * Style applied to the content container.
    *
    * @remarks This prop MUST NOT contain padding or margin rules. Such spacing rules will be zero-ed.
-   * Apply padding to the {@link ContentRendererProps.style | `style`} prop instead.
+   * Apply padding to the {@link DocumentRendererProps.style | `style`} prop instead.
    */
   contentContainerStyle?: StyleProp<ViewStyle>
 }
@@ -90,28 +90,28 @@ const contentRendererStyles = StyleSheet.create({
 /**
  * @internal
  */
-export abstract class ContentRenderer<
+export abstract class DocumentRenderer<
   D,
-  P extends ContentRendererProps<D>,
-  S extends ContentRendererState = ContentRendererState
+  P extends DocumentRendererProps<D>,
+  S extends DocumentRendererState = DocumentRendererState
 > extends PureComponent<P, S> {
-  public static propTypes: Record<keyof ContentRendererProps<any>, any> = {
+  public static propTypes: Record<keyof DocumentRendererProps<any>, any> = {
     bridge: PropTypes.instanceOf(Bridge).isRequired,
     style: ViewPropTypes.style,
     contentContainerStyle: ViewPropTypes.style,
     textStyle: PropTypes.any,
-    documentContent: DocumentContentPropType.isRequired,
+    document: DocumentPropType.isRequired,
   }
 
   protected genService: Gen.Service
-  protected doc: Document
+  protected assembler: BlockAssembler
 
   public constructor(props: P) {
     super(props)
     const { bridge } = props
     invariant(bridge != null, 'bridge prop is required')
     invariant(bridge instanceof Bridge, 'bridge prop must be an instance of Bridge class')
-    this.doc = new Document(props.documentContent)
+    this.assembler = new BlockAssembler(props.document)
     this.genService = props.bridge.getGenService()
   }
 

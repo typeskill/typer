@@ -8,8 +8,8 @@
  *
  * The library exposes:
  *
- * - The {@link (Typer:type)} component, a support for editing {@link (DocumentContent:type)}.
- * - The {@link (Print:class)} component, a display for {@link (DocumentContent:type)}.
+ * - The {@link (Typer:type)} component, a support for editing {@link (Document:type)}.
+ * - The {@link (Print:type)} component, a display for {@link (Document:type)}.
  * - The {@link (Toolbar:type)} component, which permits text transforms on current selection.
  *
  * **Triggering actions from external controls**
@@ -29,7 +29,6 @@
  * @packageDocumentation
  */
 
-import { Bridge as Bridge_2 } from 'index';
 import { ComponentClass } from 'react';
 import { ComponentType } from 'react';
 import { ImageSourcePropType } from 'react-native';
@@ -220,7 +219,7 @@ export declare class Bridge<D extends {} = {}> {
  *
  * @public
  */
-export declare function buildInitialDocContent(): DocumentContent;
+export declare function buildInitialDocContent(): Document;
 
 /**
  * Utility function to build {@link (Toolbar:type)} controls from {@link https://www.npmjs.com/package/react-native-vector-icons | react-native-vector-icons}.
@@ -236,46 +235,13 @@ export declare function buildInitialDocContent(): DocumentContent;
 export declare function buildVectorIconControlSpec<T extends Toolbar.VectorIconMinimalProps>(IconComponent: ComponentType<T & Toolbar.TextControlMinimalIconProps>, actionType: ControlAction, name: string): Toolbar.ControlSpec<T>;
 
 /**
- * Clone a peace of {@link DocumentContent | document content}.
+ * Clone a peace of {@link Document | document}.
  *
  * @param content - The content to clone
  *
  * @public
  */
-export declare function cloneDocContent(content: DocumentContent): DocumentContent;
-
-/**
- * A generic interface for components displaying {@link DocumentContent | document content}.
- *
- * @public
- */
-export declare interface ContentRendererProps {
-    /**
-     * The {@link (Bridge:class)} instance.
-     *
-     * @remarks This property MUST NOT be changed after instantiation.
-     */
-    bridge: Bridge_2;
-    /**
-     * The {@link DocumentContent | document content} to display.
-     */
-    documentContent: DocumentContent;
-    /**
-     * Component styles.
-     */
-    style?: StyleProp<ViewStyle>;
-    /**
-     * Default text style.
-     */
-    textStyle?: StyleProp<TextStyle>;
-    /**
-     * Style applied to the content container.
-     *
-     * @remarks This prop MUST NOT contain padding or margin rules. Such spacing rules will be zero-ed.
-     * Apply padding to the {@link ContentRendererProps.style | `style`} prop instead.
-     */
-    contentContainerStyle?: StyleProp<ViewStyle>;
-}
+export declare function cloneDocument(content: Document): Document;
 
 /**
  * Constant used within a {@link (Toolbar:namespace).Layout} to denote a separator.
@@ -327,7 +293,7 @@ export declare const defaultTextTransforms: Transforms.GenericSpec<Attributes.Te
  *
  * @public
  */
-export declare interface DocumentContent {
+export declare interface Document {
     /**
      * A list of operations as per deltajs definition.
      */
@@ -337,10 +303,43 @@ export declare interface DocumentContent {
      */
     readonly currentSelection: SelectionShape;
     /**
-     * The attributes encompassed by {@link DocumentContent.currentSelection} or the attributes at cursor.
+     * The attributes encompassed by {@link Document.currentSelection} or the attributes at cursor.
      * `null` values represent attributes to be removed.
      */
     readonly selectedTextAttributes: Attributes.Map;
+}
+
+/**
+ * A generic interface for components displaying {@link Document | document}.
+ *
+ * @public
+ */
+export declare interface DocumentRendererProps<D> {
+    /**
+     * The {@link (Bridge:class)} instance.
+     *
+     * @remarks This property MUST NOT be changed after instantiation.
+     */
+    bridge: Bridge<D>;
+    /**
+     * The {@link Document | document} to display.
+     */
+    document: Document;
+    /**
+     * Component styles.
+     */
+    style?: StyleProp<ViewStyle>;
+    /**
+     * Default text style.
+     */
+    textStyle?: StyleProp<TextStyle>;
+    /**
+     * Style applied to the content container.
+     *
+     * @remarks This prop MUST NOT contain padding or margin rules. Such spacing rules will be zero-ed.
+     * Apply padding to the {@link DocumentRendererProps.style | `style`} prop instead.
+     */
+    contentContainerStyle?: StyleProp<ViewStyle>;
 }
 
 /**
@@ -481,11 +480,11 @@ export declare namespace Print {
     /**
      * {@link (Print:type)} properties.
      */
-    export type Props = ContentRendererProps;
+    export type Props<D> = DocumentRendererProps<D>;
 }
 
 /**
- * A component solely responsible for viewing {@link DocumentContent | document content}.
+ * A component solely responsible for viewing {@link Document | document}.
  *
  * @public
  *
@@ -493,9 +492,9 @@ export declare namespace Print {
  *
  * This type trick is aimed at preventing from exporting the component State which should be out of API surface.
  */
-export declare type Print = ComponentClass<Print.Props>;
+export declare type Print<D> = ComponentClass<Print.Props<D>>;
 
-export declare const Print: React.ComponentClass<ContentRendererProps, any>;
+export declare const Print: React.ComponentClass<DocumentRendererProps<any>, any>;
 
 /**
  * A serializable object representing a selection of items in the {@link (Typer:type)}.
@@ -565,7 +564,7 @@ export declare namespace Toolbar {
     /**
      * Props of the {@link (Toolbar:type)} component.
      */
-    export interface Props<D extends {}> {
+    export interface Props<D> {
         /**
          * The instance to be shared with the {@link (Typer:type)}.
          */
@@ -573,7 +572,7 @@ export declare namespace Toolbar {
         /**
          * The attributes actives in selection.
          *
-         * @remarks You should provide those of your {@link DocumentContent | `documentContent`} instance.
+         * @remarks You should provide those of your {@link Document | document} instance.
          */
         selectedTextAttributes: Attributes.Map;
         /**
@@ -664,7 +663,7 @@ export declare namespace Toolbar {
  *
  * This type trick is aimed at preventing from exporting the component State which should be out of API surface.
  */
-export declare type Toolbar<D extends {}> = ComponentClass<Toolbar.Props<D>>;
+export declare type Toolbar<D> = ComponentClass<Toolbar.Props<D>>;
 
 export declare const Toolbar: React.ComponentClass<Toolbar.Props<any>, any>;
 
@@ -750,13 +749,13 @@ export declare namespace Typer {
     /**
      * {@link (Typer:type)} properties.
      */
-    export interface Props<D extends {} = {}> extends Print.Props {
+    export interface Props<D> extends DocumentRendererProps<D> {
         /**
-         * Handler to receive {@link DocumentContent | document content} updates.
+         * Handler to receive {@link Document| document} updates.
          *
          * @remarks This callback is expected to return a promise. This promise MUST resolve when the update had been proceeded.
          */
-        onDocumentContentUpdate?: (nextDocumentContent: DocumentContent) => Promise<void>;
+        onDocumentUpdate?: (nextDocumentContent: Document) => Promise<void>;
         /**
          * Customize the color of image controls upon activation.
          */
@@ -769,7 +768,7 @@ export declare namespace Typer {
 }
 
 /**
- * A component solely responsible for editing {@link DocumentContent | document content}.
+ * A component solely responsible for editing {@link Document | document}.
  *
  * @public
  *
@@ -777,8 +776,8 @@ export declare namespace Typer {
  *
  * This type trick is aimed at preventing from exporting the component State which should be out of API surface.
  */
-export declare type Typer = ComponentClass<Typer.Props>;
+export declare type Typer<D> = ComponentClass<Typer.Props<D>>;
 
-export declare const Typer: React.ComponentClass<Typer.Props<{}>, any>;
+export declare const Typer: React.ComponentClass<Typer.Props<any>, any>;
 
 export { }

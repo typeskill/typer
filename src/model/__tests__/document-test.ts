@@ -1,16 +1,16 @@
-import { DocumentContent, applyTextTransformToSelection } from '@model/documents'
+import { Document, applyTextTransformToSelection } from '@model/document'
 import { Selection } from '@delta/Selection'
 import mergeLeft from 'ramda/es/mergeLeft'
 
-describe('@model/documents', () => {
+describe('@model/document', () => {
   describe('applyTextTransformToSelection', () => {
     it('applying text attributes to empty selection should result in cursor attributes matching these attributes', () => {
-      const documentContent: DocumentContent = {
+      const document: Document = {
         currentSelection: Selection.fromBounds(1),
         ops: [{ insert: 'F' }],
         selectedTextAttributes: {},
       }
-      const diff = applyTextTransformToSelection('weight', 'bold', documentContent)
+      const diff = applyTextTransformToSelection('weight', 'bold', document)
       expect(diff.selectedTextAttributes).toMatchObject({
         weight: 'bold',
       })
@@ -19,7 +19,7 @@ describe('@model/documents', () => {
       })
     })
     it('successively applying text attributes to empty selection should result in the merging of those textAttributesAtCursor', () => {
-      const documentContent1: DocumentContent = {
+      const documentContent1: Document = {
         currentSelection: Selection.fromBounds(1),
         ops: [{ insert: 'F' }],
         selectedTextAttributes: {},
@@ -33,7 +33,7 @@ describe('@model/documents', () => {
       })
     })
     it('setting cursor attributes should apply to inserted text', () => {
-      const documentContent1: DocumentContent = {
+      const documentContent1: Document = {
         currentSelection: Selection.fromBounds(1, 2),
         ops: [{ insert: 'FP\n' }],
         selectedTextAttributes: {},
@@ -45,7 +45,7 @@ describe('@model/documents', () => {
       })
     })
     it('unsetting cursor attributes should propagate to inserted text', () => {
-      const documentContent1: DocumentContent = {
+      const documentContent1: Document = {
         currentSelection: Selection.fromBounds(1, 2),
         ops: [{ insert: 'F' }, { insert: 'P', attributes: { weight: 'bold' } }, { insert: '\n' }],
         selectedTextAttributes: { weight: 'bold' },
