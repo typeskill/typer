@@ -103,7 +103,7 @@ The bridge has three responsibilities:
 - to notify selection attributes changes to external controls;
 - to provide a shared interface for content generation and print behavior.
 
-A `Bridge` instance must be hold by the mater component, and can be shared with any external control such as `Toolbar` to operate on the document. To grasp how the bridge is interfaced with the `Toolbar` component, you can [read its implementation](src/components/Toolbar.tsx).
+A `Bridge` instance must be hold by the master component, and can be shared with any external control such as `Toolbar` to operate on the document. To grasp how the bridge is interfaced with the `Toolbar` component, you can [read its implementation](src/components/Toolbar.tsx).
 
 ### Robustness
 
@@ -178,6 +178,8 @@ You need to comply with this contract to avoid resource leakage and bugs:
 - The `Bridge` instance should be instantiated by the master component, during its own instantiation or during mount;
 - There should be exactly one `Bridge` instance for one document renderer.
 
-### Integrating images
+## Customizing
 
-// To be continued
+### Integrating your image picker
+
+Typeskill won't chose a picker on your behalf, as it would break its commitment to modular design.
