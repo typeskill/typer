@@ -9,6 +9,7 @@ import {
   StyleSheet,
   TouchableHighlight,
   TextStyle,
+  StyleProp,
 } from 'react-native'
 import { ImageOp } from '@delta/operations'
 import { boundMethod } from 'autobind-decorator'
@@ -38,7 +39,7 @@ const constantTextInputProps: TextInputProps = {
   blurOnSubmit: false,
 } as TextInputProps
 
-const TEXT_INPUT_WIDTH = 10
+const TEXT_INPUT_WIDTH = 4
 const DEFAULT_UNDERLAY = 'rgba(30,30,30,0.3)'
 
 const styles = StyleSheet.create({
@@ -100,56 +101,113 @@ export class ImageBlockInput extends PureComponent<ImageBlockInputProps> {
     }
   }
 
-  private renderImage(
-    imageDimensions: Images.Dimensions,
-    containerDimensions: Images.Dimensions,
-    spareWidthOnSides: number,
-    handlerWidth: number,
-  ) {
-    const { Component } = this.props.imageLocatorService
-    const dynamicStyle = this.isSelectedForDeletion() ? { backgroundColor: 'blue', opacity: 0.5 } : null
-    const fullHandlerWidth = handlerWidth + spareWidthOnSides
+  private renderHandles(fullHandlerWidth: number, containerDimensions: Images.Dimensions) {
+    const underlayColor = this.props.underlayColor || DEFAULT_UNDERLAY
     const touchableStyle: ViewStyle = {
       width: fullHandlerWidth,
       height: containerDimensions.height,
       position: 'absolute',
       backgroundColor: 'transparent',
     }
-    const underlayColor = this.props.underlayColor || DEFAULT_UNDERLAY
-    const cropedDimensions = {
-      ...imageDimensions,
-      width: imageDimensions.width - 2 * TEXT_INPUT_WIDTH,
+    const leftHandlePosition = {
+      left: 0,
+      bottom: 0,
+      top: 0,
+      right: containerDimensions.width - fullHandlerWidth,
     }
-    const imageComponentProps = {
-      containerWidth: this.props.contentWidth,
-      params: this.props.imageOp.attributes,
-      dimensions: cropedDimensions,
+    const rightHandlePosition = {
+      bottom: 0,
+      top: 0,
+      right: 0,
+      left: containerDimensions.width - fullHandlerWidth,
     }
     return (
-      <View style={[styles.imageContainer, containerDimensions]}>
-        <View style={{ marginLeft: spareWidthOnSides }}>
-          {this.renderTextInput(containerDimensions, this.leftInput)}
-        </View>
-        <TouchableHighlight onPress={this.handleOnPressMiddleHandler} style={[dynamicStyle, cropedDimensions]}>
-          <Component {...imageComponentProps} />
-        </TouchableHighlight>
-        <View style={{ marginRight: spareWidthOnSides }}>
-          {this.renderTextInput(containerDimensions, this.rightInput)}
-        </View>
+      <React.Fragment>
         <TouchableHighlight
           underlayColor={underlayColor}
-          style={[touchableStyle, { left: 0, bottom: 0, top: 0, right: containerDimensions.width - fullHandlerWidth }]}
+          style={[touchableStyle, leftHandlePosition]}
           onPress={this.handleOnPressLeftHandler}
         >
           <View />
         </TouchableHighlight>
         <TouchableHighlight
           underlayColor={underlayColor}
-          style={[touchableStyle, { bottom: 0, top: 0, right: 0, left: containerDimensions.width - fullHandlerWidth }]}
+          style={[touchableStyle, rightHandlePosition]}
           onPress={this.handleOnPressRightHandler}
         >
           <View />
         </TouchableHighlight>
+      </React.Fragment>
+    )
+  }
+
+  private renderImageFrame(
+    spareWidthOnSides: number,
+    imageDimensions: Images.Dimensions,
+    containerDimensions: Images.Dimensions,
+  ) {
+    const selectStyle = this.isSelectedForDeletion() ? { backgroundColor: 'blue', opacity: 0.5 } : null
+    const { Component } = this.props.imageLocatorService
+    const imageComponentProps = {
+      containerWidth: this.props.contentWidth,
+      params: this.props.imageOp.attributes,
+      dimensions: imageDimensions,
+    }
+    const imageFrameStyle: ViewStyle = {
+      ...imageDimensions,
+      position: 'relative',
+    }
+    const leftInputStyle: ViewStyle = {
+      position: 'absolute',
+      left: 0,
+      top: 0,
+      right: imageDimensions.width,
+      bottom: 0,
+      height: imageDimensions.height,
+      width: TEXT_INPUT_WIDTH,
+    }
+    const rightInputStyle: ViewStyle = {
+      position: 'absolute',
+      left: imageDimensions.width - TEXT_INPUT_WIDTH,
+      top: 0,
+      right: 0,
+      bottom: 0,
+      height: imageDimensions.height,
+      width: TEXT_INPUT_WIDTH,
+    }
+    const imageHandleStyle: StyleProp<ViewStyle> = [selectStyle, imageDimensions]
+    const imageWrapperStyle: ViewStyle = {
+      position: 'absolute',
+      left: spareWidthOnSides,
+      right: spareWidthOnSides,
+      bottom: 0,
+      top: 0,
+      ...imageDimensions,
+    }
+    return (
+      <View style={imageFrameStyle}>
+        <View style={imageWrapperStyle}>
+          <TouchableHighlight onPress={this.handleOnPressMiddleHandler} style={imageHandleStyle}>
+            <Component {...imageComponentProps} />
+          </TouchableHighlight>
+        </View>
+        <View style={leftInputStyle}>{this.renderTextInput(containerDimensions, this.leftInput)}</View>
+        <View style={rightInputStyle}>{this.renderTextInput(containerDimensions, this.rightInput)}</View>
+      </View>
+    )
+  }
+
+  private renderImage(
+    imageDimensions: Images.Dimensions,
+    containerDimensions: Images.Dimensions,
+    spareWidthOnSides: number,
+    handlerWidth: number,
+  ) {
+    const fullHandlerWidth = handlerWidth + spareWidthOnSides
+    return (
+      <View style={[styles.imageContainer, containerDimensions]}>
+        {this.renderImageFrame(spareWidthOnSides, imageDimensions, containerDimensions)}
+        {this.renderHandles(fullHandlerWidth, containerDimensions)}
       </View>
     )
   }
@@ -185,7 +243,7 @@ export class ImageBlockInput extends PureComponent<ImageBlockInputProps> {
       padding: 0,
       borderWidth: 0,
       textAlign: 'center',
-      backgroundColor: 'rgb(215,215,215)',
+      backgroundColor: 'rgba(215,215,215,0.1)',
     }
     return (
       <TextInput
