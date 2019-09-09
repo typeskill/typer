@@ -108,6 +108,7 @@ export interface DocumentRendererProps<D> {
     bridge: Bridge<D>;
     contentContainerStyle?: StyleProp<ViewStyle>;
     document: Document;
+    spacing?: number;
     style?: StyleProp<ViewStyle>;
     textStyle?: StyleProp<TextStyle>;
 }

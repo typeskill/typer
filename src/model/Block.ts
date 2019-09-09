@@ -6,6 +6,7 @@ import { ImageKind, GenericOp } from '@delta/operations'
 import { DocumentDelta } from '@delta/DocumentDelta'
 import { Attributes } from '@delta/attributes'
 import { Bridge } from '@core/Bridge'
+import { DocumentDeltaAtomicUpdate } from '@delta/DocumentDeltaAtomicUpdate'
 
 function elementToInsertion(element: Bridge.Element<any>, document: Document): [ImageKind | string, Attributes.Map] {
   return element.type === 'text'
@@ -55,16 +56,29 @@ export class Block {
     }
   }
 
-  private applyDiffToDocument(diff: Delta, document: Document): Document {
+  private applyDiffToDocument(documentDiff: Delta, document: Document): Document {
     const current = new Delta(document.ops)
-    const nextDelta = current.compose(diff)
+    const nextDelta = current.compose(documentDiff)
     const nextOps = nextDelta.ops
-    const nextSelection = getSelectionAfterTransform(diff, document)
+    const nextSelection = getSelectionAfterTransform(documentDiff, document)
     return {
       ...document,
       currentSelection: nextSelection,
       ops: nextOps,
     }
+  }
+
+  /**
+   * Mutate block-scoped ops in the document.
+   *
+   * @param blockScopedDiff - The diff delta to apply to current block.
+   * @param document - The document.
+   *
+   * @returns The resulting document ops.
+   */
+  private applyBlockScopedDiff(blockScopedDiff: Delta, document: Document): Document {
+    let fullDiff = new Delta().retain(this.descriptor.selectableUnitsOffset).concat(blockScopedDiff)
+    return this.applyDiffToDocument(fullDiff, document)
   }
 
   private getPreviousBlock(): Block | null {
@@ -81,7 +95,14 @@ export class Block {
     return this.blocks[this.descriptor.blockIndex + 1]
   }
 
-  public getScopedSelection(document: Document): SelectionShape {
+  public getDocumentSelection(blockScopedSelection: SelectionShape): SelectionShape {
+    return {
+      start: blockScopedSelection.start + this.descriptor.selectableUnitsOffset,
+      end: blockScopedSelection.end + this.descriptor.selectableUnitsOffset,
+    }
+  }
+
+  public getBlockScopedSelection(document: Document): SelectionShape {
     return {
       start: document.currentSelection.start - this.descriptor.selectableUnitsOffset,
       end: document.currentSelection.end - this.descriptor.selectableUnitsOffset,
@@ -106,7 +127,7 @@ export class Block {
     const isCursorTouchingRightEdge = isCursor && currentSelection.end === upperBoundary
     const isCursorTouchingLeftEdge = isCursor && currentSelection.start === lowerBoundary
     if (isCursorTouchingRightEdge) {
-      return nextBlock === null || !nextBlock.shouldFocusOnLeftEdge()
+      return nextBlock == null || !nextBlock.shouldFocusOnLeftEdge()
     }
     if (isCursorTouchingLeftEdge) {
       return this.shouldFocusOnLeftEdge()
@@ -125,25 +146,22 @@ export class Block {
     )
   }
 
-  /**
-   * Mutate block-scoped ops in the document.
-   *
-   * @param diff - The diff delta to apply to current block.
-   * @param document - The document.
-   *
-   * @returns The resulting document ops.
-   */
-  public applyDiff(diff: Delta, document: Document): Document {
-    let fullDiff = new Delta().retain(this.descriptor.selectableUnitsOffset).concat(diff)
-    return this.applyDiffToDocument(fullDiff, document)
-  }
-
   public updateTextAttributesAtSelection(document: Document): Document {
     const docDelta = new DocumentDelta(document.ops)
     const deltaAttributes = docDelta.getSelectedTextAttributes(Selection.fromShape(document.currentSelection))
     return {
       ...document,
       selectedTextAttributes: deltaAttributes,
+    }
+  }
+
+  public applyAtomicDeltaUpdate(
+    { diff, selectionAfterChange }: DocumentDeltaAtomicUpdate,
+    document: Document,
+  ): Document {
+    return {
+      ...this.applyBlockScopedDiff(diff, document),
+      currentSelection: this.getDocumentSelection(selectionAfterChange),
     }
   }
 

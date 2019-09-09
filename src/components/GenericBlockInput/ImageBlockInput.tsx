@@ -15,6 +15,7 @@ import { boundMethod } from 'autobind-decorator'
 import { SelectionShape } from '@delta/Selection'
 import { Images } from '@core/Images'
 import { StandardBlockInputProps } from './types'
+import { genericStyles } from '@components/styles'
 
 export interface ImageBlockInputProps extends StandardBlockInputProps {
   imageOp: ImageOp
@@ -99,11 +100,6 @@ export class ImageBlockInput extends PureComponent<ImageBlockInputProps> {
   ) {
     const { Component } = this.props.imageLocatorService
     const dynamicStyle = this.isSelectedForDeletion() ? { backgroundColor: 'blue', opacity: 0.5 } : null
-    const imageComponentProps = {
-      containerWidth: this.props.contentWidth - TEXT_INPUT_WIDTH * 2,
-      params: this.props.imageOp.attributes,
-      dimensions: imageDimensions,
-    }
     const fullHandlerWidth = handlerWidth + spareWidthOnSides
     const touchableStyle: ViewStyle = {
       width: fullHandlerWidth,
@@ -112,12 +108,21 @@ export class ImageBlockInput extends PureComponent<ImageBlockInputProps> {
       backgroundColor: 'transparent',
     }
     const underlayColor = this.props.underlayColor || DEFAULT_UNDERLAY
+    const cropedDimensions = {
+      ...imageDimensions,
+      width: imageDimensions.width - 2 * TEXT_INPUT_WIDTH,
+    }
+    const imageComponentProps = {
+      containerWidth: this.props.contentWidth,
+      params: this.props.imageOp.attributes,
+      dimensions: cropedDimensions,
+    }
     return (
       <View style={[styles.imageContainer, containerDimensions]}>
         <View style={{ marginLeft: spareWidthOnSides }}>
           {this.renderTextInput(containerDimensions, this.leftInput)}
         </View>
-        <TouchableHighlight onPress={this.handleOnPressMiddleHandler} style={[dynamicStyle, imageDimensions]}>
+        <TouchableHighlight onPress={this.handleOnPressMiddleHandler} style={[dynamicStyle, cropedDimensions]}>
           <Component {...imageComponentProps} />
         </TouchableHighlight>
         <View style={{ marginRight: spareWidthOnSides }}>
@@ -172,13 +177,14 @@ export class ImageBlockInput extends PureComponent<ImageBlockInputProps> {
       padding: 0,
       borderWidth: 0,
       textAlign: 'center',
+      backgroundColor: 'rgb(215,215,215)',
     }
     return (
       <TextInput
         ref={ref}
         onKeyPress={this.handleOnKeyPress}
         onSubmitEditing={this.handleOnSubmit}
-        style={dynamicStyle}
+        style={[dynamicStyle, genericStyles.zeroSpacing]}
         {...constantTextInputProps}
       />
     )
@@ -202,7 +208,7 @@ export class ImageBlockInput extends PureComponent<ImageBlockInputProps> {
   }
 
   public render() {
-    const imageDimensions = this.computeDimensions(this.props.contentWidth - TEXT_INPUT_WIDTH * 2)
+    const imageDimensions = this.computeDimensions(this.props.contentWidth)
     const containerDimensions = {
       width: this.props.contentWidth,
       height: imageDimensions.height,

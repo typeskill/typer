@@ -334,6 +334,15 @@ export declare interface DocumentRendererProps<D> {
      */
     textStyle?: StyleProp<TextStyle>;
     /**
+     * The spacing unit.
+     *
+     * @remarks It is used:
+     *
+     * - between two adjacent blocks;
+     * - to add padding between the container and the rendered document.
+     */
+    spacing?: number;
+    /**
      * Style applied to the content container.
      *
      * @remarks This prop MUST NOT contain padding or margin rules. Such spacing rules will be zero-ed.

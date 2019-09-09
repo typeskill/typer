@@ -1,8 +1,8 @@
 import { Block } from '@model/Block'
 import { Document } from '@model/document'
 import { SelectionShape } from '@delta/Selection'
-import Delta from 'quill-delta'
 import { Gen } from '@core/Gen'
+import { DocumentDeltaAtomicUpdate } from '@delta/DocumentDeltaAtomicUpdate'
 
 export interface DocumentProvider {
   getDocument: () => Document
@@ -33,8 +33,8 @@ export class BlockController {
     this.updateDocumentContent(this.block.updateSelection(blockScopedSelection, this.getDocument()))
   }
 
-  public applyDiffInBlock(diff: Delta) {
-    this.updateDocumentContent(this.block.applyDiff(diff, this.getDocument()))
+  public applyAtomicDeltaUpdateInBlock(documentDeltaUpdate: DocumentDeltaAtomicUpdate) {
+    this.updateDocumentContent(this.block.applyAtomicDeltaUpdate(documentDeltaUpdate, this.getDocument()))
   }
 
   public selectBlock() {

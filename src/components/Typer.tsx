@@ -108,7 +108,7 @@ class _Typer<D> extends DocumentRenderer<D, Typer.Props<D>, TyperState> implemen
           textStyle={textStyle}
           imageLocatorService={this.genService.imageLocator}
           descriptor={descriptor}
-          blockScopedSelection={block.getScopedSelection(this.props.document)}
+          blockScopedSelection={block.getBlockScopedSelection(this.props.document)}
           overridingScopedSelection={isFocused ? overridingSelection : null}
           textAttributesAtCursor={selectedTextAttributes}
           textTransforms={this.genService.textTransforms}

@@ -125,7 +125,7 @@ export class TextBlockInput extends Component<TextBlockInputProps> {
 
   private updateOps(documentDeltaUpdate: DocumentDeltaAtomicUpdate) {
     this.blockScopedSelection = documentDeltaUpdate.selectionAfterChange
-    return this.props.controller.applyDiffInBlock(documentDeltaUpdate.diff)
+    return this.props.controller.applyAtomicDeltaUpdateInBlock(documentDeltaUpdate)
   }
 
   public getCurrentSelection() {
