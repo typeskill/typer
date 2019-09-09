@@ -64,6 +64,11 @@ export class ImageBlockInput extends PureComponent<ImageBlockInputProps> {
   }
 
   @boundMethod
+  private handleOnSubmitLeft() {
+    this.props.controller.insertOrReplaceTextAtSelection('\n')
+  }
+
+  @boundMethod
   private handleOnPressLeftHandler() {
     this.props.controller.updateSelectionInBlock({ start: 0, end: 0 })
   }
@@ -79,6 +84,11 @@ export class ImageBlockInput extends PureComponent<ImageBlockInputProps> {
   }
 
   @boundMethod
+  private handleOnValueChange(text: string) {
+    this.props.controller.insertOrReplaceTextAtSelection(text)
+  }
+
+  @boundMethod
   private handleOnKeyPress(e: NativeSyntheticEvent<TextInputKeyPressEventData>) {
     const key = e.nativeEvent.key
     if (key === 'Backspace') {
@@ -87,8 +97,6 @@ export class ImageBlockInput extends PureComponent<ImageBlockInputProps> {
       } else if (!this.isLeftSelected()) {
         this.props.controller.selectBlock()
       }
-    } else {
-      this.props.controller.insertOrReplaceTextAtSelection(key)
     }
   }
 
@@ -183,6 +191,7 @@ export class ImageBlockInput extends PureComponent<ImageBlockInputProps> {
       <TextInput
         ref={ref}
         onKeyPress={this.handleOnKeyPress}
+        onChangeText={this.handleOnValueChange}
         onSubmitEditing={this.handleOnSubmit}
         style={[dynamicStyle, genericStyles.zeroSpacing]}
         {...constantTextInputProps}
