@@ -1,44 +1,56 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { PureComponent } from 'react'
-import { TextBlockView } from './TextBlockView'
+import { TextBlockView, TextBlockViewProps } from './TextBlockView'
 import { StyleProp, TextStyle, ViewStyle, View } from 'react-native'
-import { ImageBlockView } from './ImageBlockView'
+import { ImageBlockView, ImageBlockViewProps } from './ImageBlockView'
 import { TextOp, ImageOp } from '@delta/operations'
 import invariant from 'invariant'
 import { Transforms } from '@core/Transforms'
 import { Images } from '@core/Images'
 import { StandardBlockViewProps } from './types'
 
-export interface GenericBlockViewProps extends StandardBlockViewProps {
+export interface GenericBlockViewProps<ImageSource> extends StandardBlockViewProps {
   textStyle?: StyleProp<TextStyle>
-  imageLocatorService: Images.LocationService<any>
+  imageLocatorService: Images.LocationService<ImageSource>
   textTransforms: Transforms
   contentWidth: null | number
   blockStyle?: StyleProp<ViewStyle>
+  maxMediaBlockWidth?: number
+  maxMediaBlockHeight?: number
 }
 
-export class GenericBlockView extends PureComponent<GenericBlockViewProps> {
+export class GenericBlockView<ImageSource> extends PureComponent<GenericBlockViewProps<ImageSource>> {
   public render() {
-    const { descriptor, textStyle, imageLocatorService, contentWidth, blockStyle, ...otherProps } = this.props
+    const {
+      descriptor,
+      textStyle,
+      imageLocatorService,
+      contentWidth,
+      blockStyle,
+      maxMediaBlockHeight,
+      maxMediaBlockWidth,
+      textTransforms,
+    } = this.props
     let block = null
-    const realContentWidth = this.props.contentWidth
     if (descriptor.kind === 'text') {
-      block = React.createElement(TextBlockView, {
+      const textBlockProps: TextBlockViewProps = {
         descriptor,
         textStyle,
+        textTransforms,
         textOps: descriptor.opsSlice as TextOp[],
-        ...otherProps,
-      })
-    } else if (descriptor.kind === 'image' && realContentWidth !== null) {
-      invariant(descriptor.opsSlice.length === 1, `Image blocks must be grouped alone.`)
-      const imageProps = {
-        descriptor,
-        imageOp: descriptor.opsSlice[0] as ImageOp,
-        imageLocatorService,
-        contentWidth: realContentWidth,
-        ...otherProps,
       }
-      block = React.createElement(ImageBlockView, imageProps)
+      block = <TextBlockView {...textBlockProps} />
+    } else if (descriptor.kind === 'image' && contentWidth !== null) {
+      invariant(descriptor.opsSlice.length === 1, `Image blocks must be grouped alone.`)
+      const imageBlockProps: ImageBlockViewProps<ImageSource> = {
+        descriptor,
+        maxMediaBlockHeight,
+        maxMediaBlockWidth,
+        imageLocatorService,
+        imageOp: descriptor.opsSlice[0] as ImageOp<ImageSource>,
+        contentWidth: contentWidth,
+      }
+      block = <ImageBlockView<ImageSource> {...imageBlockProps} />
     }
     return <View style={blockStyle}>{block}</View>
   }

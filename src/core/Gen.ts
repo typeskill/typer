@@ -13,7 +13,7 @@ export declare namespace Gen {
    *
    * @public
    */
-  export interface Config<D extends {}> {
+  export interface Config<ImageSource> {
     /**
      * A list of {@link (Transforms:namespace).GenericSpec | specs} which will be used to map text attributes with styles.
      */
@@ -23,18 +23,18 @@ export declare namespace Gen {
      *
      * @remarks Were this parameter not provided, images interactions will be disabled in the related {@link (Typer:type)}.
      */
-    imageLocatorService: Images.LocationService<D>
+    imageLocatorService: Images.LocationService<ImageSource>
   }
   /**
    * A service providing rendering behviors.
    */
-  export interface Service {
-    imageLocator: Images.LocationService<any>
+  export interface Service<ImageSource> {
+    imageLocator: Images.LocationService<ImageSource>
     textTransforms: Transforms
   }
 }
 
-export const defaultRenderConfig: Gen.Config<any> = {
+export const defaultRenderConfig: Gen.Config<Images.StandardSource> = {
   textTransformSpecs: defaultTextTransforms,
   imageLocatorService: defaultImageLocator,
 }

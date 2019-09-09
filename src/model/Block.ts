@@ -8,10 +8,15 @@ import { Attributes } from '@delta/attributes'
 import { Bridge } from '@core/Bridge'
 import { DocumentDeltaAtomicUpdate } from '@delta/DocumentDeltaAtomicUpdate'
 
-function elementToInsertion(element: Bridge.Element<any>, document: Document): [ImageKind | string, Attributes.Map] {
-  return element.type === 'text'
-    ? [element.content, document.selectedTextAttributes]
-    : [{ kind: 'image' }, element.description]
+function elementToInsertion(
+  element: Bridge.Element<any>,
+  document: Document,
+): [ImageKind<any> | string, Attributes.Map?] {
+  if (element.type === 'text') {
+    return [element.content, document.selectedTextAttributes]
+  }
+  const imageOpIns: ImageKind<any> = { kind: 'image', ...element.description }
+  return [imageOpIns]
 }
 
 function getSelectionAfterTransform(diff: Delta, document: Document): SelectionShape {

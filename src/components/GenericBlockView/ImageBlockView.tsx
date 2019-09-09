@@ -1,27 +1,39 @@
 import React, { PureComponent } from 'react'
-import { View } from 'react-native'
-import { Images } from '@core/Images'
+import { View, StyleSheet } from 'react-native'
+import { Images, computeImageFrame } from '@core/Images'
 import { ImageOp } from '@delta/operations'
 import { StandardBlockViewProps } from './types'
 
-export interface ImageBlockViewProps extends StandardBlockViewProps {
-  imageLocatorService: Images.LocationService<any>
-  imageOp: ImageOp
+export interface ImageBlockViewProps<Source> extends StandardBlockViewProps {
+  imageLocatorService: Images.LocationService<Source>
+  imageOp: ImageOp<Source>
   contentWidth: number
+  maxMediaBlockWidth?: number
+  maxMediaBlockHeight?: number
 }
 
-export class ImageBlockView extends PureComponent<ImageBlockViewProps> {
+const styles = StyleSheet.create({
+  wrapper: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+})
+
+export class ImageBlockView<Source> extends PureComponent<ImageBlockViewProps<Source>> {
+  private computeDimensions() {
+    const { imageOp, maxMediaBlockHeight, maxMediaBlockWidth, contentWidth } = this.props
+    return computeImageFrame(imageOp.insert, contentWidth, maxMediaBlockHeight, maxMediaBlockWidth)
+  }
+
   public render() {
-    const { imageLocatorService, imageOp, contentWidth } = this.props
+    const { imageLocatorService, imageOp } = this.props
     const Component = imageLocatorService.Component
-    const imageDimensions = imageLocatorService.computeImageDimensions(imageOp.attributes, contentWidth)
-    const imageComponentProps = {
-      containerWidth: contentWidth,
-      params: this.props.imageOp.attributes,
-      dimensions: imageDimensions,
+    const imageComponentProps: Images.ComponentProps<Source> = {
+      description: imageOp.insert,
+      printDimensions: this.computeDimensions(),
     }
     return (
-      <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
+      <View style={styles.wrapper}>
         <Component {...imageComponentProps} />
       </View>
     )

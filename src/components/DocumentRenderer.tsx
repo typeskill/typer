@@ -19,13 +19,13 @@ export interface DocumentRendererState {
  *
  * @public
  */
-export interface DocumentRendererProps<D> {
+export interface DocumentRendererProps<ImageSource> {
   /**
    * The {@link (Bridge:class)} instance.
    *
    * @remarks This property MUST NOT be changed after instantiation.
    */
-  bridge: Bridge<D>
+  bridge: Bridge<ImageSource>
   /**
    * The {@link Document | document} to display.
    */
@@ -38,6 +38,16 @@ export interface DocumentRendererProps<D> {
    * Default text style.
    */
   textStyle?: StyleProp<TextStyle>
+  /**
+   * The max width of a media block.
+   *
+   * @remarks If the container width is smaller then this width, the first will be used to frame media.
+   */
+  maxMediaBlockWidth?: number
+  /**
+   * The max height of a media block.
+   */
+  maxMediaBlockHeight?: number
   /**
    * The spacing unit.
    *
@@ -78,8 +88,7 @@ const contentRendererStyles = StyleSheet.create({
  * @internal
  */
 export abstract class DocumentRenderer<
-  D,
-  P extends DocumentRendererProps<D>,
+  P extends DocumentRendererProps<any>,
   S extends DocumentRendererState = DocumentRendererState
 > extends PureComponent<P, S> {
   public static propTypes: Record<keyof DocumentRendererProps<any>, any> = {
@@ -89,9 +98,11 @@ export abstract class DocumentRenderer<
     textStyle: PropTypes.any,
     document: DocumentPropType.isRequired,
     spacing: PropTypes.number,
+    maxMediaBlockHeight: PropTypes.number,
+    maxMediaBlockWidth: PropTypes.number,
   }
 
-  protected genService: Gen.Service
+  protected genService: Gen.Service<any>
   protected assembler: BlockAssembler
 
   public constructor(props: P) {

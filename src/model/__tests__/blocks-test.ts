@@ -1,6 +1,7 @@
 import { groupOpsByBlocks, BlockDescriptor } from '@model/blocks'
-import { buildImageOp, buildTextOp } from '@delta/operations'
+import { buildTextOp } from '@delta/operations'
 import prop from 'ramda/es/prop'
+import { buildDummyImageOp } from '@test/document'
 
 describe('@model/blocks', () => {
   describe('groupOpsByBlocks', () => {
@@ -22,7 +23,7 @@ describe('@model/blocks', () => {
     it('should split groups of different kind', () => {
       const helloOp = buildTextOp('Hello')
       const greatOp = buildTextOp('Great')
-      const imgOp = buildImageOp({ test: 1 })
+      const imgOp = buildDummyImageOp()
       const blocks = groupOpsByBlocks([helloOp, greatOp, imgOp])
       expect(blocks.length).toBe(2)
       expect(blocks.map(prop('descriptor'))).toMatchObject([
@@ -62,7 +63,7 @@ describe('@model/blocks', () => {
       ] as BlockDescriptor[])
     })
     it('should create a new group for each sibling image', () => {
-      const blocks = groupOpsByBlocks([buildImageOp({ test: 1 }), buildImageOp({ test: 2 })])
+      const blocks = groupOpsByBlocks([buildDummyImageOp('A'), buildDummyImageOp('B')])
       expect(blocks.length).toBe(2)
       expect(blocks.map(prop('descriptor'))).toMatchObject([
         {
@@ -70,7 +71,7 @@ describe('@model/blocks', () => {
           kind: 'image',
           startSliceIndex: 0,
           endSliceIndex: 1,
-          opsSlice: [buildImageOp({ test: 1 })],
+          opsSlice: [buildDummyImageOp('A')],
           numOfSelectableUnits: 1,
           selectableUnitsOffset: 0,
         },
@@ -79,7 +80,7 @@ describe('@model/blocks', () => {
           kind: 'image',
           startSliceIndex: 1,
           endSliceIndex: 2,
-          opsSlice: [buildImageOp({ test: 2 })],
+          opsSlice: [buildDummyImageOp('B')],
           numOfSelectableUnits: 1,
           selectableUnitsOffset: 1,
         },

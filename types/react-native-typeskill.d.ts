@@ -31,7 +31,6 @@
 
 import { ComponentClass } from 'react';
 import { ComponentType } from 'react';
-import { ImageSourcePropType } from 'react-native';
 import React from 'react';
 import { StyleProp } from 'react-native';
 import { TextStyle } from 'react-native';
@@ -88,9 +87,9 @@ export declare namespace Bridge {
     /**
      * Block content to insert.
      */
-    export interface ImageElement<D extends {}> {
+    export interface ImageElement<Source> {
         type: 'image';
-        description: D;
+        description: Images.Description<Source>;
     }
     export interface TextElement {
         type: 'text';
@@ -99,7 +98,7 @@ export declare namespace Bridge {
     /**
      * Content to insert.
      */
-    export type Element<D extends {}> = ImageElement<D> | TextElement;
+    export type Element<ImageSource> = ImageElement<ImageSource> | TextElement;
     /**
      * Listener to selected text attributes changes.
      */
@@ -118,7 +117,7 @@ export declare namespace Bridge {
      *
      * @internal
      */
-    export type InsertOrReplaceAtSelectionListener = <D extends {}>(element: Element<D>) => void;
+    export type InsertOrReplaceAtSelectionListener<ImageSource> = <D extends {}>(element: Element<ImageSource>) => void;
     /**
      * An object representing an area of events happening by the mean of external controls.
      *
@@ -126,13 +125,13 @@ export declare namespace Bridge {
      *
      * This object exposes methods to trigger such events, and react to internal events.
      */
-    export interface ControlEventDomain<D extends {}> {
+    export interface ControlEventDomain<ImageSource> {
         /**
          * Insert an element at cursor or replace if selection exists.
          *
          * @internal
          */
-        insertOrReplaceAtSelection: (element: Element<D>) => void;
+        insertOrReplaceAtSelection: (element: Element<ImageSource>) => void;
         /**
          * Switch the given attribute's value depending on the current selection.
          *
@@ -150,7 +149,7 @@ export declare namespace Bridge {
      *
      * @internal
      */
-    export interface SheetEventDomain {
+    export interface SheetEventDomain<ImageSource> {
         /**
          * Listen to text attributes alterations in selection.
          */
@@ -158,7 +157,7 @@ export declare namespace Bridge {
         /**
          * Listen to insertions of text or blocks at selection.
          */
-        addInsertOrReplaceAtSelectionListener: (owner: object, listener: InsertOrReplaceAtSelectionListener) => void;
+        addInsertOrReplaceAtSelectionListener: (owner: object, listener: InsertOrReplaceAtSelectionListener<ImageSource>) => void;
         /**
          * Dereference all listeners registered for this owner.
          */
@@ -177,7 +176,7 @@ export declare namespace Bridge {
  *
  * @public
  */
-export declare class Bridge<D extends {} = {}> {
+export declare class Bridge<ImageSource> {
     private outerEndpoint;
     private genService;
     private controlEventDom;
@@ -185,13 +184,13 @@ export declare class Bridge<D extends {} = {}> {
     /**
      * @param genConfig - A configuration object describing content generation behaviors.
      */
-    constructor(genConfig?: Partial<Gen.Config<D>>);
+    constructor(genConfig?: Partial<Gen.Config<ImageSource>>);
     /**
      * Get {@link (Bridge:namespace).SheetEventDomain | sheetEventDom}.
      *
      * @internal
      */
-    getSheetEventDomain(): Bridge.SheetEventDomain;
+    getSheetEventDomain(): Bridge.SheetEventDomain<ImageSource>;
     /**
      * Get this bridge {@link (Bridge:namespace).ControlEventDomain}.
      *
@@ -199,11 +198,11 @@ export declare class Bridge<D extends {} = {}> {
      *
      * The returned object can be used to react from and trigger {@link (Typer:type)} events.
      */
-    getControlEventDomain(): Bridge.ControlEventDomain<D>;
+    getControlEventDomain(): Bridge.ControlEventDomain<ImageSource>;
     /**
      * @returns The gen service, responsible for content generation.
      */
-    getGenService(): Gen.Service;
+    getGenService(): Gen.Service<ImageSource>;
     /**
      * End of the bridge's lifecycle.
      *
@@ -281,7 +280,7 @@ export declare enum ControlAction {
 /**
  * @public
  */
-export declare const defaultImageLocator: Images.LocationService<Images.StandardDefinition>;
+export declare const defaultImageLocator: Images.LocationService<Images.StandardSource>;
 
 /**
  * @public
@@ -314,13 +313,13 @@ export declare interface Document {
  *
  * @public
  */
-export declare interface DocumentRendererProps<D> {
+export declare interface DocumentRendererProps<ImageSource> {
     /**
      * The {@link (Bridge:class)} instance.
      *
      * @remarks This property MUST NOT be changed after instantiation.
      */
-    bridge: Bridge<D>;
+    bridge: Bridge<ImageSource>;
     /**
      * The {@link Document | document} to display.
      */
@@ -333,6 +332,16 @@ export declare interface DocumentRendererProps<D> {
      * Default text style.
      */
     textStyle?: StyleProp<TextStyle>;
+    /**
+     * The max width of a media block.
+     *
+     * @remarks If the container width is smaller then this width, the first will be used to frame media.
+     */
+    maxMediaBlockWidth?: number;
+    /**
+     * The max height of a media block.
+     */
+    maxMediaBlockHeight?: number;
     /**
      * The spacing unit.
      *
@@ -362,7 +371,7 @@ export declare namespace Gen {
      *
      * @public
      */
-    export interface Config<D extends {}> {
+    export interface Config<ImageSource> {
         /**
          * A list of {@link (Transforms:namespace).GenericSpec | specs} which will be used to map text attributes with styles.
          */
@@ -372,13 +381,13 @@ export declare namespace Gen {
          *
          * @remarks Were this parameter not provided, images interactions will be disabled in the related {@link (Typer:type)}.
          */
-        imageLocatorService: Images.LocationService<D>;
+        imageLocatorService: Images.LocationService<ImageSource>;
     }
     /**
      * A service providing rendering behviors.
      */
-    export interface Service {
-        imageLocator: Images.LocationService<any>;
+    export interface Service<ImageSource> {
+        imageLocator: Images.LocationService<ImageSource>;
         textTransforms: Transforms;
     }
 }
@@ -438,8 +447,11 @@ export declare interface GenericRichContent {
  * @public
  */
 export declare namespace Images {
-    export interface StandardDefinition {
-        readonly source: ImageSourcePropType;
+    export interface StandardSource {
+        uri: string;
+    }
+    export interface Description<Source> {
+        readonly source: Source;
         readonly width: number;
         readonly height: number;
     }
@@ -447,36 +459,38 @@ export declare namespace Images {
         readonly width: number;
         readonly height: number;
     }
-    export interface ComponentProps<D> {
-        readonly dimensions: Dimensions;
-        readonly params: D;
+    export interface ComponentProps<Source> {
+        /**
+         * The dimensions this component MUST occupy.
+         */
+        readonly printDimensions: Dimensions;
+        /**
+         * The image description.
+         */
+        readonly description: Description<Source>;
     }
     /**
      * An object used to locate and render images.
      */
-    export interface LocationService<D> {
+    export interface LocationService<Source> {
         /**
          * The image component to render.
          *
          * @remarks The component MUST fit within the provided dimensions properties.
          */
-        readonly Component: ComponentType<ComponentProps<D>>;
+        readonly Component: ComponentType<ComponentProps<Source>>;
         /**
-         * Compute display dimensions from image info and content width.
+         * An async function that returns a promise resolving to the description of an image.
          */
-        readonly computeImageDimensions: (params: D, contentWidth: number) => Dimensions;
-        /**
-         * An async function that returns the description of an image.
-         */
-        readonly pickOneImage: () => Promise<D>;
+        readonly pickOneImage: () => Promise<Description<Source>>;
         /**
          * Callback fired when an image has been successfully inserted.
          */
-        readonly onImageAddedEvent?: (description: D) => void;
+        readonly onImageAddedEvent?: (description: Description<Source>) => void;
         /**
          * Callback fired when an image has been removed.
          */
-        readonly onImageRemovedEvent?: (description: D) => void;
+        readonly onImageRemovedEvent?: (description: Description<Source>) => void;
     }
 }
 
@@ -489,7 +503,7 @@ export declare namespace Print {
     /**
      * {@link (Print:type)} properties.
      */
-    export type Props<D> = DocumentRendererProps<D>;
+    export type Props = DocumentRendererProps<any>;
 }
 
 /**
@@ -501,7 +515,7 @@ export declare namespace Print {
  *
  * This type trick is aimed at preventing from exporting the component State which should be out of API surface.
  */
-export declare type Print<D> = ComponentClass<Print.Props<D>>;
+export declare type Print = ComponentClass<Print.Props>;
 
 export declare const Print: React.ComponentClass<DocumentRendererProps<any>, any>;
 
@@ -573,11 +587,11 @@ export declare namespace Toolbar {
     /**
      * Props of the {@link (Toolbar:type)} component.
      */
-    export interface Props<D> {
+    export interface Props<ImageSource> {
         /**
          * The instance to be shared with the {@link (Typer:type)}.
          */
-        bridge: Bridge<D>;
+        bridge: Bridge<ImageSource>;
         /**
          * The attributes actives in selection.
          *
@@ -672,7 +686,7 @@ export declare namespace Toolbar {
  *
  * This type trick is aimed at preventing from exporting the component State which should be out of API surface.
  */
-export declare type Toolbar<D> = ComponentClass<Toolbar.Props<D>>;
+export declare type Toolbar = ComponentClass<Toolbar.Props<any>>;
 
 export declare const Toolbar: React.ComponentClass<Toolbar.Props<any>, any>;
 
@@ -758,7 +772,7 @@ export declare namespace Typer {
     /**
      * {@link (Typer:type)} properties.
      */
-    export interface Props<D> extends DocumentRendererProps<D> {
+    export interface Props extends DocumentRendererProps<any> {
         /**
          * Handler to receive {@link Document| document} updates.
          *
@@ -785,8 +799,8 @@ export declare namespace Typer {
  *
  * This type trick is aimed at preventing from exporting the component State which should be out of API surface.
  */
-export declare type Typer<D> = ComponentClass<Typer.Props<D>>;
+export declare type Typer = ComponentClass<Typer.Props>;
 
-export declare const Typer: React.ComponentClass<Typer.Props<any>, any>;
+export declare const Typer: React.ComponentClass<Typer.Props, any>;
 
 export { }

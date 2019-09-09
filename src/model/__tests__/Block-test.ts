@@ -1,6 +1,7 @@
 import { buildInitialDocContent, Document } from '@model/document'
-import { buildTextOp, buildImageOp, GenericOp } from '@delta/operations'
+import { buildTextOp, GenericOp } from '@delta/operations'
 import { groupOpsByBlocks } from '@model/blocks'
+import { buildDummyImageOp } from '@test/document'
 
 describe('@model/Block', () => {
   function buildDocContentWithSel(start: number, end: number, ops?: GenericOp[]): Document {
@@ -38,7 +39,7 @@ describe('@model/Block', () => {
       expect(block.isFocused(doc)).toBe(false)
     })
     it('should return false when selection is of length 0, touching the end of this block and the next block', () => {
-      const ops = [buildImageOp({ test: 1 }), buildTextOp('Hel\n')]
+      const ops = [buildDummyImageOp(), buildTextOp('Hel\n')]
       const { blocks, doc } = createContext(1, 1, ops)
       expect(blocks.length).toBe(2)
       const textBlock = blocks[1]
@@ -70,7 +71,7 @@ describe('@model/Block', () => {
       ])
     })
     it('should not apply transform to a selection encompassing a non-text block', () => {
-      const ops = [buildTextOp('Lol'), buildImageOp({ test: 1 }), buildTextOp('\n')]
+      const ops = [buildTextOp('Lol'), buildDummyImageOp(), buildTextOp('\n')]
       const { blocks, doc } = createContext(3, 4, ops)
       expect(blocks.length).toBe(3)
       const imageBlock = blocks[1]
@@ -79,7 +80,7 @@ describe('@model/Block', () => {
   })
   describe('getScopedSelection', () => {
     it('should return a selection which is relative to the block coordinates', () => {
-      const ops = [buildTextOp('Lol'), buildImageOp({ test: 1 }), buildTextOp('\n')]
+      const ops = [buildTextOp('Lol'), buildDummyImageOp(), buildTextOp('\n')]
       const { blocks, doc } = createContext(3, 4, ops)
       expect(blocks.length).toBe(3)
       const imageBlock = blocks[1]
@@ -88,23 +89,23 @@ describe('@model/Block', () => {
   })
   describe('getSelectedOps', () => {
     it('should return ops which are selected in document', () => {
-      const ops = [buildTextOp('Lol'), buildImageOp({ test: 1 }), buildTextOp('\n')]
+      const ops = [buildTextOp('Lol'), buildDummyImageOp(), buildTextOp('\n')]
       const { blocks, doc } = createContext(3, 4, ops)
       expect(blocks.length).toBe(3)
       const imageBlock = blocks[1]
-      expect(imageBlock.getSelectedOps(doc)).toMatchObject([buildImageOp({ test: 1 })])
+      expect(imageBlock.getSelectedOps(doc)).toMatchObject([buildDummyImageOp()])
     })
   })
   describe('isEntirelySelected', () => {
     it('should return true when the current selection exactly matches the block boundaries', () => {
-      const ops = [buildTextOp('Lol'), buildImageOp({ test: 1 }), buildTextOp('\n')]
+      const ops = [buildTextOp('Lol'), buildDummyImageOp(), buildTextOp('\n')]
       const { blocks, doc } = createContext(3, 4, ops)
       expect(blocks.length).toBe(3)
       const imageBlock = blocks[1]
       expect(imageBlock.isEntirelySelected(doc)).toBe(true)
     })
     it('should return false when the current selection partly matches the block boundaries', () => {
-      const ops = [buildTextOp('Lol'), buildImageOp({ test: 1 }), buildTextOp('\n')]
+      const ops = [buildTextOp('Lol'), buildDummyImageOp(), buildTextOp('\n')]
       const { blocks, doc } = createContext(4, 4, ops)
       expect(blocks.length).toBe(3)
       const imageBlock = blocks[1]
@@ -113,7 +114,7 @@ describe('@model/Block', () => {
   })
   describe('insertOrReplaceAtSelection', () => {
     it('should replace when selection length is more then 0', () => {
-      const ops = [buildTextOp('Lol'), buildImageOp({ test: 1 }), buildTextOp('\n')]
+      const ops = [buildTextOp('Lol'), buildDummyImageOp(), buildTextOp('\n')]
       const { blocks, doc } = createContext(3, 4, ops)
       expect(blocks.length).toBe(3)
       const imageBlock = blocks[1]
@@ -124,7 +125,7 @@ describe('@model/Block', () => {
   })
   describe('remove', () => {
     it('should remove the whole block when not the first block', () => {
-      const ops = [buildTextOp('Lol'), buildImageOp({ test: 1 }), buildTextOp('\n')]
+      const ops = [buildTextOp('Lol'), buildDummyImageOp(), buildTextOp('\n')]
       const { blocks, doc } = createContext(3, 4, ops)
       expect(blocks.length).toBe(3)
       const imageBlock = blocks[1]

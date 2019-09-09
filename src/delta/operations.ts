@@ -1,6 +1,7 @@
 import { Attributes } from './attributes'
 import Op from 'quill-delta/dist/Op'
 import reduce from 'ramda/es/reduce'
+import { Images } from '@core/Images'
 
 /**
  * An atomic operation representing changes to a document.
@@ -50,17 +51,17 @@ export interface TextOp extends GenericOp {
   readonly attributes?: Attributes.Map
 }
 
-export interface ImageKind {
+export interface ImageKind<Source> extends Images.Description<Source> {
   kind: 'image'
 }
 
-export type ImageOp = BlockOp<ImageKind>
+export type ImageOp<Source> = BlockOp<ImageKind<Source>>
 
 export interface BlockOp<T extends object> extends GenericOp {
   /**
    * {@inheritdoc GenericOp.insert}
    */
-  readonly insert?: T
+  readonly insert: T
   /**
    * {@inheritdoc GenericOp.attributes}
    */
@@ -82,11 +83,11 @@ export function buildTextOp(text: string, attributes?: Attributes.Map) {
     : { insert: text }
 }
 
-export function buildImageOp(attributes?: Attributes.Map): ImageOp {
+export function buildImageOp<Source>(description: Images.Description<Source>): ImageOp<Source> {
   return {
-    attributes,
     insert: {
       kind: 'image',
+      ...description,
     },
   }
 }

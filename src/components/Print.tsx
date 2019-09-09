@@ -15,31 +15,33 @@ declare namespace Print {
   /**
    * {@link (Print:type)} properties.
    */
-  export type Props<D> = DocumentRendererProps<D>
+  export type Props = DocumentRendererProps<any>
 }
 
 type PrintState = DocumentRendererState
 
 // eslint-disable-next-line @typescript-eslint/class-name-casing
-class _Print<D> extends DocumentRenderer<D, Print.Props<D>> {
+class _Print extends DocumentRenderer<Print.Props> {
   public static propTypes = DocumentRenderer.propTypes
 
   public state: PrintState = {
     containerWidth: null,
   }
 
-  public componentDidUpdate(oldProps: Print.Props<D>) {
+  public componentDidUpdate(oldProps: Print.Props) {
     super.componentDidUpdate(oldProps)
   }
 
   @boundMethod
   private renderBlockView(block: Block) {
-    const { textStyle } = this.props
+    const { textStyle, maxMediaBlockHeight, maxMediaBlockWidth } = this.props
     const { descriptor } = block
     const key = `block-view-${descriptor.kind}-${descriptor.blockIndex}`
     return (
       <GenericBlockView
         blockStyle={this.getBlockStyle(block)}
+        maxMediaBlockHeight={maxMediaBlockHeight}
+        maxMediaBlockWidth={maxMediaBlockWidth}
         key={key}
         contentWidth={this.state.containerWidth}
         textStyle={textStyle}
@@ -73,7 +75,7 @@ class _Print<D> extends DocumentRenderer<D, Print.Props<D>> {
  *
  * This type trick is aimed at preventing from exporting the component State which should be out of API surface.
  */
-type Print<D> = ComponentClass<Print.Props<D>>
-const Print = _Print as Print<any>
+type Print = ComponentClass<Print.Props>
+const Print = _Print as Print
 
 export { Print }

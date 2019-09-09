@@ -28,7 +28,7 @@ declare namespace Typer {
   /**
    * {@link (Typer:type)} properties.
    */
-  export interface Props<D> extends DocumentRendererProps<D> {
+  export interface Props extends DocumentRendererProps<any> {
     /**
      * Handler to receive {@link Document| document} updates.
      *
@@ -48,8 +48,8 @@ declare namespace Typer {
 }
 
 // eslint-disable-next-line @typescript-eslint/class-name-casing
-class _Typer<D> extends DocumentRenderer<D, Typer.Props<D>, TyperState> implements DocumentProvider {
-  public static propTypes: Record<keyof Typer.Props<any>, any> = {
+class _Typer extends DocumentRenderer<Typer.Props, TyperState> implements DocumentProvider {
+  public static propTypes: Record<keyof Typer.Props, any> = {
     ...DocumentRenderer.propTypes,
     onDocumentUpdate: PropTypes.func,
     debug: PropTypes.bool,
@@ -61,7 +61,7 @@ class _Typer<D> extends DocumentRenderer<D, Typer.Props<D>, TyperState> implemen
     overridingScopedSelection: null,
   }
 
-  public constructor(props: Typer.Props<D>) {
+  public constructor(props: Typer.Props) {
     super(props)
   }
 
@@ -91,7 +91,7 @@ class _Typer<D> extends DocumentRenderer<D, Typer.Props<D>, TyperState> implemen
   private renderBlockInput(block: Block) {
     const descriptor = block.descriptor
     const { overridingScopedSelection: overridingSelection } = this.state
-    const { textStyle, debug } = this.props
+    const { textStyle, debug, underlayColor, maxMediaBlockHeight, maxMediaBlockWidth } = this.props
     const { selectedTextAttributes } = this.props.document
     const key = `block-input-${descriptor.kind}-${descriptor.blockIndex}`
     // TODO use weak map to memoize controller
@@ -100,6 +100,7 @@ class _Typer<D> extends DocumentRenderer<D, Typer.Props<D>, TyperState> implemen
     return (
       <ScrollIntoView enabled={isFocused} key={key}>
         <GenericBlockInput
+          underlayColor={underlayColor}
           blockStyle={this.getBlockStyle(block)}
           hightlightOnFocus={!!debug}
           isFocused={isFocused}
@@ -108,6 +109,8 @@ class _Typer<D> extends DocumentRenderer<D, Typer.Props<D>, TyperState> implemen
           textStyle={textStyle}
           imageLocatorService={this.genService.imageLocator}
           descriptor={descriptor}
+          maxMediaBlockHeight={maxMediaBlockHeight}
+          maxMediaBlockWidth={maxMediaBlockWidth}
           blockScopedSelection={block.getBlockScopedSelection(this.props.document)}
           overridingScopedSelection={isFocused ? overridingSelection : null}
           textAttributesAtCursor={selectedTextAttributes}
@@ -139,7 +142,7 @@ class _Typer<D> extends DocumentRenderer<D, Typer.Props<D>, TyperState> implemen
     this.props.bridge.getSheetEventDomain().release(this)
   }
 
-  public async componentDidUpdate(oldProps: Typer.Props<D>) {
+  public async componentDidUpdate(oldProps: Typer.Props) {
     super.componentDidUpdate(oldProps)
     const currentSelection = this.props.document.currentSelection
     if (oldProps.document.currentSelection !== currentSelection) {
@@ -173,7 +176,7 @@ class _Typer<D> extends DocumentRenderer<D, Typer.Props<D>, TyperState> implemen
  *
  * This type trick is aimed at preventing from exporting the component State which should be out of API surface.
  */
-type Typer<D> = ComponentClass<Typer.Props<D>>
-const Typer = _Typer as Typer<any>
+type Typer = ComponentClass<Typer.Props>
+const Typer = _Typer as Typer
 
 export { Typer }

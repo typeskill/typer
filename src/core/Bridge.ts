@@ -3,6 +3,7 @@ import { Endpoint } from './Endpoint'
 import { Gen, defaultRenderConfig } from './Gen'
 import mergeLeft from 'ramda/es/mergeLeft'
 import { Transforms } from './Transforms'
+import { Images } from './Images'
 
 /**
  * A set of definitions related to the {@link (Bridge:class)} class.
@@ -21,9 +22,9 @@ declare namespace Bridge {
   /**
    * Block content to insert.
    */
-  export interface ImageElement<D extends {}> {
+  export interface ImageElement<Source> {
     type: 'image'
-    description: D
+    description: Images.Description<Source>
   }
 
   export interface TextElement {
@@ -34,7 +35,7 @@ declare namespace Bridge {
   /**
    * Content to insert.
    */
-  export type Element<D extends {}> = ImageElement<D> | TextElement
+  export type Element<ImageSource> = ImageElement<ImageSource> | TextElement
 
   /**
    * Listener to selected text attributes changes.
@@ -57,7 +58,7 @@ declare namespace Bridge {
    *
    * @internal
    */
-  export type InsertOrReplaceAtSelectionListener = <D extends {}>(element: Element<D>) => void
+  export type InsertOrReplaceAtSelectionListener<ImageSource> = <D extends {}>(element: Element<ImageSource>) => void
 
   /**
    * An object representing an area of events happening by the mean of external controls.
@@ -66,13 +67,13 @@ declare namespace Bridge {
    *
    * This object exposes methods to trigger such events, and react to internal events.
    */
-  export interface ControlEventDomain<D extends {}> {
+  export interface ControlEventDomain<ImageSource> {
     /**
      * Insert an element at cursor or replace if selection exists.
      *
      * @internal
      */
-    insertOrReplaceAtSelection: (element: Element<D>) => void
+    insertOrReplaceAtSelection: (element: Element<ImageSource>) => void
 
     /**
      * Switch the given attribute's value depending on the current selection.
@@ -92,7 +93,7 @@ declare namespace Bridge {
    *
    * @internal
    */
-  export interface SheetEventDomain {
+  export interface SheetEventDomain<ImageSource> {
     /**
      * Listen to text attributes alterations in selection.
      */
@@ -101,7 +102,10 @@ declare namespace Bridge {
     /**
      * Listen to insertions of text or blocks at selection.
      */
-    addInsertOrReplaceAtSelectionListener: (owner: object, listener: InsertOrReplaceAtSelectionListener) => void
+    addInsertOrReplaceAtSelectionListener: (
+      owner: object,
+      listener: InsertOrReplaceAtSelectionListener<ImageSource>,
+    ) => void
 
     /**
      * Dereference all listeners registered for this owner.
@@ -121,12 +125,12 @@ declare namespace Bridge {
  *
  * @public
  */
-class Bridge<D extends {} = {}> {
+class Bridge<ImageSource> {
   private outerEndpoint = new Endpoint<Bridge.ControlEvent>()
-  private genService: Gen.Service
+  private genService: Gen.Service<ImageSource>
 
-  private controlEventDom: Bridge.ControlEventDomain<D> = {
-    insertOrReplaceAtSelection: (element: Bridge.Element<D>) => {
+  private controlEventDom: Bridge.ControlEventDomain<ImageSource> = {
+    insertOrReplaceAtSelection: (element: Bridge.Element<ImageSource>) => {
       this.outerEndpoint.emit('INSERT_OR_REPLACE_AT_SELECTION', element)
     },
     applyTextTransformToSelection: (attributeName: string, attributeValue: Attributes.GenericValue) => {
@@ -134,11 +138,14 @@ class Bridge<D extends {} = {}> {
     },
   }
 
-  private sheetEventDom: Bridge.SheetEventDomain = {
+  private sheetEventDom: Bridge.SheetEventDomain<ImageSource> = {
     addApplyTextTransformToSelectionListener: (owner: object, listener: Bridge.AttributesOverrideListener) => {
       this.outerEndpoint.addListener(owner, 'APPLY_ATTRIBUTES_TO_SELECTION', listener)
     },
-    addInsertOrReplaceAtSelectionListener: (owner: object, listener: Bridge.InsertOrReplaceAtSelectionListener) => {
+    addInsertOrReplaceAtSelectionListener: (
+      owner: object,
+      listener: Bridge.InsertOrReplaceAtSelectionListener<ImageSource>,
+    ) => {
       this.outerEndpoint.addListener(owner, 'INSERT_OR_REPLACE_AT_SELECTION', listener)
     },
     release: (owner: object) => {
@@ -149,7 +156,7 @@ class Bridge<D extends {} = {}> {
   /**
    * @param genConfig - A configuration object describing content generation behaviors.
    */
-  public constructor(genConfig?: Partial<Gen.Config<D>>) {
+  public constructor(genConfig?: Partial<Gen.Config<ImageSource>>) {
     this.sheetEventDom = Object.freeze(this.sheetEventDom)
     this.controlEventDom = Object.freeze(this.controlEventDom)
     const finalRendererConfig = mergeLeft(genConfig, defaultRenderConfig)
@@ -164,7 +171,7 @@ class Bridge<D extends {} = {}> {
    *
    * @internal
    */
-  public getSheetEventDomain(): Bridge.SheetEventDomain {
+  public getSheetEventDomain(): Bridge.SheetEventDomain<ImageSource> {
     return this.sheetEventDom
   }
 
@@ -175,14 +182,14 @@ class Bridge<D extends {} = {}> {
    *
    * The returned object can be used to react from and trigger {@link (Typer:type)} events.
    */
-  public getControlEventDomain(): Bridge.ControlEventDomain<D> {
+  public getControlEventDomain(): Bridge.ControlEventDomain<ImageSource> {
     return this.controlEventDom
   }
 
   /**
    * @returns The gen service, responsible for content generation.
    */
-  public getGenService(): Gen.Service {
+  public getGenService(): Gen.Service<ImageSource> {
     return this.genService
   }
 

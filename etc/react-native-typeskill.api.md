@@ -6,7 +6,6 @@
 
 import { ComponentClass } from 'react';
 import { ComponentType } from 'react';
-import { ImageSourcePropType } from 'react-native';
 import React from 'react';
 import { StyleProp } from 'react-native';
 import { TextStyle } from 'react-native';
@@ -27,26 +26,26 @@ export namespace Attributes {
 export namespace Bridge {
     export type AttributesOverrideListener = (attributeName: string, attributeValue: Attributes.GenericValue) => void;
     export type ControlEvent = 'APPLY_ATTRIBUTES_TO_SELECTION' | 'APPLY_LINE_TYPE_TO_SELECTION' | 'INSERT_OR_REPLACE_AT_SELECTION';
-    export interface ControlEventDomain<D extends {}> {
+    export interface ControlEventDomain<ImageSource> {
         applyTextTransformToSelection: (attributeName: string, attributeValue: Attributes.TextValue) => void;
         // @internal
-        insertOrReplaceAtSelection: (element: Element<D>) => void;
+        insertOrReplaceAtSelection: (element: Element<ImageSource>) => void;
     }
-    export type Element<D extends {}> = ImageElement<D> | TextElement;
-    export interface ImageElement<D extends {}> {
+    export type Element<ImageSource> = ImageElement<ImageSource> | TextElement;
+    export interface ImageElement<Source> {
         // (undocumented)
-        description: D;
+        description: Images.Description<Source>;
         // (undocumented)
         type: 'image';
     }
     // @internal (undocumented)
-    export type InsertOrReplaceAtSelectionListener = <D extends {}>(element: Element<D>) => void;
+    export type InsertOrReplaceAtSelectionListener<ImageSource> = <D extends {}>(element: Element<ImageSource>) => void;
     export type LineTypeOverrideListener = (lineType: Attributes.LineType) => void;
     export type SelectedAttributesChangeListener = (selectedAttributes: Attributes.Map) => void;
     // @internal
-    export interface SheetEventDomain {
+    export interface SheetEventDomain<ImageSource> {
         addApplyTextTransformToSelectionListener: (owner: object, listener: AttributesOverrideListener) => void;
-        addInsertOrReplaceAtSelectionListener: (owner: object, listener: InsertOrReplaceAtSelectionListener) => void;
+        addInsertOrReplaceAtSelectionListener: (owner: object, listener: InsertOrReplaceAtSelectionListener<ImageSource>) => void;
         release: (owner: object) => void;
     }
     // (undocumented)
@@ -59,13 +58,13 @@ export namespace Bridge {
 }
 
 // @public
-export class Bridge<D extends {} = {}> {
-    constructor(genConfig?: Partial<Gen.Config<D>>);
-    getControlEventDomain(): Bridge.ControlEventDomain<D>;
+export class Bridge<ImageSource> {
+    constructor(genConfig?: Partial<Gen.Config<ImageSource>>);
+    getControlEventDomain(): Bridge.ControlEventDomain<ImageSource>;
     // (undocumented)
-    getGenService(): Gen.Service;
+    getGenService(): Gen.Service<ImageSource>;
     // @internal
-    getSheetEventDomain(): Bridge.SheetEventDomain;
+    getSheetEventDomain(): Bridge.SheetEventDomain<ImageSource>;
     release(): void;
     }
 
@@ -91,7 +90,7 @@ export enum ControlAction {
 }
 
 // @public (undocumented)
-export const defaultImageLocator: Images.LocationService<Images.StandardDefinition>;
+export const defaultImageLocator: Images.LocationService<Images.StandardSource>;
 
 // @public (undocumented)
 export const defaultTextTransforms: Transforms.GenericSpec<Attributes.TextValue, 'text'>[];
@@ -104,10 +103,12 @@ export interface Document {
 }
 
 // @public
-export interface DocumentRendererProps<D> {
-    bridge: Bridge<D>;
+export interface DocumentRendererProps<ImageSource> {
+    bridge: Bridge<ImageSource>;
     contentContainerStyle?: StyleProp<ViewStyle>;
     document: Document;
+    maxMediaBlockHeight?: number;
+    maxMediaBlockWidth?: number;
     spacing?: number;
     style?: StyleProp<ViewStyle>;
     textStyle?: StyleProp<TextStyle>;
@@ -115,13 +116,13 @@ export interface DocumentRendererProps<D> {
 
 // @public
 export namespace Gen {
-    export interface Config<D extends {}> {
-        imageLocatorService: Images.LocationService<D>;
+    export interface Config<ImageSource> {
+        imageLocatorService: Images.LocationService<ImageSource>;
         textTransformSpecs: Transforms.GenericSpec<Attributes.TextValue, 'text'>[];
     }
-    export interface Service {
+    export interface Service<ImageSource> {
         // (undocumented)
-        imageLocator: Images.LocationService<any>;
+        imageLocator: Images.LocationService<ImageSource>;
         // (undocumented)
         textTransforms: Transforms;
     }
@@ -147,11 +148,18 @@ export interface GenericRichContent {
 // @public
 export namespace Images {
     // (undocumented)
-    export interface ComponentProps<D> {
+    export interface ComponentProps<Source> {
+        readonly description: Description<Source>;
+        readonly printDimensions: Dimensions;
+    }
+    // (undocumented)
+    export interface Description<Source> {
         // (undocumented)
-        readonly dimensions: Dimensions;
+        readonly height: number;
         // (undocumented)
-        readonly params: D;
+        readonly source: Source;
+        // (undocumented)
+        readonly width: number;
     }
     // (undocumented)
     export interface Dimensions {
@@ -160,31 +168,26 @@ export namespace Images {
         // (undocumented)
         readonly width: number;
     }
-    export interface LocationService<D> {
-        readonly Component: ComponentType<ComponentProps<D>>;
-        readonly computeImageDimensions: (params: D, contentWidth: number) => Dimensions;
-        readonly onImageAddedEvent?: (description: D) => void;
-        readonly onImageRemovedEvent?: (description: D) => void;
-        readonly pickOneImage: () => Promise<D>;
+    export interface LocationService<Source> {
+        readonly Component: ComponentType<ComponentProps<Source>>;
+        readonly onImageAddedEvent?: (description: Description<Source>) => void;
+        readonly onImageRemovedEvent?: (description: Description<Source>) => void;
+        readonly pickOneImage: () => Promise<Description<Source>>;
     }
     // (undocumented)
-    export interface StandardDefinition {
+    export interface StandardSource {
         // (undocumented)
-        readonly height: number;
-        // (undocumented)
-        readonly source: ImageSourcePropType;
-        // (undocumented)
-        readonly width: number;
+        uri: string;
     }
 }
 
 // @public
 export namespace Print {
-    export type Props<D> = DocumentRendererProps<D>;
+    export type Props = DocumentRendererProps<any>;
 }
 
 // @public
-export type Print<D> = ComponentClass<Print.Props<D>>;
+export type Print = ComponentClass<Print.Props>;
 
 // @public (undocumented)
 export const Print: React.ComponentClass<DocumentRendererProps<any>, any>;
@@ -209,10 +212,10 @@ export namespace Toolbar {
         iconProps?: T extends Toolbar.VectorIconMinimalProps ? Toolbar.VectorIconMinimalProps : Partial<T>;
     }
     export type Layout = (ControlSpec<any> | typeof CONTROL_SEPARATOR)[];
-    export interface Props<D> {
+    export interface Props<ImageSource> {
         activeButtonBackgroundColor?: string;
         activeButtonColor?: string;
-        bridge: Bridge<D>;
+        bridge: Bridge<ImageSource>;
         buttonSpacing?: number;
         contentContainerStyle?: StyleProp<ViewStyle>;
         iconSize?: number;
@@ -234,7 +237,7 @@ export namespace Toolbar {
 }
 
 // @public
-export type Toolbar<D> = ComponentClass<Toolbar.Props<D>>;
+export type Toolbar = ComponentClass<Toolbar.Props<any>>;
 
 // @public (undocumented)
 export const Toolbar: React.ComponentClass<Toolbar.Props<any>, any>;
@@ -265,7 +268,7 @@ export class Transforms {
 
 // @public
 export namespace Typer {
-    export interface Props<D> extends DocumentRendererProps<D> {
+    export interface Props extends DocumentRendererProps<any> {
         debug?: boolean;
         onDocumentUpdate?: (nextDocumentContent: Document) => Promise<void>;
         underlayColor?: string;
@@ -273,10 +276,10 @@ export namespace Typer {
 }
 
 // @public
-export type Typer<D> = ComponentClass<Typer.Props<D>>;
+export type Typer = ComponentClass<Typer.Props>;
 
 // @public (undocumented)
-export const Typer: React.ComponentClass<Typer.Props<any>, any>;
+export const Typer: React.ComponentClass<Typer.Props, any>;
 
 
 ```

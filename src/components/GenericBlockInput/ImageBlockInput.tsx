@@ -14,16 +14,18 @@ import {
 import { ImageOp } from '@delta/operations'
 import { boundMethod } from 'autobind-decorator'
 import { SelectionShape } from '@delta/Selection'
-import { Images } from '@core/Images'
+import { Images, computeImageFrame } from '@core/Images'
 import { StandardBlockInputProps } from './types'
 import { genericStyles } from '@components/styles'
 
-export interface ImageBlockInputProps extends StandardBlockInputProps {
-  imageOp: ImageOp
+export interface ImageBlockInputProps<ImageSource> extends StandardBlockInputProps {
+  imageOp: ImageOp<ImageSource>
   blockScopedSelection: SelectionShape
-  imageLocatorService: Images.LocationService<any>
+  imageLocatorService: Images.LocationService<ImageSource>
   contentWidth: number
   underlayColor?: string
+  maxMediaBlockWidth?: number
+  maxMediaBlockHeight?: number
 }
 
 // eslint-disable-next-line @typescript-eslint/no-object-literal-type-assertion
@@ -46,12 +48,13 @@ const styles = StyleSheet.create({
   imageContainer: { position: 'relative', flexDirection: 'row' },
 })
 
-export class ImageBlockInput extends PureComponent<ImageBlockInputProps> {
+export class ImageBlockInput<ImageSource> extends PureComponent<ImageBlockInputProps<ImageSource>> {
   private rightInput = React.createRef<TextInput>()
   private leftInput = React.createRef<TextInput>()
-  private computeDimensions(contentWidth: number) {
-    const { imageLocatorService, imageOp } = this.props
-    return imageLocatorService.computeImageDimensions(imageOp.attributes, contentWidth)
+
+  private computeDimensions() {
+    const { imageOp, maxMediaBlockHeight, maxMediaBlockWidth, contentWidth } = this.props
+    return computeImageFrame(imageOp.insert, contentWidth, maxMediaBlockHeight, maxMediaBlockWidth)
   }
 
   private isSelectedForDeletion(): boolean {
@@ -62,11 +65,6 @@ export class ImageBlockInput extends PureComponent<ImageBlockInputProps> {
   @boundMethod
   private handleOnSubmit() {
     this.props.controller.moveAfterBlock()
-  }
-
-  @boundMethod
-  private handleOnSubmitLeft() {
-    this.props.controller.insertOrReplaceTextAtSelection('\n')
   }
 
   @boundMethod
@@ -148,10 +146,9 @@ export class ImageBlockInput extends PureComponent<ImageBlockInputProps> {
   ) {
     const selectStyle = this.isSelectedForDeletion() ? { backgroundColor: 'blue', opacity: 0.5 } : null
     const { Component } = this.props.imageLocatorService
-    const imageComponentProps = {
-      containerWidth: this.props.contentWidth,
-      params: this.props.imageOp.attributes,
-      dimensions: imageDimensions,
+    const imageComponentProps: Images.ComponentProps<ImageSource> = {
+      description: this.props.imageOp.insert,
+      printDimensions: imageDimensions,
     }
     const imageFrameStyle: ViewStyle = {
       ...imageDimensions,
@@ -159,7 +156,7 @@ export class ImageBlockInput extends PureComponent<ImageBlockInputProps> {
     }
     const leftInputStyle: ViewStyle = {
       position: 'absolute',
-      left: 0,
+      left: spareWidthOnSides,
       top: 0,
       right: imageDimensions.width,
       bottom: 0,
@@ -168,7 +165,7 @@ export class ImageBlockInput extends PureComponent<ImageBlockInputProps> {
     }
     const rightInputStyle: ViewStyle = {
       position: 'absolute',
-      left: imageDimensions.width - TEXT_INPUT_WIDTH,
+      left: imageDimensions.width + spareWidthOnSides - TEXT_INPUT_WIDTH,
       top: 0,
       right: 0,
       bottom: 0,
@@ -263,7 +260,7 @@ export class ImageBlockInput extends PureComponent<ImageBlockInputProps> {
     }
   }
 
-  public componentDidUpdate(oldProps: ImageBlockInputProps) {
+  public componentDidUpdate(oldProps: ImageBlockInputProps<ImageSource>) {
     if (
       (this.props.isFocused && !oldProps.isFocused) ||
       ((oldProps.blockScopedSelection.start !== this.props.blockScopedSelection.start ||
@@ -275,15 +272,12 @@ export class ImageBlockInput extends PureComponent<ImageBlockInputProps> {
   }
 
   public render() {
-    const imageDimensions = this.computeDimensions(this.props.contentWidth)
+    const imageDimensions = this.computeDimensions()
     const containerDimensions = {
       width: this.props.contentWidth,
       height: imageDimensions.height,
     }
-    const spareWidthOnSides = Math.max(
-      (containerDimensions.width - imageDimensions.width - 2 * TEXT_INPUT_WIDTH) / 2,
-      0,
-    )
+    const spareWidthOnSides = Math.max((containerDimensions.width - imageDimensions.width) / 2, 0)
     const handlerWidth = Math.min(containerDimensions.width / 3, 60)
     return (
       <View style={{ flexDirection: 'row', justifyContent: 'center' }}>

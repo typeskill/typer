@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { PureComponent } from 'react'
-import { TextBlockInput } from './TextBlockInput'
+import { TextBlockInput, TextBlockInputProps } from './TextBlockInput'
 import { StyleProp, TextStyle, View, ViewStyle } from 'react-native'
-import { ImageBlockInput } from './ImageBlockInput'
+import { ImageBlockInput, ImageBlockInputProps } from './ImageBlockInput'
 import { TextOp, ImageOp } from '@delta/operations'
 import invariant from 'invariant'
 import { Transforms } from '@core/Transforms'
@@ -11,18 +11,21 @@ import { SelectionShape } from '@delta/Selection'
 import { Images } from '@core/Images'
 import { StandardBlockInputProps } from './types'
 
-export interface GenericBlockInputProps extends StandardBlockInputProps {
+export interface GenericBlockInputProps<ImageSource> extends StandardBlockInputProps {
   textStyle?: StyleProp<TextStyle>
-  imageLocatorService: Images.LocationService<any>
+  imageLocatorService: Images.LocationService<ImageSource>
   textTransforms: Transforms
   textAttributesAtCursor: Attributes.Map
   contentWidth: null | number
   blockScopedSelection: SelectionShape
   hightlightOnFocus: boolean
   blockStyle?: StyleProp<ViewStyle>
+  maxMediaBlockWidth?: number
+  maxMediaBlockHeight?: number
+  underlayColor?: string
 }
 
-export class GenericBlockInput extends PureComponent<GenericBlockInputProps> {
+export class GenericBlockInput<ImageSource> extends PureComponent<GenericBlockInputProps<ImageSource>> {
   private getStyles() {
     if (this.props.hightlightOnFocus) {
       return this.props.isFocused ? { borderColor: 'red', borderWidth: 1 } : { borderColor: 'gray', borderWidth: 1 }
@@ -30,28 +33,53 @@ export class GenericBlockInput extends PureComponent<GenericBlockInputProps> {
     return undefined
   }
   public render() {
-    const { descriptor, textStyle, imageLocatorService, contentWidth, blockStyle, ...otherProps } = this.props
+    const {
+      descriptor,
+      textStyle,
+      imageLocatorService,
+      contentWidth,
+      blockStyle,
+      blockScopedSelection,
+      controller,
+      hightlightOnFocus,
+      underlayColor,
+      isFocused,
+      maxMediaBlockHeight,
+      maxMediaBlockWidth,
+      overridingScopedSelection,
+      textAttributesAtCursor,
+      textTransforms,
+    } = this.props
     let block = null
-    const realContentWidth = this.props.contentWidth
-      ? this.props.contentWidth - (this.props.hightlightOnFocus ? 2 : 0)
-      : null
+    const realContentWidth = contentWidth ? contentWidth - (hightlightOnFocus ? 2 : 0) : null
     if (descriptor.kind === 'text') {
-      block = React.createElement(TextBlockInput, {
+      const textBlockProps: TextBlockInputProps = {
         descriptor,
         textStyle,
+        controller,
+        isFocused,
+        overridingScopedSelection,
+        textAttributesAtCursor,
+        textTransforms,
         textOps: descriptor.opsSlice as TextOp[],
-        ...otherProps,
-      })
+      }
+      block = <TextBlockInput {...textBlockProps} />
     } else if (descriptor.kind === 'image' && realContentWidth !== null) {
       invariant(descriptor.opsSlice.length === 1, `Image blocks must be grouped alone.`)
-      const imageProps = {
+      const imageBlockProps: ImageBlockInputProps<ImageSource> = {
         descriptor,
-        imageOp: descriptor.opsSlice[0] as ImageOp,
         imageLocatorService,
+        blockScopedSelection,
+        controller,
+        isFocused,
+        maxMediaBlockHeight,
+        maxMediaBlockWidth,
+        overridingScopedSelection,
+        underlayColor,
+        imageOp: descriptor.opsSlice[0] as ImageOp<ImageSource>,
         contentWidth: realContentWidth,
-        ...otherProps,
       }
-      block = React.createElement(ImageBlockInput, imageProps)
+      block = <ImageBlockInput<ImageSource> {...imageBlockProps} />
     }
     return <View style={[this.getStyles(), blockStyle]}>{block}</View>
   }

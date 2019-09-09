@@ -80,11 +80,11 @@ declare namespace Toolbar {
   /**
    * Props of the {@link (Toolbar:type)} component.
    */
-  export interface Props<D> {
+  export interface Props<ImageSource> {
     /**
      * The instance to be shared with the {@link (Typer:type)}.
      */
-    bridge: Bridge<D>
+    bridge: Bridge<ImageSource>
     /**
      * The attributes actives in selection.
      *
@@ -197,7 +197,7 @@ const styles = StyleSheet.create({
 })
 
 // eslint-disable-next-line @typescript-eslint/class-name-casing
-class _Toolbar<D extends {}> extends PureComponent<Toolbar.Props<D>> {
+class _Toolbar extends PureComponent<Toolbar.Props<any>> {
   public static propTypes: Record<keyof Toolbar.Props<any>, any> = {
     bridge: PropTypes.instanceOf(Bridge).isRequired,
     selectedTextAttributes: PropTypes.object.isRequired,
@@ -223,15 +223,15 @@ class _Toolbar<D extends {}> extends PureComponent<Toolbar.Props<D>> {
     iconSize: DEFAULT_ICON_SIZE,
   }
 
-  private controlEventDom: Bridge.ControlEventDomain<D>
-  private genService: Gen.Service
+  private controlEventDom: Bridge.ControlEventDomain<any>
+  private genService: Gen.Service<any>
 
   public state: ToolbarState = {
     selectedAttributes: {},
     selectedLineType: 'normal',
   }
 
-  public constructor(props: Toolbar.Props<D>) {
+  public constructor(props: Toolbar.Props<any>) {
     super(props)
     invariant(props.bridge != null, 'bridge prop is required')
     this.controlEventDom = props.bridge.getControlEventDomain()
@@ -356,7 +356,7 @@ class _Toolbar<D extends {}> extends PureComponent<Toolbar.Props<D>> {
     })
   }
 
-  public componentDidUpdate(oldProps: Toolbar.Props<D>) {
+  public componentDidUpdate(oldProps: Toolbar.Props<any>) {
     invariant(oldProps.bridge === this.props.bridge, "bridge prop cannot be changed during Toolbar's lifetime.")
   }
 
@@ -407,8 +407,8 @@ export function buildVectorIconControlSpec<T extends Toolbar.VectorIconMinimalPr
  *
  * This type trick is aimed at preventing from exporting the component State which should be out of API surface.
  */
-type Toolbar<D> = ComponentClass<Toolbar.Props<D>>
+type Toolbar = ComponentClass<Toolbar.Props<any>>
 
-const Toolbar = _Toolbar as Toolbar<any>
+const Toolbar = _Toolbar as Toolbar
 
 export { Toolbar }
