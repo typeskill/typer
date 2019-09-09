@@ -271,6 +271,7 @@ export namespace Typer {
     export interface Props extends DocumentRendererProps<any> {
         debug?: boolean;
         onDocumentUpdate?: (nextDocumentContent: Document) => Promise<void>;
+        readonly?: boolean;
         underlayColor?: string;
     }
 }

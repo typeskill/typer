@@ -2,9 +2,6 @@ import React, { ComponentClass } from 'react'
 import { DocumentRenderer, DocumentRendererProps, DocumentRendererState } from './DocumentRenderer'
 import { BlockAssembler } from '@model/BlockAssembler'
 import { ScrollView, View } from 'react-native'
-import { boundMethod } from 'autobind-decorator'
-import { Block } from '@model/Block'
-import { GenericBlockView } from './GenericBlockView'
 
 /**
  * A set of definitions relative to {@link (Print:type)} component.
@@ -30,26 +27,6 @@ class _Print extends DocumentRenderer<Print.Props> {
 
   public componentDidUpdate(oldProps: Print.Props) {
     super.componentDidUpdate(oldProps)
-  }
-
-  @boundMethod
-  private renderBlockView(block: Block) {
-    const { textStyle, maxMediaBlockHeight, maxMediaBlockWidth } = this.props
-    const { descriptor } = block
-    const key = `block-view-${descriptor.kind}-${descriptor.blockIndex}`
-    return (
-      <GenericBlockView
-        blockStyle={this.getBlockStyle(block)}
-        maxMediaBlockHeight={maxMediaBlockHeight}
-        maxMediaBlockWidth={maxMediaBlockWidth}
-        key={key}
-        contentWidth={this.state.containerWidth}
-        textStyle={textStyle}
-        imageLocatorService={this.genService.imageLocator}
-        descriptor={descriptor}
-        textTransforms={this.genService.textTransforms}
-      />
-    )
   }
 
   public render() {

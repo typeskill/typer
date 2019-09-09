@@ -44,6 +44,10 @@ declare namespace Typer {
      * In debug mode, active block will be highlighted.
      */
     debug?: boolean
+    /**
+     * Disable edition.
+     */
+    readonly?: boolean
   }
 }
 
@@ -54,6 +58,7 @@ class _Typer extends DocumentRenderer<Typer.Props, TyperState> implements Docume
     onDocumentUpdate: PropTypes.func,
     debug: PropTypes.bool,
     underlayColor: PropTypes.string,
+    readonly: PropTypes.bool,
   }
 
   public state: TyperState = {
@@ -155,11 +160,12 @@ class _Typer extends DocumentRenderer<Typer.Props, TyperState> implements Docume
 
   public render() {
     this.assembler = new BlockAssembler(this.props.document)
+    const { readonly } = this.props
     return (
       <AutoScrollView style={this.getScrollStyles()} keyboardShouldPersistTaps="always">
         <View style={this.getRootStyles()}>
           <View style={this.getContainerStyles()} onLayout={this.handleOnContainerLayout}>
-            {this.assembler.getBlocks().map(this.renderBlockInput)}
+            {this.assembler.getBlocks().map(readonly ? this.renderBlockView : this.renderBlockInput)}
           </View>
         </View>
       </AutoScrollView>

@@ -1,4 +1,4 @@
-import { PureComponent } from 'react'
+import React, { PureComponent } from 'react'
 import { DocumentPropType } from './types'
 import PropTypes from 'prop-types'
 import { Document } from '@model/document'
@@ -8,7 +8,9 @@ import { BlockAssembler } from '@model/BlockAssembler'
 import { Bridge } from '@core/Bridge'
 import { Gen } from '@core/Gen'
 import { genericStyles } from './styles'
+import { boundMethod } from 'autobind-decorator'
 import { Block } from '@model/Block'
+import { GenericBlockView } from './GenericBlockView'
 
 export interface DocumentRendererState {
   containerWidth: number | null
@@ -143,6 +145,26 @@ export abstract class DocumentRenderer<
     return {
       marginBottom: this.getSpacing(),
     }
+  }
+
+  @boundMethod
+  protected renderBlockView(block: Block) {
+    const { textStyle, maxMediaBlockHeight, maxMediaBlockWidth } = this.props
+    const { descriptor } = block
+    const key = `block-view-${descriptor.kind}-${descriptor.blockIndex}`
+    return (
+      <GenericBlockView
+        blockStyle={this.getBlockStyle(block)}
+        maxMediaBlockHeight={maxMediaBlockHeight}
+        maxMediaBlockWidth={maxMediaBlockWidth}
+        key={key}
+        contentWidth={this.state.containerWidth}
+        textStyle={textStyle}
+        imageLocatorService={this.genService.imageLocator}
+        descriptor={descriptor}
+        textTransforms={this.genService.textTransforms}
+      />
+    )
   }
 
   public componentDidUpdate(oldProps: P) {

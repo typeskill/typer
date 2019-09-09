@@ -787,6 +787,10 @@ export declare namespace Typer {
          * In debug mode, active block will be highlighted.
          */
         debug?: boolean;
+        /**
+         * Disable edition.
+         */
+        readonly?: boolean;
     }
 }
 
