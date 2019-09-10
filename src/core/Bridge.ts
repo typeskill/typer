@@ -207,5 +207,6 @@ function buildBridge<ImageSource>(): Bridge<ImageSource> {
 }
 
 const BridgeStatic = _Bridge
+const Bridge = {}
 
 export { Bridge, buildBridge, BridgeStatic }

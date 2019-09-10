@@ -29,3 +29,4 @@ const imagesHookShape: Record<keyof Images.Hooks<any>, any> = {
 }
 
 export const ImageHooksType = PropTypes.shape(imagesHookShape)
+export const TextTransformSpecsType = PropTypes.arrayOf(PropTypes.object)

@@ -7,7 +7,7 @@ import { boundMethod } from 'autobind-decorator'
 import { LineWalker } from '@delta/LineWalker'
 import { Attributes } from '@delta/attributes'
 import PropTypes from 'prop-types'
-import { OpsPropType } from './types'
+import { OpsPropType, TextTransformSpecsType } from './types'
 
 /**
  * A set of definitions related to the {@link (RichText:type)} component.
@@ -67,7 +67,7 @@ class _RichText extends Component<RichText.Props> {
   public static propTypes: Record<keyof RichText.Props, any> = {
     textOps: OpsPropType.isRequired,
     textStyle: PropTypes.any,
-    textTransformSpecs: PropTypes.object.isRequired,
+    textTransformSpecs: TextTransformSpecsType.isRequired,
   }
 
   public constructor(props: RichText.Props) {

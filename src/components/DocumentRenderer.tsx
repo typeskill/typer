@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react'
-import { DocumentPropType } from './types'
+import { DocumentPropType, TextTransformSpecsType } from './types'
 import PropTypes from 'prop-types'
 import { Document } from '@model/document'
 import { StyleSheet, StyleProp, ViewStyle, TextStyle, ViewPropTypes, LayoutChangeEvent } from 'react-native'
@@ -112,7 +112,7 @@ export abstract class DocumentRenderer<
     spacing: PropTypes.number,
     maxMediaBlockHeight: PropTypes.number,
     maxMediaBlockWidth: PropTypes.number,
-    textTransformSpecs: PropTypes.object,
+    textTransformSpecs: TextTransformSpecsType,
   }
 
   public static defaultProps: Partial<Record<keyof DocumentRendererProps<any>, any>> = {
