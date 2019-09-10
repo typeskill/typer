@@ -28,7 +28,9 @@ export interface GenericBlockInputProps<ImageSource> extends StandardBlockInputP
 export class GenericBlockInput<ImageSource> extends PureComponent<GenericBlockInputProps<ImageSource>> {
   private getStyles() {
     if (this.props.hightlightOnFocus) {
-      return this.props.isFocused ? { borderColor: 'red', borderWidth: 1 } : { borderColor: 'gray', borderWidth: 1 }
+      return this.props.isFocused
+        ? { borderColor: 'red', borderWidth: 1 }
+        : { borderColor: 'transparent', borderWidth: 1 }
     }
     return undefined
   }
