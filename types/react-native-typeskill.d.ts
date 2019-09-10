@@ -8,14 +8,14 @@
  *
  * The library exposes:
  *
- * - The {@link (Typer:type)} component, a support for editing {@link (Document:type)}.
- * - The {@link (Print:type)} component, a display for {@link (Document:type)}.
+ * - The {@link (Typer:type)} component, a support for editing {@link (Document:type)};
+ * - The {@link (Print:type)} component, a display for {@link (Document:type)};
  * - The {@link (Toolbar:type)} component, which permits text transforms on current selection.
  *
  * **Triggering actions from external controls**
  *
- * A {@link (Bridge:type)} instance should be shared between a {@link (Typer:type)} and any controlling component such as {@link (Toolbar:type)}.
- * Actions can be triggered with the help of the object returned by {@link (Bridge:type).getControlEventDomain}.
+ * A {@link (Bridge:interface)} instance should be shared between a {@link (Typer:type)} and any control component such as {@link (Toolbar:type)}.
+ * Actions can be triggered with the help of the object returned by {@link (Bridge:interface).getControlEventDomain}.
  *
  * Such actions include:
  *
@@ -23,7 +23,7 @@
  * - (un)setting text attributes (bold, italic).
  *
  * Selection change events can also be listened to with `add...Listener` methods.
- * {@link (Bridge:type).release} must be call from the component holding a reference to the {@link (Bridge:type)} instance,
+ * {@link (Bridge:interface).release} must be call from the component holding a reference to the {@link (Bridge:interface)} instance,
  * during `componentWillUnmount` hook.
  *
  * @packageDocumentation
@@ -75,7 +75,7 @@ export declare namespace Attributes {
 }
 
 /**
- * A set of definitions related to the {@link (Bridge:type)} class.
+ * A set of definitions related to the {@link (Bridge:interface)} interface.
  *
  * @public
  */
@@ -83,7 +83,7 @@ export declare namespace Bridge {
     /**
      * An event which signals the intent to modify the content touched by current selection.
      */
-    export type ControlEvent = 'APPLY_ATTRIBUTES_TO_SELECTION' | 'APPLY_LINE_TYPE_TO_SELECTION' | 'INSERT_OR_REPLACE_AT_SELECTION';
+    export type ControlEvent = 'APPLY_ATTRIBUTES_TO_SELECTION' | 'INSERT_OR_REPLACE_AT_SELECTION';
     /**
      * Block content to insert.
      */
@@ -172,21 +172,17 @@ export declare namespace Bridge {
  *
  * @internalRemarks
  *
- * The implemententation is isolated and decoupled from the {@link (Typer:type)} class.
+ * We are only exporting the type to force consumers to use the build function.
  *
  * @public
  */
-export declare class Bridge<ImageSource> {
-    private outerEndpoint;
-    private controlEventDom;
-    private sheetEventDom;
-    constructor();
+export declare interface Bridge<ImageSource> {
     /**
      * Get {@link (Bridge:namespace).SheetEventDomain | sheetEventDom}.
      *
      * @internal
      */
-    getSheetEventDomain(): Bridge.SheetEventDomain<ImageSource>;
+    getSheetEventDomain: () => Bridge.SheetEventDomain<ImageSource>;
     /**
      * Get this bridge {@link (Bridge:namespace).ControlEventDomain}.
      *
@@ -194,7 +190,7 @@ export declare class Bridge<ImageSource> {
      *
      * The returned object can be used to react from and trigger {@link (Typer:type)} events.
      */
-    getControlEventDomain(): Bridge.ControlEventDomain<ImageSource>;
+    getControlEventDomain: () => Bridge.ControlEventDomain<ImageSource>;
     /**
      * End of the bridge's lifecycle.
      *
@@ -202,8 +198,15 @@ export declare class Bridge<ImageSource> {
      *
      * One would typically call this method during `componentWillUnmout` hook.
      */
-    release(): void;
+    release: () => void;
 }
+
+/**
+ * Build a bridge instance.
+ *
+ * @public
+ */
+export declare function buildBridge<ImageSource>(): Bridge<ImageSource>;
 
 /**
  * Build an empty document.
@@ -632,7 +635,7 @@ export declare namespace Toolbar {
 }
 
 /**
- * A component to let user control the {@link (Typer:type)} through a {@link (Bridge:type)}.
+ * A component to let user control the {@link (Typer:type)} through a {@link (Bridge:interface)}.
  *
  * @public
  *
@@ -729,7 +732,7 @@ export declare namespace Typer {
      */
     export interface Props<ImageSource> extends DocumentRendererProps<ImageSource> {
         /**
-         * The {@link (Bridge:type)} instance.
+         * The {@link (Bridge:interface)} instance.
          *
          * @remarks This property MUST NOT be changed after instantiation.
          */
@@ -767,7 +770,7 @@ export declare namespace Typer {
  * You MUST provide:
  *
  * - A {@link Document | `document`} prop to render contents. You can initialize it with {@link buildEmptyDocument};
- * - A {@link (Bridge:type) | `bridge` } prop to share document-related events with external controls;
+ * - A {@link (Bridge:interface) | `bridge` } prop to share document-related events with external controls;
  *
  * You SHOULD provide:
  *

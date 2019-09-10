@@ -14,8 +14,8 @@
  *
  * **Triggering actions from external controls**
  *
- * A {@link (Bridge:type)} instance should be shared between a {@link (Typer:type)} and any control component such as {@link (Toolbar:type)}.
- * Actions can be triggered with the help of the object returned by {@link (Bridge:type).getControlEventDomain}.
+ * A {@link (Bridge:interface)} instance should be shared between a {@link (Typer:type)} and any control component such as {@link (Toolbar:type)}.
+ * Actions can be triggered with the help of the object returned by {@link (Bridge:interface).getControlEventDomain}.
  *
  * Such actions include:
  *
@@ -23,7 +23,7 @@
  * - (un)setting text attributes (bold, italic).
  *
  * Selection change events can also be listened to with `add...Listener` methods.
- * {@link (Bridge:type).release} must be call from the component holding a reference to the {@link (Bridge:type)} instance,
+ * {@link (Bridge:interface).release} must be call from the component holding a reference to the {@link (Bridge:interface)} instance,
  * during `componentWillUnmount` hook.
  *
  * @packageDocumentation

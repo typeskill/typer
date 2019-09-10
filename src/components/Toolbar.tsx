@@ -396,7 +396,7 @@ export function buildVectorIconControlSpec<T extends Toolbar.VectorIconMinimalPr
 }
 
 /**
- * A component to let user control the {@link (Typer:type)} through a {@link (Bridge:type)}.
+ * A component to let user control the {@link (Typer:type)} through a {@link (Bridge:interface)}.
  *
  * @public
  *

@@ -3,7 +3,7 @@ import { Endpoint } from './Endpoint'
 import { Images } from './Images'
 
 /**
- * A set of definitions related to the {@link (Bridge:type)} interface.
+ * A set of definitions related to the {@link (Bridge:interface)} interface.
  *
  * @public
  */

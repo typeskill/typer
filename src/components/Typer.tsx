@@ -36,7 +36,7 @@ declare namespace Typer {
    */
   export interface Props<ImageSource> extends DocumentRendererProps<ImageSource> {
     /**
-     * The {@link (Bridge:type)} instance.
+     * The {@link (Bridge:interface)} instance.
      *
      * @remarks This property MUST NOT be changed after instantiation.
      */
@@ -219,7 +219,7 @@ class _Typer extends DocumentRenderer<Typer.Props<any>, TyperState> implements D
  * You MUST provide:
  *
  * - A {@link Document | `document`} prop to render contents. You can initialize it with {@link buildEmptyDocument};
- * - A {@link (Bridge:type) | `bridge` } prop to share document-related events with external controls;
+ * - A {@link (Bridge:interface) | `bridge` } prop to share document-related events with external controls;
  *
  * You SHOULD provide:
  *

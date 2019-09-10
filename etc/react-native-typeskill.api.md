@@ -25,7 +25,7 @@ export namespace Attributes {
 // @public
 export namespace Bridge {
     export type AttributesOverrideListener = (attributeName: string, attributeValue: Attributes.GenericValue) => void;
-    export type ControlEvent = 'APPLY_ATTRIBUTES_TO_SELECTION' | 'APPLY_LINE_TYPE_TO_SELECTION' | 'INSERT_OR_REPLACE_AT_SELECTION';
+    export type ControlEvent = 'APPLY_ATTRIBUTES_TO_SELECTION' | 'INSERT_OR_REPLACE_AT_SELECTION';
     export interface ControlEventDomain<ImageSource> {
         applyTextTransformToSelection: (attributeName: string, attributeValue: Attributes.TextValue) => void;
         // @internal
@@ -58,13 +58,15 @@ export namespace Bridge {
 }
 
 // @public
-export class Bridge<ImageSource> {
-    constructor();
-    getControlEventDomain(): Bridge.ControlEventDomain<ImageSource>;
+export interface Bridge<ImageSource> {
+    getControlEventDomain: () => Bridge.ControlEventDomain<ImageSource>;
     // @internal
-    getSheetEventDomain(): Bridge.SheetEventDomain<ImageSource>;
-    release(): void;
-    }
+    getSheetEventDomain: () => Bridge.SheetEventDomain<ImageSource>;
+    release: () => void;
+}
+
+// @public
+export function buildBridge<ImageSource>(): Bridge<ImageSource>;
 
 // @public
 export function buildEmptyDocument(): Document;
