@@ -6,17 +6,17 @@ import { RichText } from '@components/RichText'
 import { StandardBlockViewProps } from './types'
 
 export interface TextBlockViewProps extends StandardBlockViewProps {
-  textTransforms: Transforms
+  textTransformSpecs: Transforms.Specs
   textStyle?: StyleProp<TextStyle>
   textOps: TextOp[]
 }
 
 export class TextBlockView extends PureComponent<TextBlockViewProps> {
   public render() {
-    const { textStyle, textOps, textTransforms } = this.props
+    const { textStyle, textOps, textTransformSpecs } = this.props
     return (
       <Text>
-        <RichText textStyle={textStyle} transforms={textTransforms} textOps={textOps} />
+        <RichText textStyle={textStyle} textTransformSpecs={textTransformSpecs} textOps={textOps} />
       </Text>
     )
   }

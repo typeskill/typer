@@ -20,13 +20,10 @@ type PrintState = DocumentRendererState
 // eslint-disable-next-line @typescript-eslint/class-name-casing
 class _Print extends DocumentRenderer<Print.Props> {
   public static propTypes = DocumentRenderer.propTypes
+  public static defaultProps = DocumentRenderer.defaultProps
 
   public state: PrintState = {
     containerWidth: null,
-  }
-
-  public componentDidUpdate(oldProps: Print.Props) {
-    super.componentDidUpdate(oldProps)
   }
 
   public render() {

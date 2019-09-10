@@ -59,17 +59,15 @@ export namespace Bridge {
 
 // @public
 export class Bridge<ImageSource> {
-    constructor(genConfig?: Partial<Gen.Config<ImageSource>>);
+    constructor();
     getControlEventDomain(): Bridge.ControlEventDomain<ImageSource>;
-    // (undocumented)
-    getGenService(): Gen.Service<ImageSource>;
     // @internal
     getSheetEventDomain(): Bridge.SheetEventDomain<ImageSource>;
     release(): void;
     }
 
 // @public
-export function buildInitialDocContent(): Document;
+export function buildEmptyDocument(): Document;
 
 // @public
 export function buildVectorIconControlSpec<T extends Toolbar.VectorIconMinimalProps>(IconComponent: ComponentType<T & Toolbar.TextControlMinimalIconProps>, actionType: ControlAction, name: string): Toolbar.ControlSpec<T>;
@@ -90,9 +88,6 @@ export enum ControlAction {
 }
 
 // @public (undocumented)
-export const defaultImageLocator: Images.LocationService<Images.StandardSource>;
-
-// @public (undocumented)
 export const defaultTextTransforms: Transforms.GenericSpec<Attributes.TextValue, 'text'>[];
 
 // @public
@@ -104,28 +99,15 @@ export interface Document {
 
 // @public
 export interface DocumentRendererProps<ImageSource> {
-    bridge: Bridge<ImageSource>;
     contentContainerStyle?: StyleProp<ViewStyle>;
     document: Document;
+    ImageComponent?: Images.Component<ImageSource>;
     maxMediaBlockHeight?: number;
     maxMediaBlockWidth?: number;
     spacing?: number;
     style?: StyleProp<ViewStyle>;
     textStyle?: StyleProp<TextStyle>;
-}
-
-// @public
-export namespace Gen {
-    export interface Config<ImageSource> {
-        imageLocatorService: Images.LocationService<ImageSource>;
-        textTransformSpecs: Transforms.GenericSpec<Attributes.TextValue, 'text'>[];
-    }
-    export interface Service<ImageSource> {
-        // (undocumented)
-        imageLocator: Images.LocationService<ImageSource>;
-        // (undocumented)
-        textTransforms: Transforms;
-    }
+    textTransformSpecs?: Transforms.Specs<'text'>;
 }
 
 // @public
@@ -148,6 +130,8 @@ export interface GenericRichContent {
 // @public
 export namespace Images {
     // (undocumented)
+    export type Component<Source> = ComponentType<ComponentProps<Source>>;
+    // (undocumented)
     export interface ComponentProps<Source> {
         readonly description: Description<Source>;
         readonly printDimensions: Dimensions;
@@ -168,11 +152,9 @@ export namespace Images {
         // (undocumented)
         readonly width: number;
     }
-    export interface LocationService<Source> {
-        readonly Component: ComponentType<ComponentProps<Source>>;
+    export interface Hooks<Source> {
         readonly onImageAddedEvent?: (description: Description<Source>) => void;
         readonly onImageRemovedEvent?: (description: Description<Source>) => void;
-        readonly pickOneImage: () => Promise<Description<Source>>;
     }
     // (undocumented)
     export interface StandardSource {
@@ -223,6 +205,7 @@ export namespace Toolbar {
         inactiveButtonColor?: string;
         layout: Layout;
         onInsertImageError?: (e: Error) => void;
+        pickOneImage?: () => Promise<Images.Description<ImageSource>>;
         selectedTextAttributes: Attributes.Map;
         separatorColor?: string;
         style?: StyleProp<ViewStyle>;
@@ -255,6 +238,8 @@ export namespace Transforms {
         activeStyle: T extends 'block' ? ViewStyle : TextStyle;
         attributeName: string;
     }
+    // (undocumented)
+    export type Specs<T extends 'text' | 'block' = 'text'> = GenericSpec<Attributes.TextValue, T>[];
     export type TargetType = 'block' | 'text';
     export type TextAttributeName = 'bold' | 'italic' | 'textDecoration';
 }
@@ -268,8 +253,10 @@ export class Transforms {
 
 // @public
 export namespace Typer {
-    export interface Props extends DocumentRendererProps<any> {
+    export interface Props<ImageSource> extends DocumentRendererProps<ImageSource> {
+        bridge: Bridge<ImageSource>;
         debug?: boolean;
+        imageHooks?: Images.Hooks<ImageSource>;
         onDocumentUpdate?: (nextDocumentContent: Document) => Promise<void>;
         readonly?: boolean;
         underlayColor?: string;
@@ -277,10 +264,10 @@ export namespace Typer {
 }
 
 // @public
-export type Typer = ComponentClass<Typer.Props>;
+export type Typer = ComponentClass<Typer.Props<any>>;
 
 // @public (undocumented)
-export const Typer: React.ComponentClass<Typer.Props, any>;
+export const Typer: React.ComponentClass<Typer.Props<any>, any>;
 
 
 ```

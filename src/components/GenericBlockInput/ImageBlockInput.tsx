@@ -21,7 +21,7 @@ import { genericStyles } from '@components/styles'
 export interface ImageBlockInputProps<ImageSource> extends StandardBlockInputProps {
   imageOp: ImageOp<ImageSource>
   blockScopedSelection: SelectionShape
-  imageLocatorService: Images.LocationService<ImageSource>
+  ImageComponent: Images.Component<ImageSource>
   contentWidth: number
   underlayColor?: string
   maxMediaBlockWidth?: number
@@ -42,7 +42,6 @@ const constantTextInputProps: TextInputProps = {
 } as TextInputProps
 
 const TEXT_INPUT_WIDTH = 4
-const DEFAULT_UNDERLAY = 'rgba(30,30,30,0.3)'
 
 const styles = StyleSheet.create({
   imageContainer: { position: 'relative', flexDirection: 'row' },
@@ -100,7 +99,7 @@ export class ImageBlockInput<ImageSource> extends PureComponent<ImageBlockInputP
   }
 
   private renderHandles(fullHandlerWidth: number, containerDimensions: Images.Dimensions) {
-    const underlayColor = this.props.underlayColor || DEFAULT_UNDERLAY
+    const underlayColor = this.props.underlayColor
     const touchableStyle: ViewStyle = {
       width: fullHandlerWidth,
       height: containerDimensions.height,
@@ -145,7 +144,7 @@ export class ImageBlockInput<ImageSource> extends PureComponent<ImageBlockInputP
     containerDimensions: Images.Dimensions,
   ) {
     const selectStyle = this.isSelectedForDeletion() ? { backgroundColor: 'blue', opacity: 0.5 } : null
-    const { Component } = this.props.imageLocatorService
+    const { ImageComponent } = this.props
     const imageComponentProps: Images.ComponentProps<ImageSource> = {
       description: this.props.imageOp.insert,
       printDimensions: imageDimensions,
@@ -185,7 +184,7 @@ export class ImageBlockInput<ImageSource> extends PureComponent<ImageBlockInputP
       <View style={imageFrameStyle}>
         <View style={imageWrapperStyle}>
           <TouchableHighlight onPress={this.handleOnPressMiddleHandler} style={imageHandleStyle}>
-            <Component {...imageComponentProps} />
+            <ImageComponent {...imageComponentProps} />
           </TouchableHighlight>
         </View>
         <View style={leftInputStyle}>{this.renderTextInput(containerDimensions, this.leftInput)}</View>

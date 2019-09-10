@@ -36,7 +36,7 @@ export interface TextBlockInputProps extends StandardBlockInputProps {
   textOps: TextOp[]
   textAttributesAtCursor: Attributes.Map
   textStyle?: StyleProp<TextStyle>
-  textTransforms: Transforms
+  textTransformSpecs: Transforms.Specs
 }
 
 export const INVARIANT_MANDATORY_TEXT_BLOCK_PROP = 'textBlock prop is mandatory'
@@ -164,7 +164,7 @@ export class TextBlockInput extends Component<TextBlockInputProps> {
   }
 
   public render() {
-    const { textStyle, textOps, textTransforms, overridingScopedSelection: overridingSelection } = this.props
+    const { textStyle, textOps, textTransformSpecs, overridingScopedSelection: overridingSelection } = this.props
     return (
       <View style={styles.grow}>
         <TextInput
@@ -177,7 +177,7 @@ export class TextBlockInput extends Component<TextBlockInputProps> {
           ref={this.textInputRef}
           {...constantTextInputProps}
         >
-          <RichText textStyle={textStyle} transforms={textTransforms} textOps={textOps} />
+          <RichText textStyle={textStyle} textTransformSpecs={textTransformSpecs} textOps={textOps} />
         </TextInput>
       </View>
     )

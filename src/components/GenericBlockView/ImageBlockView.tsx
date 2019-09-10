@@ -5,7 +5,7 @@ import { ImageOp } from '@delta/operations'
 import { StandardBlockViewProps } from './types'
 
 export interface ImageBlockViewProps<Source> extends StandardBlockViewProps {
-  imageLocatorService: Images.LocationService<Source>
+  ImageComponent: Images.Component<Source>
   imageOp: ImageOp<Source>
   contentWidth: number
   maxMediaBlockWidth?: number
@@ -26,15 +26,14 @@ export class ImageBlockView<Source> extends PureComponent<ImageBlockViewProps<So
   }
 
   public render() {
-    const { imageLocatorService, imageOp } = this.props
-    const Component = imageLocatorService.Component
+    const { ImageComponent, imageOp } = this.props
     const imageComponentProps: Images.ComponentProps<Source> = {
       description: imageOp.insert,
       printDimensions: this.computeDimensions(),
     }
     return (
       <View style={styles.wrapper}>
-        <Component {...imageComponentProps} />
+        <ImageComponent {...imageComponentProps} />
       </View>
     )
   }

@@ -3,10 +3,10 @@ import { View, TouchableOpacity, StyleProp, ViewStyle, ViewPropTypes, StyleSheet
 import invariant from 'invariant'
 import PropTypes from 'prop-types'
 import { Transforms } from '@core/Transforms'
-import { Bridge } from '@core/Bridge'
+import { BridgeStatic, Bridge } from '@core/Bridge'
 import { Attributes } from '@delta/attributes'
 import { ToolbarLayoutPropType } from './types'
-import { Gen } from '@core/Gen'
+import { Images } from '@core/Images'
 
 /**
  * Constant used within a {@link (Toolbar:namespace).Layout} to denote a separator.
@@ -92,13 +92,17 @@ declare namespace Toolbar {
      */
     selectedTextAttributes: Attributes.Map
     /**
-     * A callback fired when inserting an image results in an error.
-     */
-    onInsertImageError?: (e: Error) => void
-    /**
      * An array describing the resulting layout of this component.
      */
     layout: Layout
+    /**
+     * An async function that returns a promise resolving to the {@link Images.Description | description} of an image.
+     */
+    pickOneImage?: () => Promise<Images.Description<ImageSource>>
+    /**
+     * A callback fired when inserting an image results in an error.
+     */
+    onInsertImageError?: (e: Error) => void
     /**
      * Button background when a control is not in active state.
      */
@@ -194,8 +198,9 @@ const styles = StyleSheet.create({
 // eslint-disable-next-line @typescript-eslint/class-name-casing
 class _Toolbar extends PureComponent<Toolbar.Props<any>> {
   public static propTypes: Record<keyof Toolbar.Props<any>, any> = {
-    bridge: PropTypes.instanceOf(Bridge).isRequired,
+    bridge: PropTypes.instanceOf(BridgeStatic).isRequired,
     selectedTextAttributes: PropTypes.object.isRequired,
+    pickOneImage: PropTypes.func,
     onInsertImageError: PropTypes.func,
     layout: ToolbarLayoutPropType,
     inactiveButtonBackgroundColor: PropTypes.string,
@@ -219,13 +224,11 @@ class _Toolbar extends PureComponent<Toolbar.Props<any>> {
   }
 
   private controlEventDom: Bridge.ControlEventDomain<any>
-  private genService: Gen.Service<any>
 
   public constructor(props: Toolbar.Props<any>) {
     super(props)
     invariant(props.bridge != null, 'bridge prop is required')
     this.controlEventDom = props.bridge.getControlEventDomain()
-    this.genService = props.bridge.getGenService()
     this.insertImageAtSelection = this.insertImageAtSelection.bind(this)
   }
 
@@ -264,11 +267,15 @@ class _Toolbar extends PureComponent<Toolbar.Props<any>> {
   }
 
   private async insertImageAtSelection() {
-    try {
-      const description = await this.genService.imageLocator.pickOneImage()
-      this.controlEventDom.insertOrReplaceAtSelection({ type: 'image', description })
-    } catch (e) {
-      this.props.onInsertImageError && this.props.onInsertImageError(e)
+    if (this.props.pickOneImage) {
+      try {
+        const description = await this.props.pickOneImage()
+        this.controlEventDom.insertOrReplaceAtSelection({ type: 'image', description })
+      } catch (e) {
+        this.props.onInsertImageError && this.props.onInsertImageError(e)
+      }
+    } else {
+      console.warn(`You didn't pass pickOneImage in ${Toolbar.name} component.`)
     }
   }
 
@@ -389,7 +396,7 @@ export function buildVectorIconControlSpec<T extends Toolbar.VectorIconMinimalPr
 }
 
 /**
- * A component to let user control the {@link (Typer:type)} through a {@link (Bridge:class)}.
+ * A component to let user control the {@link (Typer:type)} through a {@link (Bridge:type)}.
  *
  * @public
  *

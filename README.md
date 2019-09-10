@@ -99,11 +99,15 @@ Document renderers and controls are **[controlled components](https://reactjs.or
 Document renderers need an invariant `Bridge` instance prop.
 The bridge has three responsibilities:
 
-- to convey actions such as *insert an image at selection* or *change text attributes in selection* from external controls;
-- to notify selection attributes changes to external controls;
-- to provide a shared interface for content generation and print behavior.
+- To convey actions such as *insert an image at selection* or *change text attributes in selection* from external controls;
+- To notify selection attributes changes to external controls.
 
-A `Bridge` instance must be hold by the master component, and can be shared with any external control such as `Toolbar` to operate on the document. To grasp how the bridge is interfaced with the `Toolbar` component, you can [read its implementation](src/components/Toolbar.tsx).
+A `Bridge` instance must be hold by the master component, and can be shared with any external control such as `Toolbar` to operate on the document.
+
+**Remarks**
+
+- The `Bridge` constructor **is not exposed**. You must consume the `buildBridge` function instead;
+- To grasp how the bridge is interfaced with the `Toolbar` component, you can [read its implementation](src/components/Toolbar.tsx).
 
 ### Robustness
 

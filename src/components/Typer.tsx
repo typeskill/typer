@@ -11,6 +11,12 @@ import { BlockAssembler } from '@model/BlockAssembler'
 import { SelectionShape, Selection } from '@delta/Selection'
 import { ScrollIntoView, wrapScrollView } from 'react-native-scroll-into-view'
 import { DocumentRenderer, DocumentRendererProps } from './DocumentRenderer'
+import { Bridge, BridgeStatic } from '@core/Bridge'
+import invariant from 'invariant'
+import { ImageHooksType } from './types'
+import { defaults } from './defaults'
+import { Images } from '@core/Images'
+import { Transforms } from '@core/Transforms'
 
 const AutoScrollView = wrapScrollView(ScrollView)
 
@@ -28,7 +34,19 @@ declare namespace Typer {
   /**
    * {@link (Typer:type)} properties.
    */
-  export interface Props extends DocumentRendererProps<any> {
+  export interface Props<ImageSource> extends DocumentRendererProps<ImageSource> {
+    /**
+     * The {@link (Bridge:type)} instance.
+     *
+     * @remarks This property MUST NOT be changed after instantiation.
+     */
+    bridge: Bridge<ImageSource>
+
+    /**
+     * Callbacks on image insertion and deletion.
+     */
+    imageHooks?: Images.Hooks<ImageSource>
+
     /**
      * Handler to receive {@link Document| document} updates.
      *
@@ -54,13 +72,23 @@ declare namespace Typer {
 }
 
 // eslint-disable-next-line @typescript-eslint/class-name-casing
-class _Typer extends DocumentRenderer<Typer.Props, TyperState> implements DocumentProvider {
-  public static propTypes: Record<keyof Typer.Props, any> = {
+class _Typer extends DocumentRenderer<Typer.Props<any>, TyperState> implements DocumentProvider {
+  public static propTypes: Record<keyof Typer.Props<any>, any> = {
     ...DocumentRenderer.propTypes,
+    bridge: PropTypes.instanceOf(BridgeStatic).isRequired,
     onDocumentUpdate: PropTypes.func,
     debug: PropTypes.bool,
     underlayColor: PropTypes.string,
     readonly: PropTypes.bool,
+    imageHooks: ImageHooksType,
+  }
+
+  public static defaultProps: Partial<Record<keyof Typer.Props<any>, any>> = {
+    ...DocumentRenderer.defaultProps,
+    readonly: false,
+    debug: false,
+    underlayColor: defaults.underlayColor,
+    imageHooks: defaults.imageHooks,
   }
 
   public state: TyperState = {
@@ -68,7 +96,7 @@ class _Typer extends DocumentRenderer<Typer.Props, TyperState> implements Docume
     overridingScopedSelection: null,
   }
 
-  public constructor(props: Typer.Props) {
+  public constructor(props: Typer.Props<any>) {
     super(props)
   }
 
@@ -77,12 +105,12 @@ class _Typer extends DocumentRenderer<Typer.Props, TyperState> implements Docume
     this.setState({ overridingScopedSelection: null })
   }
 
-  public getGenService() {
-    return this.genService
-  }
-
   public getDocument() {
     return this.props.document
+  }
+
+  public getImageHooks() {
+    return this.props.imageHooks as Images.Hooks<any>
   }
 
   public updateDocument(documentUpdate: Partial<Document>): Promise<void> {
@@ -98,7 +126,15 @@ class _Typer extends DocumentRenderer<Typer.Props, TyperState> implements Docume
   private renderBlockInput(block: Block) {
     const descriptor = block.descriptor
     const { overridingScopedSelection: overridingSelection } = this.state
-    const { textStyle, debug, underlayColor, maxMediaBlockHeight, maxMediaBlockWidth } = this.props
+    const {
+      textStyle,
+      debug,
+      underlayColor,
+      maxMediaBlockHeight,
+      maxMediaBlockWidth,
+      ImageComponent,
+      textTransformSpecs,
+    } = this.props
     const { selectedTextAttributes } = this.props.document
     const key = `block-input-${descriptor.kind}-${descriptor.blockIndex}`
     // TODO use weak map to memoize controller
@@ -114,14 +150,14 @@ class _Typer extends DocumentRenderer<Typer.Props, TyperState> implements Docume
           controller={controller}
           contentWidth={this.state.containerWidth}
           textStyle={textStyle}
-          imageLocatorService={this.genService.imageLocator}
+          ImageComponent={ImageComponent as Images.Component<any>}
           descriptor={descriptor}
           maxMediaBlockHeight={maxMediaBlockHeight}
           maxMediaBlockWidth={maxMediaBlockWidth}
           blockScopedSelection={block.getBlockScopedSelection(this.props.document)}
           overridingScopedSelection={isFocused ? overridingSelection : null}
           textAttributesAtCursor={selectedTextAttributes}
-          textTransforms={this.genService.textTransforms}
+          textTransformSpecs={textTransformSpecs as Transforms.Specs}
         />
       </ScrollIntoView>
     )
@@ -139,7 +175,7 @@ class _Typer extends DocumentRenderer<Typer.Props, TyperState> implements Docume
     sheetEventDom.addInsertOrReplaceAtSelectionListener(this, async element => {
       await this.updateDocument(this.assembler.insertOrReplaceAtSelection(element))
       if (element.type === 'image') {
-        const { onImageAddedEvent } = this.genService.imageLocator
+        const { onImageAddedEvent } = this.props.imageHooks as Images.Hooks<any>
         onImageAddedEvent && onImageAddedEvent(element.description)
       }
     })
@@ -149,8 +185,8 @@ class _Typer extends DocumentRenderer<Typer.Props, TyperState> implements Docume
     this.props.bridge.getSheetEventDomain().release(this)
   }
 
-  public async componentDidUpdate(oldProps: Typer.Props) {
-    super.componentDidUpdate(oldProps)
+  public async componentDidUpdate(oldProps: Typer.Props<any>) {
+    invariant(oldProps.bridge === this.props.bridge, 'bridge prop cannot be changed after instantiation')
     const currentSelection = this.props.document.currentSelection
     if (oldProps.document.currentSelection !== currentSelection) {
       await this.updateDocument(this.assembler.updateTextAttributesAtSelection())
@@ -183,13 +219,11 @@ class _Typer extends DocumentRenderer<Typer.Props, TyperState> implements Docume
  * You MUST provide:
  *
  * - A {@link Document | `document`} prop to render contents. You can initialize it with {@link buildEmptyDocument};
- * - A {@link Bridge | `bridge` } prop to share document-related events with external controls;
+ * - A {@link (Bridge:type) | `bridge` } prop to share document-related events with external controls;
  *
  * You SHOULD provide:
  *
  * - A `onDocumentUpdate` prop to update its state.
- *
- *
  *
  * @public
  *
@@ -197,7 +231,7 @@ class _Typer extends DocumentRenderer<Typer.Props, TyperState> implements Docume
  *
  * This type trick is aimed at preventing from exporting the component State which should be out of API surface.
  */
-type Typer = ComponentClass<Typer.Props>
+type Typer = ComponentClass<Typer.Props<any>>
 const Typer = _Typer as Typer
 
 export { Typer }

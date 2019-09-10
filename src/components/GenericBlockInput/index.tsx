@@ -8,17 +8,17 @@ import invariant from 'invariant'
 import { Transforms } from '@core/Transforms'
 import { Attributes } from '@delta/attributes'
 import { SelectionShape } from '@delta/Selection'
-import { Images } from '@core/Images'
 import { StandardBlockInputProps } from './types'
+import { Images } from '@core/Images'
 
 export interface GenericBlockInputProps<ImageSource> extends StandardBlockInputProps {
-  textStyle?: StyleProp<TextStyle>
-  imageLocatorService: Images.LocationService<ImageSource>
-  textTransforms: Transforms
+  textTransformSpecs: Transforms.Specs
   textAttributesAtCursor: Attributes.Map
   contentWidth: null | number
   blockScopedSelection: SelectionShape
   hightlightOnFocus: boolean
+  ImageComponent: Images.Component<ImageSource>
+  textStyle?: StyleProp<TextStyle>
   blockStyle?: StyleProp<ViewStyle>
   maxMediaBlockWidth?: number
   maxMediaBlockHeight?: number
@@ -36,7 +36,6 @@ export class GenericBlockInput<ImageSource> extends PureComponent<GenericBlockIn
     const {
       descriptor,
       textStyle,
-      imageLocatorService,
       contentWidth,
       blockStyle,
       blockScopedSelection,
@@ -48,7 +47,8 @@ export class GenericBlockInput<ImageSource> extends PureComponent<GenericBlockIn
       maxMediaBlockWidth,
       overridingScopedSelection,
       textAttributesAtCursor,
-      textTransforms,
+      textTransformSpecs,
+      ImageComponent,
     } = this.props
     let block = null
     const realContentWidth = contentWidth ? contentWidth - (hightlightOnFocus ? 2 : 0) : null
@@ -60,7 +60,7 @@ export class GenericBlockInput<ImageSource> extends PureComponent<GenericBlockIn
         isFocused,
         overridingScopedSelection,
         textAttributesAtCursor,
-        textTransforms,
+        textTransformSpecs,
         textOps: descriptor.opsSlice as TextOp[],
       }
       block = <TextBlockInput {...textBlockProps} />
@@ -68,7 +68,6 @@ export class GenericBlockInput<ImageSource> extends PureComponent<GenericBlockIn
       invariant(descriptor.opsSlice.length === 1, `Image blocks must be grouped alone.`)
       const imageBlockProps: ImageBlockInputProps<ImageSource> = {
         descriptor,
-        imageLocatorService,
         blockScopedSelection,
         controller,
         isFocused,
@@ -76,6 +75,7 @@ export class GenericBlockInput<ImageSource> extends PureComponent<GenericBlockIn
         maxMediaBlockWidth,
         overridingScopedSelection,
         underlayColor,
+        ImageComponent,
         imageOp: descriptor.opsSlice[0] as ImageOp<ImageSource>,
         contentWidth: realContentWidth,
       }

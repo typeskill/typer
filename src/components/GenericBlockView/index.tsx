@@ -11,8 +11,8 @@ import { StandardBlockViewProps } from './types'
 
 export interface GenericBlockViewProps<ImageSource> extends StandardBlockViewProps {
   textStyle?: StyleProp<TextStyle>
-  imageLocatorService: Images.LocationService<ImageSource>
-  textTransforms: Transforms
+  ImageComponent: Images.Component<ImageSource>
+  textTransformSpecs: Transforms.Specs
   contentWidth: null | number
   blockStyle?: StyleProp<ViewStyle>
   maxMediaBlockWidth?: number
@@ -24,19 +24,19 @@ export class GenericBlockView<ImageSource> extends PureComponent<GenericBlockVie
     const {
       descriptor,
       textStyle,
-      imageLocatorService,
       contentWidth,
       blockStyle,
       maxMediaBlockHeight,
       maxMediaBlockWidth,
-      textTransforms,
+      textTransformSpecs,
+      ImageComponent,
     } = this.props
     let block = null
     if (descriptor.kind === 'text') {
       const textBlockProps: TextBlockViewProps = {
         descriptor,
         textStyle,
-        textTransforms,
+        textTransformSpecs,
         textOps: descriptor.opsSlice as TextOp[],
       }
       block = <TextBlockView {...textBlockProps} />
@@ -44,9 +44,9 @@ export class GenericBlockView<ImageSource> extends PureComponent<GenericBlockVie
       invariant(descriptor.opsSlice.length === 1, `Image blocks must be grouped alone.`)
       const imageBlockProps: ImageBlockViewProps<ImageSource> = {
         descriptor,
+        ImageComponent,
         maxMediaBlockHeight,
         maxMediaBlockWidth,
-        imageLocatorService,
         imageOp: descriptor.opsSlice[0] as ImageOp<ImageSource>,
         contentWidth: contentWidth,
       }

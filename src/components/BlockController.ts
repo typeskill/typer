@@ -1,14 +1,14 @@
 import { Block } from '@model/Block'
 import { Document } from '@model/document'
 import { SelectionShape } from '@delta/Selection'
-import { Gen } from '@core/Gen'
 import { DocumentDeltaAtomicUpdate } from '@delta/DocumentDeltaAtomicUpdate'
 import { ImageOp } from '@delta/operations'
+import { Images } from '@core/Images'
 
 export interface DocumentProvider {
   getDocument: () => Document
   updateDocument: (document: Document) => void
-  getGenService: () => Gen.Service<any>
+  getImageHooks: () => Images.Hooks<any>
 }
 
 export class BlockController {
@@ -25,8 +25,8 @@ export class BlockController {
   private onBlockDeletion() {
     if (this.block.kind === 'image') {
       const [imageOp] = this.block.getSelectedOps(this.getDocument()) as [ImageOp<any>]
-      const locator = this.provider.getGenService().imageLocator
-      locator.onImageRemovedEvent && locator.onImageRemovedEvent(imageOp.insert)
+      const hooks = this.provider.getImageHooks()
+      hooks.onImageRemovedEvent && hooks.onImageRemovedEvent(imageOp.insert)
     }
   }
 

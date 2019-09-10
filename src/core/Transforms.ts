@@ -69,6 +69,8 @@ declare namespace Transforms {
      */
     activeStyle: T extends 'block' ? ViewStyle : TextStyle
   }
+
+  export type Specs<T extends 'text' | 'block' = 'text'> = GenericSpec<Attributes.TextValue, T>[]
 }
 
 /**

@@ -26,7 +26,7 @@ declare namespace RichText {
     /**
      * An object describing how to convert attributes to style properties.
      */
-    transforms: Transforms
+    textTransformSpecs: Transforms.Specs
     /**
      * Default text style.
      *
@@ -65,16 +65,15 @@ class _RichText extends Component<RichText.Props> {
   private transforms: Transforms
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public static propTypes: Record<keyof RichText.Props, any> = {
-    textOps: OpsPropType,
+    textOps: OpsPropType.isRequired,
     textStyle: PropTypes.any,
-    transforms: PropTypes.instanceOf(Transforms),
+    textTransformSpecs: PropTypes.object.isRequired,
   }
 
   public constructor(props: RichText.Props) {
     super(props)
     this.renderOperation = this.renderOperation.bind(this)
-    this.transforms = props.transforms
-    invariant(props.transforms instanceof Transforms, 'textTransformsReg prop is mandatory')
+    this.transforms = new Transforms(props.textTransformSpecs)
   }
 
   @boundMethod
@@ -125,7 +124,10 @@ class _RichText extends Component<RichText.Props> {
    * @internal
    */
   public componentDidUpdate(oldProps: RichText.Props) {
-    invariant(oldProps.transforms === this.props.transforms, 'transforms prop cannot be changed after instantiation')
+    invariant(
+      oldProps.textTransformSpecs === this.props.textTransformSpecs,
+      'transforms prop cannot be changed after instantiation',
+    )
   }
 
   /**

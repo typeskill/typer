@@ -14,8 +14,8 @@
  *
  * **Triggering actions from external controls**
  *
- * A {@link (Bridge:class)} instance should be shared between a {@link (Typer:type)} and any controlling component such as {@link (Toolbar:type)}.
- * Actions can be triggered with the help of the object returned by {@link (Bridge:class).getControlEventDomain}.
+ * A {@link (Bridge:type)} instance should be shared between a {@link (Typer:type)} and any controlling component such as {@link (Toolbar:type)}.
+ * Actions can be triggered with the help of the object returned by {@link (Bridge:type).getControlEventDomain}.
  *
  * Such actions include:
  *
@@ -23,7 +23,7 @@
  * - (un)setting text attributes (bold, italic).
  *
  * Selection change events can also be listened to with `add...Listener` methods.
- * {@link (Bridge:class).release} must be call from the component holding a reference to the {@link (Bridge:class)} instance,
+ * {@link (Bridge:type).release} must be call from the component holding a reference to the {@link (Bridge:type)} instance,
  * during `componentWillUnmount` hook.
  *
  * @packageDocumentation
@@ -75,7 +75,7 @@ export declare namespace Attributes {
 }
 
 /**
- * A set of definitions related to the {@link (Bridge:class)} class.
+ * A set of definitions related to the {@link (Bridge:type)} class.
  *
  * @public
  */
@@ -178,13 +178,9 @@ export declare namespace Bridge {
  */
 export declare class Bridge<ImageSource> {
     private outerEndpoint;
-    private genService;
     private controlEventDom;
     private sheetEventDom;
-    /**
-     * @param genConfig - A configuration object describing content generation behaviors.
-     */
-    constructor(genConfig?: Partial<Gen.Config<ImageSource>>);
+    constructor();
     /**
      * Get {@link (Bridge:namespace).SheetEventDomain | sheetEventDom}.
      *
@@ -200,10 +196,6 @@ export declare class Bridge<ImageSource> {
      */
     getControlEventDomain(): Bridge.ControlEventDomain<ImageSource>;
     /**
-     * @returns The gen service, responsible for content generation.
-     */
-    getGenService(): Gen.Service<ImageSource>;
-    /**
      * End of the bridge's lifecycle.
      *
      * @remarks
@@ -214,11 +206,11 @@ export declare class Bridge<ImageSource> {
 }
 
 /**
- * Build the initial document content.
+ * Build an empty document.
  *
  * @public
  */
-export declare function buildInitialDocContent(): Document;
+export declare function buildEmptyDocument(): Document;
 
 /**
  * Utility function to build {@link (Toolbar:type)} controls from {@link https://www.npmjs.com/package/react-native-vector-icons | react-native-vector-icons}.
@@ -280,11 +272,6 @@ export declare enum ControlAction {
 /**
  * @public
  */
-export declare const defaultImageLocator: Images.LocationService<Images.StandardSource>;
-
-/**
- * @public
- */
 export declare const defaultTextTransforms: Transforms.GenericSpec<Attributes.TextValue, 'text'>[];
 
 /**
@@ -315,19 +302,19 @@ export declare interface Document {
  */
 export declare interface DocumentRendererProps<ImageSource> {
     /**
-     * The {@link (Bridge:class)} instance.
-     *
-     * @remarks This property MUST NOT be changed after instantiation.
-     */
-    bridge: Bridge<ImageSource>;
-    /**
      * The {@link Document | document} to display.
      */
     document: Document;
     /**
-     * Component styles.
+     * The image component to render.
+     *
+     * @remarks The component MUST fit within the passed {@link Images.ComponentProps.printDimensions} prop.
      */
-    style?: StyleProp<ViewStyle>;
+    ImageComponent?: Images.Component<ImageSource>;
+    /**
+     * A collection of text transforms.
+     */
+    textTransformSpecs?: Transforms.Specs<'text'>;
     /**
      * Default text style.
      */
@@ -352,44 +339,16 @@ export declare interface DocumentRendererProps<ImageSource> {
      */
     spacing?: number;
     /**
+     * Component style.
+     */
+    style?: StyleProp<ViewStyle>;
+    /**
      * Style applied to the content container.
      *
      * @remarks This prop MUST NOT contain padding or margin rules. Such spacing rules will be zero-ed.
      * Apply padding to the {@link DocumentRendererProps.style | `style`} prop instead.
      */
     contentContainerStyle?: StyleProp<ViewStyle>;
-}
-
-/**
- * A set of definitions related to rich content generation.
- *
- * @public
- */
-export declare namespace Gen {
-    /**
-     * An object defining custom rendering behaviors.
-     *
-     * @public
-     */
-    export interface Config<ImageSource> {
-        /**
-         * A list of {@link (Transforms:namespace).GenericSpec | specs} which will be used to map text attributes with styles.
-         */
-        textTransformSpecs: Transforms.GenericSpec<Attributes.TextValue, 'text'>[];
-        /**
-         * An object describing the behavior to locate and render images.
-         *
-         * @remarks Were this parameter not provided, images interactions will be disabled in the related {@link (Typer:type)}.
-         */
-        imageLocatorService: Images.LocationService<ImageSource>;
-    }
-    /**
-     * A service providing rendering behviors.
-     */
-    export interface Service<ImageSource> {
-        imageLocator: Images.LocationService<ImageSource>;
-        textTransforms: Transforms;
-    }
 }
 
 /**
@@ -459,6 +418,7 @@ export declare namespace Images {
         readonly width: number;
         readonly height: number;
     }
+    export type Component<Source> = ComponentType<ComponentProps<Source>>;
     export interface ComponentProps<Source> {
         /**
          * The dimensions this component MUST occupy.
@@ -472,17 +432,7 @@ export declare namespace Images {
     /**
      * An object used to locate and render images.
      */
-    export interface LocationService<Source> {
-        /**
-         * The image component to render.
-         *
-         * @remarks The component MUST fit within the provided dimensions properties.
-         */
-        readonly Component: ComponentType<ComponentProps<Source>>;
-        /**
-         * An async function that returns a promise resolving to the description of an image.
-         */
-        readonly pickOneImage: () => Promise<Description<Source>>;
+    export interface Hooks<Source> {
         /**
          * Callback fired when an image has been successfully inserted.
          */
@@ -599,13 +549,17 @@ export declare namespace Toolbar {
          */
         selectedTextAttributes: Attributes.Map;
         /**
-         * A callback fired when inserting an image results in an error.
-         */
-        onInsertImageError?: (e: Error) => void;
-        /**
          * An array describing the resulting layout of this component.
          */
         layout: Layout;
+        /**
+         * An async function that returns a promise resolving to the {@link Images.Description | description} of an image.
+         */
+        pickOneImage?: () => Promise<Images.Description<ImageSource>>;
+        /**
+         * A callback fired when inserting an image results in an error.
+         */
+        onInsertImageError?: (e: Error) => void;
         /**
          * Button background when a control is not in active state.
          */
@@ -678,7 +632,7 @@ export declare namespace Toolbar {
 }
 
 /**
- * A component to let user control the {@link (Typer:type)} through a {@link (Bridge:class)}.
+ * A component to let user control the {@link (Typer:type)} through a {@link (Bridge:type)}.
  *
  * @public
  *
@@ -743,6 +697,7 @@ export declare namespace Transforms {
          */
         activeStyle: T extends 'block' ? ViewStyle : TextStyle;
     }
+    export type Specs<T extends 'text' | 'block' = 'text'> = GenericSpec<Attributes.TextValue, T>[];
 }
 
 /**
@@ -772,13 +727,27 @@ export declare namespace Typer {
     /**
      * {@link (Typer:type)} properties.
      */
-    export interface Props extends DocumentRendererProps<any> {
+    export interface Props<ImageSource> extends DocumentRendererProps<ImageSource> {
+        /**
+         * The {@link (Bridge:type)} instance.
+         *
+         * @remarks This property MUST NOT be changed after instantiation.
+         */
+        bridge: Bridge<ImageSource>;
+        /**
+         * Callbacks on image insertion and deletion.
+         */
+        imageHooks?: Images.Hooks<ImageSource>;
         /**
          * Handler to receive {@link Document| document} updates.
          *
          * @remarks This callback is expected to return a promise. This promise MUST resolve when the update had been proceeded.
          */
         onDocumentUpdate?: (nextDocumentContent: Document) => Promise<void>;
+        /**
+         * Disable edition.
+         */
+        readonly?: boolean;
         /**
          * Customize the color of image controls upon activation.
          */
@@ -787,15 +756,22 @@ export declare namespace Typer {
          * In debug mode, active block will be highlighted.
          */
         debug?: boolean;
-        /**
-         * Disable edition.
-         */
-        readonly?: boolean;
     }
 }
 
 /**
  * A component solely responsible for editing {@link Document | document}.
+ *
+ * @remarks This component is [controlled](https://reactjs.org/docs/forms.html#controlled-components).
+ *
+ * You MUST provide:
+ *
+ * - A {@link Document | `document`} prop to render contents. You can initialize it with {@link buildEmptyDocument};
+ * - A {@link (Bridge:type) | `bridge` } prop to share document-related events with external controls;
+ *
+ * You SHOULD provide:
+ *
+ * - A `onDocumentUpdate` prop to update its state.
  *
  * @public
  *
@@ -803,8 +779,8 @@ export declare namespace Typer {
  *
  * This type trick is aimed at preventing from exporting the component State which should be out of API surface.
  */
-export declare type Typer = ComponentClass<Typer.Props>;
+export declare type Typer = ComponentClass<Typer.Props<any>>;
 
-export declare const Typer: React.ComponentClass<Typer.Props, any>;
+export declare const Typer: React.ComponentClass<Typer.Props<any>, any>;
 
 export { }

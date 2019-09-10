@@ -1,12 +1,9 @@
 import { Attributes } from '@delta/attributes'
 import { Endpoint } from './Endpoint'
-import { Gen, defaultRenderConfig } from './Gen'
-import mergeLeft from 'ramda/es/mergeLeft'
-import { Transforms } from './Transforms'
 import { Images } from './Images'
 
 /**
- * A set of definitions related to the {@link (Bridge:class)} class.
+ * A set of definitions related to the {@link (Bridge:type)} interface.
  *
  * @public
  */
@@ -14,10 +11,7 @@ declare namespace Bridge {
   /**
    * An event which signals the intent to modify the content touched by current selection.
    */
-  export type ControlEvent =
-    | 'APPLY_ATTRIBUTES_TO_SELECTION'
-    | 'APPLY_LINE_TYPE_TO_SELECTION'
-    | 'INSERT_OR_REPLACE_AT_SELECTION'
+  export type ControlEvent = 'APPLY_ATTRIBUTES_TO_SELECTION' | 'INSERT_OR_REPLACE_AT_SELECTION'
 
   /**
    * Block content to insert.
@@ -121,13 +115,38 @@ declare namespace Bridge {
  *
  * @internalRemarks
  *
- * The implemententation is isolated and decoupled from the {@link (Typer:type)} class.
+ * We are only exporting the type to force consumers to use the build function.
  *
  * @public
  */
-class Bridge<ImageSource> {
+interface Bridge<ImageSource> {
+  /**
+   * Get {@link (Bridge:namespace).SheetEventDomain | sheetEventDom}.
+   *
+   * @internal
+   */
+  getSheetEventDomain: () => Bridge.SheetEventDomain<ImageSource>
+  /**
+   * Get this bridge {@link (Bridge:namespace).ControlEventDomain}.
+   *
+   * @remarks
+   *
+   * The returned object can be used to react from and trigger {@link (Typer:type)} events.
+   */
+  getControlEventDomain: () => Bridge.ControlEventDomain<ImageSource>
+  /**
+   * End of the bridge's lifecycle.
+   *
+   * @remarks
+   *
+   * One would typically call this method during `componentWillUnmout` hook.
+   */
+  release: () => void
+}
+
+// eslint-disable-next-line @typescript-eslint/class-name-casing
+class _Bridge<ImageSource> implements Bridge<any> {
   private outerEndpoint = new Endpoint<Bridge.ControlEvent>()
-  private genService: Gen.Service<ImageSource>
 
   private controlEventDom: Bridge.ControlEventDomain<ImageSource> = {
     insertOrReplaceAtSelection: (element: Bridge.Element<ImageSource>) => {
@@ -153,44 +172,17 @@ class Bridge<ImageSource> {
     },
   }
 
-  /**
-   * @param genConfig - A configuration object describing content generation behaviors.
-   */
-  public constructor(genConfig?: Partial<Gen.Config<ImageSource>>) {
+  public constructor() {
     this.sheetEventDom = Object.freeze(this.sheetEventDom)
     this.controlEventDom = Object.freeze(this.controlEventDom)
-    const finalRendererConfig = mergeLeft(genConfig, defaultRenderConfig)
-    this.genService = {
-      imageLocator: finalRendererConfig.imageLocatorService,
-      textTransforms: new Transforms(finalRendererConfig.textTransformSpecs),
-    }
   }
 
-  /**
-   * Get {@link (Bridge:namespace).SheetEventDomain | sheetEventDom}.
-   *
-   * @internal
-   */
   public getSheetEventDomain(): Bridge.SheetEventDomain<ImageSource> {
     return this.sheetEventDom
   }
 
-  /**
-   * Get this bridge {@link (Bridge:namespace).ControlEventDomain}.
-   *
-   * @remarks
-   *
-   * The returned object can be used to react from and trigger {@link (Typer:type)} events.
-   */
   public getControlEventDomain(): Bridge.ControlEventDomain<ImageSource> {
     return this.controlEventDom
-  }
-
-  /**
-   * @returns The gen service, responsible for content generation.
-   */
-  public getGenService(): Gen.Service<ImageSource> {
-    return this.genService
   }
 
   /**
@@ -205,4 +197,15 @@ class Bridge<ImageSource> {
   }
 }
 
-export { Bridge }
+/**
+ * Build a bridge instance.
+ *
+ * @public
+ */
+function buildBridge<ImageSource>(): Bridge<ImageSource> {
+  return new _Bridge<ImageSource>()
+}
+
+const BridgeStatic = _Bridge
+
+export { Bridge, buildBridge, BridgeStatic }

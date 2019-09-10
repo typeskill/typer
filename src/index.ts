@@ -8,14 +8,14 @@
  *
  * The library exposes:
  *
- * - The {@link (Typer:type)} component, a support for editing {@link (Document:type)}.
- * - The {@link (Print:type)} component, a display for {@link (Document:type)}.
+ * - The {@link (Typer:type)} component, a support for editing {@link (Document:type)};
+ * - The {@link (Print:type)} component, a display for {@link (Document:type)};
  * - The {@link (Toolbar:type)} component, which permits text transforms on current selection.
  *
  * **Triggering actions from external controls**
  *
- * A {@link (Bridge:class)} instance should be shared between a {@link (Typer:type)} and any controlling component such as {@link (Toolbar:type)}.
- * Actions can be triggered with the help of the object returned by {@link (Bridge:class).getControlEventDomain}.
+ * A {@link (Bridge:type)} instance should be shared between a {@link (Typer:type)} and any control component such as {@link (Toolbar:type)}.
+ * Actions can be triggered with the help of the object returned by {@link (Bridge:type).getControlEventDomain}.
  *
  * Such actions include:
  *
@@ -23,13 +23,13 @@
  * - (un)setting text attributes (bold, italic).
  *
  * Selection change events can also be listened to with `add...Listener` methods.
- * {@link (Bridge:class).release} must be call from the component holding a reference to the {@link (Bridge:class)} instance,
+ * {@link (Bridge:type).release} must be call from the component holding a reference to the {@link (Bridge:type)} instance,
  * during `componentWillUnmount` hook.
  *
  * @packageDocumentation
  */
 import { Typer } from '@components/Typer'
-import { Bridge } from '@core/Bridge'
+import { Bridge, buildBridge } from '@core/Bridge'
 import { Toolbar, ControlAction, CONTROL_SEPARATOR, buildVectorIconControlSpec } from '@components/Toolbar'
 import { Attributes } from '@delta/attributes'
 import { GenericRichContent } from '@delta/generic'
@@ -37,8 +37,7 @@ import { GenericOp, TextOp } from '@delta/operations'
 import { Transforms, defaultTextTransforms } from '@core/Transforms'
 import { Document, buildEmptyDocument, cloneDocument } from '@model/document'
 import { SelectionShape } from '@delta/Selection'
-import { defaultImageLocator, Images } from '@core/Images'
-import { Gen } from '@core/Gen'
+import { Images } from '@core/Images'
 import { Print } from '@components/Print'
 import { DocumentRendererProps } from '@components/DocumentRenderer'
 
@@ -53,7 +52,6 @@ export {
   DocumentRendererProps,
   // Model related
   Bridge,
-  Gen,
   Images,
   GenericRichContent,
   GenericOp,
@@ -63,9 +61,9 @@ export {
   Transforms,
   Document,
   // Generation
+  buildBridge,
   buildEmptyDocument,
   cloneDocument,
   // Customization
-  defaultImageLocator,
   defaultTextTransforms,
 }
