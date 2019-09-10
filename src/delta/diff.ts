@@ -7,7 +7,7 @@ function getDeltasFromTextDiff(oldText: string, newText: string, attributes?: At
   let delta = new Delta()
   for (const change of changes) {
     if (change.added) {
-      const lines = change.value.split('\n')
+      const lines: string[] = change.value.split('\n')
       delta = lines.reduce((d, line, i) => {
         let next = d.insert(line, attributes)
         if (i < lines.length - 1) {

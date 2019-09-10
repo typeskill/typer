@@ -24,6 +24,10 @@ export interface Document {
    * `null` values represent attributes to be removed.
    */
   readonly selectedTextAttributes: Attributes.Map
+  /**
+   * The diff ops which were used to produce current ops by combining previous ops.
+   */
+  readonly lastDiff: GenericOp[]
 }
 
 /**
@@ -45,6 +49,7 @@ export function buildEmptyDocument(): Document {
     currentSelection: { start: 0, end: 0 },
     ops: [{ insert: '\n' }],
     selectedTextAttributes: {},
+    lastDiff: [],
   }
 }
 
@@ -60,6 +65,7 @@ export function cloneDocument(content: Document): Document {
     ops: clone(content.ops),
     currentSelection: content.currentSelection,
     selectedTextAttributes: content.selectedTextAttributes,
+    lastDiff: content.lastDiff,
   }
 }
 
@@ -67,7 +73,7 @@ export function applyTextTransformToSelection(
   attributeName: string,
   attributeValue: Attributes.GenericValue,
   document: Document,
-): Pick<Document, 'ops' | 'selectedTextAttributes'> {
+): Pick<Document, 'ops' | 'selectedTextAttributes' | 'lastDiff'> {
   const { currentSelection, ops, selectedTextAttributes } = document
   const delta = new DocumentDelta(ops)
   const selection = Selection.fromShape(currentSelection)
@@ -78,5 +84,6 @@ export function applyTextTransformToSelection(
   return {
     selectedTextAttributes: nextSelectedAttributes,
     ops: atomicUpdate.delta.ops,
+    lastDiff: atomicUpdate.diff.ops,
   }
 }

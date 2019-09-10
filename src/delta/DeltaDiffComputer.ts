@@ -76,11 +76,13 @@ export class DeltaDiffComputer {
     buffer.push(new Delta().retain(selectionTraversalBeforeChange.start))
     const replacedLines = zip(linesBeforeChange, linesAfterChange)
     let shouldDeleteNextNewline = false
+    // return makeDiffDelta(originalText.raw, newText.raw, textAttributes)
     // Replaced lines
     replacedLines.forEach(([lineBefore, lineAfter]) => {
       const lineDelta = makeDiffDelta(lineBefore.text, lineAfter.text, textAttributes)
+      console.info('REPLACED', JSON.stringify(lineBefore), JSON.stringify(lineAfter.text))
       if (originalText.charAt(lineBefore.lineRange.end) !== '\n') {
-        // Noop
+        // noop
       } else {
         lineDelta.retain(1) // Keep first newline
         shouldDeleteNextNewline =
@@ -90,12 +92,14 @@ export class DeltaDiffComputer {
     })
     // Inserted lines
     linesAfterChange.slice(replacedLines.length).forEach(lineAfter => {
+      console.info('INSERTED')
       const lineDelta = makeDiffDelta('', lineAfter.text, textAttributes)
       lineDelta.insert('\n', {})
       buffer.push(lineDelta)
     })
     // Deleted lines
     linesBeforeChange.slice(replacedLines.length).forEach(lineBefore => {
+      console.info('DELETED')
       const { start: beginningOfLineIndex } = lineBefore.lineRange
       const lineDelta = makeDiffDelta(lineBefore.text, '', textAttributes)
       if (beginningOfLineIndex < selectionTraversalBeforeChange.end || shouldDeleteNextNewline) {

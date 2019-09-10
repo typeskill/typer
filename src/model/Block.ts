@@ -61,15 +61,16 @@ export class Block {
     }
   }
 
-  private applyDiffToDocument(documentDiff: Delta, document: Document): Document {
+  private applyDiffToDocument(lastDiff: Delta, document: Document): Document {
     const current = new Delta(document.ops)
-    const nextDelta = current.compose(documentDiff)
+    const nextDelta = current.compose(lastDiff)
     const nextOps = nextDelta.ops
-    const nextSelection = getSelectionAfterTransform(documentDiff, document)
+    const nextSelection = getSelectionAfterTransform(lastDiff, document)
     return {
       ...document,
       currentSelection: nextSelection,
       ops: nextOps,
+      lastDiff: lastDiff.ops,
     }
   }
 

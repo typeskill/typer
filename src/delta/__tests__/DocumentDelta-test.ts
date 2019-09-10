@@ -7,7 +7,7 @@ import { isLineInSelection } from '@delta/lines'
 import { mockDocumentDelta } from '@test/document'
 import { LineWalker } from '@delta/LineWalker'
 
-describe('@delta/DocumentDelta', () => {
+fdescribe('@delta/DocumentDelta', () => {
   // The idea is to expose operations on different kind of blocks
   // Giving support for text blocks, ordered and unordered lists, headings
   describe('eachLine', () => {
@@ -34,7 +34,7 @@ describe('@delta/DocumentDelta', () => {
       expect(attributes).toEqual([{ $type: 'misc' }, { $type: 'rand' }, {}, {}])
     })
   })
-  describe('applyTextDiff', () => {
+  fdescribe('applyTextDiff', () => {
     it('should reproduce a delete operation when one character was deleted', () => {
       const newText = 'Hello worl\n'
       const originalDelta = mockDocumentDelta([{ insert: 'Hello world\n' }])
@@ -125,6 +125,30 @@ describe('@delta/DocumentDelta', () => {
       const originalDelta = mockDocumentDelta([{ insert: 'Hello world\n' }])
       const { delta } = originalDelta.applyTextDiff(newText, changeContext)
       expect(delta.ops).toEqual([{ insert: 'Hello world\nH\n' }])
+    })
+    fit('should keep text attributes when removing a line', () => {
+      const originalDelta = mockDocumentDelta([
+        { insert: '\n' },
+        { insert: 'L', attributes: { bold: true } },
+        { insert: '\n' },
+      ])
+      const newText = 'L\n'
+      const changeContext = mockDeltaChangeContext(1, 0)
+      const { delta, diff } = originalDelta.applyTextDiff(newText, changeContext)
+      expect(diff.ops).toEqual([{ delete: 1 }, { retain: 2 }])
+      expect(delta.ops).toEqual([{ insert: 'L', attributes: { bold: true } }, { insert: '\n' }])
+    })
+    fit('should keep text attributes when inserting a line', () => {
+      const originalDelta = mockDocumentDelta([
+        { insert: '\n' },
+        { insert: 'L', attributes: { bold: true } },
+        { insert: '\n' },
+      ])
+      const newText = '\nL\n\n'
+      const changeContext = mockDeltaChangeContext(1, 2)
+      const { delta, diff } = originalDelta.applyTextDiff(newText, changeContext)
+      expect(diff.ops).toEqual([{ retain: 3 }, { insert: '\n' }])
+      expect(delta.ops).toEqual([{ insert: '\n' }, { insert: 'L', attributes: { bold: true } }, { insert: '\n\n' }])
     })
     it('should retain newline character after inserting a newline character to keep the current linetype, if that line type is not propagable', () => {
       const newText = 'Hello world\n'
