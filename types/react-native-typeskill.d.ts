@@ -201,6 +201,8 @@ export declare interface Bridge<ImageSource> {
     release: () => void;
 }
 
+export declare const Bridge: {};
+
 /**
  * Build a bridge instance.
  *

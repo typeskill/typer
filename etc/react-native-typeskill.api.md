@@ -65,6 +65,9 @@ export interface Bridge<ImageSource> {
     release: () => void;
 }
 
+// @public (undocumented)
+export const Bridge: {};
+
 // @public
 export function buildBridge<ImageSource>(): Bridge<ImageSource>;
 

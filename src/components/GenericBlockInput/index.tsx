@@ -15,7 +15,7 @@ export interface GenericBlockInputProps<ImageSource> extends StandardBlockInputP
   textTransformSpecs: Transforms.Specs
   textAttributesAtCursor: Attributes.Map
   contentWidth: null | number
-  blockScopedSelection: SelectionShape
+  blockScopedSelection: SelectionShape | null
   hightlightOnFocus: boolean
   ImageComponent: Images.Component<ImageSource>
   textStyle?: StyleProp<TextStyle>
@@ -32,6 +32,7 @@ export class GenericBlockInput<ImageSource> extends PureComponent<GenericBlockIn
     }
     return undefined
   }
+
   public render() {
     const {
       descriptor,
@@ -58,7 +59,8 @@ export class GenericBlockInput<ImageSource> extends PureComponent<GenericBlockIn
         textStyle,
         controller,
         isFocused,
-        overridingScopedSelection,
+        blockScopedSelection,
+        overridingScopedSelection: overridingScopedSelection,
         textAttributesAtCursor,
         textTransformSpecs,
         textOps: descriptor.opsSlice as TextOp[],

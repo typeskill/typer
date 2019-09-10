@@ -20,7 +20,7 @@ import { genericStyles } from '@components/styles'
 
 export interface ImageBlockInputProps<ImageSource> extends StandardBlockInputProps {
   imageOp: ImageOp<ImageSource>
-  blockScopedSelection: SelectionShape
+  blockScopedSelection: SelectionShape | null
   ImageComponent: Images.Component<ImageSource>
   contentWidth: number
   underlayColor?: string
@@ -58,7 +58,11 @@ export class ImageBlockInput<ImageSource> extends PureComponent<ImageBlockInputP
 
   private isSelectedForDeletion(): boolean {
     const { descriptor, blockScopedSelection } = this.props
-    return blockScopedSelection.start === 0 && descriptor.numOfSelectableUnits === blockScopedSelection.end
+    return (
+      !!blockScopedSelection &&
+      blockScopedSelection.start === 0 &&
+      descriptor.numOfSelectableUnits === blockScopedSelection.end
+    )
   }
 
   @boundMethod
@@ -210,7 +214,7 @@ export class ImageBlockInput<ImageSource> extends PureComponent<ImageBlockInputP
 
   private isLeftSelected() {
     const selection = this.props.blockScopedSelection
-    return selection.start === selection.end && selection.start === 0
+    return selection && selection.start === selection.end && selection.start === 0
   }
 
   private focusRight() {
@@ -260,10 +264,13 @@ export class ImageBlockInput<ImageSource> extends PureComponent<ImageBlockInputP
   }
 
   public componentDidUpdate(oldProps: ImageBlockInputProps<ImageSource>) {
+    const currenBlockedSelection = this.props.blockScopedSelection
     if (
       (this.props.isFocused && !oldProps.isFocused) ||
-      ((oldProps.blockScopedSelection.start !== this.props.blockScopedSelection.start ||
-        oldProps.blockScopedSelection.end !== this.props.blockScopedSelection.end) &&
+      (oldProps.blockScopedSelection &&
+        currenBlockedSelection &&
+        (oldProps.blockScopedSelection.start !== currenBlockedSelection.start ||
+          (oldProps.blockScopedSelection && oldProps.blockScopedSelection.end !== currenBlockedSelection.end)) &&
         this.props.isFocused)
     ) {
       setTimeout(this.focus, 0)

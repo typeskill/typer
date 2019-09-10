@@ -13,7 +13,7 @@ import {
 } from 'react-native'
 import { RichText, richTextStyles } from '@components/RichText'
 import { boundMethod } from 'autobind-decorator'
-import { Selection } from '@delta/Selection'
+import { Selection, SelectionShape } from '@delta/Selection'
 import { TextOp } from '@delta/operations'
 import { Attributes } from '@delta/attributes'
 import { Transforms } from '@core/Transforms'
@@ -37,6 +37,7 @@ export interface TextBlockInputProps extends StandardBlockInputProps {
   textAttributesAtCursor: Attributes.Map
   textStyle?: StyleProp<TextStyle>
   textTransformSpecs: Transforms.Specs
+  blockScopedSelection: SelectionShape | null
 }
 
 export const INVARIANT_MANDATORY_TEXT_BLOCK_PROP = 'textBlock prop is mandatory'
@@ -53,14 +54,23 @@ const constantTextInputProps: TextInputProps = {
   blurOnSubmit: false,
 } as TextInputProps
 
+interface State {
+  overridingSelection: SelectionShape | null
+}
+
 /**
  * A component which is responsible for providing a user interface to edit {@link RichContent}.
  *
  */
-export class TextBlockInput extends Component<TextBlockInputProps> {
+export class TextBlockInput extends Component<TextBlockInputProps, State> {
   private textChangeSession: TextChangeSession | null = null
   private textInputRef = React.createRef<TextInput>()
   private blockScopedSelection = Selection.fromShape({ start: 0, end: 0 })
+  private nextOverridingSelection: SelectionShape | null = null
+
+  public state: State = {
+    overridingSelection: null,
+  }
 
   public constructor(props: TextBlockInputProps) {
     super(props)
@@ -101,20 +111,27 @@ export class TextBlockInput extends Component<TextBlockInputProps> {
   }
 
   @boundMethod
-  private focus() {
+  private focus(nextOverrideSelection?: SelectionShape) {
+    this.nextOverridingSelection = nextOverrideSelection || null
     this.textInputRef.current && this.textInputRef.current.focus()
   }
 
   @boundMethod
   private handleOnFocus() {
-    this.updateSelection(this.blockScopedSelection)
+    const nextOverridingSelection = this.nextOverridingSelection
+    if (nextOverridingSelection !== null) {
+      this.setState({ overridingSelection: nextOverridingSelection })
+      this.blockScopedSelection = Selection.fromShape(nextOverridingSelection)
+      this.nextOverridingSelection = null
+    }
   }
 
-  public shouldComponentUpdate(nextProps: TextBlockInputProps) {
+  public shouldComponentUpdate(nextProps: TextBlockInputProps, nextState: State) {
     return (
       nextProps.overridingScopedSelection !== this.props.overridingScopedSelection ||
       nextProps.textOps !== this.props.textOps ||
-      nextProps.isFocused !== this.props.isFocused
+      nextProps.isFocused !== this.props.isFocused ||
+      nextState.overridingSelection !== this.props.overridingScopedSelection
     )
   }
 
@@ -151,30 +168,40 @@ export class TextBlockInput extends Component<TextBlockInputProps> {
   }
 
   public componentDidUpdate(oldProps: TextBlockInputProps) {
-    if (this.props.isFocused && !oldProps.isFocused) {
-      setTimeout(this.focus, 0)
+    if (this.state.overridingSelection !== null) {
+      setTimeout(() => this.setState({ overridingSelection: null }))
     }
-    if (this.props.overridingScopedSelection !== null) {
+    const blockScopedSelection = this.props.blockScopedSelection
+    if (this.props.isFocused && blockScopedSelection) {
+      if (!oldProps.isFocused) {
+        this.blockScopedSelection = Selection.fromShape(blockScopedSelection)
+        this.focus(blockScopedSelection)
+      } else if (
+        blockScopedSelection.start !== this.blockScopedSelection.start ||
+        blockScopedSelection.end !== this.blockScopedSelection.end
+      ) {
+        this.blockScopedSelection = Selection.fromShape(blockScopedSelection)
+        this.setState({ overridingSelection: blockScopedSelection })
+      }
+    }
+    if (this.props.isFocused && this.props.overridingScopedSelection !== null) {
       this.blockScopedSelection = Selection.fromShape(this.props.overridingScopedSelection)
     }
   }
 
-  public componentDidCatch(error: {}, info: {}) {
-    console.warn(error, info)
-  }
-
   public render() {
-    const { textStyle, textOps, textTransformSpecs, overridingScopedSelection: overridingSelection } = this.props
+    const { textStyle, textOps, textTransformSpecs } = this.props
+    const overriding = this.props.overridingScopedSelection || this.state.overridingSelection
     return (
       <View style={styles.grow}>
         <TextInput
-          selection={overridingSelection ? overridingSelection : undefined}
+          selection={overriding ? overriding : undefined}
           style={[styles.grow, styles.textInput, richTextStyles.defaultText, textStyle, genericStyles.zeroSpacing]}
           onKeyPress={this.handleOnKeyPressed}
           onSelectionChange={this.handleOnSelectionChanged}
           onChangeText={this.handleOnTextChanged}
-          onFocus={this.handleOnFocus}
           ref={this.textInputRef}
+          onFocus={this.handleOnFocus}
           {...constantTextInputProps}
         >
           <RichText textStyle={textStyle} textTransformSpecs={textTransformSpecs} textOps={textOps} />

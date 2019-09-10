@@ -64,6 +64,7 @@ export class BlockController {
   }
 
   public moveBeforeBlock() {
-    this.updateDocumentContent(this.block.moveBefore(this.getDocument()))
+    const nextDoc = this.block.moveBefore(this.getDocument())
+    this.updateDocumentContent(nextDoc)
   }
 }
