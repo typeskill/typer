@@ -1,4 +1,4 @@
-import { buildInitialDocContent, Document } from '@model/document'
+import { buildEmptyDocument, Document } from '@model/document'
 import { buildTextOp, GenericOp } from '@delta/operations'
 import { groupOpsByBlocks } from '@model/blocks'
 import { buildDummyImageOp } from '@test/document'
@@ -6,7 +6,7 @@ import { buildDummyImageOp } from '@test/document'
 describe('@model/Block', () => {
   function buildDocContentWithSel(start: number, end: number, ops?: GenericOp[]): Document {
     const obj = {
-      ...buildInitialDocContent(),
+      ...buildEmptyDocument(),
       currentSelection: { start, end },
     }
     return ops ? { ...obj, ops } : obj

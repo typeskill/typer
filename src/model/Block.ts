@@ -1,5 +1,5 @@
 import { BlockDescriptor } from './blocks'
-import { Document, applyTextTransformToSelection, buildInitialDocContent } from './document'
+import { Document, applyTextTransformToSelection, buildEmptyDocument } from './document'
 import { SelectionShape, Selection } from '@delta/Selection'
 import Delta from 'quill-delta'
 import { ImageKind, GenericOp } from '@delta/operations'
@@ -210,7 +210,7 @@ export class Block {
    */
   public remove(document: Document): Document {
     if (this.isFirst() && this.isLast()) {
-      return buildInitialDocContent()
+      return buildEmptyDocument()
     }
     const diff = new Delta().retain(this.descriptor.selectableUnitsOffset).delete(this.descriptor.numOfSelectableUnits)
     return this.applyDiffToDocument(diff, document)

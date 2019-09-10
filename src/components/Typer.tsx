@@ -37,17 +37,19 @@ declare namespace Typer {
     onDocumentUpdate?: (nextDocumentContent: Document) => Promise<void>
 
     /**
+     * Disable edition.
+     */
+    readonly?: boolean
+
+    /**
      * Customize the color of image controls upon activation.
      */
     underlayColor?: string
+
     /**
      * In debug mode, active block will be highlighted.
      */
     debug?: boolean
-    /**
-     * Disable edition.
-     */
-    readonly?: boolean
   }
 }
 
@@ -175,6 +177,19 @@ class _Typer extends DocumentRenderer<Typer.Props, TyperState> implements Docume
 
 /**
  * A component solely responsible for editing {@link Document | document}.
+ *
+ * @remarks This component is [controlled](https://reactjs.org/docs/forms.html#controlled-components).
+ *
+ * You MUST provide:
+ *
+ * - A {@link Document | `document`} prop to render contents. You can initialize it with {@link buildEmptyDocument};
+ * - A {@link Bridge | `bridge` } prop to share document-related events with external controls;
+ *
+ * You SHOULD provide:
+ *
+ * - A `onDocumentUpdate` prop to update its state.
+ *
+ *
  *
  * @public
  *

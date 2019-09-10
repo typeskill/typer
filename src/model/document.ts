@@ -36,11 +36,11 @@ export interface Document {
 export type DocumentUpdater = (nextDocument: Document) => Promise<void>
 
 /**
- * Build the initial document content.
+ * Build an empty document.
  *
  * @public
  */
-export function buildInitialDocContent(): Document {
+export function buildEmptyDocument(): Document {
   return {
     currentSelection: { start: 0, end: 0 },
     ops: [{ insert: '\n' }],

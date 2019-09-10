@@ -35,7 +35,7 @@ import { Attributes } from '@delta/attributes'
 import { GenericRichContent } from '@delta/generic'
 import { GenericOp, TextOp } from '@delta/operations'
 import { Transforms, defaultTextTransforms } from '@core/Transforms'
-import { Document, buildInitialDocContent, cloneDocument } from '@model/document'
+import { Document, buildEmptyDocument, cloneDocument } from '@model/document'
 import { SelectionShape } from '@delta/Selection'
 import { defaultImageLocator, Images } from '@core/Images'
 import { Gen } from '@core/Gen'
@@ -63,7 +63,7 @@ export {
   Transforms,
   Document,
   // Generation
-  buildInitialDocContent,
+  buildEmptyDocument,
   cloneDocument,
   // Customization
   defaultImageLocator,
