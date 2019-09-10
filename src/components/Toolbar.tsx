@@ -172,11 +172,6 @@ declare namespace Toolbar {
   }
 }
 
-interface ToolbarState {
-  selectedAttributes: Attributes.Map
-  selectedLineType: Attributes.LineType
-}
-
 interface ButtonProps {
   selected: boolean
   IconComponent: ComponentType<Toolbar.TextControlMinimalIconProps>
@@ -225,11 +220,6 @@ class _Toolbar extends PureComponent<Toolbar.Props<any>> {
 
   private controlEventDom: Bridge.ControlEventDomain<any>
   private genService: Gen.Service<any>
-
-  public state: ToolbarState = {
-    selectedAttributes: {},
-    selectedLineType: 'normal',
-  }
 
   public constructor(props: Toolbar.Props<any>) {
     super(props)
