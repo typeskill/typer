@@ -68,19 +68,29 @@ export class DeltaDiffComputer {
       selectionTraversalBeforeChange.start,
       lineAfterChangeSelection.end,
     )
+    console.info(`LINE BEFORE CHANGE`, lineBeforeChangeSelection, 'FROM SELECTION', context.selectionBeforeChange)
+    console.info(`LINE AFTER CHANGE`, lineAfterChangeSelection, 'FROM SELECTION', context.selectionAfterChange)
     const buffer = new DeltaBuffer()
     const textBeforeChange = originalText.select(selectionTraversalBeforeChange)
     const textAfterChange = newText.select(selectionTraversalAfterChange)
     const linesBeforeChange = textBeforeChange.getLines()
     const linesAfterChange = textAfterChange.getLines()
     buffer.push(new Delta().retain(selectionTraversalBeforeChange.start))
+    console.info(`LINES BEFORE CHANGE: ${JSON.stringify(linesBeforeChange, null, 2)}`)
+    console.info(`LINES AFTER CHANGE: ${JSON.stringify(linesAfterChange, null, 2)}`)
     const replacedLines = zip(linesBeforeChange, linesAfterChange)
+    const insertedLines = linesAfterChange.slice(replacedLines.length)
+    const deletedLines = linesBeforeChange.slice(replacedLines.length)
     let shouldDeleteNextNewline = false
-    // return makeDiffDelta(originalText.raw, newText.raw, textAttributes)
-    // Replaced lines
     replacedLines.forEach(([lineBefore, lineAfter]) => {
       const lineDelta = makeDiffDelta(lineBefore.text, lineAfter.text, textAttributes)
-      console.info('REPLACED', JSON.stringify(lineBefore), JSON.stringify(lineAfter.text))
+      console.info(
+        'REPLACED',
+        lineBefore.index,
+        lineAfter.index,
+        JSON.stringify(lineBefore),
+        JSON.stringify(lineAfter.text),
+      )
       if (originalText.charAt(lineBefore.lineRange.end) !== '\n') {
         // noop
       } else {
@@ -90,16 +100,12 @@ export class DeltaDiffComputer {
       }
       buffer.push(lineDelta)
     })
-    // Inserted lines
-    linesAfterChange.slice(replacedLines.length).forEach(lineAfter => {
-      console.info('INSERTED')
+    insertedLines.forEach(lineAfter => {
       const lineDelta = makeDiffDelta('', lineAfter.text, textAttributes)
       lineDelta.insert('\n', {})
       buffer.push(lineDelta)
     })
-    // Deleted lines
-    linesBeforeChange.slice(replacedLines.length).forEach(lineBefore => {
-      console.info('DELETED')
+    deletedLines.forEach(lineBefore => {
       const { start: beginningOfLineIndex } = lineBefore.lineRange
       const lineDelta = makeDiffDelta(lineBefore.text, '', textAttributes)
       if (beginningOfLineIndex < selectionTraversalBeforeChange.end || shouldDeleteNextNewline) {

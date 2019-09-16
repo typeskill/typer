@@ -138,7 +138,7 @@ fdescribe('@delta/DocumentDelta', () => {
       expect(diff.ops).toEqual([{ delete: 1 }, { retain: 2 }])
       expect(delta.ops).toEqual([{ insert: 'L', attributes: { bold: true } }, { insert: '\n' }])
     })
-    fit('should keep text attributes when inserting a line', () => {
+    it('should keep text attributes when inserting a line', () => {
       const originalDelta = mockDocumentDelta([
         { insert: '\n' },
         { insert: 'L', attributes: { bold: true } },
