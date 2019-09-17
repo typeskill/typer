@@ -7,8 +7,7 @@
     "examples": {
       "packages": [
         "examples/expo/package.json"
-      ],
-      "ignore": ["expo", "react-native", "react"]
+      ]
     },
     "default": {
       "packages": [
