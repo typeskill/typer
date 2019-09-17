@@ -106,8 +106,8 @@
     "rimraf": "^3.0.0",
     "semantic-release": "^15.13.14",
     "standard-version": "^6.0.1",
-    "ttypescript": "^1.5.6",
-    "typescript": "^3.3.4000"
+    "ttypescript": "^1.5.7",
+    "typescript": "3.6.3"
   },
   "peerDependencies": {
     "react": "*",
