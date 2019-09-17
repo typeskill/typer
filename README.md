@@ -9,23 +9,23 @@
         <img src="https://img.shields.io/npm/v/react-native-typeskill.svg" /></a>
     <img src="https://img.shields.io/badge/platforms-android%20|%20ios%20|%20windows-lightgrey.svg" />
     <img src="https://img.shields.io/npm/l/react-native-typeskill.svg"/>
-    <a href="https://github.com/jsamr/react-native-typeskill/issues?q=is%3Aissue+is%3Aopen+label%3A%22scheduled+feature%22" >
-        <img src="https://img.shields.io/github/issues-raw/jsamr/react-native-typeskill/scheduled%20feature.svg?label=scheduled%20feature&colorB=125bba" alt="scheduled features" />
+    <a href="https://github.com/typeskill/typeskill/issues?q=is%3Aissue+is%3Aopen+label%3A%22scheduled+feature%22" >
+        <img src="https://img.shields.io/github/issues-raw/typeskill/typeskill/scheduled%20feature.svg?label=scheduled%20feature&colorB=125bba" alt="scheduled features" />
     </a>
 </p>
 <p align="center">
-    <a href="https://circleci.com/gh/jsamr/react-native-typeskill">
-        <img src="https://circleci.com/gh/jsamr/react-native-typeskill.svg?style=shield" alt="Circle CI" />
+    <a href="https://circleci.com/gh/typeskill/typeskill">
+        <img src="https://circleci.com/gh/typeskill/typeskill.svg?style=shield" alt="Circle CI" />
     </a>
-    <a href="https://codecov.io/gh/jsamr/react-native-typeskill">
-        <img src="https://codecov.io/gh/jsamr/react-native-typeskill/branch/master/graph/badge.svg" alt="Code coverage">
+    <a href="https://codecov.io/gh/typeskill/typeskill">
+        <img src="https://codecov.io/gh/typeskill/typeskill/branch/master/graph/badge.svg" alt="Code coverage">
     </a>
-    <a href="https://github.com/jsamr/react-native-typeskill/issues?q=is%3Aissue+is%3Aopen+label%3Abug">
-        <img src="https://img.shields.io/github/issues-raw/jsamr/react-native-typeskill/bug.svg?label=open%20bugs" alt="open bugs">
+    <a href="https://github.com/typeskill/typeskill/issues?q=is%3Aissue+is%3Aopen+label%3Abug">
+        <img src="https://img.shields.io/github/issues-raw/typeskill/typeskill/bug.svg?label=open%20bugs" alt="open bugs">
     </a>
-    <img alt="Greenkeeper badge" src="https://badges.greenkeeper.io/jsamr/react-native-typeskill.svg">
-    <a href="https://snyk.io/test/github/jsamr/react-native-typeskill">
-      <img alt="vulnerabilities" src="https://snyk.io/test/github/jsamr/react-native-typeskill/badge.svg">
+    <img alt="Greenkeeper badge" src="https://badges.greenkeeper.io/typeskill/typeskill.svg">
+    <a href="https://snyk.io/test/github/typeskill/typeskill">
+      <img alt="vulnerabilities" src="https://snyk.io/test/github/typeskill/typeskill/badge.svg">
     </a>
 </p>
 
@@ -41,8 +41,6 @@
     <a href="#trying-locally">You can also run it locally in seconds</a>
 
 </p>
-
-> ⚠️ This library is in early development and subject to fast changes. Do not use in production. Also, pull requests are closed prior to reaching 1.0.
 
 ## Features & design principles
 
@@ -65,7 +63,7 @@
 *Prerequisite: you must have `npm` and `expo-cli` globally installed*
 
 ``` bash
-git clone https://github.com/jsamr/react-native-typeskill.git
+git clone https://github.com/typeskill/typeskill.git
 cd react-native-typeskill/examples/expo
 npm install
 expo start
