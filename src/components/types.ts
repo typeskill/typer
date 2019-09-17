@@ -9,6 +9,7 @@ const documentShape: Record<keyof Document, any> = {
   ops: OpsPropType,
   currentSelection: PropTypes.object,
   selectedTextAttributes: PropTypes.object,
+  lastDiff: OpsPropType,
 }
 
 const controlSpecsShape: Record<keyof Toolbar.ControlSpec, any> = {

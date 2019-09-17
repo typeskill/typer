@@ -8,6 +8,7 @@ describe('@model/document', () => {
       const document: Document = {
         currentSelection: Selection.fromBounds(1),
         ops: [{ insert: 'F' }],
+        lastDiff: [],
         selectedTextAttributes: {},
       }
       const diff = applyTextTransformToSelection('weight', 'bold', document)
@@ -22,6 +23,7 @@ describe('@model/document', () => {
       const documentContent1: Document = {
         currentSelection: Selection.fromBounds(1),
         ops: [{ insert: 'F' }],
+        lastDiff: [],
         selectedTextAttributes: {},
       }
       const diff1 = applyTextTransformToSelection('weight', 'bold', documentContent1)
@@ -36,6 +38,7 @@ describe('@model/document', () => {
       const documentContent1: Document = {
         currentSelection: Selection.fromBounds(1, 2),
         ops: [{ insert: 'FP\n' }],
+        lastDiff: [],
         selectedTextAttributes: {},
       }
       const diff = applyTextTransformToSelection('weight', 'bold', documentContent1)
@@ -49,6 +52,7 @@ describe('@model/document', () => {
         currentSelection: Selection.fromBounds(1, 2),
         ops: [{ insert: 'F' }, { insert: 'P', attributes: { weight: 'bold' } }, { insert: '\n' }],
         selectedTextAttributes: { weight: 'bold' },
+        lastDiff: [],
       }
       const diff = applyTextTransformToSelection('weight', null, documentContent1)
       expect(diff).toMatchObject({

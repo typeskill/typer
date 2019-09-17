@@ -2,12 +2,9 @@ import Delta from 'quill-delta'
 import { DocumentDelta } from './DocumentDelta'
 import { Attributes, mergeAttributesRight } from './attributes'
 import { DeltaChangeContext } from './DeltaChangeContext'
-import { Text, TextLine } from './Text'
+import { Text } from './Text'
 import { Selection } from './Selection'
-import { DeltaBuffer } from './DeltaBuffer'
 import { makeDiffDelta } from './diff'
-import zip from 'ramda/es/zip'
-import { KeyValuePair } from 'ramda'
 
 export enum NormalizeOperation {
   INSERT_LINE_TYPE_PREFIX,

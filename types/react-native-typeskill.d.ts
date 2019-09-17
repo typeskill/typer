@@ -298,6 +298,10 @@ export declare interface Document {
      * `null` values represent attributes to be removed.
      */
     readonly selectedTextAttributes: Attributes.Map;
+    /**
+     * The diff ops which were used to produce current ops by combining previous ops.
+     */
+    readonly lastDiff: GenericOp[];
 }
 
 /**

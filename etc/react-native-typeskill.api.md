@@ -98,6 +98,7 @@ export const defaultTextTransforms: Transforms.GenericSpec<Attributes.TextValue,
 // @public
 export interface Document {
     readonly currentSelection: SelectionShape;
+    readonly lastDiff: GenericOp[];
     readonly ops: GenericOp[];
     readonly selectedTextAttributes: Attributes.Map;
 }
