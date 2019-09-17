@@ -5,6 +5,7 @@ describe('@delta/Selection', () => {
   describe('constructor', () => {
     it('should throw when start lower then end', () => {
       expect(() => {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
         // @ts-ignore
         new Selection(0, -1)
       }).toThrow()

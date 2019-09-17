@@ -28,7 +28,6 @@ export interface ImageBlockInputProps<ImageSource> extends StandardBlockInputPro
   maxMediaBlockHeight?: number
 }
 
-// eslint-disable-next-line @typescript-eslint/no-object-literal-type-assertion
 const constantTextInputProps: TextInputProps = {
   disableFullscreenUI: true,
   scrollEnabled: false,

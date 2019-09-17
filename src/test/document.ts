@@ -5,6 +5,6 @@ export function mockDocumentDelta(ops?: GenericOp[]): DocumentDelta {
   return new DocumentDelta(ops)
 }
 
-export function buildDummyImageOp(uri: string = 'A'): ImageOp<any> {
+export function buildDummyImageOp(uri = 'A'): ImageOp<any> {
   return buildImageOp({ height: 10, width: 10, source: { uri } })
 }

@@ -5,7 +5,6 @@ export function mockSelectionChangeEvent(
   start: number,
   end: number,
 ): NativeSyntheticEvent<TextInputSelectionChangeEventData> {
-  // eslint-disable-next-line @typescript-eslint/no-object-literal-type-assertion
   return { nativeEvent: { selection: { start, end } } } as NativeSyntheticEvent<TextInputSelectionChangeEventData>
 }
 

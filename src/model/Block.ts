@@ -83,8 +83,10 @@ export class Block {
    * @returns The resulting document ops.
    */
   private applyBlockScopedDiff(blockScopedDiff: Delta, document: Document): Document {
-    let fullDiff = new Delta().retain(this.descriptor.selectableUnitsOffset).concat(blockScopedDiff)
-    return this.applyDiffToDocument(fullDiff, document)
+    return this.applyDiffToDocument(
+      new Delta().retain(this.descriptor.selectableUnitsOffset).concat(blockScopedDiff),
+      document,
+    )
   }
 
   private getPreviousBlock(): Block | null {

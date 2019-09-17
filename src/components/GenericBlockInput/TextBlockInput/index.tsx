@@ -42,7 +42,6 @@ export interface TextBlockInputProps extends StandardBlockInputProps {
 
 export const INVARIANT_MANDATORY_TEXT_BLOCK_PROP = 'textBlock prop is mandatory'
 
-// eslint-disable-next-line @typescript-eslint/no-object-literal-type-assertion
 const constantTextInputProps: TextInputProps = {
   disableFullscreenUI: true,
   scrollEnabled: false,

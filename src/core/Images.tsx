@@ -68,8 +68,8 @@ export declare namespace Images {
 export function computeImageFrame(
   originalDimensions: Images.Dimensions,
   containerWidth: number,
-  userMaxHeight: number = Infinity,
-  userMaxWidth: number = Infinity,
+  userMaxHeight = Infinity,
+  userMaxWidth = Infinity,
 ): Images.Dimensions {
   const { width, height } = originalDimensions
   const imageRatio = width / height

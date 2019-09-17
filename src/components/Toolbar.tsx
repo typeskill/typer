@@ -294,7 +294,7 @@ class _Toolbar extends PureComponent<Toolbar.Props<any>> {
     return typeof this.props.buttonSpacing === 'number' ? this.props.buttonSpacing : (this.props.iconSize as number) / 3
   }
 
-  private renderInsertImageController(textControlSpec: Toolbar.ControlSpec, last: boolean = false) {
+  private renderInsertImageController(textControlSpec: Toolbar.ControlSpec, last = false) {
     const IconButton = this.IconButton
     return (
       <IconButton
@@ -311,7 +311,7 @@ class _Toolbar extends PureComponent<Toolbar.Props<any>> {
     attributeName: Transforms.TextAttributeName,
     activeAttributeValue: Attributes.TextValue,
     textControlSpec: Toolbar.ControlSpec,
-    last: boolean = false,
+    last = false,
   ) {
     const { selectedTextAttributes: selectedAttributes } = this.props
     const IconButton = this.IconButton

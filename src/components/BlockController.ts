@@ -12,7 +12,13 @@ export interface DocumentProvider {
 }
 
 export class BlockController {
-  public constructor(private block: Block, private provider: DocumentProvider) {}
+  private block: Block
+  private provider: DocumentProvider
+
+  public constructor(block: Block, provider: DocumentProvider) {
+    this.block = block
+    this.provider = provider
+  }
 
   private getDocument(): Document {
     return this.provider.getDocument()
