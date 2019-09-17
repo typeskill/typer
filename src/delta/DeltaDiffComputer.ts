@@ -2,11 +2,12 @@ import Delta from 'quill-delta'
 import { DocumentDelta } from './DocumentDelta'
 import { Attributes, mergeAttributesRight } from './attributes'
 import { DeltaChangeContext } from './DeltaChangeContext'
-import { Text } from './Text'
+import { Text, TextLine } from './Text'
 import { Selection } from './Selection'
 import { DeltaBuffer } from './DeltaBuffer'
 import { makeDiffDelta } from './diff'
 import zip from 'ramda/es/zip'
+import { KeyValuePair } from 'ramda'
 
 export enum NormalizeOperation {
   INSERT_LINE_TYPE_PREFIX,
@@ -68,53 +69,13 @@ export class DeltaDiffComputer {
       selectionTraversalBeforeChange.start,
       lineAfterChangeSelection.end,
     )
-    console.info(`LINE BEFORE CHANGE`, lineBeforeChangeSelection, 'FROM SELECTION', context.selectionBeforeChange)
-    console.info(`LINE AFTER CHANGE`, lineAfterChangeSelection, 'FROM SELECTION', context.selectionAfterChange)
-    const buffer = new DeltaBuffer()
     const textBeforeChange = originalText.select(selectionTraversalBeforeChange)
     const textAfterChange = newText.select(selectionTraversalAfterChange)
-    const linesBeforeChange = textBeforeChange.getLines()
-    const linesAfterChange = textAfterChange.getLines()
-    buffer.push(new Delta().retain(selectionTraversalBeforeChange.start))
-    console.info(`LINES BEFORE CHANGE: ${JSON.stringify(linesBeforeChange, null, 2)}`)
-    console.info(`LINES AFTER CHANGE: ${JSON.stringify(linesAfterChange, null, 2)}`)
-    const replacedLines = zip(linesBeforeChange, linesAfterChange)
-    const insertedLines = linesAfterChange.slice(replacedLines.length)
-    const deletedLines = linesBeforeChange.slice(replacedLines.length)
-    let shouldDeleteNextNewline = false
-    replacedLines.forEach(([lineBefore, lineAfter]) => {
-      const lineDelta = makeDiffDelta(lineBefore.text, lineAfter.text, textAttributes)
-      console.info(
-        'REPLACED',
-        lineBefore.index,
-        lineAfter.index,
-        JSON.stringify(lineBefore),
-        JSON.stringify(lineAfter.text),
-      )
-      if (originalText.charAt(lineBefore.lineRange.end) !== '\n') {
-        // noop
-      } else {
-        lineDelta.retain(1) // Keep first newline
-        shouldDeleteNextNewline =
-          context.isDeletion() && selectionTraversalBeforeChange.touchesIndex(lineBefore.lineRange.end)
-      }
-      buffer.push(lineDelta)
-    })
-    insertedLines.forEach(lineAfter => {
-      const lineDelta = makeDiffDelta('', lineAfter.text, textAttributes)
-      lineDelta.insert('\n', {})
-      buffer.push(lineDelta)
-    })
-    deletedLines.forEach(lineBefore => {
-      const { start: beginningOfLineIndex } = lineBefore.lineRange
-      const lineDelta = makeDiffDelta(lineBefore.text, '', textAttributes)
-      if (beginningOfLineIndex < selectionTraversalBeforeChange.end || shouldDeleteNextNewline) {
-        lineDelta.delete(1)
-        shouldDeleteNextNewline = false
-      }
-      buffer.push(lineDelta)
-    })
-    return buffer.compose()
+    const delta = new Delta()
+      .retain(selectionTraversalBeforeChange.start)
+      .concat(makeDiffDelta(textBeforeChange.raw, textAfterChange.raw, textAttributes))
+      .retain(originalText.length - selectionTraversalBeforeChange.end)
+    return delta
   }
 
   public toDeltaDiffReport(): DeltaDiffReport {

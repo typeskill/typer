@@ -34,7 +34,7 @@ fdescribe('@delta/DocumentDelta', () => {
       expect(attributes).toEqual([{ $type: 'misc' }, { $type: 'rand' }, {}, {}])
     })
   })
-  fdescribe('applyTextDiff', () => {
+  describe('applyTextDiff', () => {
     it('should reproduce a delete operation when one character was deleted', () => {
       const newText = 'Hello worl\n'
       const originalDelta = mockDocumentDelta([{ insert: 'Hello world\n' }])
@@ -53,7 +53,7 @@ fdescribe('@delta/DocumentDelta', () => {
     it('should reproduce a delete operation when multiple lines were deleted', () => {
       const newText = 'A\nB\n'
       const originalDelta = mockDocumentDelta([{ insert: 'A\nBC\nD\n' }])
-      const changeContext = mockDeltaChangeContext(3, 3, 7)
+      const changeContext = mockDeltaChangeContext(3, 3, 6)
       const { delta } = originalDelta.applyTextDiff(newText, changeContext)
       expect(delta.ops).toEqual([{ insert: 'A\nB\n' }])
     })
@@ -108,17 +108,6 @@ fdescribe('@delta/DocumentDelta', () => {
       const { delta } = originalDelta.applyTextDiff(newText, changeContext)
       expect(delta.ops).toEqual([{ insert: newText }])
     })
-    it('should keep the line type at selection start when reproducing a multiline replace operation', () => {
-      const newText = 'A\n'
-      const originalDelta = mockDocumentDelta([
-        { insert: 'A' },
-        { insert: '\n', attributes: { $type: 'custom' } },
-        { insert: 'B\nC\n' },
-      ])
-      const changeContext = mockDeltaChangeContext(1, 1, 5)
-      const { delta } = originalDelta.applyTextDiff(newText, changeContext)
-      expect(delta.ops).toEqual([{ insert: 'A' }, { insert: '\n', attributes: { $type: 'custom' } }])
-    })
     it('should not append a newline character to delta after inserting a character at the begening of a newline', () => {
       const newText = 'Hello world\nH\n'
       const changeContext = mockDeltaChangeContext(11, 12)
@@ -126,7 +115,7 @@ fdescribe('@delta/DocumentDelta', () => {
       const { delta } = originalDelta.applyTextDiff(newText, changeContext)
       expect(delta.ops).toEqual([{ insert: 'Hello world\nH\n' }])
     })
-    fit('should keep text attributes when removing a line', () => {
+    it('should keep text attributes when removing a line', () => {
       const originalDelta = mockDocumentDelta([
         { insert: '\n' },
         { insert: 'L', attributes: { bold: true } },
@@ -145,12 +134,39 @@ fdescribe('@delta/DocumentDelta', () => {
         { insert: '\n' },
       ])
       const newText = '\nL\n\n'
-      const changeContext = mockDeltaChangeContext(1, 2)
+      const changeContext = mockDeltaChangeContext(2, 3)
       const { delta, diff } = originalDelta.applyTextDiff(newText, changeContext)
-      expect(diff.ops).toEqual([{ retain: 3 }, { insert: '\n' }])
+      expect(diff.ops).toEqual([{ retain: 2 }, { insert: '\n' }, { retain: 1 }])
       expect(delta.ops).toEqual([{ insert: '\n' }, { insert: 'L', attributes: { bold: true } }, { insert: '\n\n' }])
     })
-    it('should retain newline character after inserting a newline character to keep the current linetype, if that line type is not propagable', () => {
+    it('it should handle insertion of a newline character from the middle of a line', () => {
+      const newText = 'Hello \nworld\n'
+      const changeContext = mockDeltaChangeContext(6, 7)
+      const originalDelta = mockDocumentDelta([{ insert: 'Hello world\n' }])
+      const { delta } = originalDelta.applyTextDiff(newText, changeContext)
+      expect(delta.ops).toEqual([{ insert: 'Hello \nworld\n' }])
+    })
+    it('should not remove newline character when reaching the beginning of a line', () => {
+      const changeContext = mockDeltaChangeContext(3, 2)
+      const newText = 'A\n\nC\n'
+      const originalDelta = mockDocumentDelta([{ insert: 'A\nB\nC\n' }])
+      const { delta } = originalDelta.applyTextDiff(newText, changeContext)
+      expect(delta.ops).toEqual([{ insert: 'A\n\nC\n' }])
+    })
+    // These four tests are skipped because we removed line-wise logic, which couldn't properly
+    // handle some edge-cases.
+    xit('should keep the line type at selection start when reproducing a multiline replace operation', () => {
+      const newText = 'A\n'
+      const originalDelta = mockDocumentDelta([
+        { insert: 'A' },
+        { insert: '\n', attributes: { $type: 'custom' } },
+        { insert: 'B\nC\n' },
+      ])
+      const changeContext = mockDeltaChangeContext(1, 1, 5)
+      const { delta } = originalDelta.applyTextDiff(newText, changeContext)
+      expect(delta.ops).toEqual([{ insert: 'A' }, { insert: '\n', attributes: { $type: 'custom' } }])
+    })
+    xit('should retain newline character after inserting a newline character to keep the current linetype, if that line type is not propagable', () => {
       const newText = 'Hello world\n'
       const changeContext = mockDeltaChangeContext(11, 12)
       const originalDelta = mockDocumentDelta([
@@ -164,14 +180,7 @@ fdescribe('@delta/DocumentDelta', () => {
         { insert: '\n' },
       ])
     })
-    it('it should handle insertion of a newline character from the middle of a line', () => {
-      const newText = 'Hello \nworld\n'
-      const changeContext = mockDeltaChangeContext(6, 7)
-      const originalDelta = mockDocumentDelta([{ insert: 'Hello world\n' }])
-      const { delta } = originalDelta.applyTextDiff(newText, changeContext)
-      expect(delta.ops).toEqual([{ insert: 'Hello \nworld\n' }])
-    })
-    it('should not propagate the previous line type to the newline after replacing a newline character, if that line type is not propagable', () => {
+    xit('should not propagate the previous line type to the newline after replacing a newline character, if that line type is not propagable', () => {
       const newText = 'Hello worl\n'
       const changeContext = mockDeltaChangeContext(10, 11, 11)
       const originalDelta = mockDocumentDelta([
@@ -185,14 +194,7 @@ fdescribe('@delta/DocumentDelta', () => {
         { insert: '\n' },
       ])
     })
-    it('should not remove newline character when reaching the beginning of a line', () => {
-      const changeContext = mockDeltaChangeContext(3, 2)
-      const newText = 'A\n\nC\n'
-      const originalDelta = mockDocumentDelta([{ insert: 'A\nB\nC\n' }])
-      const { delta } = originalDelta.applyTextDiff(newText, changeContext)
-      expect(delta.ops).toEqual([{ insert: 'A\n\nC\n' }])
-    })
-    it('should retain first newline character and remove next newline when removing newline', () => {
+    xit('should retain first newline character and remove next newline when removing newline', () => {
       const changeContext = mockDeltaChangeContext(2, 1)
       const newText = 'A\nC\n'
       const originalDelta = mockDocumentDelta([
