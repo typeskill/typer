@@ -5,8 +5,11 @@ import PropTypes from 'prop-types'
 import { Transforms } from '@core/Transforms'
 import { BridgeStatic, Bridge } from '@core/Bridge'
 import { Attributes } from '@delta/attributes'
-import { ToolbarLayoutPropType } from './types'
+import { ToolbarLayoutPropType, DocumentPropType } from './types'
 import { Images } from '@core/Images'
+import { Document } from '@model/document'
+import identity from 'ramda/es/identity'
+import partial from 'ramda/es/partial'
 
 /**
  * Constant used within a {@link (Toolbar:namespace).Layout} to denote a separator.
@@ -16,11 +19,18 @@ import { Images } from '@core/Images'
 export const CONTROL_SEPARATOR = Symbol('separator')
 
 /**
- * Actions which can be triggered with the {@link (Toolbar:type)} component.
+ * Any actions which can be triggered with the {@link (Toolbar:type)} component.
  *
  * @public
  */
-export enum ControlAction {
+export type GenericControlAction = string | symbol | number
+
+/**
+ * Actions which can be triggered with the {@link (Toolbar:type)} component to alter document.
+ *
+ * @public
+ */
+export enum DocumentControlAction {
   /**
    * Switch bold formatting in the selected text.
    */
@@ -49,10 +59,7 @@ export enum ControlAction {
  * @public
  */
 declare namespace Toolbar {
-  /**
-   * An object describing the characteristics of a control.
-   */
-  export interface ControlSpec<T extends object = {}> {
+  export interface GenericControlSpec<A extends GenericControlAction, T extends object> {
     /**
      * The react {@link react#ComponentType} representing the rendered icon.
      *
@@ -66,7 +73,7 @@ declare namespace Toolbar {
     /**
      * The action performed when the control is actionated.
      */
-    actionType: ControlAction
+    actionType: A
     /**
      * Any value to be passed to action hook.
      */
@@ -76,10 +83,15 @@ declare namespace Toolbar {
      */
     iconProps?: T extends Toolbar.VectorIconMinimalProps ? Toolbar.VectorIconMinimalProps : Partial<T>
   }
+
+  /**
+   * An object describing a control which alter the document.
+   */
+  export type DocumentControlSpec<T extends object = {}> = GenericControlSpec<DocumentControlAction, T>
   /**
    * Declaratively describes the layout of the {@link (Toolbar:type)} component.
    */
-  export type Layout = (ControlSpec<any> | typeof CONTROL_SEPARATOR)[]
+  export type Layout = (DocumentControlSpec<any> | typeof CONTROL_SEPARATOR | GenericControlSpec<any, any>)[]
 
   /**
    * Props of the {@link (Toolbar:type)} component.
@@ -90,11 +102,9 @@ declare namespace Toolbar {
      */
     bridge: Bridge<ImageSource>
     /**
-     * The attributes actives in selection.
-     *
-     * @remarks You should provide those of your {@link Document | document} instance.
+     * The {@link Document | document}.
      */
-    selectedTextAttributes: Attributes.Map
+    document: Document
     /**
      * An array describing the resulting layout of this component.
      */
@@ -102,9 +112,13 @@ declare namespace Toolbar {
     /**
      * An async function that returns a promise resolving to the {@link Images.Description | description} of an image.
      *
-     * @remarks The corresponding {@link (Toolbar:namespace).ControlSpec.actionOptions} will be passed to this function.
+     * @remarks The corresponding {@link (Toolbar:namespace).GenericControlSpec.actionOptions} will be passed to this function.
      */
     pickOneImage?: <O = {}>(options?: O) => Promise<Images.Description<ImageSource>>
+    /**
+     * A callback fired when pressing a custom control.
+     */
+    onPressCustomControl?: <A extends GenericControlAction>(actionType: A, actionOptions?: any) => void
     /**
      * A callback fired when inserting an image results in an error.
      */
@@ -205,8 +219,9 @@ const styles = StyleSheet.create({
 class _Toolbar extends PureComponent<Toolbar.Props<any>> {
   public static propTypes: Record<keyof Toolbar.Props<any>, any> = {
     bridge: PropTypes.instanceOf(BridgeStatic).isRequired,
-    selectedTextAttributes: PropTypes.object.isRequired,
+    document: DocumentPropType,
     pickOneImage: PropTypes.func,
+    onPressCustomControl: PropTypes.func,
     onInsertImageError: PropTypes.func,
     layout: ToolbarLayoutPropType,
     inactiveButtonBackgroundColor: PropTypes.string,
@@ -289,8 +304,8 @@ class _Toolbar extends PureComponent<Toolbar.Props<any>> {
     attributeName: Transforms.TextAttributeName,
     activeAttributeValue: Attributes.TextValue,
   ) {
-    const nextAttributeValue =
-      this.props.selectedTextAttributes[attributeName] === activeAttributeValue ? null : activeAttributeValue
+    const currentTextAttribute = this.props.document.selectedTextAttributes[attributeName]
+    const nextAttributeValue = currentTextAttribute === activeAttributeValue ? null : activeAttributeValue
     return () => {
       this.controlEventDom.applyTextTransformToSelection(attributeName, nextAttributeValue)
     }
@@ -300,7 +315,11 @@ class _Toolbar extends PureComponent<Toolbar.Props<any>> {
     return typeof this.props.buttonSpacing === 'number' ? this.props.buttonSpacing : (this.props.iconSize as number) / 3
   }
 
-  private renderInsertImageController(controlSpec: Toolbar.ControlSpec, last = false) {
+  private renderStatelessActionController(
+    controlSpec: Toolbar.DocumentControlSpec,
+    onPress: () => void,
+    last: boolean,
+  ) {
     const IconButton = this.IconButton
     return (
       <IconButton
@@ -308,22 +327,40 @@ class _Toolbar extends PureComponent<Toolbar.Props<any>> {
         style={last ? undefined : { marginRight: this.computeIconSpacing() }}
         IconComponent={controlSpec.IconComponent}
         iconProps={controlSpec.iconProps}
-        onPress={this.insertImageAtSelection.bind(this, controlSpec.actionOptions)}
+        onPress={onPress}
       />
+    )
+  }
+
+  private renderCustomController(controlSpec: Toolbar.GenericControlSpec<any, any>, last: boolean) {
+    const onPressCustomControl = partial(this.props.onPressCustomControl || identity, [
+      controlSpec.actionType,
+      controlSpec.actionOptions,
+    ]) as () => void
+    return this.renderStatelessActionController(controlSpec, onPressCustomControl, last)
+  }
+
+  private renderInsertImageController(controlSpec: Toolbar.DocumentControlSpec, last: boolean) {
+    return this.renderStatelessActionController(
+      controlSpec,
+      this.insertImageAtSelection.bind(this, controlSpec.actionOptions),
+      last,
     )
   }
 
   private renderTextTransformController(
     attributeName: Transforms.TextAttributeName,
     activeAttributeValue: Attributes.TextValue,
-    textControlSpec: Toolbar.ControlSpec,
+    textControlSpec: Toolbar.DocumentControlSpec,
     last = false,
   ) {
-    const { selectedTextAttributes: selectedAttributes } = this.props
+    const {
+      document: { selectedTextAttributes },
+    } = this.props
     const IconButton = this.IconButton
     return (
       <IconButton
-        selected={selectedAttributes[attributeName] === activeAttributeValue}
+        selected={selectedTextAttributes[attributeName] === activeAttributeValue}
         style={last ? undefined : { marginRight: this.computeIconSpacing() }}
         IconComponent={textControlSpec.IconComponent}
         iconProps={textControlSpec.iconProps}
@@ -332,18 +369,20 @@ class _Toolbar extends PureComponent<Toolbar.Props<any>> {
     )
   }
 
-  private renderIconControl(textControlSpec: Toolbar.ControlSpec, last: boolean) {
-    switch (textControlSpec.actionType) {
-      case ControlAction.SELECT_TEXT_BOLD:
-        return this.renderTextTransformController('bold', true, textControlSpec, last)
-      case ControlAction.SELECT_TEXT_ITALIC:
-        return this.renderTextTransformController('italic', true, textControlSpec, last)
-      case ControlAction.SELECT_TEXT_UNDERLINE:
-        return this.renderTextTransformController('textDecoration', 'underline', textControlSpec, last)
-      case ControlAction.SELECT_TEXT_STRIKETHROUGH:
-        return this.renderTextTransformController('textDecoration', 'strikethrough', textControlSpec, last)
-      case ControlAction.INSERT_IMAGE_AT_SELECTION:
-        return this.renderInsertImageController(textControlSpec, last)
+  private renderIconControl(controlSpec: Toolbar.GenericControlSpec<DocumentControlAction | any, any>, last: boolean) {
+    switch (controlSpec.actionType) {
+      case DocumentControlAction.SELECT_TEXT_BOLD:
+        return this.renderTextTransformController('bold', true, controlSpec, last)
+      case DocumentControlAction.SELECT_TEXT_ITALIC:
+        return this.renderTextTransformController('italic', true, controlSpec, last)
+      case DocumentControlAction.SELECT_TEXT_UNDERLINE:
+        return this.renderTextTransformController('textDecoration', 'underline', controlSpec, last)
+      case DocumentControlAction.SELECT_TEXT_STRIKETHROUGH:
+        return this.renderTextTransformController('textDecoration', 'strikethrough', controlSpec, last)
+      case DocumentControlAction.INSERT_IMAGE_AT_SELECTION:
+        return this.renderInsertImageController(controlSpec, last)
+      default:
+        return this.renderCustomController(controlSpec, last)
     }
   }
 
@@ -386,14 +425,14 @@ class _Toolbar extends PureComponent<Toolbar.Props<any>> {
  *
  * @public
  */
-export function buildVectorIconControlSpec<T extends Toolbar.VectorIconMinimalProps>(
+export function buildVectorIconControlSpec<A extends GenericControlAction, T extends Toolbar.VectorIconMinimalProps>(
   IconComponent: ComponentType<T & Toolbar.TextControlMinimalIconProps>,
-  actionType: ControlAction,
+  actionType: A,
   name: string,
-  options: Pick<Toolbar.ControlSpec<T>, 'actionOptions' | 'iconProps'>,
-): Toolbar.ControlSpec<T> {
+  options?: Pick<Toolbar.GenericControlSpec<A, T>, 'actionOptions' | 'iconProps'>,
+): Toolbar.GenericControlSpec<A, T> {
   const iconProps: any = { name }
-  const specs: Toolbar.ControlSpec<T> = {
+  const specs: Toolbar.GenericControlSpec<A, T> = {
     ...options,
     actionType,
     iconProps,

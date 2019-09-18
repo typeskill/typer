@@ -12,7 +12,7 @@ const documentShape: Record<keyof Document, any> = {
   lastDiff: OpsPropType,
 }
 
-const controlSpecsShape: Record<keyof Toolbar.ControlSpec, any> = {
+const controlSpecsShape: Record<keyof Toolbar.DocumentControlSpec, any> = {
   IconComponent: PropTypes.func.isRequired,
   actionType: PropTypes.number.isRequired,
   iconProps: PropTypes.object,

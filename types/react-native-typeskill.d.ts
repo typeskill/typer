@@ -228,7 +228,7 @@ export declare function buildEmptyDocument(): Document;
  *
  * @public
  */
-export declare function buildVectorIconControlSpec<T extends Toolbar.VectorIconMinimalProps>(IconComponent: ComponentType<T & Toolbar.TextControlMinimalIconProps>, actionType: ControlAction, name: string, options: Pick<Toolbar.ControlSpec<T>, 'actionOptions' | 'iconProps'>): Toolbar.ControlSpec<T>;
+export declare function buildVectorIconControlSpec<A extends GenericControlAction, T extends Toolbar.VectorIconMinimalProps>(IconComponent: ComponentType<T & Toolbar.TextControlMinimalIconProps>, actionType: A, name: string, options?: Pick<Toolbar.GenericControlSpec<A, T>, 'actionOptions' | 'iconProps'>): Toolbar.GenericControlSpec<A, T>;
 
 /**
  * Clone a peace of {@link Document | document}.
@@ -245,34 +245,6 @@ export declare function cloneDocument(content: Document): Document;
  * @public
  */
 export declare const CONTROL_SEPARATOR: unique symbol;
-
-/**
- * Actions which can be triggered with the {@link (Toolbar:type)} component.
- *
- * @public
- */
-export declare enum ControlAction {
-    /**
-     * Switch bold formatting in the selected text.
-     */
-    SELECT_TEXT_BOLD = 0,
-    /**
-     * Switch italic formatting in the selected text.
-     */
-    SELECT_TEXT_ITALIC = 1,
-    /**
-     * Switch underline formatting in the selected text.
-     */
-    SELECT_TEXT_UNDERLINE = 2,
-    /**
-     * Switch strikethrough formatting in the selected text.
-     */
-    SELECT_TEXT_STRIKETHROUGH = 3,
-    /**
-     * Insert an image at selection.
-     */
-    INSERT_IMAGE_AT_SELECTION = 4
-}
 
 /**
  * @public
@@ -302,6 +274,34 @@ export declare interface Document {
      * The diff ops which were used to produce current ops by combining previous ops.
      */
     readonly lastDiff: GenericOp[];
+}
+
+/**
+ * Actions which can be triggered with the {@link (Toolbar:type)} component to alter document.
+ *
+ * @public
+ */
+export declare enum DocumentControlAction {
+    /**
+     * Switch bold formatting in the selected text.
+     */
+    SELECT_TEXT_BOLD = 0,
+    /**
+     * Switch italic formatting in the selected text.
+     */
+    SELECT_TEXT_ITALIC = 1,
+    /**
+     * Switch underline formatting in the selected text.
+     */
+    SELECT_TEXT_UNDERLINE = 2,
+    /**
+     * Switch strikethrough formatting in the selected text.
+     */
+    SELECT_TEXT_STRIKETHROUGH = 3,
+    /**
+     * Insert an image at selection.
+     */
+    INSERT_IMAGE_AT_SELECTION = 4
 }
 
 /**
@@ -377,6 +377,13 @@ export declare interface DocumentRendererProps<ImageSource> {
      */
     documentStyle?: StyleProp<ViewStyle>;
 }
+
+/**
+ * Any actions which can be triggered with the {@link (Toolbar:type)} component.
+ *
+ * @public
+ */
+export declare type GenericControlAction = string | symbol | number;
 
 /**
  * An atomic operation representing changes to a document.
@@ -534,10 +541,7 @@ export declare interface TextOp extends GenericOp {
  * @public
  */
 export declare namespace Toolbar {
-    /**
-     * An object describing the characteristics of a control.
-     */
-    export interface ControlSpec<T extends object = {}> {
+    export interface GenericControlSpec<A extends GenericControlAction, T extends object> {
         /**
          * The react {@link react#ComponentType} representing the rendered icon.
          *
@@ -551,7 +555,7 @@ export declare namespace Toolbar {
         /**
          * The action performed when the control is actionated.
          */
-        actionType: ControlAction;
+        actionType: A;
         /**
          * Any value to be passed to action hook.
          */
@@ -562,9 +566,13 @@ export declare namespace Toolbar {
         iconProps?: T extends Toolbar.VectorIconMinimalProps ? Toolbar.VectorIconMinimalProps : Partial<T>;
     }
     /**
+     * An object describing a control which alter the document.
+     */
+    export type DocumentControlSpec<T extends object = {}> = GenericControlSpec<DocumentControlAction, T>;
+    /**
      * Declaratively describes the layout of the {@link (Toolbar:type)} component.
      */
-    export type Layout = (ControlSpec<any> | typeof CONTROL_SEPARATOR)[];
+    export type Layout = (DocumentControlSpec<any> | typeof CONTROL_SEPARATOR | GenericControlSpec<any, any>)[];
     /**
      * Props of the {@link (Toolbar:type)} component.
      */
@@ -574,11 +582,9 @@ export declare namespace Toolbar {
          */
         bridge: Bridge<ImageSource>;
         /**
-         * The attributes actives in selection.
-         *
-         * @remarks You should provide those of your {@link Document | document} instance.
+         * The {@link Document | document}.
          */
-        selectedTextAttributes: Attributes.Map;
+        document: Document;
         /**
          * An array describing the resulting layout of this component.
          */
@@ -586,9 +592,13 @@ export declare namespace Toolbar {
         /**
          * An async function that returns a promise resolving to the {@link Images.Description | description} of an image.
          *
-         * @remarks The corresponding {@link (Toolbar:namespace).ControlSpec.actionOptions} will be passed to this function.
+         * @remarks The corresponding {@link (Toolbar:namespace).GenericControlSpec.actionOptions} will be passed to this function.
          */
         pickOneImage?: <O = {}>(options?: O) => Promise<Images.Description<ImageSource>>;
+        /**
+         * A callback fired when pressing a custom control.
+         */
+        onPressCustomControl?: <A extends GenericControlAction>(actionType: A, actionOptions?: any) => void;
         /**
          * A callback fired when inserting an image results in an error.
          */

@@ -30,7 +30,13 @@
  */
 import { Typer } from '@components/Typer'
 import { Bridge, buildBridge } from '@core/Bridge'
-import { Toolbar, ControlAction, CONTROL_SEPARATOR, buildVectorIconControlSpec } from '@components/Toolbar'
+import {
+  Toolbar,
+  DocumentControlAction,
+  CONTROL_SEPARATOR,
+  buildVectorIconControlSpec,
+  GenericControlAction,
+} from '@components/Toolbar'
 import { Attributes } from '@delta/attributes'
 import { GenericRichContent } from '@delta/generic'
 import { GenericOp, TextOp } from '@delta/operations'
@@ -46,7 +52,8 @@ export {
   Typer,
   Print,
   Toolbar,
-  ControlAction,
+  DocumentControlAction,
+  GenericControlAction,
   CONTROL_SEPARATOR,
   buildVectorIconControlSpec,
   DocumentRendererProps,

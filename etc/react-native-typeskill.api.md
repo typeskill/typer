@@ -75,22 +75,13 @@ export function buildBridge<ImageSource>(): Bridge<ImageSource>;
 export function buildEmptyDocument(): Document;
 
 // @public
-export function buildVectorIconControlSpec<T extends Toolbar.VectorIconMinimalProps>(IconComponent: ComponentType<T & Toolbar.TextControlMinimalIconProps>, actionType: ControlAction, name: string, options: Pick<Toolbar.ControlSpec<T>, 'actionOptions' | 'iconProps'>): Toolbar.ControlSpec<T>;
+export function buildVectorIconControlSpec<A extends GenericControlAction, T extends Toolbar.VectorIconMinimalProps>(IconComponent: ComponentType<T & Toolbar.TextControlMinimalIconProps>, actionType: A, name: string, options?: Pick<Toolbar.GenericControlSpec<A, T>, 'actionOptions' | 'iconProps'>): Toolbar.GenericControlSpec<A, T>;
 
 // @public
 export function cloneDocument(content: Document): Document;
 
 // @public
 export const CONTROL_SEPARATOR: unique symbol;
-
-// @public
-export enum ControlAction {
-    INSERT_IMAGE_AT_SELECTION = 4,
-    SELECT_TEXT_BOLD = 0,
-    SELECT_TEXT_ITALIC = 1,
-    SELECT_TEXT_STRIKETHROUGH = 3,
-    SELECT_TEXT_UNDERLINE = 2
-}
 
 // @public (undocumented)
 export const defaultTextTransforms: Transforms.GenericSpec<Attributes.TextValue, 'text'>[];
@@ -101,6 +92,15 @@ export interface Document {
     readonly lastDiff: GenericOp[];
     readonly ops: GenericOp[];
     readonly selectedTextAttributes: Attributes.Map;
+}
+
+// @public
+export enum DocumentControlAction {
+    INSERT_IMAGE_AT_SELECTION = 4,
+    SELECT_TEXT_BOLD = 0,
+    SELECT_TEXT_ITALIC = 1,
+    SELECT_TEXT_STRIKETHROUGH = 3,
+    SELECT_TEXT_UNDERLINE = 2
 }
 
 // @public
@@ -116,6 +116,9 @@ export interface DocumentRendererProps<ImageSource> {
     textStyle?: StyleProp<TextStyle>;
     textTransformSpecs?: Transforms.Specs<'text'>;
 }
+
+// @public
+export type GenericControlAction = string | symbol | number;
 
 // @public
 export interface GenericOp {
@@ -195,26 +198,29 @@ export interface TextOp extends GenericOp {
 
 // @public
 export namespace Toolbar {
-    export interface ControlSpec<T extends object = {}> {
+    export type DocumentControlSpec<T extends object = {}> = GenericControlSpec<DocumentControlAction, T>;
+    // (undocumented)
+    export interface GenericControlSpec<A extends GenericControlAction, T extends object> {
         actionOptions?: any;
-        actionType: ControlAction;
+        actionType: A;
         IconComponent: ComponentType<TextControlMinimalIconProps & T>;
         iconProps?: T extends Toolbar.VectorIconMinimalProps ? Toolbar.VectorIconMinimalProps : Partial<T>;
     }
-    export type Layout = (ControlSpec<any> | typeof CONTROL_SEPARATOR)[];
+    export type Layout = (DocumentControlSpec<any> | typeof CONTROL_SEPARATOR | GenericControlSpec<any, any>)[];
     export interface Props<ImageSource> {
         activeButtonBackgroundColor?: string;
         activeButtonColor?: string;
         bridge: Bridge<ImageSource>;
         buttonSpacing?: number;
         contentContainerStyle?: StyleProp<ViewStyle>;
+        document: Document;
         iconSize?: number;
         inactiveButtonBackgroundColor?: string;
         inactiveButtonColor?: string;
         layout: Layout;
         onInsertImageError?: (e: Error) => void;
+        onPressCustomControl?: <A extends GenericControlAction>(actionType: A, actionOptions?: any) => void;
         pickOneImage?: <O = {}>(options?: O) => Promise<Images.Description<ImageSource>>;
-        selectedTextAttributes: Attributes.Map;
         separatorColor?: string;
         style?: StyleProp<ViewStyle>;
     }
