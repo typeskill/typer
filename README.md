@@ -117,7 +117,7 @@ This decoupled design has the following advantages:
 
 ### Minimal example
 
-Bellow is a simplified snippet [from the expo example](examples/expo/App.tsx) to show you how the `Toolbar` can be interfaced with the `Typer` component.
+Bellow is a simplified snippet [from the minimal expo example](examples/expo/App.tsx) to show you how the `Toolbar` can be interfaced with the `Typer` component.
 You need a linked `react-native-vector-icons` or `@expo/vector-icons` if you are on expo to make this example work.
 
 ``` jsx
@@ -125,47 +125,53 @@ import React from 'react'
 import { Component } from 'react-native'
 import {
   Bridge,
-  Sheeet,
   Toolbar,
+  Typer,
   buildVectorIconControlSpec,
+  buildEmptyDocument,
   TEXT_CONTROL_SEPARATOR,
-  ControlAction
+  DocumentControlAction
 } from 'react-native-typeskill'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 
 const toolbarLayout = [
   buildVectorIconControlSpec(
     MaterialCommunityIcons,
-    ControlAction.SELECT_TEXT_BOLD,
+    DocumentControlAction.SELECT_TEXT_BOLD,
     'format-bold'
   ),
   buildVectorIconControlSpec(
     MaterialCommunityIcons,
-    ControlAction.SELECT_TEXT_ITALIC,
+    DocumentControlAction.SELECT_TEXT_ITALIC,
     'format-italic'
   ),
   buildVectorIconControlSpec(
     MaterialCommunityIcons,
-    ControlAction.SELECT_TEXT_UNDERLINE,
+    DocumentControlAction.SELECT_TEXT_UNDERLINE,
     'format-underline'
   ),
   buildVectorIconControlSpec(
     MaterialCommunityIcons,
-    ControlAction.SELECT_TEXT_STRIKETHROUGH,
+    DocumentControlAction.SELECT_TEXT_STRIKETHROUGH,
     'format-strikethrough-variant'
   )
 ]
 
 export class RichTextEditor extends Component {
   bridge = new Bridge()
-
+  state = {
+    document: buildEmptyDocument()
+  }
+  onDocumentUpdate = (document) => {
+    this.setState({ document })
+  }
   render() {
     return (
       <View style={{ flex: 1 }}>
-        <Typer bridgeInnerInterface={this.bridge.getInnerInterface()} />
+        <Typer document={this.state.document} onDocumentUpdate={this.onDocumentUpdate} bridge={this.bridge} />
         <Toolbar
           layout={toolbarLayout}
-          bridgeOuterInferface={this.bridge.getOuterInterface()}
+          bridge={this.bridge}
         />
       </View>
     )

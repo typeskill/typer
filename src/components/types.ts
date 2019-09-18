@@ -14,7 +14,7 @@ const documentShape: Record<keyof Document, any> = {
 
 const controlSpecsShape: Record<keyof Toolbar.DocumentControlSpec, any> = {
   IconComponent: PropTypes.func.isRequired,
-  actionType: PropTypes.number.isRequired,
+  actionType: PropTypes.oneOf([PropTypes.number, PropTypes.string, PropTypes.symbol]).isRequired,
   iconProps: PropTypes.object,
   actionOptions: PropTypes.any,
 }

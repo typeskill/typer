@@ -207,7 +207,7 @@ export namespace Toolbar {
         iconProps?: T extends Toolbar.VectorIconMinimalProps ? Toolbar.VectorIconMinimalProps : Partial<T>;
     }
     export type Layout = (DocumentControlSpec<any> | typeof CONTROL_SEPARATOR | GenericControlSpec<any, any>)[];
-    export interface Props<ImageSource> {
+    export interface Props<ImageSource, O = any> {
         activeButtonBackgroundColor?: string;
         activeButtonColor?: string;
         bridge: Bridge<ImageSource>;
@@ -220,7 +220,7 @@ export namespace Toolbar {
         layout: Layout;
         onInsertImageError?: (e: Error) => void;
         onPressCustomControl?: <A extends GenericControlAction>(actionType: A, actionOptions?: any) => void;
-        pickOneImage?: <O = {}>(options?: O) => Promise<Images.Description<ImageSource>>;
+        pickOneImage?: (options?: O) => Promise<Images.Description<ImageSource>>;
         separatorColor?: string;
         style?: StyleProp<ViewStyle>;
     }
@@ -237,7 +237,7 @@ export namespace Toolbar {
 export type Toolbar = ComponentClass<Toolbar.Props<any>>;
 
 // @public (undocumented)
-export const Toolbar: React.ComponentClass<Toolbar.Props<any>, any>;
+export const Toolbar: React.ComponentClass<Toolbar.Props<any, any>, any>;
 
 // @public
 export namespace Transforms {
