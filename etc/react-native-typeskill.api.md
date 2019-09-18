@@ -107,6 +107,7 @@ export interface Document {
 export interface DocumentRendererProps<ImageSource> {
     contentContainerStyle?: StyleProp<ViewStyle>;
     document: Document;
+    documentStyle?: StyleProp<ViewStyle>;
     ImageComponent?: Images.Component<ImageSource>;
     maxMediaBlockHeight?: number;
     maxMediaBlockWidth?: number;

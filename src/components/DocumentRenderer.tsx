@@ -19,6 +19,18 @@ export interface DocumentRendererState {
 /**
  * A generic interface for components displaying {@link Document | document}.
  *
+ * @remarks There are 3 styles props:
+ *
+ * ```
+ * +------------------------------+
+ * | style (ScrollView)           |
+ * | +--------------------------+ |
+ * | | contentContainerStyle    | |
+ * | | +----------------------+ | |
+ * | | | documentStyle        | | |
+ * | | |                      | | |
+ * ```
+ *
  * @public
  */
 export interface DocumentRendererProps<ImageSource> {
@@ -62,7 +74,7 @@ export interface DocumentRendererProps<ImageSource> {
    * @remarks It is used:
    *
    * - between two adjacent blocks;
-   * - to add padding between the container and the rendered document.
+   * - to add padding between container and document print.
    */
   spacing?: number
 
@@ -75,21 +87,28 @@ export interface DocumentRendererProps<ImageSource> {
    * Style applied to the content container.
    *
    * @remarks This prop MUST NOT contain padding or margin rules. Such spacing rules will be zero-ed.
-   * Apply padding to the {@link DocumentRendererProps.style | `style`} prop instead.
+   * Instead, {@link DocumentRendererProps.spacing | `spacing`} prop will add spacing between the edge of the scrollview and container.
    */
   contentContainerStyle?: StyleProp<ViewStyle>
+
+  /**
+   * Styles applied to the closest view encompassing rich content.
+   *
+   * @remarks This prop MUST NOT contain padding rules. Such padding rules will be zero-ed. Instead, use margin rules.
+   */
+  documentStyle?: StyleProp<ViewStyle>
 }
 
 const contentRendererStyles = StyleSheet.create({
   scroll: {
     flex: 1,
   },
-  contentContainer: {
+  documentStyle: {
     flexGrow: 1,
     justifyContent: 'flex-start',
     alignItems: 'stretch',
   },
-  root: {
+  contentContainer: {
     flex: 1,
     flexDirection: 'row',
     alignSelf: 'stretch',
@@ -108,6 +127,7 @@ export abstract class DocumentRenderer<
     ImageComponent: PropTypes.func,
     style: ViewPropTypes.style,
     contentContainerStyle: ViewPropTypes.style,
+    documentStyle: ViewPropTypes.style,
     textStyle: PropTypes.any,
     spacing: PropTypes.number,
     maxMediaBlockHeight: PropTypes.number,
@@ -138,16 +158,21 @@ export abstract class DocumentRenderer<
     })
   }
 
-  protected getScrollStyles(): StyleProp<ViewStyle> {
+  protected getComponentStyles(): StyleProp<ViewStyle> {
     return [contentRendererStyles.scroll, this.props.style]
   }
 
-  protected getRootStyles(): StyleProp<ViewStyle> {
-    return [contentRendererStyles.root, { padding: this.getSpacing() }, this.props.contentContainerStyle]
+  protected getContentContainerStyles(): StyleProp<ViewStyle> {
+    return [
+      contentRendererStyles.contentContainer,
+      this.props.contentContainerStyle,
+      genericStyles.zeroSpacing,
+      { padding: this.getSpacing() },
+    ]
   }
 
-  protected getContainerStyles(): StyleProp<ViewStyle> {
-    return [contentRendererStyles.contentContainer, this.props.contentContainerStyle, genericStyles.zeroSpacing]
+  protected getDocumentStyles(): StyleProp<ViewStyle> {
+    return [contentRendererStyles.documentStyle, this.props.documentStyle, genericStyles.zeroPadding]
   }
 
   protected getBlockStyle(block: Block) {

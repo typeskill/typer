@@ -200,9 +200,9 @@ class _Typer extends DocumentRenderer<Typer.Props<any>, TyperState> implements D
     this.assembler = new BlockAssembler(this.props.document)
     const { readonly } = this.props
     return (
-      <AutoScrollView style={this.getScrollStyles()} keyboardShouldPersistTaps="always">
-        <View style={this.getRootStyles()}>
-          <View style={this.getContainerStyles()} onLayout={this.handleOnContainerLayout}>
+      <AutoScrollView style={this.getComponentStyles()} keyboardShouldPersistTaps="always">
+        <View style={this.getContentContainerStyles()}>
+          <View style={this.getDocumentStyles()} onLayout={this.handleOnContainerLayout}>
             {this.assembler.getBlocks().map(readonly ? this.renderBlockView : this.renderBlockInput)}
           </View>
         </View>

@@ -29,9 +29,9 @@ class _Print extends DocumentRenderer<Print.Props> {
   public render() {
     this.assembler = new BlockAssembler(this.props.document)
     return (
-      <ScrollView style={this.getScrollStyles()}>
-        <View style={this.getRootStyles()}>
-          <View style={this.getContainerStyles()} onLayout={this.handleOnContainerLayout}>
+      <ScrollView style={this.getComponentStyles()}>
+        <View style={this.getContentContainerStyles()}>
+          <View style={this.getDocumentStyles()} onLayout={this.handleOnContainerLayout}>
             {this.assembler.getBlocks().map(this.renderBlockView)}
           </View>
         </View>
