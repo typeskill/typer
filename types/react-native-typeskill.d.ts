@@ -228,7 +228,7 @@ export declare function buildEmptyDocument(): Document;
  *
  * @public
  */
-export declare function buildVectorIconControlSpec<T extends Toolbar.VectorIconMinimalProps>(IconComponent: ComponentType<T & Toolbar.TextControlMinimalIconProps>, actionType: ControlAction, name: string): Toolbar.ControlSpec<T>;
+export declare function buildVectorIconControlSpec<T extends Toolbar.VectorIconMinimalProps>(IconComponent: ComponentType<T & Toolbar.TextControlMinimalIconProps>, actionType: ControlAction, name: string, options: Pick<Toolbar.ControlSpec<T>, 'actionOptions' | 'iconProps'>): Toolbar.ControlSpec<T>;
 
 /**
  * Clone a peace of {@link Document | document}.
@@ -553,6 +553,10 @@ export declare namespace Toolbar {
          */
         actionType: ControlAction;
         /**
+         * Any value to be passed to action hook.
+         */
+        actionOptions?: any;
+        /**
          * The props passed to `IconComponent`
          */
         iconProps?: T extends Toolbar.VectorIconMinimalProps ? Toolbar.VectorIconMinimalProps : Partial<T>;
@@ -581,8 +585,10 @@ export declare namespace Toolbar {
         layout: Layout;
         /**
          * An async function that returns a promise resolving to the {@link Images.Description | description} of an image.
+         *
+         * @remarks The corresponding {@link (Toolbar:namespace).ControlSpec.actionOptions} will be passed to this function.
          */
-        pickOneImage?: () => Promise<Images.Description<ImageSource>>;
+        pickOneImage?: <O = {}>(options?: O) => Promise<Images.Description<ImageSource>>;
         /**
          * A callback fired when inserting an image results in an error.
          */

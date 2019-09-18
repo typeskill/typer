@@ -68,6 +68,10 @@ declare namespace Toolbar {
      */
     actionType: ControlAction
     /**
+     * Any value to be passed to action hook.
+     */
+    actionOptions?: any
+    /**
      * The props passed to `IconComponent`
      */
     iconProps?: T extends Toolbar.VectorIconMinimalProps ? Toolbar.VectorIconMinimalProps : Partial<T>
@@ -97,8 +101,10 @@ declare namespace Toolbar {
     layout: Layout
     /**
      * An async function that returns a promise resolving to the {@link Images.Description | description} of an image.
+     *
+     * @remarks The corresponding {@link (Toolbar:namespace).ControlSpec.actionOptions} will be passed to this function.
      */
-    pickOneImage?: () => Promise<Images.Description<ImageSource>>
+    pickOneImage?: <O = {}>(options?: O) => Promise<Images.Description<ImageSource>>
     /**
      * A callback fired when inserting an image results in an error.
      */
@@ -266,10 +272,10 @@ class _Toolbar extends PureComponent<Toolbar.Props<any>> {
     }
   }
 
-  private async insertImageAtSelection() {
+  private async insertImageAtSelection(options?: any) {
     if (this.props.pickOneImage) {
       try {
-        const description = await this.props.pickOneImage()
+        const description = await this.props.pickOneImage(options)
         this.controlEventDom.insertOrReplaceAtSelection({ type: 'image', description })
       } catch (e) {
         this.props.onInsertImageError && this.props.onInsertImageError(e)
@@ -294,15 +300,15 @@ class _Toolbar extends PureComponent<Toolbar.Props<any>> {
     return typeof this.props.buttonSpacing === 'number' ? this.props.buttonSpacing : (this.props.iconSize as number) / 3
   }
 
-  private renderInsertImageController(textControlSpec: Toolbar.ControlSpec, last = false) {
+  private renderInsertImageController(controlSpec: Toolbar.ControlSpec, last = false) {
     const IconButton = this.IconButton
     return (
       <IconButton
         selected={false}
         style={last ? undefined : { marginRight: this.computeIconSpacing() }}
-        IconComponent={textControlSpec.IconComponent}
-        iconProps={textControlSpec.iconProps}
-        onPress={this.insertImageAtSelection}
+        IconComponent={controlSpec.IconComponent}
+        iconProps={controlSpec.iconProps}
+        onPress={this.insertImageAtSelection.bind(this, controlSpec.actionOptions)}
       />
     )
   }
@@ -384,10 +390,11 @@ export function buildVectorIconControlSpec<T extends Toolbar.VectorIconMinimalPr
   IconComponent: ComponentType<T & Toolbar.TextControlMinimalIconProps>,
   actionType: ControlAction,
   name: string,
+  options: Pick<Toolbar.ControlSpec<T>, 'actionOptions' | 'iconProps'>,
 ): Toolbar.ControlSpec<T> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const iconProps: any = { name }
   const specs: Toolbar.ControlSpec<T> = {
+    ...options,
     actionType,
     iconProps,
     IconComponent,

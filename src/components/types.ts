@@ -16,6 +16,7 @@ const controlSpecsShape: Record<keyof Toolbar.ControlSpec, any> = {
   IconComponent: PropTypes.func.isRequired,
   actionType: PropTypes.number.isRequired,
   iconProps: PropTypes.object,
+  actionOptions: PropTypes.any,
 }
 
 export const DocumentPropType = PropTypes.shape(documentShape)

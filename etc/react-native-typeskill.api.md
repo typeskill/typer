@@ -75,7 +75,7 @@ export function buildBridge<ImageSource>(): Bridge<ImageSource>;
 export function buildEmptyDocument(): Document;
 
 // @public
-export function buildVectorIconControlSpec<T extends Toolbar.VectorIconMinimalProps>(IconComponent: ComponentType<T & Toolbar.TextControlMinimalIconProps>, actionType: ControlAction, name: string): Toolbar.ControlSpec<T>;
+export function buildVectorIconControlSpec<T extends Toolbar.VectorIconMinimalProps>(IconComponent: ComponentType<T & Toolbar.TextControlMinimalIconProps>, actionType: ControlAction, name: string, options: Pick<Toolbar.ControlSpec<T>, 'actionOptions' | 'iconProps'>): Toolbar.ControlSpec<T>;
 
 // @public
 export function cloneDocument(content: Document): Document;
@@ -196,6 +196,7 @@ export interface TextOp extends GenericOp {
 // @public
 export namespace Toolbar {
     export interface ControlSpec<T extends object = {}> {
+        actionOptions?: any;
         actionType: ControlAction;
         IconComponent: ComponentType<TextControlMinimalIconProps & T>;
         iconProps?: T extends Toolbar.VectorIconMinimalProps ? Toolbar.VectorIconMinimalProps : Partial<T>;
@@ -212,7 +213,7 @@ export namespace Toolbar {
         inactiveButtonColor?: string;
         layout: Layout;
         onInsertImageError?: (e: Error) => void;
-        pickOneImage?: () => Promise<Images.Description<ImageSource>>;
+        pickOneImage?: <O = {}>(options?: O) => Promise<Images.Description<ImageSource>>;
         selectedTextAttributes: Attributes.Map;
         separatorColor?: string;
         style?: StyleProp<ViewStyle>;
