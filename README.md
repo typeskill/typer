@@ -117,7 +117,7 @@ This decoupled design has the following advantages:
 
 ### Minimal example
 
-Bellow is a simplified snippet [from the minimal expo example](examples/expo/App.tsx) to show you how the `Toolbar` can be interfaced with the `Typer` component.
+Bellow is a simplified snippet [from the minimal expo example](https://github.com/typeskill/examples/tree/master/expo-minimal) to show you how the `Toolbar` can be interfaced with the `Typer` component.
 You need a linked `react-native-vector-icons` or `@expo/vector-icons` if you are on expo to make this example work.
 
 ``` jsx
@@ -129,7 +129,6 @@ import {
   Typer,
   buildVectorIconControlSpec,
   buildEmptyDocument,
-  TEXT_CONTROL_SEPARATOR,
   DocumentControlAction
 } from 'react-native-typeskill'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
