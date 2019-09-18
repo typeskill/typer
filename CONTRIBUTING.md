@@ -53,7 +53,7 @@ npm run release -- --skip.changelog=true --prerelease alpha
 
 ## Reporting issues
 
-You can report issues on our [bug tracker](https://github.com/jsamr/react-native-Typeskill/issues). Please search for existing issues and follow the issue template when opening an issue.
+You can report issues on our [bug tracker](https://github.com/typeskill/typer/issues). Please search for existing issues and follow the issue template when opening an issue.
 
 ## License
 

@@ -21,7 +21,7 @@ Ideally, please attempt tests on at least one iOS and one Android device or emul
 
 ## Versions
 <!-- Please add the used versions/branches -->
-- react-native-typeskill:
+- @typeskill/typer:
 - react-native:
 
 ## Description

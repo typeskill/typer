@@ -1,14 +1,14 @@
 <h1 align="center">
 <code>
-    react-native-typeskill
+    @typeskill/typer
 </code>
 </h1>
 
 <p align="center">
-    <a href="https://www.npmjs.com/package/react-native-typeskill" alt="Npm Version">
-        <img src="https://img.shields.io/npm/v/react-native-typeskill.svg" /></a>
+    <a href="https://www.npmjs.com/package/@typeskill/typer" alt="Npm Version">
+        <img src="https://img.shields.io/npm/v/@typeskill/typer.svg" /></a>
     <img src="https://img.shields.io/badge/platforms-android%20|%20ios%20|%20windows-lightgrey.svg" />
-    <img src="https://img.shields.io/npm/l/react-native-typeskill.svg"/>
+    <img src="https://img.shields.io/npm/l/@typeskill/typer.svg"/>
     <a href="https://github.com/typeskill/typeskill/issues?q=is%3Aissue+is%3Aopen+label%3A%22scheduled+feature%22" >
         <img src="https://img.shields.io/github/issues-raw/typeskill/typeskill/scheduled%20feature.svg?label=scheduled%20feature&colorB=125bba" alt="scheduled features" />
     </a>
@@ -63,8 +63,8 @@
 *Prerequisite: you must have `npm` and `expo-cli` globally installed*
 
 ``` bash
-git clone https://github.com/typeskill/typeskill.git
-cd react-native-typeskill/examples/expo
+git clone https://github.com/typeskill/examples/tree/master
+cd examples/expo-minimal
 npm install
 expo start
 ```
@@ -130,7 +130,7 @@ import {
   buildVectorIconControlSpec,
   buildEmptyDocument,
   DocumentControlAction
-} from 'react-native-typeskill'
+} from '@typeskill/typer'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 
 const toolbarLayout = [
