@@ -190,3 +190,4 @@ You need to comply with this contract to avoid resource leakage and bugs:
 ### Integrating your image picker
 
 Typeskill won't chose a picker on your behalf, as it would break its commitment to modular design.
+You can check [the showcase expo example](https://github.com/typeskill/examples/tree/master/expo-showcase) to see how to integrate your image picker.
