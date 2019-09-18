@@ -28,7 +28,7 @@
     "types/**/*"
   ],
   "main": "lib/index.js",
-  "types": "types/react-native-typeskill.d.ts",
+  "types": "types/typer.d.ts",
   "keywords": [
     "react native",
     "rich text",
@@ -87,6 +87,7 @@
     "@types/react-test-renderer": "^16.8.1",
     "@typescript-eslint/eslint-plugin": "^2.3.0",
     "@typescript-eslint/parser": "^2.3.0",
+    "@typeskill/eslint-config": "^1.0.0",
     "@zerollup/ts-transform-paths": "^1.7.1",
     "babel-jest": "^24.8.0",
     "babel-plugin-module-resolver": "^3.2.0",
@@ -94,7 +95,6 @@
     "codecov": "^3.5.0",
     "eslint": "^6.4.0",
     "eslint-config-prettier": "^6.3.0",
-    "eslint-config-typeskill": "^1.0.0",
     "eslint-plugin-prettier": "^3.1.0",
     "eslint-plugin-react": "^7.14.3",
     "husky": "^3.0.5",
