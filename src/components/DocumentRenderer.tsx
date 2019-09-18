@@ -163,11 +163,12 @@ export abstract class DocumentRenderer<
   }
 
   protected getContentContainerStyles(): StyleProp<ViewStyle> {
+    const padding = this.getSpacing()
     return [
       contentRendererStyles.contentContainer,
       this.props.contentContainerStyle,
       genericStyles.zeroSpacing,
-      { padding: this.getSpacing() },
+      { paddingLeft: padding, paddingRight: padding, paddingTop: padding, paddingBottom: padding },
     ]
   }
 
