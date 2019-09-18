@@ -768,9 +768,8 @@ export declare namespace Typer {
         /**
          * Handler to receive {@link Document| document} updates.
          *
-         * @remarks This callback is expected to return a promise. This promise MUST resolve when the update had been proceeded.
          */
-        onDocumentUpdate?: (nextDocumentContent: Document) => Promise<void>;
+        onDocumentUpdate?: (nextDocumentContent: Document) => void;
         /**
          * Disable edition.
          */

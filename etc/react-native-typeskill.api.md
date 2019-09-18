@@ -264,7 +264,7 @@ export namespace Typer {
         bridge: Bridge<ImageSource>;
         debug?: boolean;
         imageHooks?: Images.Hooks<ImageSource>;
-        onDocumentUpdate?: (nextDocumentContent: Document) => Promise<void>;
+        onDocumentUpdate?: (nextDocumentContent: Document) => void;
         readonly?: boolean;
         underlayColor?: string;
     }

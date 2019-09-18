@@ -4,7 +4,6 @@ import { Document } from '@model/document'
 import { boundMethod } from 'autobind-decorator'
 import PropTypes from 'prop-types'
 import { GenericBlockInput } from './GenericBlockInput'
-import mergeLeft from 'ramda/es/mergeLeft'
 import { Block } from '@model/Block'
 import { DocumentProvider, BlockController } from './BlockController'
 import { BlockAssembler } from '@model/BlockAssembler'
@@ -50,9 +49,8 @@ declare namespace Typer {
     /**
      * Handler to receive {@link Document| document} updates.
      *
-     * @remarks This callback is expected to return a promise. This promise MUST resolve when the update had been proceeded.
      */
-    onDocumentUpdate?: (nextDocumentContent: Document) => Promise<void>
+    onDocumentUpdate?: (nextDocumentContent: Document) => void
 
     /**
      * Disable edition.
@@ -113,11 +111,9 @@ class _Typer extends DocumentRenderer<Typer.Props<any>, TyperState> implements D
     return this.props.imageHooks as Images.Hooks<any>
   }
 
-  public updateDocument(documentUpdate: Partial<Document>): Promise<void> {
+  public async updateDocument(documentUpdate: Document): Promise<void> {
     return (
-      (this.props.onDocumentUpdate &&
-        this.props.document &&
-        this.props.onDocumentUpdate(mergeLeft(documentUpdate, this.props.document) as Document)) ||
+      (this.props.onDocumentUpdate && this.props.document && this.props.onDocumentUpdate(documentUpdate)) ||
       Promise.resolve()
     )
   }
