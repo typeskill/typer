@@ -9,23 +9,23 @@
         <img src="https://img.shields.io/npm/v/@typeskill/typer.svg" /></a>
     <img src="https://img.shields.io/badge/platforms-android%20|%20ios%20|%20windows-lightgrey.svg" />
     <img src="https://img.shields.io/npm/l/@typeskill/typer.svg"/>
-    <a href="https://github.com/typeskill/typeskill/issues?q=is%3Aissue+is%3Aopen+label%3A%22scheduled+feature%22" >
-        <img src="https://img.shields.io/github/issues-raw/typeskill/typeskill/scheduled%20feature.svg?label=scheduled%20feature&colorB=125bba" alt="scheduled features" />
+    <a href="https://github.com/typeskill/typer/issues?q=is%3Aissue+is%3Aopen+label%3A%22scheduled+feature%22" >
+        <img src="https://img.shields.io/github/issues-raw/typeskill/typer/scheduled%20feature.svg?label=scheduled%20feature&colorB=125bba" alt="scheduled features" />
     </a>
 </p>
 <p align="center">
-    <a href="https://circleci.com/gh/typeskill/typeskill">
-        <img src="https://circleci.com/gh/typeskill/typeskill.svg?style=shield" alt="Circle CI" />
+    <a href="https://circleci.com/gh/typeskill/typer">
+        <img src="https://circleci.com/gh/typeskill/typer.svg?style=shield" alt="Circle CI" />
     </a>
-    <a href="https://codecov.io/gh/typeskill/typeskill">
-        <img src="https://codecov.io/gh/typeskill/typeskill/branch/master/graph/badge.svg" alt="Code coverage">
+    <a href="https://codecov.io/gh/typeskill/typer">
+        <img src="https://codecov.io/gh/typeskill/typer/branch/master/graph/badge.svg" alt="Code coverage">
     </a>
-    <a href="https://github.com/typeskill/typeskill/issues?q=is%3Aissue+is%3Aopen+label%3Abug">
-        <img src="https://img.shields.io/github/issues-raw/typeskill/typeskill/bug.svg?label=open%20bugs" alt="open bugs">
+    <a href="https://github.com/typeskill/typer/issues?q=is%3Aissue+is%3Aopen+label%3Abug">
+        <img src="https://img.shields.io/github/issues-raw/typeskill/typer/bug.svg?label=open%20bugs" alt="open bugs">
     </a>
-    <img alt="Greenkeeper badge" src="https://badges.greenkeeper.io/typeskill/typeskill.svg">
-    <a href="https://snyk.io/test/github/typeskill/typeskill">
-      <img alt="vulnerabilities" src="https://snyk.io/test/github/typeskill/typeskill/badge.svg">
+    <img alt="Greenkeeper badge" src="https://badges.greenkeeper.io/typeskill/typer.svg">
+    <a href="https://snyk.io/test/github/typeskill/typer">
+      <img alt="vulnerabilities" src="https://snyk.io/test/github/typeskill/typer/badge.svg">
     </a>
 </p>
 
