@@ -112,6 +112,7 @@ const contentRendererStyles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     alignSelf: 'stretch',
+    justifyContent: 'center',
   },
 })
 
