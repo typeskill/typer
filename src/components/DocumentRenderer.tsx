@@ -4,7 +4,7 @@ import PropTypes from 'prop-types'
 import { Document } from '@model/document'
 import { StyleSheet, StyleProp, ViewStyle, TextStyle, ViewPropTypes, LayoutChangeEvent } from 'react-native'
 import { BlockAssembler } from '@model/BlockAssembler'
-import { genericStyles } from './styles'
+import { genericStyles, overridePadding } from './styles'
 import { boundMethod } from 'autobind-decorator'
 import { Block } from '@model/Block'
 import { GenericBlockView } from './GenericBlockView'
@@ -73,8 +73,8 @@ export interface DocumentRendererProps<ImageSource> {
    *
    * @remarks It is used:
    *
-   * - between two adjacent blocks;
-   * - to add padding between container and document print.
+   * - Between two adjacent blocks;
+   * - Between container and document print.
    */
   spacing?: number
 
@@ -149,7 +149,7 @@ export abstract class DocumentRenderer<
   }
 
   private getSpacing() {
-    return this.props.spacing
+    return this.props.spacing as number
   }
 
   protected handleOnContainerLayout = (layoutEvent: LayoutChangeEvent) => {
@@ -164,12 +164,7 @@ export abstract class DocumentRenderer<
 
   protected getContentContainerStyles(): StyleProp<ViewStyle> {
     const padding = this.getSpacing()
-    return [
-      contentRendererStyles.contentContainer,
-      this.props.contentContainerStyle,
-      genericStyles.zeroSpacing,
-      { paddingLeft: padding, paddingRight: padding, paddingTop: padding, paddingBottom: padding },
-    ]
+    return [contentRendererStyles.contentContainer, this.props.contentContainerStyle, overridePadding(padding)]
   }
 
   protected getDocumentStyles(): StyleProp<ViewStyle> {

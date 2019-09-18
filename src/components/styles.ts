@@ -12,17 +12,21 @@ const zeroMargin: ViewStyle = {
   marginVertical: 0,
 }
 
-const zeroPadding: ViewStyle = {
-  padding: 0,
-  paddingBottom: 0,
-  paddingEnd: 0,
-  paddingHorizontal: 0,
-  paddingLeft: 0,
-  paddingRight: 0,
-  paddingStart: 0,
-  paddingTop: 0,
-  paddingVertical: 0,
+export function overridePadding(padding: number) {
+  return {
+    padding,
+    paddingBottom: padding,
+    paddingEnd: padding,
+    paddingHorizontal: padding,
+    paddingLeft: padding,
+    paddingRight: padding,
+    paddingStart: padding,
+    paddingTop: padding,
+    paddingVertical: padding,
+  }
 }
+
+const zeroPadding: ViewStyle = overridePadding(0)
 
 export const genericStyles = StyleSheet.create({
   zeroMargin,

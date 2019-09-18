@@ -355,8 +355,8 @@ export declare interface DocumentRendererProps<ImageSource> {
      *
      * @remarks It is used:
      *
-     * - between two adjacent blocks;
-     * - to add padding between container and document print.
+     * - Between two adjacent blocks;
+     * - Between container and document print.
      */
     spacing?: number;
     /**
