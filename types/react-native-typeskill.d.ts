@@ -576,7 +576,7 @@ export declare namespace Toolbar {
     /**
      * Props of the {@link (Toolbar:type)} component.
      */
-    export interface Props<ImageSource> {
+    export interface Props<ImageSource, O = any> {
         /**
          * The instance to be shared with the {@link (Typer:type)}.
          */
@@ -594,7 +594,7 @@ export declare namespace Toolbar {
          *
          * @remarks The corresponding {@link (Toolbar:namespace).GenericControlSpec.actionOptions} will be passed to this function.
          */
-        pickOneImage?: <O = {}>(options?: O) => Promise<Images.Description<ImageSource>>;
+        pickOneImage?: (options?: O) => Promise<Images.Description<ImageSource>>;
         /**
          * A callback fired when pressing a custom control.
          */
@@ -685,7 +685,7 @@ export declare namespace Toolbar {
  */
 export declare type Toolbar = ComponentClass<Toolbar.Props<any>>;
 
-export declare const Toolbar: React.ComponentClass<Toolbar.Props<any>, any>;
+export declare const Toolbar: React.ComponentClass<Toolbar.Props<any, any>, any>;
 
 /**
  * A set of definitions related to text and arbitrary content transforms.

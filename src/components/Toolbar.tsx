@@ -96,7 +96,7 @@ declare namespace Toolbar {
   /**
    * Props of the {@link (Toolbar:type)} component.
    */
-  export interface Props<ImageSource> {
+  export interface Props<ImageSource, O = any> {
     /**
      * The instance to be shared with the {@link (Typer:type)}.
      */
@@ -114,7 +114,7 @@ declare namespace Toolbar {
      *
      * @remarks The corresponding {@link (Toolbar:namespace).GenericControlSpec.actionOptions} will be passed to this function.
      */
-    pickOneImage?: <O = {}>(options?: O) => Promise<Images.Description<ImageSource>>
+    pickOneImage?: (options?: O) => Promise<Images.Description<ImageSource>>
     /**
      * A callback fired when pressing a custom control.
      */
@@ -216,7 +216,7 @@ const styles = StyleSheet.create({
 })
 
 // eslint-disable-next-line @typescript-eslint/class-name-casing
-class _Toolbar extends PureComponent<Toolbar.Props<any>> {
+class _Toolbar extends PureComponent<Toolbar.Props<any, any>> {
   public static propTypes: Record<keyof Toolbar.Props<any>, any> = {
     bridge: PropTypes.instanceOf(BridgeStatic).isRequired,
     document: DocumentPropType,
