@@ -143,7 +143,7 @@ export abstract class DocumentRenderer<
   }
 
   protected getRootStyles(): StyleProp<ViewStyle> {
-    return [contentRendererStyles.root, { padding: this.getSpacing() }]
+    return [contentRendererStyles.root, { padding: this.getSpacing() }, this.props.contentContainerStyle]
   }
 
   protected getContainerStyles(): StyleProp<ViewStyle> {
