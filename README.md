@@ -5,7 +5,7 @@
 </h1>
 <p align="center">
   <em>
-    Typeskill, the Operational-Transform Based (React) Native Rich Text library.
+    Typeskill, the Operational-Transform Based (React) Native Rich Text Library.
   </em>
 </p>
 <p align="center">
@@ -38,7 +38,7 @@
   </code>
 </p>
 <p align="center">
-    <img width="300" src="images/screenshot.jpg" alt="Typeskill screenshot">
+    <img width="400" src="images/screenshot.png" alt="Typeskill screenshot">
 
 </p>
 <p align="center">
