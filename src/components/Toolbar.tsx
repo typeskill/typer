@@ -97,29 +97,29 @@ declare namespace Toolbar {
     /**
      * Button background when a control is not in active state.
      */
-    inactiveButtonBackgroundColor?: string
+    inactiveButtonBackgroundColor: string
     /**
      * Button icon color when a control is not in active state.
      */
-    inactiveButtonColor?: string
+    inactiveButtonColor: string
     /**
      * Button icon color when a control is in active state.
      */
-    activeButtonBackgroundColor?: string
+    activeButtonBackgroundColor: string
     /**
      * Button background when a control is in active state.
      */
-    activeButtonColor?: string
+    activeButtonColor: string
     /**
      * Icon size.
      */
-    iconSize?: number
+    iconSize: number
   }
 
   /**
    * Props of the {@link (Toolbar:type)} component.
    */
-  export interface Props<ImageSource, O = any> extends IconButtonSpecs {
+  export interface Props<ImageSource, O = any> extends Partial<IconButtonSpecs> {
     /**
      * The instance to be shared with the {@link (Typer:type)}.
      */
@@ -278,13 +278,12 @@ class _Toolbar extends PureComponent<Toolbar.Props<any, any>> {
     style,
     IconComponent,
     iconProps,
-    iconSize,
     ...buttonSpec
   }) => {
     const dynamicStyle = selected ? getSelectedButtonStyle(buttonSpec) : getDefaultButtonStyle(buttonSpec)
     return (
       <TouchableOpacity onPress={onPress} style={[dynamicStyle, style]}>
-        <IconComponent color={dynamicStyle.color as string} size={iconSize || DEFAULT_ICON_SIZE} {...iconProps} />
+        <IconComponent color={dynamicStyle.color as string} size={buttonSpec.iconSize} {...iconProps} />
       </TouchableOpacity>
     )
   }
@@ -336,6 +335,23 @@ class _Toolbar extends PureComponent<Toolbar.Props<any, any>> {
     return typeof this.props.buttonSpacing === 'number' ? this.props.buttonSpacing : (this.props.iconSize as number) / 3
   }
 
+  private getButtonSpecs(): Toolbar.IconButtonSpecs {
+    const {
+      iconSize,
+      activeButtonBackgroundColor,
+      activeButtonColor,
+      inactiveButtonBackgroundColor,
+      inactiveButtonColor,
+    } = this.props
+    return {
+      iconSize: iconSize as number,
+      activeButtonBackgroundColor: activeButtonBackgroundColor as string,
+      activeButtonColor: activeButtonColor as string,
+      inactiveButtonBackgroundColor: inactiveButtonBackgroundColor as string,
+      inactiveButtonColor: inactiveButtonColor as string,
+    }
+  }
+
   private renderStatelessActionController(
     controlSpec: Toolbar.DocumentControlSpec,
     onPress: () => void,
@@ -344,6 +360,7 @@ class _Toolbar extends PureComponent<Toolbar.Props<any, any>> {
     const IconButton = _Toolbar.IconButton
     return (
       <IconButton
+        {...this.getButtonSpecs()}
         selected={false}
         style={last ? undefined : { marginRight: this.computeIconSpacing() }}
         IconComponent={controlSpec.IconComponent}
@@ -381,6 +398,7 @@ class _Toolbar extends PureComponent<Toolbar.Props<any, any>> {
     const IconButton = _Toolbar.IconButton
     return (
       <IconButton
+        {...this.getButtonSpecs()}
         selected={selectedTextAttributes[attributeName] === activeAttributeValue}
         style={last ? undefined : { marginRight: this.computeIconSpacing() }}
         IconComponent={textControlSpec.IconComponent}

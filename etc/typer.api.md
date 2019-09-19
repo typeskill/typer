@@ -221,14 +221,14 @@ export namespace Toolbar {
     }
     // (undocumented)
     export interface IconButtonSpecs {
-        activeButtonBackgroundColor?: string;
-        activeButtonColor?: string;
-        iconSize?: number;
-        inactiveButtonBackgroundColor?: string;
-        inactiveButtonColor?: string;
+        activeButtonBackgroundColor: string;
+        activeButtonColor: string;
+        iconSize: number;
+        inactiveButtonBackgroundColor: string;
+        inactiveButtonColor: string;
     }
     export type Layout = (DocumentControlSpec<any> | typeof CONTROL_SEPARATOR | GenericControlSpec<any, any>)[];
-    export interface Props<ImageSource, O = any> extends IconButtonSpecs {
+    export interface Props<ImageSource, O = any> extends Partial<IconButtonSpecs> {
         bridge: Bridge<ImageSource>;
         buttonSpacing?: number;
         contentContainerStyle?: StyleProp<ViewStyle>;

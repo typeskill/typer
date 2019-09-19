@@ -584,28 +584,28 @@ export declare namespace Toolbar {
         /**
          * Button background when a control is not in active state.
          */
-        inactiveButtonBackgroundColor?: string;
+        inactiveButtonBackgroundColor: string;
         /**
          * Button icon color when a control is not in active state.
          */
-        inactiveButtonColor?: string;
+        inactiveButtonColor: string;
         /**
          * Button icon color when a control is in active state.
          */
-        activeButtonBackgroundColor?: string;
+        activeButtonBackgroundColor: string;
         /**
          * Button background when a control is in active state.
          */
-        activeButtonColor?: string;
+        activeButtonColor: string;
         /**
          * Icon size.
          */
-        iconSize?: number;
+        iconSize: number;
     }
     /**
      * Props of the {@link (Toolbar:type)} component.
      */
-    export interface Props<ImageSource, O = any> extends IconButtonSpecs {
+    export interface Props<ImageSource, O = any> extends Partial<IconButtonSpecs> {
         /**
          * The instance to be shared with the {@link (Typer:type)}.
          */
