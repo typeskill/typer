@@ -93,10 +93,33 @@ declare namespace Toolbar {
    */
   export type Layout = (DocumentControlSpec<any> | typeof CONTROL_SEPARATOR | GenericControlSpec<any, any>)[]
 
+  export interface IconButtonSpecs {
+    /**
+     * Button background when a control is not in active state.
+     */
+    inactiveButtonBackgroundColor?: string
+    /**
+     * Button icon color when a control is not in active state.
+     */
+    inactiveButtonColor?: string
+    /**
+     * Button icon color when a control is in active state.
+     */
+    activeButtonBackgroundColor?: string
+    /**
+     * Button background when a control is in active state.
+     */
+    activeButtonColor?: string
+    /**
+     * Icon size.
+     */
+    iconSize?: number
+  }
+
   /**
    * Props of the {@link (Toolbar:type)} component.
    */
-  export interface Props<ImageSource, O = any> {
+  export interface Props<ImageSource, O = any> extends IconButtonSpecs {
     /**
      * The instance to be shared with the {@link (Typer:type)}.
      */
@@ -123,22 +146,7 @@ declare namespace Toolbar {
      * A callback fired when inserting an image results in an error.
      */
     onInsertImageError?: (e: Error) => void
-    /**
-     * Button background when a control is not in active state.
-     */
-    inactiveButtonBackgroundColor?: string
-    /**
-     * Button icon color when a control is not in active state.
-     */
-    inactiveButtonColor?: string
-    /**
-     * Button icon color when a control is in active state.
-     */
-    activeButtonBackgroundColor?: string
-    /**
-     * Button background when a control is in active state.
-     */
-    activeButtonColor?: string
+
     /**
      * The color of the separator.
      *
@@ -156,13 +164,20 @@ declare namespace Toolbar {
      */
     contentContainerStyle?: StyleProp<ViewStyle>
     /**
-     * Icon size.
-     */
-    iconSize?: number
-    /**
      * The space between two buttons.
      */
     buttonSpacing?: number
+  }
+
+  /**
+   * Props for {@link (Toolbar:namespace).Static.IconButton} component.
+   */
+  export interface IconButtonProps extends IconButtonSpecs {
+    selected: boolean
+    IconComponent: ComponentType<TextControlMinimalIconProps>
+    onPress?: () => void
+    style?: StyleProp<ViewStyle>
+    iconProps?: object
   }
 
   /**
@@ -175,8 +190,8 @@ declare namespace Toolbar {
      * @remarks
      *
      * The color varies depending on the active state.
-     * Will receive {@link (Toolbar:namespace).Props.inactiveButtonColor} when not active and
-     * {@link (Toolbar:namespace).Props.activeButtonColor} when active.
+     * Will receive {@link (Toolbar:namespace).IconButtonSpecs.inactiveButtonColor} when not active and
+     * {@link (Toolbar:namespace).IconButtonSpecs.activeButtonColor} when active.
      */
     color?: string
     /**
@@ -194,17 +209,16 @@ declare namespace Toolbar {
      */
     name: string
   }
+
+  /**
+   * Static members of {@link (Toolbar:type)} component.
+   */
+  export interface Static {
+    IconButton: SFC<Toolbar.IconButtonProps>
+  }
 }
 
-interface ButtonProps {
-  selected: boolean
-  IconComponent: ComponentType<Toolbar.TextControlMinimalIconProps>
-  onPress?: () => void
-  style?: StyleProp<ViewStyle>
-  iconProps?: object
-}
-
-const DEFAULT_ICON_SIZE = 32
+const DEFAULT_ICON_SIZE = 24
 
 const styles = StyleSheet.create({
   container: {
@@ -214,6 +228,20 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 10,
   },
 })
+
+function getDefaultButtonStyle({ inactiveButtonColor, inactiveButtonBackgroundColor }: Toolbar.IconButtonSpecs) {
+  return {
+    color: inactiveButtonColor,
+    backgroundColor: inactiveButtonBackgroundColor,
+  }
+}
+
+function getSelectedButtonStyle({ activeButtonColor, activeButtonBackgroundColor }: Toolbar.IconButtonSpecs) {
+  return {
+    color: activeButtonColor,
+    backgroundColor: activeButtonBackgroundColor,
+  }
+}
 
 // eslint-disable-next-line @typescript-eslint/class-name-casing
 class _Toolbar extends PureComponent<Toolbar.Props<any, any>> {
@@ -244,6 +272,23 @@ class _Toolbar extends PureComponent<Toolbar.Props<any, any>> {
     iconSize: DEFAULT_ICON_SIZE,
   }
 
+  public static IconButton: SFC<Toolbar.IconButtonProps> = ({
+    onPress,
+    selected,
+    style,
+    IconComponent,
+    iconProps,
+    iconSize,
+    ...buttonSpec
+  }) => {
+    const dynamicStyle = selected ? getSelectedButtonStyle(buttonSpec) : getDefaultButtonStyle(buttonSpec)
+    return (
+      <TouchableOpacity onPress={onPress} style={[dynamicStyle, style]}>
+        <IconComponent color={dynamicStyle.color as string} size={iconSize || DEFAULT_ICON_SIZE} {...iconProps} />
+      </TouchableOpacity>
+    )
+  }
+
   private controlEventDom: Bridge.ControlEventDomain<any>
 
   public constructor(props: Toolbar.Props<any>) {
@@ -259,33 +304,9 @@ class _Toolbar extends PureComponent<Toolbar.Props<any, any>> {
         height: this.props.iconSize,
         width: 2,
         backgroundColor: this.props.separatorColor,
-        marginRight: this.computeIconSpacing() * 2,
-        marginLeft: this.computeIconSpacing(),
+        marginRight: this.computeIconSpacing(),
       },
     })
-
-  private IconButton: SFC<ButtonProps> = ({ onPress, selected, style, IconComponent, iconProps }) => {
-    const dynamicStyle = selected ? this.getSelectedButtonStyle() : this.getDefaultButtonStyle()
-    return (
-      <TouchableOpacity onPress={onPress} style={[dynamicStyle, style]}>
-        <IconComponent color={dynamicStyle.color as string} size={this.props.iconSize as number} {...iconProps} />
-      </TouchableOpacity>
-    )
-  }
-
-  private getDefaultButtonStyle() {
-    return {
-      color: this.props.inactiveButtonColor,
-      backgroundColor: this.props.inactiveButtonBackgroundColor,
-    }
-  }
-
-  private getSelectedButtonStyle() {
-    return {
-      color: this.props.activeButtonColor,
-      backgroundColor: this.props.activeButtonBackgroundColor,
-    }
-  }
 
   private async insertImageAtSelection(options?: any) {
     if (this.props.pickOneImage) {
@@ -320,7 +341,7 @@ class _Toolbar extends PureComponent<Toolbar.Props<any, any>> {
     onPress: () => void,
     last: boolean,
   ) {
-    const IconButton = this.IconButton
+    const IconButton = _Toolbar.IconButton
     return (
       <IconButton
         selected={false}
@@ -357,7 +378,7 @@ class _Toolbar extends PureComponent<Toolbar.Props<any, any>> {
     const {
       document: { selectedTextAttributes },
     } = this.props
-    const IconButton = this.IconButton
+    const IconButton = _Toolbar.IconButton
     return (
       <IconButton
         selected={selectedTextAttributes[attributeName] === activeAttributeValue}
@@ -450,7 +471,7 @@ export function buildVectorIconControlSpec<A extends GenericControlAction, T ext
  *
  * This type trick is aimed at preventing from exporting the component State which should be out of API surface.
  */
-type Toolbar = ComponentClass<Toolbar.Props<any>>
+type Toolbar = ComponentClass<Toolbar.Props<any>> & Toolbar.Static
 
 const Toolbar = _Toolbar as Toolbar
 

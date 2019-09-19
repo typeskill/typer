@@ -38,6 +38,7 @@
 import { ComponentClass } from 'react';
 import { ComponentType } from 'react';
 import React from 'react';
+import { SFC } from 'react';
 import { StyleProp } from 'react-native';
 import { TextStyle } from 'react-native';
 import { ViewStyle } from 'react-native';
@@ -579,10 +580,32 @@ export declare namespace Toolbar {
      * Declaratively describes the layout of the {@link (Toolbar:type)} component.
      */
     export type Layout = (DocumentControlSpec<any> | typeof CONTROL_SEPARATOR | GenericControlSpec<any, any>)[];
+    export interface IconButtonSpecs {
+        /**
+         * Button background when a control is not in active state.
+         */
+        inactiveButtonBackgroundColor?: string;
+        /**
+         * Button icon color when a control is not in active state.
+         */
+        inactiveButtonColor?: string;
+        /**
+         * Button icon color when a control is in active state.
+         */
+        activeButtonBackgroundColor?: string;
+        /**
+         * Button background when a control is in active state.
+         */
+        activeButtonColor?: string;
+        /**
+         * Icon size.
+         */
+        iconSize?: number;
+    }
     /**
      * Props of the {@link (Toolbar:type)} component.
      */
-    export interface Props<ImageSource, O = any> {
+    export interface Props<ImageSource, O = any> extends IconButtonSpecs {
         /**
          * The instance to be shared with the {@link (Typer:type)}.
          */
@@ -610,22 +633,6 @@ export declare namespace Toolbar {
          */
         onInsertImageError?: (e: Error) => void;
         /**
-         * Button background when a control is not in active state.
-         */
-        inactiveButtonBackgroundColor?: string;
-        /**
-         * Button icon color when a control is not in active state.
-         */
-        inactiveButtonColor?: string;
-        /**
-         * Button icon color when a control is in active state.
-         */
-        activeButtonBackgroundColor?: string;
-        /**
-         * Button background when a control is in active state.
-         */
-        activeButtonColor?: string;
-        /**
          * The color of the separator.
          *
          * @remarks
@@ -642,13 +649,19 @@ export declare namespace Toolbar {
          */
         contentContainerStyle?: StyleProp<ViewStyle>;
         /**
-         * Icon size.
-         */
-        iconSize?: number;
-        /**
          * The space between two buttons.
          */
         buttonSpacing?: number;
+    }
+    /**
+     * Props for {@link (Toolbar:namespace).Static.IconButton} component.
+     */
+    export interface IconButtonProps extends IconButtonSpecs {
+        selected: boolean;
+        IconComponent: ComponentType<TextControlMinimalIconProps>;
+        onPress?: () => void;
+        style?: StyleProp<ViewStyle>;
+        iconProps?: object;
     }
     /**
      * The props passed to every icon {@link react#ComponentType}.
@@ -660,8 +673,8 @@ export declare namespace Toolbar {
          * @remarks
          *
          * The color varies depending on the active state.
-         * Will receive {@link (Toolbar:namespace).Props.inactiveButtonColor} when not active and
-         * {@link (Toolbar:namespace).Props.activeButtonColor} when active.
+         * Will receive {@link (Toolbar:namespace).IconButtonSpecs.inactiveButtonColor} when not active and
+         * {@link (Toolbar:namespace).IconButtonSpecs.activeButtonColor} when active.
          */
         color?: string;
         /**
@@ -678,6 +691,12 @@ export declare namespace Toolbar {
          */
         name: string;
     }
+    /**
+     * Static members of {@link (Toolbar:type)} component.
+     */
+    export interface Static {
+        IconButton: SFC<Toolbar.IconButtonProps>;
+    }
 }
 
 /**
@@ -689,9 +708,9 @@ export declare namespace Toolbar {
  *
  * This type trick is aimed at preventing from exporting the component State which should be out of API surface.
  */
-export declare type Toolbar = ComponentClass<Toolbar.Props<any>>;
+export declare type Toolbar = ComponentClass<Toolbar.Props<any>> & Toolbar.Static;
 
-export declare const Toolbar: React.ComponentClass<Toolbar.Props<any, any>, any>;
+export declare const Toolbar: Toolbar;
 
 /**
  * A set of definitions related to text and arbitrary content transforms.

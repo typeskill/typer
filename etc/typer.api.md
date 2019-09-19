@@ -7,6 +7,7 @@
 import { ComponentClass } from 'react';
 import { ComponentType } from 'react';
 import React from 'react';
+import { SFC } from 'react';
 import { StyleProp } from 'react-native';
 import { TextStyle } from 'react-native';
 import { ViewStyle } from 'react-native';
@@ -206,23 +207,42 @@ export namespace Toolbar {
         IconComponent: ComponentType<TextControlMinimalIconProps & T>;
         iconProps?: T extends Toolbar.VectorIconMinimalProps ? Toolbar.VectorIconMinimalProps : Partial<T>;
     }
-    export type Layout = (DocumentControlSpec<any> | typeof CONTROL_SEPARATOR | GenericControlSpec<any, any>)[];
-    export interface Props<ImageSource, O = any> {
+    export interface IconButtonProps extends IconButtonSpecs {
+        // (undocumented)
+        IconComponent: ComponentType<TextControlMinimalIconProps>;
+        // (undocumented)
+        iconProps?: object;
+        // (undocumented)
+        onPress?: () => void;
+        // (undocumented)
+        selected: boolean;
+        // (undocumented)
+        style?: StyleProp<ViewStyle>;
+    }
+    // (undocumented)
+    export interface IconButtonSpecs {
         activeButtonBackgroundColor?: string;
         activeButtonColor?: string;
+        iconSize?: number;
+        inactiveButtonBackgroundColor?: string;
+        inactiveButtonColor?: string;
+    }
+    export type Layout = (DocumentControlSpec<any> | typeof CONTROL_SEPARATOR | GenericControlSpec<any, any>)[];
+    export interface Props<ImageSource, O = any> extends IconButtonSpecs {
         bridge: Bridge<ImageSource>;
         buttonSpacing?: number;
         contentContainerStyle?: StyleProp<ViewStyle>;
         document: Document;
-        iconSize?: number;
-        inactiveButtonBackgroundColor?: string;
-        inactiveButtonColor?: string;
         layout: Layout;
         onInsertImageError?: (e: Error) => void;
         onPressCustomControl?: <A extends GenericControlAction>(actionType: A, actionOptions?: any) => void;
         pickOneImage?: (options?: O) => Promise<Images.Description<ImageSource>>;
         separatorColor?: string;
         style?: StyleProp<ViewStyle>;
+    }
+    export interface Static {
+        // (undocumented)
+        IconButton: SFC<Toolbar.IconButtonProps>;
     }
     export interface TextControlMinimalIconProps {
         color?: string;
@@ -234,10 +254,10 @@ export namespace Toolbar {
 }
 
 // @public
-export type Toolbar = ComponentClass<Toolbar.Props<any>>;
+export type Toolbar = ComponentClass<Toolbar.Props<any>> & Toolbar.Static;
 
 // @public (undocumented)
-export const Toolbar: React.ComponentClass<Toolbar.Props<any, any>, any>;
+export const Toolbar: Toolbar;
 
 // @public
 export namespace Transforms {
