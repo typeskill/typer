@@ -38,16 +38,16 @@
   </code>
 </p>
 <p align="center">
-    <img width="400" src="images/screenshot.png" alt="Typeskill screenshot">
+    <img width="400" src="https://raw.githubusercontent.com/typeskill/typeskill/HEAD/images/screenshot.png" alt="Typeskill screenshot">
 
 </p>
 <p align="center">
-    <a href="https://expo.io/@jsamr/typeskill">
+    <a href="https://expo.io/@jsamr/typeskill-showcase">
         <strong>Give it a try on Expo</strong>
     </a>
     <br/><br/>
-    <a href="https://expo.io/@jsamr/typeskill">
-        <img src="images/qr.png" alt="Expo QR code">
+    <a href="https://expo.io/@jsamr/typeskill-showcase">
+        <img src="https://raw.githubusercontent.com/typeskill/typeskill/HEAD/images/qr.png" alt="Expo QR code">
     </a>
     <br/>
     <a href="#trying-locally">You can also run it locally in seconds</a>
@@ -200,6 +200,10 @@ You need to comply with this contract to avoid resource leakage and bugs:
 [**Typescript definitions**](types/typer.d.ts) provide an exhaustive and curated documentation reference. The comments are [100% compliant with tsdoc](https://github.com/microsoft/tsdoc) and generated with Microsoft famous [API Extractor](https://api-extractor.com/) utility. [**These definitions follow semantic versioning.**](https://semver.org/)
 
 Please note that `props` definitions are namespaced. For example, if you are looking at `Toolbar` component definitions, you should look for `Props` definition inside `Toolbar` namespace.
+
+## Inspecting and reporting bugs
+
+[`@typeskill/debugger`](https://github.com/typeskill/debugger) is a tool to inspect and reproduce bugs. If you witness a bug, please try a reproduction on the debugger prior to reporting it.
 
 ## Customizing
 
