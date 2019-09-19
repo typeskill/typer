@@ -76,7 +76,7 @@
 
 ``` bash
 git clone https://github.com/typeskill/examples/tree/master
-cd examples/expo-minimal
+cd examples/expo-showcase
 npm install
 expo start
 ```
