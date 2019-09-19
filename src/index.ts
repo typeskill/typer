@@ -12,9 +12,15 @@
  * - The {@link (Print:type)} component, a display for {@link (Document:type)};
  * - The {@link (Toolbar:type)} component, which permits text transforms on current selection.
  *
+ * **Controlled components**
+ *
+ * {@link (Typer:type)} and {@link (Print:type)} components are [controlled components](https://reactjs.org/docs/forms.html#controlled-components).
+ * You need to pass them a {@link Document | `document`} prop which you can initialize with {@link buildEmptyDocument}.
+ *
  * **Triggering actions from external controls**
  *
- * A {@link (Bridge:interface)} instance should be shared between a {@link (Typer:type)} and any control component such as {@link (Toolbar:type)}.
+ * A {@link (Bridge:interface)} instance must be shared between a {@link (Typer:type)} and any control component such as {@link (Toolbar:type)}.
+ * The {@link (Bridge:interface)} instance can be instantiated with {@link buildBridge}.
  * Actions can be triggered with the help of the object returned by {@link (Bridge:interface).getControlEventDomain}.
  *
  * Such actions include:

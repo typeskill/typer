@@ -3,7 +3,11 @@
     @typeskill/typer
 </code>
 </h1>
-
+<p align="center">
+  <em>
+    Typeskill, the Operational-Transform Based (React) Native Rich Text library.
+  </em>
+</p>
 <p align="center">
     <a href="https://www.npmjs.com/package/@typeskill/typer" alt="Npm Version">
         <img src="https://img.shields.io/npm/v/@typeskill/typer.svg" /></a>
@@ -28,7 +32,15 @@
       <img alt="vulnerabilities" src="https://snyk.io/test/github/typeskill/typer/badge.svg">
     </a>
 </p>
+<p align="center">
+  <code>
+      npm install --save @typeskill/typer
+  </code>
+</p>
+<p align="center">
+    <img width="300" src="images/screenshot.jpg" alt="Typeskill screenshot">
 
+</p>
 <p align="center">
     <a href="https://expo.io/@jsamr/typeskill">
         <strong>Give it a try on Expo</strong>
@@ -39,7 +51,6 @@
     </a>
     <br/>
     <a href="#trying-locally">You can also run it locally in seconds</a>
-
 </p>
 
 ## Features & design principles
@@ -48,6 +59,7 @@
 
 - Extensively **modular** architecture: Typeskill handles the logic, you chose the layout;
 - No bloated/clumsy `WebView` ; this library only relies on (React) **Native** components;
+- Fully [controlled components](https://reactjs.org/docs/forms.html#controlled-components);
 - Based on the reliable [Delta](https://github.com/quilljs/delta) **operational transform** library from [quilljs](https://github.com/quilljs).
 
 ### Features
@@ -88,9 +100,7 @@ The library exposes two components to render documents:
 
 ### Controlled components
 
-Document renderers and controls are **[controlled components](https://reactjs.org/docs/forms.html#controlled-components)**, which means you need to define how to store the state from a master component, or through a store architecture such as a Redux.
-
-**link to example**
+Document renderers and controls are **[controlled components](https://reactjs.org/docs/forms.html#controlled-components)**, which means you need to define how to store the state from a master component, or through a store architecture such as a Redux. [You can study `Editor.tsx`, a minimal example master component.](https://github.com/typeskill/examples/blob/master/expo-minimal/src/Editor.tsx)
 
 ### A domain of shared events
 
@@ -185,9 +195,15 @@ You need to comply with this contract to avoid resource leakage and bugs:
 - The `Bridge` instance should be instantiated by the master component, during its own instantiation or during mount;
 - There should be exactly one `Bridge` instance for one document renderer.
 
+## API Reference
+
+[**Typescript definitions**](types/typer.d.ts) provide an exhaustive and curated documentation reference. The comments are [100% compliant with tsdoc](https://github.com/microsoft/tsdoc) and generated with Microsoft famous [API Extractor](https://api-extractor.com/) utility. [**These definitions follow semantic versioning.**](https://semver.org/)
+
+Please note that `props` definitions are namespaced. For example, if you are looking at `Toolbar` component definitions, you should look for `Props` definition inside `Toolbar` namespace.
+
 ## Customizing
 
 ### Integrating your image picker
 
 Typeskill won't chose a picker on your behalf, as it would break its commitment to modular design.
-You can check [the showcase expo example](https://github.com/typeskill/examples/tree/master/expo-showcase) to see how to integrate your image picker.
+You can check [`Editor.tsx` component](https://github.com/typeskill/examples/blob/master/expo-showcase/src/Editor.tsx) from [the showcase expo example](https://github.com/typeskill/examples/tree/master/expo-showcase) to see how to integrate your image picker.

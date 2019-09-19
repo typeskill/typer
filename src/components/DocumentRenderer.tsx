@@ -59,7 +59,7 @@ export interface DocumentRendererProps<ImageSource> {
   /**
    * The max width of a media block.
    *
-   * @remarks If the container width is smaller then this width, the first will be used to frame media.
+   * @remarks If the container width is smaller than this width, the first will be used to frame media.
    */
   maxMediaBlockWidth?: number
 
