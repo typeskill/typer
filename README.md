@@ -177,8 +177,13 @@ export class RichTextEditor extends Component {
   render() {
     return (
       <View style={{ flex: 1 }}>
-        <Typer document={this.state.document} onDocumentUpdate={this.onDocumentUpdate} bridge={this.bridge} />
+        <Typer
+          document={this.state.document}
+          onDocumentUpdate={this.onDocumentUpdate}
+          bridge={this.bridge}
+        />
         <Toolbar
+          document={this.state.document}
           layout={toolbarLayout}
           bridge={this.bridge}
         />
