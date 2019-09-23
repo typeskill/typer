@@ -66,6 +66,23 @@ declare namespace Typer {
      * In debug mode, active block will be highlighted.
      */
     debug?: boolean
+
+    /**
+     * Disable selection overrides.
+     *
+     * @remarks
+     *
+     * In some instances, the typer will override active text selections. This can happen:
+     *
+     * - When user select text and apply transforms, the selection will be overriden to stay the same and allow user to apply multiple transforms;
+     * - When user press the edge of a media block, the selection will be overriden in order to select the preceding or following text input closest selectable unit.
+     *
+     * However, some versions of React Native have an Android bug which can trigger a `setSpan` error. If such errors occur, you should disable selection overrides.
+     * {@link https://github.com/facebook/react-native/issues/25265}
+     * {@link https://github.com/facebook/react-native/issues/17236}
+     * {@link https://github.com/facebook/react-native/issues/18316}
+     */
+    disableSelectionOverrides?: boolean
   }
 }
 
@@ -79,6 +96,7 @@ class _Typer extends DocumentRenderer<Typer.Props<any>, TyperState> implements D
     underlayColor: PropTypes.string,
     readonly: PropTypes.bool,
     imageHooks: ImageHooksType,
+    disableSelectionOverrides: PropTypes.bool,
   }
 
   public static defaultProps: Partial<Record<keyof Typer.Props<any>, any>> = {
@@ -130,6 +148,7 @@ class _Typer extends DocumentRenderer<Typer.Props<any>, TyperState> implements D
       maxMediaBlockWidth,
       ImageComponent,
       textTransformSpecs,
+      disableSelectionOverrides,
     } = this.props
     const { selectedTextAttributes } = this.props.document
     const key = `block-input-${descriptor.kind}-${descriptor.blockIndex}`
@@ -153,6 +172,7 @@ class _Typer extends DocumentRenderer<Typer.Props<any>, TyperState> implements D
           blockScopedSelection={block.getBlockScopedSelection(this.props.document)}
           overridingScopedSelection={isFocused ? overridingSelection : null}
           textAttributesAtCursor={selectedTextAttributes}
+          disableSelectionOverrides={disableSelectionOverrides}
           textTransformSpecs={textTransformSpecs as Transforms.Specs}
         />
       </ScrollIntoView>

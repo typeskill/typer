@@ -38,6 +38,7 @@ export interface TextBlockInputProps extends StandardBlockInputProps {
   textStyle?: StyleProp<TextStyle>
   textTransformSpecs: Transforms.Specs
   blockScopedSelection: SelectionShape | null
+  disableSelectionOverrides: boolean
 }
 
 export const INVARIANT_MANDATORY_TEXT_BLOCK_PROP = 'textBlock prop is mandatory'
@@ -189,8 +190,8 @@ export class TextBlockInput extends Component<TextBlockInputProps, State> {
   }
 
   public render() {
-    const { textStyle, textOps, textTransformSpecs } = this.props
-    const overriding = this.props.overridingScopedSelection || this.state.overridingSelection
+    const { textStyle, textOps, textTransformSpecs, overridingScopedSelection, disableSelectionOverrides } = this.props
+    const overriding = !disableSelectionOverrides && (overridingScopedSelection || this.state.overridingSelection)
     return (
       <View style={styles.grow}>
         <TextInput

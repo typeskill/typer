@@ -18,6 +18,7 @@ export interface GenericBlockInputProps<ImageSource> extends StandardBlockInputP
   blockScopedSelection: SelectionShape | null
   hightlightOnFocus: boolean
   ImageComponent: Images.Component<ImageSource>
+  disableSelectionOverrides?: boolean
   textStyle?: StyleProp<TextStyle>
   blockStyle?: StyleProp<ViewStyle>
   maxMediaBlockWidth?: number
@@ -43,6 +44,7 @@ export class GenericBlockInput<ImageSource> extends PureComponent<GenericBlockIn
       blockStyle,
       blockScopedSelection,
       controller,
+      disableSelectionOverrides,
       hightlightOnFocus,
       underlayColor,
       isFocused,
@@ -62,6 +64,7 @@ export class GenericBlockInput<ImageSource> extends PureComponent<GenericBlockIn
         controller,
         isFocused,
         blockScopedSelection,
+        disableSelectionOverrides: disableSelectionOverrides || false,
         overridingScopedSelection: overridingScopedSelection,
         textAttributesAtCursor,
         textTransformSpecs,
