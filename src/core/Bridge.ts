@@ -79,7 +79,7 @@ declare namespace Bridge {
   }
 
   /**
-   * An object representing an area of events happening inside the {@link (Typer:type)}.
+   * An object representing an area of events happening inside the {@link (Typer:interface)}.
    *
    * @privateRemarks
    *
@@ -109,7 +109,7 @@ declare namespace Bridge {
 }
 
 /**
- * An abstraction responsible for event dispatching between the {@link (Typer:type)} and external controls.
+ * An abstraction responsible for event dispatching between the {@link (Typer:interface)} and external controls.
  *
  * @remarks It also provide a uniform access to custom rendering logic.
  *
@@ -131,7 +131,7 @@ interface Bridge<ImageSource> {
    *
    * @remarks
    *
-   * The returned object can be used to react from and trigger {@link (Typer:type)} events.
+   * The returned object can be used to react from and trigger {@link (Typer:interface)} events.
    */
   getControlEventDomain: () => Bridge.ControlEventDomain<ImageSource>
   /**

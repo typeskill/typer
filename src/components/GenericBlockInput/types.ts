@@ -8,3 +8,13 @@ export interface StandardBlockInputProps {
   isFocused: boolean
   overridingScopedSelection: SelectionShape | null
 }
+
+/**
+ * @public
+ */
+export interface FocusableInput {
+  /**
+   * Focus programatically.
+   */
+  focus: () => void
+}

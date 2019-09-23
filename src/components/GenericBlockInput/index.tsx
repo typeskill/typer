@@ -8,7 +8,7 @@ import invariant from 'invariant'
 import { Transforms } from '@core/Transforms'
 import { Attributes } from '@delta/attributes'
 import { SelectionShape } from '@delta/Selection'
-import { StandardBlockInputProps } from './types'
+import { StandardBlockInputProps, FocusableInput } from './types'
 import { Images } from '@core/Images'
 
 export interface GenericBlockInputProps<ImageSource> extends StandardBlockInputProps {
@@ -26,7 +26,12 @@ export interface GenericBlockInputProps<ImageSource> extends StandardBlockInputP
   underlayColor?: string
 }
 
-export class GenericBlockInput<ImageSource> extends PureComponent<GenericBlockInputProps<ImageSource>> {
+export { FocusableInput }
+
+export class GenericBlockInput<ImageSource> extends PureComponent<GenericBlockInputProps<ImageSource>>
+  implements FocusableInput {
+  private ref = React.createRef<FocusableInput>()
+
   private getStyles() {
     if (this.props.hightlightOnFocus) {
       return this.props.isFocused
@@ -34,6 +39,10 @@ export class GenericBlockInput<ImageSource> extends PureComponent<GenericBlockIn
         : { borderColor: 'transparent', borderWidth: 1 }
     }
     return undefined
+  }
+
+  public focus() {
+    this.ref.current && this.ref.current.focus()
   }
 
   public render() {
@@ -70,7 +79,7 @@ export class GenericBlockInput<ImageSource> extends PureComponent<GenericBlockIn
         textTransformSpecs,
         textOps: descriptor.opsSlice as TextOp[],
       }
-      block = <TextBlockInput {...textBlockProps} />
+      block = <TextBlockInput ref={this.ref as any} {...textBlockProps} />
     } else if (descriptor.kind === 'image' && realContentWidth !== null) {
       invariant(descriptor.opsSlice.length === 1, `Image blocks must be grouped alone.`)
       const imageBlockProps: ImageBlockInputProps<ImageSource> = {
@@ -86,7 +95,7 @@ export class GenericBlockInput<ImageSource> extends PureComponent<GenericBlockIn
         imageOp: descriptor.opsSlice[0] as ImageOp<ImageSource>,
         contentWidth: realContentWidth,
       }
-      block = <ImageBlockInput<ImageSource> {...imageBlockProps} />
+      block = <ImageBlockInput<ImageSource> ref={this.ref as any} {...imageBlockProps} />
     }
     return <View style={[this.getStyles(), blockStyle]}>{block}</View>
   }

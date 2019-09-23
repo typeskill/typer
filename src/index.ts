@@ -8,18 +8,18 @@
  *
  * The library exposes:
  *
- * - The {@link (Typer:type)} component, a support for editing {@link (Document:type)};
- * - The {@link (Print:type)} component, a display for {@link (Document:type)};
- * - The {@link (Toolbar:type)} component, which permits text transforms on current selection.
+ * - The {@link (Typer:interface)} component, a support for editing {@link (Document:type)};
+ * - The {@link (Print:interface)} component, a display for {@link (Document:type)};
+ * - The {@link (Toolbar:interface)} component, which permits text transforms on current selection.
  *
  * **Controlled components**
  *
- * {@link (Typer:type)} and {@link (Print:type)} components are [controlled components](https://reactjs.org/docs/forms.html#controlled-components).
+ * {@link (Typer:interface)} and {@link (Print:interface)} components are [controlled components](https://reactjs.org/docs/forms.html#controlled-components).
  * You need to pass them a {@link Document | `document`} prop which you can initialize with {@link buildEmptyDocument}.
  *
  * **Triggering actions from external controls**
  *
- * A {@link (Bridge:interface)} instance must be shared between a {@link (Typer:type)} and any control component such as {@link (Toolbar:type)}.
+ * A {@link (Bridge:interface)} instance must be shared between a {@link (Typer:interface)} and any control component such as {@link (Toolbar:interface)}.
  * The {@link (Bridge:interface)} instance can be instantiated with {@link buildBridge}.
  * Actions can be triggered with the help of the object returned by {@link (Bridge:interface).getControlEventDomain}.
  *
@@ -52,10 +52,12 @@ import { SelectionShape } from '@delta/Selection'
 import { Images } from '@core/Images'
 import { Print } from '@components/Print'
 import { DocumentRendererProps } from '@components/DocumentRenderer'
+import { FocusableInput } from '@components/GenericBlockInput'
 
 export {
   // Components related
   Typer,
+  FocusableInput,
   Print,
   Toolbar,
   DocumentControlAction,

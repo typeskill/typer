@@ -4,10 +4,10 @@
 
 ```ts
 
-import { ComponentClass } from 'react';
+import { Component } from 'react';
 import { ComponentType } from 'react';
-import React from 'react';
-import { SFC } from 'react';
+import { FunctionComponent } from 'react';
+import { Images as Images_2 } from 'index';
 import { StyleProp } from 'react-native';
 import { TextStyle } from 'react-native';
 import { ViewStyle } from 'react-native';
@@ -124,6 +124,11 @@ export interface DocumentRendererProps<ImageSource> {
     textTransformSpecs?: Transforms.Specs<'text'>;
 }
 
+// @public (undocumented)
+export interface FocusableInput {
+    focus: () => void;
+}
+
 // @public
 export type GenericControlAction = string | symbol | number;
 
@@ -191,14 +196,17 @@ export namespace Images {
 
 // @public
 export namespace Print {
-    export type Props = DocumentRendererProps<any>;
+    export type Props<ImageSource> = DocumentRendererProps<ImageSource>;
 }
 
 // @public
-export type Print = ComponentClass<Print.Props>;
+export interface Print {
+    // (undocumented)
+    new <ImageSource = Images_2.StandardSource>(props: Print.Props<ImageSource>, context?: any): Component<Print.Props<ImageSource>>;
+}
 
 // @public (undocumented)
-export const Print: React.ComponentClass<DocumentRendererProps<any>, any>;
+export const Print: Print;
 
 // @public
 export interface SelectionShape {
@@ -243,7 +251,7 @@ export namespace Toolbar {
         inactiveButtonColor: string;
     }
     export type Layout = (DocumentControlSpec<any> | typeof CONTROL_SEPARATOR | GenericControlSpec<any, any>)[];
-    export interface Props<ImageSource, O = any> extends Partial<IconButtonSpecs> {
+    export interface Props<ImageSource, ImageOptions = any> extends Partial<IconButtonSpecs> {
         bridge: Bridge<ImageSource>;
         buttonSpacing?: number;
         contentContainerStyle?: StyleProp<ViewStyle>;
@@ -251,13 +259,9 @@ export namespace Toolbar {
         layout: Layout;
         onInsertImageError?: (e: Error) => void;
         onPressCustomControl?: <A extends GenericControlAction>(actionType: A, actionOptions?: any) => void;
-        pickOneImage?: (options?: O) => Promise<Images.Description<ImageSource>>;
+        pickOneImage?: (options?: ImageOptions) => Promise<Images.Description<ImageSource>>;
         separatorColor?: string;
         style?: StyleProp<ViewStyle>;
-    }
-    export interface Static {
-        // (undocumented)
-        IconButton: SFC<Toolbar.IconButtonProps>;
     }
     export interface TextControlMinimalIconProps {
         color?: string;
@@ -269,7 +273,12 @@ export namespace Toolbar {
 }
 
 // @public
-export type Toolbar = ComponentClass<Toolbar.Props<any>> & Toolbar.Static;
+export interface Toolbar {
+    // (undocumented)
+    new <ImageSource = Images.StandardSource, ImageOptions = any>(props: Toolbar.Props<ImageSource, ImageOptions>, context?: any): Component<Toolbar.Props<ImageSource, ImageOptions>>;
+    // (undocumented)
+    IconButton: FunctionComponent<Toolbar.IconButtonProps>;
+}
 
 // @public (undocumented)
 export const Toolbar: Toolbar;
@@ -314,10 +323,13 @@ export namespace Typer {
 }
 
 // @public
-export type Typer = ComponentClass<Typer.Props<any>>;
+export interface Typer {
+    // (undocumented)
+    new <ImageSource = Images.StandardSource>(props: Typer.Props<ImageSource>, context?: any): Component<Typer.Props<ImageSource>> & FocusableInput;
+}
 
 // @public (undocumented)
-export const Typer: React.ComponentClass<Typer.Props<any>, any>;
+export const Typer: Typer;
 
 
 ```

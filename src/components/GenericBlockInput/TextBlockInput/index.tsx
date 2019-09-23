@@ -20,7 +20,7 @@ import { Transforms } from '@core/Transforms'
 import { TextChangeSession } from './TextChangeSession'
 import { DocumentDelta } from '@delta/DocumentDelta'
 import { DocumentDeltaAtomicUpdate } from '@delta/DocumentDeltaAtomicUpdate'
-import { StandardBlockInputProps } from '../types'
+import { StandardBlockInputProps, FocusableInput } from '../types'
 import { genericStyles } from '@components/styles'
 
 const styles = StyleSheet.create({
@@ -62,7 +62,7 @@ interface State {
  * A component which is responsible for providing a user interface to edit {@link RichContent}.
  *
  */
-export class TextBlockInput extends Component<TextBlockInputProps, State> {
+export class TextBlockInput extends Component<TextBlockInputProps, State> implements FocusableInput {
   private textChangeSession: TextChangeSession | null = null
   private textInputRef = React.createRef<TextInput>()
   private blockScopedSelection = Selection.fromShape({ start: 0, end: 0 })
@@ -111,7 +111,7 @@ export class TextBlockInput extends Component<TextBlockInputProps, State> {
   }
 
   @boundMethod
-  private focus(nextOverrideSelection?: SelectionShape) {
+  public focus(nextOverrideSelection?: SelectionShape) {
     this.nextOverridingSelection = nextOverrideSelection || null
     this.textInputRef.current && this.textInputRef.current.focus()
   }

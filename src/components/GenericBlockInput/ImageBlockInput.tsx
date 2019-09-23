@@ -15,7 +15,7 @@ import { ImageOp } from '@delta/operations'
 import { boundMethod } from 'autobind-decorator'
 import { SelectionShape } from '@delta/Selection'
 import { Images, computeImageFrame } from '@core/Images'
-import { StandardBlockInputProps } from './types'
+import { StandardBlockInputProps, FocusableInput } from './types'
 import { genericStyles } from '@components/styles'
 
 export interface ImageBlockInputProps<ImageSource> extends StandardBlockInputProps {
@@ -46,7 +46,8 @@ const styles = StyleSheet.create({
   imageContainer: { position: 'relative', flexDirection: 'row' },
 })
 
-export class ImageBlockInput<ImageSource> extends PureComponent<ImageBlockInputProps<ImageSource>> {
+export class ImageBlockInput<ImageSource> extends PureComponent<ImageBlockInputProps<ImageSource>>
+  implements FocusableInput {
   private rightInput = React.createRef<TextInput>()
   private leftInput = React.createRef<TextInput>()
 
@@ -225,7 +226,7 @@ export class ImageBlockInput<ImageSource> extends PureComponent<ImageBlockInputP
   }
 
   @boundMethod
-  private focus() {
+  public focus() {
     if (this.isLeftSelected()) {
       this.focusLeft()
     } else {

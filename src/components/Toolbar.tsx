@@ -1,4 +1,4 @@
-import React, { PureComponent, SFC, ComponentType, ComponentClass } from 'react'
+import React, { PureComponent, SFC, ComponentType, Component, FunctionComponent } from 'react'
 import { View, TouchableOpacity, StyleProp, ViewStyle, ViewPropTypes, StyleSheet } from 'react-native'
 import invariant from 'invariant'
 import PropTypes from 'prop-types'
@@ -19,14 +19,14 @@ import partial from 'ramda/es/partial'
 export const CONTROL_SEPARATOR = Symbol('separator')
 
 /**
- * Any actions which can be triggered with the {@link (Toolbar:type)} component.
+ * Any actions which can be triggered with the {@link (Toolbar:interface)} component.
  *
  * @public
  */
 export type GenericControlAction = string | symbol | number
 
 /**
- * Actions which can be triggered with the {@link (Toolbar:type)} component to alter document.
+ * Actions which can be triggered with the {@link (Toolbar:interface)} component to alter document.
  *
  * @public
  */
@@ -54,7 +54,7 @@ export enum DocumentControlAction {
 }
 
 /**
- * A set of definitions related to the {@link (Toolbar:type)} component.
+ * A set of definitions related to the {@link (Toolbar:interface)} component.
  *
  * @public
  */
@@ -89,7 +89,7 @@ declare namespace Toolbar {
    */
   export type DocumentControlSpec<T extends object = {}> = GenericControlSpec<DocumentControlAction, T>
   /**
-   * Declaratively describes the layout of the {@link (Toolbar:type)} component.
+   * Declaratively describes the layout of the {@link (Toolbar:interface)} component.
    */
   export type Layout = (DocumentControlSpec<any> | typeof CONTROL_SEPARATOR | GenericControlSpec<any, any>)[]
 
@@ -117,11 +117,11 @@ declare namespace Toolbar {
   }
 
   /**
-   * Props of the {@link (Toolbar:type)} component.
+   * Props of the {@link (Toolbar:interface)} component.
    */
-  export interface Props<ImageSource, O = any> extends Partial<IconButtonSpecs> {
+  export interface Props<ImageSource, ImageOptions = any> extends Partial<IconButtonSpecs> {
     /**
-     * The instance to be shared with the {@link (Typer:type)}.
+     * The instance to be shared with the {@link (Typer:interface)}.
      */
     bridge: Bridge<ImageSource>
     /**
@@ -137,7 +137,7 @@ declare namespace Toolbar {
      *
      * @remarks The corresponding {@link (Toolbar:namespace).GenericControlSpec.actionOptions} will be passed to this function.
      */
-    pickOneImage?: (options?: O) => Promise<Images.Description<ImageSource>>
+    pickOneImage?: (options?: ImageOptions) => Promise<Images.Description<ImageSource>>
     /**
      * A callback fired when pressing a custom control.
      */
@@ -170,7 +170,7 @@ declare namespace Toolbar {
   }
 
   /**
-   * Props for {@link (Toolbar:namespace).Static.IconButton} component.
+   * Props for {@link (Toolbar:interface).IconButton} component.
    */
   export interface IconButtonProps extends IconButtonSpecs {
     selected: boolean
@@ -208,13 +208,6 @@ declare namespace Toolbar {
      * Icon name.
      */
     name: string
-  }
-
-  /**
-   * Static members of {@link (Toolbar:type)} component.
-   */
-  export interface Static {
-    IconButton: SFC<Toolbar.IconButtonProps>
   }
 }
 
@@ -454,7 +447,7 @@ class _Toolbar extends PureComponent<Toolbar.Props<any, any>> {
 }
 
 /**
- * Utility function to build {@link (Toolbar:type)} controls from {@link https://www.npmjs.com/package/react-native-vector-icons | react-native-vector-icons}.
+ * Utility function to build {@link (Toolbar:interface)} controls from {@link https://www.npmjs.com/package/react-native-vector-icons | react-native-vector-icons}.
  *
  * @param IconComponent - The icon {@link react#ComponentType} such as `MaterialCommunityIcons`
  * @param actionType - The control action performed when this control is actionated.
@@ -481,7 +474,7 @@ export function buildVectorIconControlSpec<A extends GenericControlAction, T ext
 }
 
 /**
- * A component to let user control the {@link (Typer:type)} through a {@link (Bridge:interface)}.
+ * A component to let user control the {@link (Typer:interface)} through a {@link (Bridge:interface)}.
  *
  * @public
  *
@@ -489,7 +482,13 @@ export function buildVectorIconControlSpec<A extends GenericControlAction, T ext
  *
  * This type trick is aimed at preventing from exporting the component State which should be out of API surface.
  */
-type Toolbar = ComponentClass<Toolbar.Props<any>> & Toolbar.Static
+interface Toolbar {
+  new <ImageSource = Images.StandardSource, ImageOptions = any>(
+    props: Toolbar.Props<ImageSource, ImageOptions>,
+    context?: any,
+  ): Component<Toolbar.Props<ImageSource, ImageOptions>>
+  IconButton: FunctionComponent<Toolbar.IconButtonProps>
+}
 
 const Toolbar = _Toolbar as Toolbar
 

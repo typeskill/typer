@@ -1,9 +1,9 @@
-import React, { ComponentClass } from 'react'
+import React, { Component } from 'react'
 import { ScrollView, View } from 'react-native'
 import { Document } from '@model/document'
 import { boundMethod } from 'autobind-decorator'
 import PropTypes from 'prop-types'
-import { GenericBlockInput } from './GenericBlockInput'
+import { GenericBlockInput, FocusableInput } from './GenericBlockInput'
 import { Block } from '@model/Block'
 import { DocumentProvider, BlockController } from './BlockController'
 import { BlockAssembler } from '@model/BlockAssembler'
@@ -25,13 +25,13 @@ interface TyperState {
 }
 
 /**
- * A set of definitions relative to {@link (Typer:type)} component.
+ * A set of definitions relative to {@link (Typer:interface)} component.
  *
  * @public
  */
 declare namespace Typer {
   /**
-   * {@link (Typer:type)} properties.
+   * {@link (Typer:interface)} properties.
    */
   export interface Props<ImageSource> extends DocumentRendererProps<ImageSource> {
     /**
@@ -107,6 +107,8 @@ class _Typer extends DocumentRenderer<Typer.Props<any>, TyperState> implements D
     imageHooks: defaults.imageHooks,
   }
 
+  private focusedBlock = React.createRef<GenericBlockInput<any>>()
+
   public state: TyperState = {
     containerWidth: null,
     overridingScopedSelection: null,
@@ -158,6 +160,7 @@ class _Typer extends DocumentRenderer<Typer.Props<any>, TyperState> implements D
     return (
       <ScrollIntoView enabled={isFocused} key={key}>
         <GenericBlockInput
+          ref={isFocused ? this.focusedBlock : undefined}
           underlayColor={underlayColor}
           blockStyle={this.getBlockStyle(block)}
           hightlightOnFocus={!!debug}
@@ -178,6 +181,7 @@ class _Typer extends DocumentRenderer<Typer.Props<any>, TyperState> implements D
       </ScrollIntoView>
     )
   }
+
   public componentDidMount() {
     const sheetEventDom = this.props.bridge.getSheetEventDomain()
     sheetEventDom.addApplyTextTransformToSelectionListener(this, async (attributeName, attributeValue) => {
@@ -210,6 +214,10 @@ class _Typer extends DocumentRenderer<Typer.Props<any>, TyperState> implements D
     if (this.state.overridingScopedSelection !== null) {
       setTimeout(this.clearSelection, 0)
     }
+  }
+
+  public focus() {
+    this.focusedBlock.current && this.focusedBlock.current.focus()
   }
 
   public render() {
@@ -247,7 +255,13 @@ class _Typer extends DocumentRenderer<Typer.Props<any>, TyperState> implements D
  *
  * This type trick is aimed at preventing from exporting the component State which should be out of API surface.
  */
-type Typer = ComponentClass<Typer.Props<any>>
+interface Typer {
+  new <ImageSource = Images.StandardSource>(props: Typer.Props<ImageSource>, context?: any): Component<
+    Typer.Props<ImageSource>
+  > &
+    FocusableInput
+}
+
 const Typer = _Typer as Typer
 
 export { Typer }
