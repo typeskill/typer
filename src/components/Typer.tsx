@@ -216,6 +216,7 @@ class _Typer extends DocumentRenderer<Typer.Props<any>, TyperState> implements D
     }
   }
 
+  @boundMethod
   public focus() {
     this.focusedBlock.current && this.focusedBlock.current.focus()
   }
