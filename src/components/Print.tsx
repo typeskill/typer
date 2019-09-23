@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import { DocumentRenderer, DocumentRendererProps, DocumentRendererState } from './DocumentRenderer'
 import { BlockAssembler } from '@model/BlockAssembler'
 import { ScrollView, View } from 'react-native'
-import { Images } from 'index'
+import { Images } from '@core/Images'
 
 /**
  * A set of definitions relative to {@link (Print:interface)} component.

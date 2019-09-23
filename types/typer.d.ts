@@ -38,7 +38,6 @@
 import { Component } from 'react';
 import { ComponentType } from 'react';
 import { FunctionComponent } from 'react';
-import { Images as Images_2 } from 'index';
 import { StyleProp } from 'react-native';
 import { TextStyle } from 'react-native';
 import { ViewStyle } from 'react-native';
@@ -549,7 +548,7 @@ export declare namespace Print {
  * This type trick is aimed at preventing from exporting the component State which should be out of API surface.
  */
 export declare interface Print {
-    new <ImageSource = Images_2.StandardSource>(props: Print.Props<ImageSource>, context?: any): Component<Print.Props<ImageSource>>;
+    new <ImageSource = Images.StandardSource>(props: Print.Props<ImageSource>, context?: any): Component<Print.Props<ImageSource>>;
 }
 
 export declare const Print: Print;
