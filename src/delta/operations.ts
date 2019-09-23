@@ -36,7 +36,7 @@ export interface GenericOp {
 }
 
 /**
- * An operation containing text.
+ * An operation referring to text.
  *
  * @public
  */
@@ -51,12 +51,27 @@ export interface TextOp extends GenericOp {
   readonly attributes?: Attributes.Map
 }
 
+/**
+ * A description of an image to be persisted in the document.
+ *
+ * @public
+ */
 export interface ImageKind<Source> extends Images.Description<Source> {
   kind: 'image'
 }
 
+/**
+ * An operation referring to an image.
+ *
+ * @public
+ */
 export type ImageOp<Source> = BlockOp<ImageKind<Source>>
 
+/**
+ * An operation referring to a block.
+ *
+ * @public
+ */
 export interface BlockOp<T extends object> extends GenericOp {
   /**
    * {@inheritdoc GenericOp.insert}

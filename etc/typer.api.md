@@ -24,6 +24,12 @@ export namespace Attributes {
 }
 
 // @public
+export interface BlockOp<T extends object> extends GenericOp {
+    readonly attributes?: Attributes.Map;
+    readonly insert: T;
+}
+
+// @public
 export namespace Bridge {
     export type AttributesOverrideListener = (attributeName: string, attributeValue: Attributes.GenericValue) => void;
     export type ControlEvent = 'APPLY_ATTRIBUTES_TO_SELECTION' | 'INSERT_OR_REPLACE_AT_SELECTION';
@@ -137,6 +143,15 @@ export interface GenericRichContent {
     readonly length: () => number;
     readonly ops: GenericOp[];
 }
+
+// @public
+export interface ImageKind<Source> extends Images.Description<Source> {
+    // (undocumented)
+    kind: 'image';
+}
+
+// @public
+export type ImageOp<Source> = BlockOp<ImageKind<Source>>;
 
 // @public
 export namespace Images {

@@ -45,7 +45,7 @@ import {
 } from '@components/Toolbar'
 import { Attributes } from '@delta/attributes'
 import { GenericRichContent } from '@delta/generic'
-import { GenericOp, TextOp, ImageOp, BlockOp } from '@delta/operations'
+import { GenericOp, TextOp, ImageOp, BlockOp, ImageKind } from '@delta/operations'
 import { Transforms, defaultTextTransforms } from '@core/Transforms'
 import { Document, buildEmptyDocument, cloneDocument } from '@model/document'
 import { SelectionShape } from '@delta/Selection'
@@ -71,6 +71,7 @@ export {
   GenericOp,
   TextOp,
   ImageOp,
+  ImageKind,
   BlockOp,
   Attributes,
   Transforms,

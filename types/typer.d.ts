@@ -82,6 +82,22 @@ export declare namespace Attributes {
 }
 
 /**
+ * An operation referring to a block.
+ *
+ * @public
+ */
+export declare interface BlockOp<T extends object> extends GenericOp {
+    /**
+     * {@inheritdoc GenericOp.insert}
+     */
+    readonly insert: T;
+    /**
+     * {@inheritdoc GenericOp.attributes}
+     */
+    readonly attributes?: Attributes.Map;
+}
+
+/**
  * A set of definitions related to the {@link (Bridge:interface)} interface.
  *
  * @public
@@ -442,6 +458,22 @@ export declare interface GenericRichContent {
 }
 
 /**
+ * A description of an image to be persisted in the document.
+ *
+ * @public
+ */
+export declare interface ImageKind<Source> extends Images.Description<Source> {
+    kind: 'image';
+}
+
+/**
+ * An operation referring to an image.
+ *
+ * @public
+ */
+export declare type ImageOp<Source> = BlockOp<ImageKind<Source>>;
+
+/**
  * A set of definitions related to images.
  *
  * @public
@@ -527,7 +559,7 @@ export declare interface SelectionShape {
 }
 
 /**
- * An operation containing text.
+ * An operation referring to text.
  *
  * @public
  */
