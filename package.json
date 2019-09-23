@@ -72,7 +72,7 @@
     "@babel/runtime": "^7.4.5",
     "@commitlint/cli": "^8.0.0",
     "@commitlint/config-conventional": "^8.0.0",
-    "@microsoft/api-documenter": "^7.3.3",
+    "@microsoft/api-documenter": "^7.4.5",
     "@microsoft/api-extractor": "^7.2.1",
     "@react-native-community/eslint-config": "^0.0.5",
     "@semantic-release/changelog": "^3.0.2",
