@@ -1,6 +1,6 @@
 {
   "name": "@typeskill/typer",
-  "version": "0.10.0-beta.8",
+  "version": "0.10.0-beta.9",
   "repository": "git@github.com:typeskill/typeskill.git",
   "description": "Operational-Transform Based (React) Native Rich Text Editor",
   "author": "Jules Randolph <jules.sam.randolph@gmail.com>",
