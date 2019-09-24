@@ -223,6 +223,8 @@ class _Typer extends DocumentRenderer<Typer.Props<any>, TyperState> implements D
   }
 }
 
+exports.Typer = _Typer
+
 /**
  * A component solely responsible for editing {@link Document | document}.
  *
@@ -244,5 +246,3 @@ export declare class Typer<ImageSource = Images.StandardSource> extends Componen
   implements FocusableInput {
   focus: () => void
 }
-
-exports.Typer = _Typer

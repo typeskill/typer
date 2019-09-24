@@ -2,6 +2,7 @@ import { Component } from 'react'
 import { DocumentRenderer, DocumentRendererProps, DocumentRendererState } from './DocumentRenderer'
 import { BlockAssembler } from '@model/BlockAssembler'
 import { Images } from '@core/Images'
+import { boundMethod } from 'autobind-decorator'
 
 /**
  * A set of definitions relative to {@link (Print:class)} component.
@@ -33,6 +34,8 @@ class _Print extends DocumentRenderer<Print.Props<any>> {
   }
 }
 
+exports.Print = _Print
+
 /**
  * A component solely responsible for viewing {@link Document | document}.
  *
@@ -40,5 +43,3 @@ class _Print extends DocumentRenderer<Print.Props<any>> {
  *
  */
 export declare class Print<ImageSource = Images.StandardSource> extends Component<Print.Props<ImageSource>> {}
-
-exports.Print = _Print

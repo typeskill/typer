@@ -19,8 +19,8 @@ import { boundMethod } from 'autobind-decorator'
 import { Block } from '@model/Block'
 import { GenericBlockView } from './GenericBlockView'
 import { Images } from '@core/Images'
-import { defaults } from './defaults'
 import { Transforms } from '@core/Transforms'
+import { defaults } from './defaults'
 
 export interface DocumentRendererState {
   containerWidth: number | null

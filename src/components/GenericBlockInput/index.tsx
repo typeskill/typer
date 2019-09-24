@@ -1,7 +1,6 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { PureComponent } from 'react'
-import { TextBlockInput, TextBlockInputProps } from './TextBlockInput'
 import { StyleProp, TextStyle, View, ViewStyle } from 'react-native'
+import { TextBlockInput, TextBlockInputProps } from './TextBlockInput'
 import { ImageBlockInput, ImageBlockInputProps } from './ImageBlockInput'
 import { TextOp, ImageOp } from '@delta/operations'
 import invariant from 'invariant'

@@ -474,6 +474,8 @@ export function buildVectorIconControlSpec<A extends GenericControlAction, T ext
   return specs
 }
 
+exports.Toolbar = _Toolbar
+
 /**
  * A component to let user control the {@link (Typer:class)} through a {@link (Bridge:interface)}.
  *
@@ -487,5 +489,3 @@ export declare class Toolbar<ImageSource = Images.StandardSource, ImageOptions =
    */
   IconButton: FunctionComponent<Toolbar.IconButtonProps>
 }
-
-exports.Toolbar = _Toolbar
