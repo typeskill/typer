@@ -4,7 +4,7 @@ import renderer from 'react-test-renderer'
 import { Print } from '@components/Print'
 import { buildEmptyDocument } from '@model/document'
 
-fdescribe('@components/<Print>', () => {
+describe('@components/<Print>', () => {
   it('should renders without crashing', () => {
     const print = renderer.create(<Print document={buildEmptyDocument()} />)
     expect(print).toBeTruthy()

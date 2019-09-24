@@ -142,7 +142,7 @@ const contentRendererStyles = StyleSheet.create({
 /**
  * @internal
  */
-export abstract class DocumentRenderer<
+export class DocumentRenderer<
   P extends DocumentRendererProps<any>,
   S extends DocumentRendererState = DocumentRendererState
 > extends PureComponent<P, S> {
