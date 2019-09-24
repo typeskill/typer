@@ -9,7 +9,7 @@ import { Images } from '@core/Images'
 
  * @public
  */
-declare namespace Print {
+export declare namespace Print {
   /**
    * {@link (Print:class)} properties.
    */
@@ -48,8 +48,6 @@ class _Print extends DocumentRenderer<Print.Props<any>> {
  * @public
  *
  */
-declare class Print<ImageSource = Images.StandardSource> extends Component<Print.Props<ImageSource>> {}
+export declare class Print<ImageSource = Images.StandardSource> extends Component<Print.Props<ImageSource>> {}
 
-eval('let Print=_Print;')
-
-export { Print }
+exports.Print = _Print

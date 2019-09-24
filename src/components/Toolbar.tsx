@@ -58,7 +58,7 @@ export enum DocumentControlAction {
  *
  * @public
  */
-declare namespace Toolbar {
+export declare namespace Toolbar {
   export interface GenericControlSpec<A extends GenericControlAction, T extends object> {
     /**
      * The react {@link react#ComponentType} representing the rendered icon.
@@ -479,7 +479,7 @@ export function buildVectorIconControlSpec<A extends GenericControlAction, T ext
  *
  * @public
  */
-declare class Toolbar<ImageSource = Images.StandardSource, ImageOptions = any> extends Component<
+export declare class Toolbar<ImageSource = Images.StandardSource, ImageOptions = any> extends Component<
   Toolbar.Props<ImageSource, ImageOptions>
 > {
   /**
@@ -488,6 +488,4 @@ declare class Toolbar<ImageSource = Images.StandardSource, ImageOptions = any> e
   IconButton: FunctionComponent<Toolbar.IconButtonProps>
 }
 
-eval('let Toolbar=_Toolbar;')
-
-export { Toolbar }
+exports.Toolbar = _Toolbar

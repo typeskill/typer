@@ -29,7 +29,7 @@ interface TyperState {
  *
  * @public
  */
-declare namespace Typer {
+export declare namespace Typer {
   /**
    * {@link (Typer:class)} properties.
    */
@@ -253,11 +253,9 @@ class _Typer extends DocumentRenderer<Typer.Props<any>, TyperState> implements D
  * @public
  *
  */
-declare class Typer<ImageSource = Images.StandardSource> extends Component<Typer.Props<ImageSource>>
+export declare class Typer<ImageSource = Images.StandardSource> extends Component<Typer.Props<ImageSource>>
   implements FocusableInput {
   focus: () => void
 }
 
-eval('let Typer=_Typer;')
-
-export { Typer }
+exports.Typer = _Typer
