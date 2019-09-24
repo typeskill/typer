@@ -97,16 +97,16 @@
     "eslint-plugin-react": "^7.14.3",
     "husky": "^3.0.5",
     "jest": "^24.8.0",
-    "metro-react-native-babel-preset": "^0.56.0",
+    "metro-react-native-babel-preset": "~0.56.0",
     "prettier": "^1.18.2",
-    "react": "16.8.6",
-    "react-native": "0.60.5",
-    "react-test-renderer": "16.8.6",
+    "react": "~16.8.6",
+    "react-native": "~0.60.5",
+    "react-test-renderer": "~16.8.6",
     "rimraf": "^3.0.0",
     "semantic-release": "^15.13.14",
     "standard-version": "^7.0.0",
     "ttypescript": "^1.5.7",
-    "typescript": "3.6.3"
+    "typescript": "~3.6.3"
   },
   "peerDependencies": {
     "react": "*",
