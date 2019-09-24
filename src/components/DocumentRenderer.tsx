@@ -115,7 +115,7 @@ export interface DocumentRendererProps<ImageSource> {
    * - Do not pass `style` prop as it will be overriden by this component `style` props;
    * - Do not pass `keyboardShouldPersistTaps` because it will be forced to `"always"`.
    */
-  scrollViewProps?: Omit<ScrollViewProps, 'style' | 'keyboardShouldPersistTaps'>
+  scrollViewProps?: ScrollViewProps
   /**
    * The component to replace RN default {@link react-native#ScrollView}.
    */
