@@ -50,8 +50,7 @@
     "invariant": "~2.2.4",
     "prop-types": "~15.7.2",
     "quill-delta": "~4.2.1",
-    "ramda": "~0.26.1",
-    "react-native-scroll-into-view": "~1.0.3"
+    "ramda": "~0.26.1"
   },
   "devDependencies": {
     "@babel/cli": "^7.4.4",

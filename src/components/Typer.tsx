@@ -8,7 +8,6 @@ import { Block } from '@model/Block'
 import { DocumentProvider, BlockController } from './BlockController'
 import { BlockAssembler } from '@model/BlockAssembler'
 import { SelectionShape, Selection } from '@delta/Selection'
-import { ScrollIntoView, wrapScrollView } from 'react-native-scroll-into-view'
 import { DocumentRenderer, DocumentRendererProps } from './DocumentRenderer'
 import { Bridge, BridgeStatic } from '@core/Bridge'
 import invariant from 'invariant'
@@ -16,8 +15,6 @@ import { ImageHooksType } from './types'
 import { defaults } from './defaults'
 import { Images } from '@core/Images'
 import { Transforms } from '@core/Transforms'
-
-const AutoScrollView = wrapScrollView(ScrollView)
 
 interface TyperState {
   containerWidth: number | null
@@ -159,27 +156,26 @@ class _Typer extends DocumentRenderer<Typer.Props<any>, TyperState> implements D
     const controller = new BlockController(block, this)
     const isFocused = block.isFocused(this.props.document)
     return (
-      <ScrollIntoView enabled={isFocused} key={key}>
-        <GenericBlockInput
-          ref={isFocused ? this.focusedBlock : undefined}
-          underlayColor={underlayColor}
-          blockStyle={this.getBlockStyle(block)}
-          hightlightOnFocus={!!debug}
-          isFocused={isFocused}
-          controller={controller}
-          contentWidth={this.state.containerWidth}
-          textStyle={textStyle}
-          ImageComponent={ImageComponent as Images.Component<any>}
-          descriptor={descriptor}
-          maxMediaBlockHeight={maxMediaBlockHeight}
-          maxMediaBlockWidth={maxMediaBlockWidth}
-          blockScopedSelection={block.getBlockScopedSelection(this.props.document)}
-          overridingScopedSelection={isFocused ? overridingSelection : null}
-          textAttributesAtCursor={selectedTextAttributes}
-          disableSelectionOverrides={disableSelectionOverrides}
-          textTransformSpecs={textTransformSpecs as Transforms.Specs}
-        />
-      </ScrollIntoView>
+      <GenericBlockInput
+        key={key}
+        ref={isFocused ? this.focusedBlock : undefined}
+        underlayColor={underlayColor}
+        blockStyle={this.getBlockStyle(block)}
+        hightlightOnFocus={!!debug}
+        isFocused={isFocused}
+        controller={controller}
+        contentWidth={this.state.containerWidth}
+        textStyle={textStyle}
+        ImageComponent={ImageComponent as Images.Component<any>}
+        descriptor={descriptor}
+        maxMediaBlockHeight={maxMediaBlockHeight}
+        maxMediaBlockWidth={maxMediaBlockWidth}
+        blockScopedSelection={block.getBlockScopedSelection(this.props.document)}
+        overridingScopedSelection={isFocused ? overridingSelection : null}
+        textAttributesAtCursor={selectedTextAttributes}
+        disableSelectionOverrides={disableSelectionOverrides}
+        textTransformSpecs={textTransformSpecs as Transforms.Specs}
+      />
     )
   }
 
@@ -225,13 +221,13 @@ class _Typer extends DocumentRenderer<Typer.Props<any>, TyperState> implements D
     this.assembler = new BlockAssembler(this.props.document)
     const { readonly } = this.props
     return (
-      <AutoScrollView style={this.getComponentStyles()} keyboardShouldPersistTaps="always">
+      <ScrollView style={this.getComponentStyles()} keyboardShouldPersistTaps="always">
         <View style={this.getContentContainerStyles()}>
           <View style={this.getDocumentStyles()} onLayout={this.handleOnContainerLayout}>
             {this.assembler.getBlocks().map(readonly ? this.renderBlockView : this.renderBlockInput)}
           </View>
         </View>
-      </AutoScrollView>
+      </ScrollView>
     )
   }
 }
