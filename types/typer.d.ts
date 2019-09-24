@@ -38,6 +38,7 @@
 import { Component } from 'react';
 import { ComponentType } from 'react';
 import { FunctionComponent } from 'react';
+import { ScrollViewProps } from 'react-native';
 import { StyleProp } from 'react-native';
 import { TextStyle } from 'react-native';
 import { ViewStyle } from 'react-native';
@@ -398,6 +399,19 @@ export declare interface DocumentRendererProps<ImageSource> {
      * @remarks This prop MUST NOT contain padding rules. Such padding rules will be zero-ed. Instead, use margin rules.
      */
     documentStyle?: StyleProp<ViewStyle>;
+    /**
+     * Any {@link react-native#ScrollView} props you wish to pass.
+     *
+     * @remarks
+     *
+     * - Do not pass `style` prop as it will be overriden by this component `style` props;
+     * - Do not pass `keyboardShouldPersistTaps` because it will be forced to `"always"`.
+     */
+    scrollViewProps?: ScrollViewProps;
+    /**
+     * The component to replace RN default {@link react-native#ScrollView}.
+     */
+    ScrollView?: ComponentType<any>;
 }
 
 /**

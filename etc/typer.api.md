@@ -7,6 +7,7 @@
 import { Component } from 'react';
 import { ComponentType } from 'react';
 import { FunctionComponent } from 'react';
+import { ScrollViewProps } from 'react-native';
 import { StyleProp } from 'react-native';
 import { TextStyle } from 'react-native';
 import { ViewStyle } from 'react-native';
@@ -117,6 +118,8 @@ export interface DocumentRendererProps<ImageSource> {
     ImageComponent?: Images.Component<ImageSource>;
     maxMediaBlockHeight?: number;
     maxMediaBlockWidth?: number;
+    ScrollView?: ComponentType<any>;
+    scrollViewProps?: ScrollViewProps;
     spacing?: number;
     style?: StyleProp<ViewStyle>;
     textStyle?: StyleProp<TextStyle>;
