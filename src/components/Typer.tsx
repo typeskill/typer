@@ -25,13 +25,13 @@ interface TyperState {
 }
 
 /**
- * A set of definitions relative to {@link (Typer:interface)} component.
+ * A set of definitions relative to {@link (Typer:class)} component.
  *
  * @public
  */
 declare namespace Typer {
   /**
-   * {@link (Typer:interface)} properties.
+   * {@link (Typer:class)} properties.
    */
   export interface Props<ImageSource> extends DocumentRendererProps<ImageSource> {
     /**
@@ -88,6 +88,7 @@ declare namespace Typer {
 
 // eslint-disable-next-line @typescript-eslint/class-name-casing
 class _Typer extends DocumentRenderer<Typer.Props<any>, TyperState> implements DocumentProvider {
+  public static displayName = 'Typer'
   public static propTypes: Record<keyof Typer.Props<any>, any> = {
     ...DocumentRenderer.propTypes,
     bridge: PropTypes.instanceOf(BridgeStatic).isRequired,
@@ -251,17 +252,12 @@ class _Typer extends DocumentRenderer<Typer.Props<any>, TyperState> implements D
  *
  * @public
  *
- * @internalRemarks
- *
- * This type trick is aimed at preventing from exporting the component State which should be out of API surface.
  */
-interface Typer {
-  new <ImageSource = Images.StandardSource>(props: Typer.Props<ImageSource>, context?: any): Component<
-    Typer.Props<ImageSource>
-  > &
-    FocusableInput
+declare class Typer<ImageSource = Images.StandardSource> extends Component<Typer.Props<ImageSource>>
+  implements FocusableInput {
+  focus: () => void
 }
 
-const Typer = _Typer as Typer
+eval('let Typer=_Typer;')
 
 export { Typer }

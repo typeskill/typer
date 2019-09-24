@@ -199,13 +199,8 @@ export namespace Print {
 }
 
 // @public
-export interface Print {
-    // (undocumented)
-    new <ImageSource = Images.StandardSource>(props: Print.Props<ImageSource>, context?: any): Component<Print.Props<ImageSource>>;
+export class Print<ImageSource = Images.StandardSource> extends Component<Print.Props<ImageSource>> {
 }
-
-// @public (undocumented)
-export const Print: Print;
 
 // @public
 export interface SelectionShape {
@@ -272,15 +267,9 @@ export namespace Toolbar {
 }
 
 // @public
-export interface Toolbar {
-    // (undocumented)
-    new <ImageSource = Images.StandardSource, ImageOptions = any>(props: Toolbar.Props<ImageSource, ImageOptions>, context?: any): Component<Toolbar.Props<ImageSource, ImageOptions>>;
-    // (undocumented)
+export class Toolbar<ImageSource = Images.StandardSource, ImageOptions = any> extends Component<Toolbar.Props<ImageSource, ImageOptions>> {
     IconButton: FunctionComponent<Toolbar.IconButtonProps>;
 }
-
-// @public (undocumented)
-export const Toolbar: Toolbar;
 
 // @public
 export namespace Transforms {
@@ -322,13 +311,10 @@ export namespace Typer {
 }
 
 // @public
-export interface Typer {
+export class Typer<ImageSource = Images.StandardSource> extends Component<Typer.Props<ImageSource>> implements FocusableInput {
     // (undocumented)
-    new <ImageSource = Images.StandardSource>(props: Typer.Props<ImageSource>, context?: any): Component<Typer.Props<ImageSource>> & FocusableInput;
+    focus: () => void;
 }
-
-// @public (undocumented)
-export const Typer: Typer;
 
 
 ```

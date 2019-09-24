@@ -8,18 +8,18 @@
  *
  * The library exposes:
  *
- * - The {@link (Typer:interface)} component, a support for editing {@link (Document:type)};
- * - The {@link (Print:interface)} component, a display for {@link (Document:type)};
- * - The {@link (Toolbar:interface)} component, which permits text transforms on current selection.
+ * - The {@link (Typer:class)} component, a support for editing {@link (Document:type)};
+ * - The {@link (Print:type)} component, a display for {@link (Document:type)};
+ * - The {@link (Toolbar:class)} component, which permits text transforms on current selection.
  *
  * **Controlled components**
  *
- * {@link (Typer:interface)} and {@link (Print:interface)} components are [controlled components](https://reactjs.org/docs/forms.html#controlled-components).
+ * {@link (Typer:class)} and {@link (Print:type)} components are [controlled components](https://reactjs.org/docs/forms.html#controlled-components).
  * You need to pass them a {@link Document | `document`} prop which you can initialize with {@link buildEmptyDocument}.
  *
  * **Triggering actions from external controls**
  *
- * A {@link (Bridge:interface)} instance must be shared between a {@link (Typer:interface)} and any control component such as {@link (Toolbar:interface)}.
+ * A {@link (Bridge:interface)} instance must be shared between a {@link (Typer:class)} and any control component such as {@link (Toolbar:class)}.
  * The {@link (Bridge:interface)} instance can be instantiated with {@link buildBridge}.
  * Actions can be triggered with the help of the object returned by {@link (Bridge:interface).getControlEventDomain}.
  *
@@ -35,6 +35,7 @@
  * @packageDocumentation
  */
 export { Typer } from '@components/Typer'
+export { Print } from '@components/Print'
 export { Bridge, buildBridge } from '@core/Bridge'
 export {
   Toolbar,
@@ -50,6 +51,5 @@ export { Transforms, defaultTextTransforms } from '@core/Transforms'
 export { Document, buildEmptyDocument, cloneDocument } from '@model/document'
 export { SelectionShape } from '@delta/Selection'
 export { Images } from '@core/Images'
-export { Print } from '@components/Print'
 export { DocumentRendererProps } from '@components/DocumentRenderer'
 export { FocusableInput } from '@components/GenericBlockInput'

@@ -8,18 +8,18 @@
  *
  * The library exposes:
  *
- * - The {@link (Typer:interface)} component, a support for editing {@link (Document:type)};
- * - The {@link (Print:interface)} component, a display for {@link (Document:type)};
- * - The {@link (Toolbar:interface)} component, which permits text transforms on current selection.
+ * - The {@link (Typer:class)} component, a support for editing {@link (Document:type)};
+ * - The {@link (Print:type)} component, a display for {@link (Document:type)};
+ * - The {@link (Toolbar:class)} component, which permits text transforms on current selection.
  *
  * **Controlled components**
  *
- * {@link (Typer:interface)} and {@link (Print:interface)} components are [controlled components](https://reactjs.org/docs/forms.html#controlled-components).
+ * {@link (Typer:class)} and {@link (Print:type)} components are [controlled components](https://reactjs.org/docs/forms.html#controlled-components).
  * You need to pass them a {@link Document | `document`} prop which you can initialize with {@link buildEmptyDocument}.
  *
  * **Triggering actions from external controls**
  *
- * A {@link (Bridge:interface)} instance must be shared between a {@link (Typer:interface)} and any control component such as {@link (Toolbar:interface)}.
+ * A {@link (Bridge:interface)} instance must be shared between a {@link (Typer:class)} and any control component such as {@link (Toolbar:class)}.
  * The {@link (Bridge:interface)} instance can be instantiated with {@link buildBridge}.
  * Actions can be triggered with the help of the object returned by {@link (Bridge:interface).getControlEventDomain}.
  *
@@ -163,7 +163,7 @@ export declare namespace Bridge {
         applyTextTransformToSelection: (attributeName: string, attributeValue: Attributes.TextValue) => void;
     }
     /**
-     * An object representing an area of events happening inside the {@link (Typer:interface)}.
+     * An object representing an area of events happening inside the {@link (Typer:class)}.
      *
      * @privateRemarks
      *
@@ -188,7 +188,7 @@ export declare namespace Bridge {
 }
 
 /**
- * An abstraction responsible for event dispatching between the {@link (Typer:interface)} and external controls.
+ * An abstraction responsible for event dispatching between the {@link (Typer:class)} and external controls.
  *
  * @remarks It also provide a uniform access to custom rendering logic.
  *
@@ -210,7 +210,7 @@ export declare interface Bridge<ImageSource> {
      *
      * @remarks
      *
-     * The returned object can be used to react from and trigger {@link (Typer:interface)} events.
+     * The returned object can be used to react from and trigger {@link (Typer:class)} events.
      */
     getControlEventDomain: () => Bridge.ControlEventDomain<ImageSource>;
     /**
@@ -240,7 +240,7 @@ export declare function buildBridge<ImageSource>(): Bridge<ImageSource>;
 export declare function buildEmptyDocument(): Document;
 
 /**
- * Utility function to build {@link (Toolbar:interface)} controls from {@link https://www.npmjs.com/package/react-native-vector-icons | react-native-vector-icons}.
+ * Utility function to build {@link (Toolbar:class)} controls from {@link https://www.npmjs.com/package/react-native-vector-icons | react-native-vector-icons}.
  *
  * @param IconComponent - The icon {@link react#ComponentType} such as `MaterialCommunityIcons`
  * @param actionType - The control action performed when this control is actionated.
@@ -299,7 +299,7 @@ export declare interface Document {
 }
 
 /**
- * Actions which can be triggered with the {@link (Toolbar:interface)} component to alter document.
+ * Actions which can be triggered with the {@link (Toolbar:class)} component to alter document.
  *
  * @public
  */
@@ -411,7 +411,7 @@ export declare interface FocusableInput {
 }
 
 /**
- * Any actions which can be triggered with the {@link (Toolbar:interface)} component.
+ * Any actions which can be triggered with the {@link (Toolbar:class)} component.
  *
  * @public
  */
@@ -527,13 +527,13 @@ export declare namespace Images {
 }
 
 /**
- * A set of definitions relative to {@link (Print:interface)} component.
+ * A set of definitions relative to {@link (Print:class)} component.
 
  * @public
  */
 export declare namespace Print {
     /**
-     * {@link (Print:interface)} properties.
+     * {@link (Print:class)} properties.
      */
     export type Props<ImageSource> = DocumentRendererProps<ImageSource>;
 }
@@ -543,18 +543,12 @@ export declare namespace Print {
  *
  * @public
  *
- * @internalRemarks
- *
- * This type trick is aimed at preventing from exporting the component State which should be out of API surface.
  */
-export declare interface Print {
-    new <ImageSource = Images.StandardSource>(props: Print.Props<ImageSource>, context?: any): Component<Print.Props<ImageSource>>;
+export declare class Print<ImageSource = Images.StandardSource> extends Component<Print.Props<ImageSource>> {
 }
 
-export declare const Print: Print;
-
 /**
- * A serializable object representing a selection of items in the {@link (Typer:interface)}.
+ * A serializable object representing a selection of items in the {@link (Typer:class)}.
  *
  * @public
  */
@@ -586,7 +580,7 @@ export declare interface TextOp extends GenericOp {
 }
 
 /**
- * A set of definitions related to the {@link (Toolbar:interface)} component.
+ * A set of definitions related to the {@link (Toolbar:class)} component.
  *
  * @public
  */
@@ -620,7 +614,7 @@ export declare namespace Toolbar {
      */
     export type DocumentControlSpec<T extends object = {}> = GenericControlSpec<DocumentControlAction, T>;
     /**
-     * Declaratively describes the layout of the {@link (Toolbar:interface)} component.
+     * Declaratively describes the layout of the {@link (Toolbar:class)} component.
      */
     export type Layout = (DocumentControlSpec<any> | typeof CONTROL_SEPARATOR | GenericControlSpec<any, any>)[];
     export interface IconButtonSpecs {
@@ -646,11 +640,11 @@ export declare namespace Toolbar {
         iconSize: number;
     }
     /**
-     * Props of the {@link (Toolbar:interface)} component.
+     * Props of the {@link (Toolbar:class)} component.
      */
     export interface Props<ImageSource, ImageOptions = any> extends Partial<IconButtonSpecs> {
         /**
-         * The instance to be shared with the {@link (Typer:interface)}.
+         * The instance to be shared with the {@link (Typer:class)}.
          */
         bridge: Bridge<ImageSource>;
         /**
@@ -697,7 +691,7 @@ export declare namespace Toolbar {
         buttonSpacing?: number;
     }
     /**
-     * Props for {@link (Toolbar:interface).IconButton} component.
+     * Props for {@link (Toolbar:class).IconButton} component.
      */
     export interface IconButtonProps extends IconButtonSpecs {
         selected: boolean;
@@ -737,20 +731,16 @@ export declare namespace Toolbar {
 }
 
 /**
- * A component to let user control the {@link (Typer:interface)} through a {@link (Bridge:interface)}.
+ * A component to let user control the {@link (Typer:class)} through a {@link (Bridge:interface)}.
  *
  * @public
- *
- * @internalRemarks
- *
- * This type trick is aimed at preventing from exporting the component State which should be out of API surface.
  */
-export declare interface Toolbar {
-    new <ImageSource = Images.StandardSource, ImageOptions = any>(props: Toolbar.Props<ImageSource, ImageOptions>, context?: any): Component<Toolbar.Props<ImageSource, ImageOptions>>;
+export declare class Toolbar<ImageSource = Images.StandardSource, ImageOptions = any> extends Component<Toolbar.Props<ImageSource, ImageOptions>> {
+    /**
+     * A button component displayed inside a toolbar.
+     */
     IconButton: FunctionComponent<Toolbar.IconButtonProps>;
 }
-
-export declare const Toolbar: Toolbar;
 
 /**
  * A set of definitions related to text and arbitrary content transforms.
@@ -827,13 +817,13 @@ export declare class Transforms {
 }
 
 /**
- * A set of definitions relative to {@link (Typer:interface)} component.
+ * A set of definitions relative to {@link (Typer:class)} component.
  *
  * @public
  */
 export declare namespace Typer {
     /**
-     * {@link (Typer:interface)} properties.
+     * {@link (Typer:class)} properties.
      */
     export interface Props<ImageSource> extends DocumentRendererProps<ImageSource> {
         /**
@@ -898,14 +888,9 @@ export declare namespace Typer {
  *
  * @public
  *
- * @internalRemarks
- *
- * This type trick is aimed at preventing from exporting the component State which should be out of API surface.
  */
-export declare interface Typer {
-    new <ImageSource = Images.StandardSource>(props: Typer.Props<ImageSource>, context?: any): Component<Typer.Props<ImageSource>> & FocusableInput;
+export declare class Typer<ImageSource = Images.StandardSource> extends Component<Typer.Props<ImageSource>> implements FocusableInput {
+    focus: () => void;
 }
-
-export declare const Typer: Typer;
 
 export { }

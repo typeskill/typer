@@ -19,14 +19,14 @@ import partial from 'ramda/es/partial'
 export const CONTROL_SEPARATOR = Symbol('separator')
 
 /**
- * Any actions which can be triggered with the {@link (Toolbar:interface)} component.
+ * Any actions which can be triggered with the {@link (Toolbar:class)} component.
  *
  * @public
  */
 export type GenericControlAction = string | symbol | number
 
 /**
- * Actions which can be triggered with the {@link (Toolbar:interface)} component to alter document.
+ * Actions which can be triggered with the {@link (Toolbar:class)} component to alter document.
  *
  * @public
  */
@@ -54,7 +54,7 @@ export enum DocumentControlAction {
 }
 
 /**
- * A set of definitions related to the {@link (Toolbar:interface)} component.
+ * A set of definitions related to the {@link (Toolbar:class)} component.
  *
  * @public
  */
@@ -89,7 +89,7 @@ declare namespace Toolbar {
    */
   export type DocumentControlSpec<T extends object = {}> = GenericControlSpec<DocumentControlAction, T>
   /**
-   * Declaratively describes the layout of the {@link (Toolbar:interface)} component.
+   * Declaratively describes the layout of the {@link (Toolbar:class)} component.
    */
   export type Layout = (DocumentControlSpec<any> | typeof CONTROL_SEPARATOR | GenericControlSpec<any, any>)[]
 
@@ -117,11 +117,11 @@ declare namespace Toolbar {
   }
 
   /**
-   * Props of the {@link (Toolbar:interface)} component.
+   * Props of the {@link (Toolbar:class)} component.
    */
   export interface Props<ImageSource, ImageOptions = any> extends Partial<IconButtonSpecs> {
     /**
-     * The instance to be shared with the {@link (Typer:interface)}.
+     * The instance to be shared with the {@link (Typer:class)}.
      */
     bridge: Bridge<ImageSource>
     /**
@@ -170,7 +170,7 @@ declare namespace Toolbar {
   }
 
   /**
-   * Props for {@link (Toolbar:interface).IconButton} component.
+   * Props for {@link (Toolbar:class).IconButton} component.
    */
   export interface IconButtonProps extends IconButtonSpecs {
     selected: boolean
@@ -238,6 +238,7 @@ function getSelectedButtonStyle({ activeButtonColor, activeButtonBackgroundColor
 
 // eslint-disable-next-line @typescript-eslint/class-name-casing
 class _Toolbar extends PureComponent<Toolbar.Props<any, any>> {
+  public static displayName = 'Toolbar'
   public static propTypes: Record<keyof Toolbar.Props<any>, any> = {
     bridge: PropTypes.instanceOf(BridgeStatic).isRequired,
     document: DocumentPropType,
@@ -447,7 +448,7 @@ class _Toolbar extends PureComponent<Toolbar.Props<any, any>> {
 }
 
 /**
- * Utility function to build {@link (Toolbar:interface)} controls from {@link https://www.npmjs.com/package/react-native-vector-icons | react-native-vector-icons}.
+ * Utility function to build {@link (Toolbar:class)} controls from {@link https://www.npmjs.com/package/react-native-vector-icons | react-native-vector-icons}.
  *
  * @param IconComponent - The icon {@link react#ComponentType} such as `MaterialCommunityIcons`
  * @param actionType - The control action performed when this control is actionated.
@@ -474,22 +475,19 @@ export function buildVectorIconControlSpec<A extends GenericControlAction, T ext
 }
 
 /**
- * A component to let user control the {@link (Typer:interface)} through a {@link (Bridge:interface)}.
+ * A component to let user control the {@link (Typer:class)} through a {@link (Bridge:interface)}.
  *
  * @public
- *
- * @internalRemarks
- *
- * This type trick is aimed at preventing from exporting the component State which should be out of API surface.
  */
-interface Toolbar {
-  new <ImageSource = Images.StandardSource, ImageOptions = any>(
-    props: Toolbar.Props<ImageSource, ImageOptions>,
-    context?: any,
-  ): Component<Toolbar.Props<ImageSource, ImageOptions>>
+declare class Toolbar<ImageSource = Images.StandardSource, ImageOptions = any> extends Component<
+  Toolbar.Props<ImageSource, ImageOptions>
+> {
+  /**
+   * A button component displayed inside a toolbar.
+   */
   IconButton: FunctionComponent<Toolbar.IconButtonProps>
 }
 
-const Toolbar = _Toolbar as Toolbar
+eval('let Toolbar=_Toolbar;')
 
 export { Toolbar }
