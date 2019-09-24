@@ -34,54 +34,22 @@
  *
  * @packageDocumentation
  */
-import { Typer } from '@components/Typer'
-import { Bridge, buildBridge } from '@core/Bridge'
-import {
+export { Typer } from '@components/Typer'
+export { Bridge, buildBridge } from '@core/Bridge'
+export {
   Toolbar,
   DocumentControlAction,
   CONTROL_SEPARATOR,
   buildVectorIconControlSpec,
   GenericControlAction,
 } from '@components/Toolbar'
-import { Attributes } from '@delta/attributes'
-import { GenericRichContent } from '@delta/generic'
-import { GenericOp, TextOp, ImageOp, BlockOp, ImageKind } from '@delta/operations'
-import { Transforms, defaultTextTransforms } from '@core/Transforms'
-import { Document, buildEmptyDocument, cloneDocument } from '@model/document'
-import { SelectionShape } from '@delta/Selection'
-import { Images } from '@core/Images'
-import { Print } from '@components/Print'
-import { DocumentRendererProps } from '@components/DocumentRenderer'
-import { FocusableInput } from '@components/GenericBlockInput'
-
-export {
-  // Components related
-  Typer,
-  FocusableInput,
-  Print,
-  Toolbar,
-  DocumentControlAction,
-  GenericControlAction,
-  CONTROL_SEPARATOR,
-  buildVectorIconControlSpec,
-  DocumentRendererProps,
-  // Model related
-  Bridge,
-  Images,
-  SelectionShape,
-  GenericRichContent,
-  GenericOp,
-  TextOp,
-  ImageOp,
-  ImageKind,
-  BlockOp,
-  Attributes,
-  Transforms,
-  Document,
-  // Generation
-  buildBridge,
-  buildEmptyDocument,
-  cloneDocument,
-  // Customization
-  defaultTextTransforms,
-}
+export { Attributes } from '@delta/attributes'
+export { GenericRichContent } from '@delta/generic'
+export { GenericOp, TextOp, ImageOp, BlockOp, ImageKind } from '@delta/operations'
+export { Transforms, defaultTextTransforms } from '@core/Transforms'
+export { Document, buildEmptyDocument, cloneDocument } from '@model/document'
+export { SelectionShape } from '@delta/Selection'
+export { Images } from '@core/Images'
+export { Print } from '@components/Print'
+export { DocumentRendererProps } from '@components/DocumentRenderer'
+export { FocusableInput } from '@components/GenericBlockInput'
