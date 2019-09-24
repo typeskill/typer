@@ -1,5 +1,4 @@
 import React, { Component } from 'react'
-import { ScrollView, View } from 'react-native'
 import { Document } from '@model/document'
 import { boundMethod } from 'autobind-decorator'
 import PropTypes from 'prop-types'
@@ -220,15 +219,7 @@ class _Typer extends DocumentRenderer<Typer.Props<any>, TyperState> implements D
   public render() {
     this.assembler = new BlockAssembler(this.props.document)
     const { readonly } = this.props
-    return (
-      <ScrollView style={this.getComponentStyles()} keyboardShouldPersistTaps="always">
-        <View style={this.getContentContainerStyles()}>
-          <View style={this.getDocumentStyles()} onLayout={this.handleOnContainerLayout}>
-            {this.assembler.getBlocks().map(readonly ? this.renderBlockView : this.renderBlockInput)}
-          </View>
-        </View>
-      </ScrollView>
-    )
+    return this.renderRoot(this.assembler.getBlocks().map(readonly ? this.renderBlockView : this.renderBlockInput))
   }
 }
 

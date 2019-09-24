@@ -1,7 +1,6 @@
-import React, { Component } from 'react'
+import { Component } from 'react'
 import { DocumentRenderer, DocumentRendererProps, DocumentRendererState } from './DocumentRenderer'
 import { BlockAssembler } from '@model/BlockAssembler'
-import { ScrollView, View } from 'react-native'
 import { Images } from '@core/Images'
 
 /**
@@ -30,15 +29,7 @@ class _Print extends DocumentRenderer<Print.Props<any>> {
 
   public render() {
     this.assembler = new BlockAssembler(this.props.document)
-    return (
-      <ScrollView style={this.getComponentStyles()}>
-        <View style={this.getContentContainerStyles()}>
-          <View style={this.getDocumentStyles()} onLayout={this.handleOnContainerLayout}>
-            {this.assembler.getBlocks().map(this.renderBlockView)}
-          </View>
-        </View>
-      </ScrollView>
-    )
+    return this.renderRoot(this.assembler.getBlocks().map(this.renderBlockView))
   }
 }
 

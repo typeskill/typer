@@ -1,8 +1,18 @@
-import React, { PureComponent } from 'react'
+import React, { PureComponent, ComponentType, ReactNode } from 'react'
 import { DocumentPropType, TextTransformSpecsType } from './types'
 import PropTypes from 'prop-types'
 import { Document } from '@model/document'
-import { StyleSheet, StyleProp, ViewStyle, TextStyle, ViewPropTypes, LayoutChangeEvent } from 'react-native'
+import {
+  StyleSheet,
+  StyleProp,
+  ViewStyle,
+  TextStyle,
+  ViewPropTypes,
+  LayoutChangeEvent,
+  ScrollViewProps,
+  ScrollView,
+  View,
+} from 'react-native'
 import { BlockAssembler } from '@model/BlockAssembler'
 import { genericStyles, overridePadding } from './styles'
 import { boundMethod } from 'autobind-decorator'
@@ -97,6 +107,19 @@ export interface DocumentRendererProps<ImageSource> {
    * @remarks This prop MUST NOT contain padding rules. Such padding rules will be zero-ed. Instead, use margin rules.
    */
   documentStyle?: StyleProp<ViewStyle>
+  /**
+   * Any {@link react-native#ScrollView} props you wish to pass.
+   *
+   * @remarks
+   *
+   * - Do not pass `style` prop as it will be overriden by this component `style` props;
+   * - Do not pass `keyboardShouldPersistTaps` because it will be forced to `"always"`.
+   */
+  scrollViewProps?: Omit<ScrollViewProps, 'style' | 'keyboardShouldPersistTaps'>
+  /**
+   * The component to replace RN default {@link react-native#ScrollView}.
+   */
+  ScrollView?: ComponentType<any>
 }
 
 const contentRendererStyles = StyleSheet.create({
@@ -134,6 +157,8 @@ export abstract class DocumentRenderer<
     maxMediaBlockHeight: PropTypes.number,
     maxMediaBlockWidth: PropTypes.number,
     textTransformSpecs: TextTransformSpecsType,
+    ScrollView: PropTypes.func,
+    scrollViewProps: PropTypes.object,
   }
 
   public static defaultProps: Partial<Record<keyof DocumentRendererProps<any>, any>> = {
@@ -153,22 +178,22 @@ export abstract class DocumentRenderer<
     return this.props.spacing as number
   }
 
-  protected handleOnContainerLayout = (layoutEvent: LayoutChangeEvent) => {
+  private handleOnContainerLayout = (layoutEvent: LayoutChangeEvent) => {
     this.setState({
       containerWidth: layoutEvent.nativeEvent.layout.width,
     })
   }
 
-  protected getComponentStyles(): StyleProp<ViewStyle> {
+  private getComponentStyles(): StyleProp<ViewStyle> {
     return [contentRendererStyles.scroll, this.props.style]
   }
 
-  protected getContentContainerStyles(): StyleProp<ViewStyle> {
+  private getContentContainerStyles(): StyleProp<ViewStyle> {
     const padding = this.getSpacing()
     return [contentRendererStyles.contentContainer, this.props.contentContainerStyle, overridePadding(padding)]
   }
 
-  protected getDocumentStyles(): StyleProp<ViewStyle> {
+  private getDocumentStyles(): StyleProp<ViewStyle> {
     return [contentRendererStyles.documentStyle, this.props.documentStyle, genericStyles.zeroPadding]
   }
 
@@ -198,6 +223,20 @@ export abstract class DocumentRenderer<
         ImageComponent={ImageComponent as Images.Component<any>}
         textTransformSpecs={textTransformSpecs as Transforms.Specs}
       />
+    )
+  }
+
+  protected renderRoot(children: ReactNode) {
+    const { scrollViewProps, ScrollView: UserScrollView } = this.props
+    const ScrollViewComponent = (UserScrollView || ScrollView) as typeof ScrollView
+    return (
+      <ScrollViewComponent {...scrollViewProps} style={this.getComponentStyles()} keyboardShouldPersistTaps="always">
+        <View style={this.getContentContainerStyles()}>
+          <View style={this.getDocumentStyles()} onLayout={this.handleOnContainerLayout}>
+            {children}
+          </View>
+        </View>
+      </ScrollViewComponent>
     )
   }
 }
