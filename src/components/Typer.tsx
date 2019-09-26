@@ -69,10 +69,8 @@ export declare namespace Typer {
      *
      * @remarks
      *
-     * In some instances, the typer will override active text selections. This can happen:
-     *
-     * - When user select text and apply transforms, the selection will be overriden to stay the same and allow user to apply multiple transforms;
-     * - When user press the edge of a media block, the selection will be overriden in order to select the preceding or following text input closest selectable unit.
+     * In some instances, the typer will override active text selections. This will happen when user press the edge of a media block:
+     * the selection will be overriden in order to select the preceding or following text input closest selectable unit.
      *
      * However, some versions of React Native have an Android bug which can trigger a `setSpan` error. If such errors occur, you should disable selection overrides.
      * {@link https://github.com/facebook/react-native/issues/25265}
@@ -80,6 +78,11 @@ export declare namespace Typer {
      * {@link https://github.com/facebook/react-native/issues/18316}
      */
     disableSelectionOverrides?: boolean
+    /**
+     * By default, when user select text and apply transforms, the selection will be overriden to stay the same and allow user to apply multiple transforms.
+     * When this prop is set to `true`, such behavior will be prevented.
+     */
+    disableMultipleAttributeEdits?: boolean
   }
 }
 
@@ -95,6 +98,7 @@ class _Typer extends DocumentRenderer<Typer.Props<any>, TyperState> implements D
     readonly: PropTypes.bool,
     imageHooks: ImageHooksType,
     disableSelectionOverrides: PropTypes.bool,
+    disableMultipleAttributeEdits: PropTypes.bool,
   }
 
   public static defaultProps: Partial<Record<keyof Typer.Props<any>, any>> = {
@@ -185,7 +189,7 @@ class _Typer extends DocumentRenderer<Typer.Props<any>, TyperState> implements D
       const currentSelection = this.props.document.currentSelection
       await this.updateDocument(this.assembler.applyTextTransformToSelection(attributeName, attributeValue))
       // Force the current selection to allow multiple edits.
-      if (Selection.fromShape(currentSelection).length() > 0) {
+      if (Selection.fromShape(currentSelection).length() > 0 && !this.props.disableMultipleAttributeEdits) {
         this.setState({ overridingScopedSelection: this.assembler.getActiveBlockScopedSelection() })
       }
     })
