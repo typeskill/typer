@@ -14,6 +14,7 @@ import { ImageHooksType } from './types'
 import { defaults } from './defaults'
 import { Images } from '@core/Images'
 import { Transforms } from '@core/Transforms'
+import equals from 'ramda/es/equals'
 
 interface TyperState {
   containerWidth: number | null
@@ -204,8 +205,13 @@ class _Typer extends DocumentRenderer<Typer.Props<any>, TyperState> implements D
   public async componentDidUpdate(oldProps: Typer.Props<any>) {
     invariant(oldProps.bridge === this.props.bridge, 'bridge prop cannot be changed after instantiation')
     const currentSelection = this.props.document.currentSelection
+    const currentSelectedTextAttributes = this.props.document.selectedTextAttributes
     if (oldProps.document.currentSelection !== currentSelection) {
-      await this.updateDocument(this.assembler.updateTextAttributesAtSelection())
+      const nextDocument = this.assembler.updateTextAttributesAtSelection()
+      // update text attributes when necessary
+      if (!equals(nextDocument.selectedTextAttributes, currentSelectedTextAttributes)) {
+        await this.updateDocument(nextDocument)
+      }
     }
     if (this.state.overridingScopedSelection !== null) {
       setTimeout(this.clearSelection, 0)
