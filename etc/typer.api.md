@@ -305,6 +305,7 @@ export namespace Typer {
     export interface Props<ImageSource> extends DocumentRendererProps<ImageSource> {
         bridge: Bridge<ImageSource>;
         debug?: boolean;
+        disableMultipleAttributeEdits?: boolean;
         disableSelectionOverrides?: boolean;
         imageHooks?: Images.Hooks<ImageSource>;
         onDocumentUpdate?: (nextDocumentContent: Document) => void;
