@@ -98,6 +98,7 @@ export interface Document {
     readonly currentSelection: SelectionShape;
     readonly lastDiff: GenericOp[];
     readonly ops: GenericOp[];
+    readonly schemaVersion: number;
     readonly selectedTextAttributes: Attributes.Map;
 }
 

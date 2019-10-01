@@ -10,6 +10,7 @@ describe('@model/document', () => {
         ops: [{ insert: 'F' }],
         lastDiff: [],
         selectedTextAttributes: {},
+        schemaVersion: 1,
       }
       const diff = applyTextTransformToSelection('weight', 'bold', document)
       expect(diff.selectedTextAttributes).toMatchObject({
@@ -25,6 +26,7 @@ describe('@model/document', () => {
         ops: [{ insert: 'F' }],
         lastDiff: [],
         selectedTextAttributes: {},
+        schemaVersion: 1,
       }
       const diff1 = applyTextTransformToSelection('weight', 'bold', documentContent1)
       const documentContent2 = mergeLeft(diff1, documentContent1)
@@ -40,6 +42,7 @@ describe('@model/document', () => {
         ops: [{ insert: 'FP\n' }],
         lastDiff: [],
         selectedTextAttributes: {},
+        schemaVersion: 1,
       }
       const diff = applyTextTransformToSelection('weight', 'bold', documentContent1)
       expect(diff).toMatchObject({
@@ -53,6 +56,7 @@ describe('@model/document', () => {
         ops: [{ insert: 'F' }, { insert: 'P', attributes: { weight: 'bold' } }, { insert: '\n' }],
         selectedTextAttributes: { weight: 'bold' },
         lastDiff: [],
+        schemaVersion: 1,
       }
       const diff = applyTextTransformToSelection('weight', null, documentContent1)
       expect(diff).toMatchObject({

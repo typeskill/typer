@@ -10,6 +10,7 @@ const documentShape: Record<keyof Document, any> = {
   currentSelection: PropTypes.object,
   selectedTextAttributes: PropTypes.object,
   lastDiff: OpsPropType,
+  schemaVersion: PropTypes.number,
 }
 
 const controlSpecsShape: Record<keyof Toolbar.DocumentControlSpec, any> = {

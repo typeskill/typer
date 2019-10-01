@@ -28,6 +28,14 @@ export interface Document {
    * The diff ops which were used to produce current ops by combining previous ops.
    */
   readonly lastDiff: GenericOp[]
+  /**
+   * The document shape versionning.
+   *
+   * @remarks This attribute might only change between major releases, and is intended to very rarely change.
+   * It is also guaranteed that if there were any, the library would offer tools to handle schema migrations.
+   *
+   */
+  readonly schemaVersion: number
 }
 
 /**
@@ -50,6 +58,7 @@ export function buildEmptyDocument(): Document {
     ops: [{ insert: '\n' }],
     selectedTextAttributes: {},
     lastDiff: [],
+    schemaVersion: 1,
   }
 }
 
@@ -66,6 +75,7 @@ export function cloneDocument(content: Document): Document {
     currentSelection: content.currentSelection,
     selectedTextAttributes: content.selectedTextAttributes,
     lastDiff: content.lastDiff,
+    schemaVersion: content.schemaVersion,
   }
 }
 
