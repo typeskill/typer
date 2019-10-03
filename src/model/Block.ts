@@ -110,9 +110,9 @@ export class Block {
     }
   }
 
-  public getBlockScopedSelection(document: Document): SelectionShape | null {
-    const start = document.currentSelection.start - this.descriptor.selectableUnitsOffset
-    const end = document.currentSelection.end - this.descriptor.selectableUnitsOffset
+  public getBlockScopedSelection(documentSelection: SelectionShape): SelectionShape | null {
+    const start = documentSelection.start - this.descriptor.selectableUnitsOffset
+    const end = documentSelection.end - this.descriptor.selectableUnitsOffset
     if (start < 0 || end > this.descriptor.numOfSelectableUnits) {
       return null
     }

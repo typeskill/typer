@@ -84,7 +84,7 @@ describe('@model/Block', () => {
       const { blocks, doc } = createContext(3, 4, ops)
       expect(blocks.length).toBe(3)
       const imageBlock = blocks[1]
-      expect(imageBlock.getBlockScopedSelection(doc)).toMatchObject({ start: 0, end: 1 })
+      expect(imageBlock.getBlockScopedSelection(doc.currentSelection)).toMatchObject({ start: 0, end: 1 })
     })
   })
   describe('getSelectedOps', () => {

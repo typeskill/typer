@@ -52,6 +52,6 @@ export class BlockAssembler {
 
   public getActiveBlockScopedSelection(): SelectionShape {
     const activeBlock = this.getActiveBlock() as Block
-    return activeBlock.getBlockScopedSelection(this.document) as SelectionShape
+    return activeBlock.getBlockScopedSelection(this.document.currentSelection) as SelectionShape
   }
 }

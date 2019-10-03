@@ -15,10 +15,11 @@ import { defaults } from './defaults'
 import { Images } from '@core/Images'
 import { Transforms } from '@core/Transforms'
 import equals from 'ramda/es/equals'
+import { Platform } from 'react-native'
 
 interface TyperState {
   containerWidth: number | null
-  overridingScopedSelection: SelectionShape | null
+  overridingSelection: SelectionShape | null
 }
 
 /**
@@ -80,9 +81,10 @@ export declare namespace Typer {
     disableSelectionOverrides?: boolean
     /**
      * By default, when user select text and apply transforms, the selection will be overriden to stay the same and allow user to apply multiple transforms.
-     * When this prop is set to `true`, such behavior will be prevented.
+     * This is the normal behavior on iOS, but not on Android. Typeksill will by default enforce this behavior on Android too.
+     * However, when this prop is set to `true`, such behavior will be prevented on Android.
      */
-    disableMultipleAttributeEdits?: boolean
+    androidDisableMultipleAttributeEdits?: boolean
   }
 }
 
@@ -98,7 +100,7 @@ class _Typer extends DocumentRenderer<Typer.Props<any>, TyperState> implements D
     readonly: PropTypes.bool,
     imageHooks: ImageHooksType,
     disableSelectionOverrides: PropTypes.bool,
-    disableMultipleAttributeEdits: PropTypes.bool,
+    androidDisableMultipleAttributeEdits: PropTypes.bool,
   }
 
   public static defaultProps: Partial<Record<keyof Typer.Props<any>, any>> = {
@@ -113,7 +115,7 @@ class _Typer extends DocumentRenderer<Typer.Props<any>, TyperState> implements D
 
   public state: TyperState = {
     containerWidth: null,
-    overridingScopedSelection: null,
+    overridingSelection: null,
   }
 
   public constructor(props: Typer.Props<any>) {
@@ -122,7 +124,7 @@ class _Typer extends DocumentRenderer<Typer.Props<any>, TyperState> implements D
 
   @boundMethod
   private clearSelection() {
-    this.setState({ overridingScopedSelection: null })
+    this.setState({ overridingSelection: null })
   }
 
   public getDocument() {
@@ -143,7 +145,7 @@ class _Typer extends DocumentRenderer<Typer.Props<any>, TyperState> implements D
   @boundMethod
   private renderBlockInput(block: Block) {
     const descriptor = block.descriptor
-    const { overridingScopedSelection: overridingSelection } = this.state
+    const { overridingSelection } = this.state
     const {
       textStyle,
       debug,
@@ -174,8 +176,10 @@ class _Typer extends DocumentRenderer<Typer.Props<any>, TyperState> implements D
         descriptor={descriptor}
         maxMediaBlockHeight={maxMediaBlockHeight}
         maxMediaBlockWidth={maxMediaBlockWidth}
-        blockScopedSelection={block.getBlockScopedSelection(this.props.document)}
-        overridingScopedSelection={isFocused ? overridingSelection : null}
+        blockScopedSelection={block.getBlockScopedSelection(this.props.document.currentSelection)}
+        overridingScopedSelection={
+          isFocused && overridingSelection ? block.getBlockScopedSelection(overridingSelection) : null
+        }
         textAttributesAtCursor={selectedTextAttributes}
         disableSelectionOverrides={disableSelectionOverrides}
         textTransformSpecs={textTransformSpecs as Transforms.Specs}
@@ -183,14 +187,22 @@ class _Typer extends DocumentRenderer<Typer.Props<any>, TyperState> implements D
     )
   }
 
+  public overrideSelection(overridingSelection: SelectionShape) {
+    this.setState({ overridingSelection })
+  }
+
   public componentDidMount() {
     const sheetEventDom = this.props.bridge.getSheetEventDomain()
     sheetEventDom.addApplyTextTransformToSelectionListener(this, async (attributeName, attributeValue) => {
       const currentSelection = this.props.document.currentSelection
       await this.updateDocument(this.assembler.applyTextTransformToSelection(attributeName, attributeValue))
-      // Force the current selection to allow multiple edits.
-      if (Selection.fromShape(currentSelection).length() > 0 && !this.props.disableMultipleAttributeEdits) {
-        this.setState({ overridingScopedSelection: this.assembler.getActiveBlockScopedSelection() })
+      // Force the current selection to allow multiple edits on Android.
+      if (
+        Platform.OS === 'android' &&
+        Selection.fromShape(currentSelection).length() > 0 &&
+        !this.props.androidDisableMultipleAttributeEdits
+      ) {
+        this.overrideSelection(this.props.document.currentSelection)
       }
     })
     sheetEventDom.addInsertOrReplaceAtSelectionListener(this, async element => {
@@ -217,8 +229,8 @@ class _Typer extends DocumentRenderer<Typer.Props<any>, TyperState> implements D
         await this.updateDocument(nextDocument)
       }
     }
-    if (this.state.overridingScopedSelection !== null) {
-      setTimeout(this.clearSelection, 0)
+    if (this.state.overridingSelection !== null) {
+      setTimeout(this.clearSelection, Platform.select({ ios: 100, default: 0 }))
     }
   }
 
