@@ -1,27 +1,39 @@
-import React, { Component } from 'react'
-import invariant from 'invariant'
+import React, {
+  memo,
+  useState,
+  useRef,
+  useCallback,
+  forwardRef,
+  useImperativeHandle,
+  useEffect,
+  PropsWithChildren,
+} from 'react'
 import {
   View,
   TextInput,
   NativeSyntheticEvent,
   StyleSheet,
   TextInputProps,
-  TextInputSelectionChangeEventData,
   TextInputKeyPressEventData,
   StyleProp,
   TextStyle,
+  Platform,
 } from 'react-native'
 import { RichText, richTextStyles } from '@components/RichText'
-import { boundMethod } from 'autobind-decorator'
-import { Selection, SelectionShape } from '@delta/Selection'
+import { SelectionShape } from '@delta/Selection'
 import { TextOp } from '@delta/operations'
 import { Attributes } from '@delta/attributes'
 import { Transforms } from '@core/Transforms'
 import { TextChangeSession } from './TextChangeSession'
-import { DocumentDelta } from '@delta/DocumentDelta'
 import { DocumentDeltaAtomicUpdate } from '@delta/DocumentDeltaAtomicUpdate'
 import { StandardBlockInputProps, FocusableInput } from '../types'
 import { genericStyles } from '@components/styles'
+import {
+  TextChangeSessionOwner,
+  androidTextChangeSessionBehavior,
+  iosTextChangeSessionBehavior,
+} from './TextChangeSessionBehavior'
+import partial from 'ramda/es/partial'
 
 const styles = StyleSheet.create({
   grow: {
@@ -54,159 +66,158 @@ const constantTextInputProps: TextInputProps = {
   blurOnSubmit: false,
 } as TextInputProps
 
-interface State {
-  overridingSelection: SelectionShape | null
+function selectionShapesAreEqual(s1: SelectionShape | null, s2: SelectionShape | null): boolean {
+  return !!s1 && !!s2 && s1.start === s2.start && s1.end === s2.end
+}
+
+function propsAreEqual(
+  previousProps: Readonly<PropsWithChildren<TextBlockInputProps>>,
+  nextProps: Readonly<PropsWithChildren<TextBlockInputProps>>,
+) {
+  return (
+    nextProps.overridingScopedSelection === previousProps.overridingScopedSelection &&
+    nextProps.textOps === previousProps.textOps &&
+    nextProps.isFocused === previousProps.isFocused &&
+    selectionShapesAreEqual(previousProps.blockScopedSelection, nextProps.blockScopedSelection)
+  )
+}
+
+const sessionBehavior = Platform.select({
+  ios: iosTextChangeSessionBehavior,
+  android: androidTextChangeSessionBehavior,
+  windows: androidTextChangeSessionBehavior,
+})
+
+function _TextBlockInput(
+  {
+    textStyle,
+    textOps,
+    textTransformSpecs,
+    overridingScopedSelection,
+    disableSelectionOverrides,
+    blockScopedSelection,
+    controller,
+    isFocused,
+    textAttributesAtCursor,
+  }: TextBlockInputProps,
+  ref: any,
+) {
+  const inputRef = useRef<TextInput | null>()
+  const textInputSelectionRef = useRef<SelectionShape | null>(blockScopedSelection)
+  const nextOverrideSelectionRef = useRef<SelectionShape | null>(null)
+  const cachedChangeSessionRef = useRef<TextChangeSession | null>(null)
+  const hasFocusRef = useRef<boolean>(false)
+  const [overridingSelection, setOverridingSelection] = useState<SelectionShape | null>(null)
+  const getOps = useCallback(() => textOps, [textOps])
+  const getAttributesAtCursor = useCallback(() => textAttributesAtCursor, [textAttributesAtCursor])
+  const getBlockScopedSelection = useCallback(() => textInputSelectionRef.current, [])
+  const getTextChangeSession = useCallback(() => cachedChangeSessionRef.current, [])
+  const setTextChangeSession = useCallback(function setTextChangeSession(session: TextChangeSession | null) {
+    cachedChangeSessionRef.current = session
+  }, [])
+  const setCachedSelection = useCallback(function setCachedSelection(selection: SelectionShape) {
+    textInputSelectionRef.current = selection
+  }, [])
+  const focus = useCallback(function focus(nextOverrideSelection?: SelectionShape | null) {
+    inputRef.current && inputRef.current.focus()
+    if (nextOverrideSelection) {
+      nextOverrideSelectionRef.current = nextOverrideSelection
+    }
+  }, [])
+  const handleOnKeyPressed = useCallback(
+    function handleOnKeyPressed(e: NativeSyntheticEvent<TextInputKeyPressEventData>) {
+      const key = e.nativeEvent.key
+      const cachedSelection = textInputSelectionRef.current
+      if (key === 'Backspace' && cachedSelection && cachedSelection.start === 0 && cachedSelection.end === 0) {
+        controller.removeOneBeforeBlock()
+      }
+    },
+    [controller],
+  )
+  useImperativeHandle(ref, () => ({
+    focus,
+  }))
+  // To fix selection discrepancy
+  useEffect(() => {
+    if (isFocused && !selectionShapesAreEqual(blockScopedSelection, textInputSelectionRef.current)) {
+      setOverridingSelection(blockScopedSelection)
+    }
+  }, [blockScopedSelection, isFocused])
+  // On focus
+  useEffect(() => {
+    if (isFocused && !hasFocusRef.current) {
+      focus(blockScopedSelection)
+    } else if (!isFocused) {
+      hasFocusRef.current = false
+    }
+  }, [isFocused])
+  // The overriding should be one-shot, and
+  // therefore suppressed after one render cycle.
+  useEffect(() => {
+    if (overridingSelection !== null) {
+      setOverridingSelection(null)
+    }
+  }, [overridingSelection])
+  const handleOnFocus = useCallback(function handleOnFocus() {
+    hasFocusRef.current = true
+    const nextOverrideSelection = nextOverrideSelectionRef.current
+    if (nextOverrideSelection) {
+      nextOverrideSelectionRef.current = null
+      textInputSelectionRef.current = nextOverrideSelection
+      setOverridingSelection(nextOverrideSelection)
+    }
+  }, [])
+  const updateOps = useCallback(
+    function updateOps(documentDeltaUpdate: DocumentDeltaAtomicUpdate) {
+      setCachedSelection(documentDeltaUpdate.selectionAfterChange.toShape())
+      return controller.applyAtomicDeltaUpdateInBlock(documentDeltaUpdate)
+    },
+    [controller],
+  )
+  const updateSelection = useCallback(
+    function updateSelection(currentSelection: SelectionShape) {
+      setCachedSelection(currentSelection)
+      controller.updateSelectionInBlock(currentSelection)
+    },
+    [controller],
+  )
+  const sessionChangeOwner: TextChangeSessionOwner = {
+    getBlockScopedSelection,
+    getTextChangeSession,
+    getAttributesAtCursor,
+    getOps,
+    setTextChangeSession,
+    updateOps,
+    updateSelection,
+  }
+  const shouldOverrideSelection = !disableSelectionOverrides && (overridingScopedSelection || overridingSelection)
+  const handleOnChangeText = useCallback(partial(sessionBehavior.handleOnTextChanged, [sessionChangeOwner]), [
+    sessionChangeOwner,
+  ])
+  const handleOnSelectionChange = useCallback(partial(sessionBehavior.handleOnSelectionChanged, [sessionChangeOwner]), [
+    sessionChangeOwner,
+  ])
+  return (
+    <View style={styles.grow}>
+      <TextInput
+        selection={shouldOverrideSelection ? shouldOverrideSelection : undefined}
+        style={[styles.grow, styles.textInput, richTextStyles.defaultText, textStyle, genericStyles.zeroSpacing]}
+        onKeyPress={handleOnKeyPressed}
+        onSelectionChange={handleOnSelectionChange}
+        onChangeText={handleOnChangeText}
+        ref={inputRef as any}
+        onFocus={handleOnFocus}
+        {...constantTextInputProps}
+      >
+        <RichText textStyle={textStyle} textTransformSpecs={textTransformSpecs} textOps={textOps} />
+      </TextInput>
+    </View>
+  )
 }
 
 /**
  * A component which is responsible for providing a user interface to edit {@link RichContent}.
- *
  */
-export class TextBlockInput extends Component<TextBlockInputProps, State> implements FocusableInput {
-  private textChangeSession: TextChangeSession | null = null
-  private textInputRef = React.createRef<TextInput>()
-  private blockScopedSelection = Selection.fromShape({ start: 0, end: 0 })
-  private nextOverridingSelection: SelectionShape | null = null
+export const TextBlockInput = memo(forwardRef<FocusableInput, TextBlockInputProps>(_TextBlockInput), propsAreEqual)
 
-  public state: State = {
-    overridingSelection: null,
-  }
-
-  public constructor(props: TextBlockInputProps) {
-    super(props)
-    invariant(props.textOps != null, INVARIANT_MANDATORY_TEXT_BLOCK_PROP)
-  }
-
-  /**
-   * **Preconditions**: this method must be called before handleOnSelectionChange
-   * This is the current TextInput behavior.
-   *
-   * @param nextText
-   */
-  @boundMethod
-  private handleOnTextChanged(nextText: string) {
-    this.textChangeSession = new TextChangeSession()
-    this.textChangeSession.setTextAfterChange(nextText)
-    this.textChangeSession.setSelectionBeforeChange(this.blockScopedSelection)
-  }
-
-  @boundMethod
-  private handleOnSelectionChanged({
-    nativeEvent: { selection },
-  }: NativeSyntheticEvent<TextInputSelectionChangeEventData>) {
-    const nextSelection = Selection.between(selection.start, selection.end)
-    if (this.textChangeSession !== null) {
-      this.textChangeSession.setSelectionAfterChange(nextSelection)
-      const ops = this.props.textOps
-      const documentDeltaUpdate = new DocumentDelta(ops).applyTextDiff(
-        this.textChangeSession.getTextAfterChange(),
-        this.textChangeSession.getDeltaChangeContext(),
-        this.props.textAttributesAtCursor,
-      )
-      this.textChangeSession = null
-      this.updateOps(documentDeltaUpdate)
-    } else {
-      this.updateSelection(nextSelection)
-    }
-  }
-
-  @boundMethod
-  public focus(nextOverrideSelection?: SelectionShape) {
-    this.nextOverridingSelection = nextOverrideSelection || null
-    this.textInputRef.current && this.textInputRef.current.focus()
-  }
-
-  @boundMethod
-  private handleOnFocus() {
-    const nextOverridingSelection = this.nextOverridingSelection
-    if (nextOverridingSelection !== null) {
-      this.setState({ overridingSelection: nextOverridingSelection })
-      this.blockScopedSelection = Selection.fromShape(nextOverridingSelection)
-      this.nextOverridingSelection = null
-    }
-  }
-
-  public shouldComponentUpdate(nextProps: TextBlockInputProps, nextState: State) {
-    return (
-      nextProps.overridingScopedSelection !== this.props.overridingScopedSelection ||
-      nextProps.textOps !== this.props.textOps ||
-      nextProps.isFocused !== this.props.isFocused ||
-      nextState.overridingSelection !== this.props.overridingScopedSelection
-    )
-  }
-
-  public async updateSelection(currentSelection: Selection) {
-    this.blockScopedSelection = currentSelection
-    return this.props.controller.updateSelectionInBlock(currentSelection)
-  }
-
-  private updateOps(documentDeltaUpdate: DocumentDeltaAtomicUpdate) {
-    this.blockScopedSelection = documentDeltaUpdate.selectionAfterChange
-    return this.props.controller.applyAtomicDeltaUpdateInBlock(documentDeltaUpdate)
-  }
-
-  public getCurrentSelection() {
-    return this.blockScopedSelection
-  }
-
-  public getOps() {
-    return this.props.textOps
-  }
-
-  @boundMethod
-  public handleOnKeyPressed(e: NativeSyntheticEvent<TextInputKeyPressEventData>) {
-    const key = e.nativeEvent.key
-    if (key === 'Backspace' && this.blockScopedSelection.start === 0 && this.blockScopedSelection.end === 0) {
-      this.props.controller.removeOneBeforeBlock()
-    }
-  }
-
-  public componentDidMount() {
-    if (this.props.isFocused) {
-      this.focus()
-    }
-  }
-
-  public componentDidUpdate(oldProps: TextBlockInputProps) {
-    if (this.state.overridingSelection !== null) {
-      setTimeout(() => this.setState({ overridingSelection: null }))
-    }
-    const blockScopedSelection = this.props.blockScopedSelection
-    if (this.props.isFocused && blockScopedSelection) {
-      if (!oldProps.isFocused) {
-        this.blockScopedSelection = Selection.fromShape(blockScopedSelection)
-        this.focus(blockScopedSelection)
-      } else if (
-        blockScopedSelection.start !== this.blockScopedSelection.start ||
-        blockScopedSelection.end !== this.blockScopedSelection.end
-      ) {
-        this.blockScopedSelection = Selection.fromShape(blockScopedSelection)
-        this.setState({ overridingSelection: blockScopedSelection })
-      }
-    }
-    if (this.props.isFocused && this.props.overridingScopedSelection !== null) {
-      this.blockScopedSelection = Selection.fromShape(this.props.overridingScopedSelection)
-    }
-  }
-
-  public render() {
-    const { textStyle, textOps, textTransformSpecs, overridingScopedSelection, disableSelectionOverrides } = this.props
-    const overriding = !disableSelectionOverrides && (overridingScopedSelection || this.state.overridingSelection)
-    return (
-      <View style={styles.grow}>
-        <TextInput
-          selection={overriding ? overriding : undefined}
-          style={[styles.grow, styles.textInput, richTextStyles.defaultText, textStyle, genericStyles.zeroSpacing]}
-          onKeyPress={this.handleOnKeyPressed}
-          onSelectionChange={this.handleOnSelectionChanged}
-          onChangeText={this.handleOnTextChanged}
-          ref={this.textInputRef}
-          onFocus={this.handleOnFocus}
-          {...constantTextInputProps}
-        >
-          <RichText textStyle={textStyle} textTransformSpecs={textTransformSpecs} textOps={textOps} />
-        </TextInput>
-      </View>
-    )
-  }
-}
+TextBlockInput.displayName = 'TextBlockInput'

@@ -1,9 +1,9 @@
-import { Selection } from '@delta/Selection'
+import { Selection, SelectionShape } from '@delta/Selection'
 import { DeltaChangeContext } from '@delta/DeltaChangeContext'
 
 export class TextChangeSession {
-  private selectionBeforeChange: Selection | null = null
-  private selectionAfterChange: Selection | null = null
+  private selectionBeforeChange: SelectionShape | null = null
+  private selectionAfterChange: SelectionShape | null = null
   private textAfterChange: string | null = null
 
   public getDeltaChangeContext(): DeltaChangeContext {
@@ -13,18 +13,21 @@ export class TextChangeSession {
     if (this.selectionBeforeChange === null) {
       throw new Error('selectionBeforeChange must be set before getting delta change context.')
     }
-    return new DeltaChangeContext(this.selectionBeforeChange, this.selectionAfterChange)
+    return new DeltaChangeContext(
+      Selection.fromShape(this.selectionBeforeChange),
+      Selection.fromShape(this.selectionAfterChange),
+    )
   }
 
   public setTextAfterChange(textAfterChange: string) {
     this.textAfterChange = textAfterChange
   }
 
-  public setSelectionBeforeChange(selectionBeforeChange: Selection) {
+  public setSelectionBeforeChange(selectionBeforeChange: SelectionShape) {
     this.selectionBeforeChange = selectionBeforeChange
   }
 
-  public setSelectionAfterChange(selectionAfterChange: Selection) {
+  public setSelectionAfterChange(selectionAfterChange: SelectionShape) {
     this.selectionAfterChange = selectionAfterChange
   }
 
