@@ -1,13 +1,4 @@
-import React, {
-  memo,
-  useState,
-  useRef,
-  useCallback,
-  forwardRef,
-  useImperativeHandle,
-  useEffect,
-  PropsWithChildren,
-} from 'react'
+import React, { memo, useRef, useCallback, forwardRef, useImperativeHandle, useEffect, PropsWithChildren } from 'react'
 import {
   View,
   TextInput,
@@ -102,12 +93,18 @@ function _TextBlockInput(
   }: TextBlockInputProps,
   ref: any,
 ) {
-  const inputRef = useRef<TextInput | null>()
+  const inputRef = useRef<TextInput>()
+  const timeoutRef = useRef<any | null>()
   const textInputSelectionRef = useRef<SelectionShape | null>(blockScopedSelection)
   const nextOverrideSelectionRef = useRef<SelectionShape | null>(null)
   const cachedChangeSessionRef = useRef<TextChangeSession | null>(null)
   const hasFocusRef = useRef<boolean>(false)
-  const [overridingSelection, setOverridingSelection] = useState<SelectionShape | null>(null)
+  const setTimeoutLocal = useCallback((callback: Function, duration: number) => {
+    timeoutRef.current = setTimeout(callback, duration)
+  }, [])
+  const clearTimeoutLocal = useCallback(() => {
+    clearTimeout(timeoutRef.current)
+  }, [])
   const getOps = useCallback(() => textOps, [textOps])
   const getAttributesAtCursor = useCallback(() => textAttributesAtCursor, [textAttributesAtCursor])
   const getBlockScopedSelection = useCallback(() => textInputSelectionRef.current, [])
@@ -118,12 +115,15 @@ function _TextBlockInput(
   const setCachedSelection = useCallback(function setCachedSelection(selection: SelectionShape) {
     textInputSelectionRef.current = selection
   }, [])
-  const focus = useCallback(function focus(nextOverrideSelection?: SelectionShape | null) {
-    inputRef.current && inputRef.current.focus()
-    if (nextOverrideSelection) {
-      nextOverrideSelectionRef.current = nextOverrideSelection
-    }
-  }, [])
+  const focus = useCallback(
+    function focus(nextOverrideSelection?: SelectionShape | null) {
+      inputRef.current && inputRef.current.focus()
+      if (nextOverrideSelection) {
+        nextOverrideSelectionRef.current = nextOverrideSelection
+      }
+    },
+    [blockScopedSelection],
+  )
   const handleOnKeyPressed = useCallback(
     function handleOnKeyPressed(e: NativeSyntheticEvent<TextInputKeyPressEventData>) {
       const key = e.nativeEvent.key
@@ -137,35 +137,20 @@ function _TextBlockInput(
   useImperativeHandle(ref, () => ({
     focus,
   }))
-  // To fix selection discrepancy
+  // Clear timeout on unmount
   useEffect(() => {
-    if (isFocused && !selectionShapesAreEqual(blockScopedSelection, textInputSelectionRef.current)) {
-      setOverridingSelection(blockScopedSelection)
-    }
-  }, [blockScopedSelection, isFocused])
+    return clearTimeoutLocal
+  }, [])
   // On focus
   useEffect(() => {
     if (isFocused && !hasFocusRef.current) {
-      focus(blockScopedSelection)
+      focus()
     } else if (!isFocused) {
       hasFocusRef.current = false
     }
   }, [isFocused, blockScopedSelection])
-  // The overriding should be one-shot, and
-  // therefore suppressed after one render cycle.
-  useEffect(() => {
-    if (overridingSelection !== null) {
-      setOverridingSelection(null)
-    }
-  }, [overridingSelection])
   const handleOnFocus = useCallback(function handleOnFocus() {
     hasFocusRef.current = true
-    const nextOverrideSelection = nextOverrideSelectionRef.current
-    if (nextOverrideSelection) {
-      nextOverrideSelectionRef.current = null
-      textInputSelectionRef.current = nextOverrideSelection
-      setOverridingSelection(nextOverrideSelection)
-    }
   }, [])
   const updateOps = useCallback(
     function updateOps(documentDeltaUpdate: DocumentDeltaAtomicUpdate) {
@@ -189,18 +174,22 @@ function _TextBlockInput(
     setTextChangeSession,
     updateOps,
     updateSelection,
+    setTimeout: setTimeoutLocal,
+    clearTimeout: clearTimeoutLocal,
   }
-  const shouldOverrideSelection = !disableSelectionOverrides && (overridingScopedSelection || overridingSelection)
+  const forcedSelection = !disableSelectionOverrides && overridingScopedSelection
   const handleOnChangeText = useCallback(partial(sessionBehavior.handleOnTextChanged, [sessionChangeOwner]), [
     sessionChangeOwner,
   ])
   const handleOnSelectionChange = useCallback(partial(sessionBehavior.handleOnSelectionChanged, [sessionChangeOwner]), [
     sessionChangeOwner,
   ])
+  const selection = forcedSelection || undefined
+  console.info(`REAL OVERRIDING SEL ${JSON.stringify(selection)}`)
   return (
     <View style={styles.grow}>
       <TextInput
-        selection={shouldOverrideSelection ? shouldOverrideSelection : undefined}
+        selection={selection}
         style={[styles.grow, styles.textInput, richTextStyles.defaultText, textStyle, genericStyles.zeroSpacing]}
         onKeyPress={handleOnKeyPressed}
         onSelectionChange={handleOnSelectionChange}

@@ -14,6 +14,8 @@ export interface TextChangeSessionOwner {
   getOps: () => TextOp[]
   getAttributesAtCursor: () => Attributes.Map
   updateSelection: (selection: SelectionShape) => void
+  clearTimeout: () => void
+  setTimeout: (callback: () => void, duration: number) => void
 }
 
 export interface TextChangeSessionBehavior {
@@ -35,17 +37,26 @@ function applySelectionChange(owner: TextChangeSessionOwner, textChangeSession: 
   owner.updateOps(documentDeltaUpdate)
 }
 
+const IOS_TIMEOUT_DURATION = 10
+
 /**
  * As of RN61 on iOS, selection changes happens before text change.
  */
 export const iosTextChangeSessionBehavior: TextChangeSessionBehavior = {
   handleOnSelectionChanged(owner, { nativeEvent: { selection } }) {
+    console.info(`SELECTION CHANGE ${JSON.stringify(selection)}`)
+    owner.clearTimeout()
     const textChangeSession = new TextChangeSession()
     textChangeSession.setSelectionBeforeChange(owner.getBlockScopedSelection() as SelectionShape)
     textChangeSession.setSelectionAfterChange(selection)
     owner.setTextChangeSession(textChangeSession)
+    owner.setTimeout(() => {
+      owner.setTextChangeSession(null)
+      owner.updateSelection(selection)
+    }, IOS_TIMEOUT_DURATION)
   },
   handleOnTextChanged(owner, nextText) {
+    owner.clearTimeout()
     const textChangeSession = owner.getTextChangeSession()
     if (textChangeSession !== null) {
       textChangeSession.setTextAfterChange(nextText)

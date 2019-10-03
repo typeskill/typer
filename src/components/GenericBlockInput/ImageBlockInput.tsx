@@ -72,12 +72,12 @@ export class ImageBlockInput<ImageSource> extends PureComponent<ImageBlockInputP
 
   @boundMethod
   private handleOnPressLeftHandler() {
-    this.props.controller.updateSelectionInBlock({ start: 0, end: 0 })
+    this.props.controller.updateSelectionInBlock({ start: 0, end: 0 }, true)
   }
 
   @boundMethod
   private handleOnPressRightHandler() {
-    this.props.controller.updateSelectionInBlock({ start: 1, end: 1 })
+    this.props.controller.updateSelectionInBlock({ start: 1, end: 1 }, true)
   }
 
   @boundMethod

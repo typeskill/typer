@@ -9,6 +9,7 @@ export interface DocumentProvider {
   getDocument: () => Document
   updateDocument: (document: Document) => void
   getImageHooks: () => Images.Hooks<any>
+  overrideSelection: (overridingSelection: SelectionShape) => void
 }
 
 export class BlockController {
@@ -36,8 +37,12 @@ export class BlockController {
     }
   }
 
-  public updateSelectionInBlock(blockScopedSelection: SelectionShape) {
-    this.updateDocumentContent(this.block.updateSelection(blockScopedSelection, this.getDocument()))
+  public updateSelectionInBlock(blockScopedSelection: SelectionShape, override?: boolean) {
+    const nextDocument = this.block.updateSelection(blockScopedSelection, this.getDocument())
+    this.updateDocumentContent(nextDocument)
+    if (override) {
+      this.provider.overrideSelection(nextDocument.currentSelection)
+    }
   }
 
   public applyAtomicDeltaUpdateInBlock(documentDeltaUpdate: DocumentDeltaAtomicUpdate) {
