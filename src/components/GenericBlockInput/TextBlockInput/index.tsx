@@ -150,7 +150,7 @@ function _TextBlockInput(
     } else if (!isFocused) {
       hasFocusRef.current = false
     }
-  }, [isFocused])
+  }, [isFocused, blockScopedSelection])
   // The overriding should be one-shot, and
   // therefore suppressed after one render cycle.
   useEffect(() => {
