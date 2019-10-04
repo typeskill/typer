@@ -85,7 +85,7 @@
     "@types/react-test-renderer": "^16.9.0",
     "@typescript-eslint/eslint-plugin": "^2.3.1",
     "@typescript-eslint/parser": "^2.3.1",
-    "@typeskill/eslint-config": "^1.0.0",
+    "@typeskill/eslint-config": "^1.1.0",
     "@zerollup/ts-transform-paths": "^1.7.3",
     "babel-jest": "^24.9.0",
     "babel-plugin-module-resolver": "^3.2.0",
