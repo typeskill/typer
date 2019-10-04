@@ -185,7 +185,6 @@ function _TextBlockInput(
     sessionChangeOwner,
   ])
   const selection = forcedSelection || undefined
-  console.info(`REAL OVERRIDING SEL ${JSON.stringify(selection)}`)
   return (
     <View style={styles.grow}>
       <TextInput
