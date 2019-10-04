@@ -304,9 +304,9 @@ export class Transforms {
 // @public
 export namespace Typer {
     export interface Props<ImageSource> extends DocumentRendererProps<ImageSource> {
+        androidDisableMultipleAttributeEdits?: boolean;
         bridge: Bridge<ImageSource>;
         debug?: boolean;
-        disableMultipleAttributeEdits?: boolean;
         disableSelectionOverrides?: boolean;
         imageHooks?: Images.Hooks<ImageSource>;
         onDocumentUpdate?: (nextDocumentContent: Document) => void;

@@ -891,9 +891,10 @@ export declare namespace Typer {
         disableSelectionOverrides?: boolean;
         /**
          * By default, when user select text and apply transforms, the selection will be overriden to stay the same and allow user to apply multiple transforms.
-         * When this prop is set to `true`, such behavior will be prevented.
+         * This is the normal behavior on iOS, but not on Android. Typeksill will by default enforce this behavior on Android too.
+         * However, when this prop is set to `true`, such behavior will be prevented on Android.
          */
-        disableMultipleAttributeEdits?: boolean;
+        androidDisableMultipleAttributeEdits?: boolean;
     }
 }
 
