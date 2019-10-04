@@ -44,8 +44,6 @@ export interface TextBlockInputProps extends StandardBlockInputProps {
   disableSelectionOverrides: boolean
 }
 
-export const INVARIANT_MANDATORY_TEXT_BLOCK_PROP = 'textBlock prop is mandatory'
-
 const constantTextInputProps: TextInputProps = {
   disableFullscreenUI: true,
   scrollEnabled: false,
