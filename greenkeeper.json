@@ -1,13 +1,11 @@
 {
   "groups": {
-    "examples": {
-      "packages": [
-        "examples/expo/package.json"
-      ]
-    },
     "default": {
       "packages": [
         "package.json"
+      ],
+      "ignore": [
+        "react"
       ]
     }
   }
