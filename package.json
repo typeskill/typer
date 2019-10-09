@@ -43,7 +43,7 @@
   "dependencies": {
     "@types/diff": "^4.0.2",
     "@types/invariant": "^2.2.30",
-    "@types/ramda": "0.26.23",
+    "@types/ramda": "0.26.29",
     "autobind-decorator": "~2.4.0",
     "diff": "~4.0.1",
     "eventemitter3": "^3.1.2",
