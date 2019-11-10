@@ -86,7 +86,7 @@
     "@typescript-eslint/eslint-plugin": "^2.3.2",
     "@typescript-eslint/parser": "^2.3.2",
     "@typeskill/eslint-config": "^1.1.1",
-    "@zerollup/ts-transform-paths": "^1.7.3",
+    "@zerollup/ts-transform-paths": "^1.7.5",
     "babel-jest": "^24.9.0",
     "babel-plugin-module-resolver": "^3.2.0",
     "babel-preset-jest": "^24.9.0",
