@@ -104,7 +104,7 @@
     "react-native": "^0.61.2",
     "react-test-renderer": "~16.9.0",
     "rimraf": "^3.0.0",
-    "semantic-release": "^15.13.24",
+    "semantic-release": "^16.0.1",
     "standard-version": "^7.0.0",
     "ttypescript": "^1.5.7",
     "typescript": "~3.6.3"
