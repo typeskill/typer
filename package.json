@@ -50,7 +50,7 @@
     "invariant": "~2.2.4",
     "prop-types": "~15.7.2",
     "quill-delta": "~4.2.1",
-    "ramda": "~0.26.1"
+    "ramda": "~0.27.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.6.2",
