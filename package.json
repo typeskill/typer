@@ -84,7 +84,7 @@
     "@types/react-native": "^0.60.17",
     "@types/react-test-renderer": "^16.9.0",
     "@typescript-eslint/eslint-plugin": "^2.3.2",
-    "@typescript-eslint/parser": "^2.3.2",
+    "@typescript-eslint/parser": "2.19.0",
     "@typeskill/eslint-config": "^1.1.1",
     "@zerollup/ts-transform-paths": "^1.7.3",
     "babel-jest": "^24.9.0",
