@@ -130,66 +130,57 @@ This decoupled design has the following advantages:
 Bellow is a simplified snippet [from the minimal expo example](https://github.com/typeskill/examples/tree/master/expo-minimal) to show you how the `Toolbar` can be interfaced with the `Typer` component.
 You need a linked `react-native-vector-icons` or `@expo/vector-icons` if you are on expo to make this example work.
 
-``` jsx
-import React from 'react'
-import { Component } from 'react-native'
+```jsx
+import React, { useState, useMemo } from 'react'
+import { View, KeyboardAvoidingView, SafeAreaView, Platform } from 'react-native'
 import {
-  Bridge,
-  Toolbar,
   Typer,
+  Toolbar,
+  DocumentControlAction,
   buildVectorIconControlSpec,
+  buildBridge,
   buildEmptyDocument,
-  DocumentControlAction
 } from '@typeskill/typer'
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
+/** NON EXPO **/
+import { MaterialCommunityIcons } from 'react-native-vector-icons/MaterialCommunityIcons'
+/** EXPO **/
+// import { MaterialCommunityIcons } from '@expo/vector-icons'
+
+function buildMaterialControlSpec(actionType, name) {
+  return buildVectorIconControlSpec(MaterialCommunityIcons, actionType, name)
+}
 
 const toolbarLayout = [
-  buildVectorIconControlSpec(
-    MaterialCommunityIcons,
-    DocumentControlAction.SELECT_TEXT_BOLD,
-    'format-bold'
-  ),
-  buildVectorIconControlSpec(
-    MaterialCommunityIcons,
-    DocumentControlAction.SELECT_TEXT_ITALIC,
-    'format-italic'
-  ),
-  buildVectorIconControlSpec(
-    MaterialCommunityIcons,
-    DocumentControlAction.SELECT_TEXT_UNDERLINE,
-    'format-underline'
-  ),
-  buildVectorIconControlSpec(
-    MaterialCommunityIcons,
-    DocumentControlAction.SELECT_TEXT_STRIKETHROUGH,
-    'format-strikethrough-variant'
-  )
+  buildMaterialControlSpec(DocumentControlAction.SELECT_TEXT_BOLD, 'format-bold'),
+  buildMaterialControlSpec(DocumentControlAction.SELECT_TEXT_ITALIC, 'format-italic'),
+  buildMaterialControlSpec(DocumentControlAction.SELECT_TEXT_UNDERLINE, 'format-underline'),
+  buildMaterialControlSpec(DocumentControlAction.SELECT_TEXT_STRIKETHROUGH, 'format-strikethrough-variant'),
 ]
 
-export class RichTextEditor extends Component {
-  bridge = new Bridge()
-  state = {
-    document: buildEmptyDocument()
-  }
-  onDocumentUpdate = (document) => {
-    this.setState({ document })
-  }
-  render() {
-    return (
-      <View style={{ flex: 1 }}>
-        <Typer
-          document={this.state.document}
-          onDocumentUpdate={this.onDocumentUpdate}
-          bridge={this.bridge}
-        />
-        <Toolbar
-          document={this.state.document}
-          layout={toolbarLayout}
-          bridge={this.bridge}
-        />
-      </View>
-    )
-  }
+export function Editor() {
+  const [document, setDocument] = useState(buildEmptyDocument())
+  const bridge = useMemo(() => buildBridge(), [])
+  return (
+    <View style={{ flex: 1 }}>
+      <Typer
+        document={document}
+        spacing={SPACING}
+        onDocumentUpdate={setDocument}
+        textStyle={soberTheme.textStyle}
+        bridge={bridge}
+        maxMediaBlockHeight={300}
+      />
+      <Toolbar
+        iconSize={ICON_SIZE}
+        activeButtonColor={ICON_ACTIVE_COLOR}
+        inactiveButtonColor={ICON_INACTIVE_COLOR}
+        document={document}
+        layout={toolbarLayout}
+        contentContainerStyle={soberTheme.toolbarContainer}
+        bridge={bridge}
+      />
+    </View>
+  )
 }
 ```
 
@@ -197,7 +188,7 @@ export class RichTextEditor extends Component {
 
 You need to comply with this contract to avoid resource leakage and bugs:
 
-- The `Bridge` instance should be instantiated by the master component, during its own instantiation or during mount;
+- The `Bridge` instance should be instantiated by the master component, during mount;
 - There should be exactly one `Bridge` instance for one document renderer.
 
 ## API Reference
