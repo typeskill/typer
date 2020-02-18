@@ -202,7 +202,7 @@ class _Bridge<ImageSource> implements Bridge<any> {
  *
  * @public
  */
-function buildBridge<ImageSource>(): Bridge<ImageSource> {
+function buildBridge<ImageSource = Images.StandardSource>(): Bridge<ImageSource> {
   return new _Bridge<ImageSource>()
 }
 
