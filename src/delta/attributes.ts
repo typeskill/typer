@@ -57,7 +57,7 @@ const rejectNil = reject(isNil)
  * @param attributes - the attributes object to merge
  */
 export function mergeAttributesRight(...attributes: Attributes.Map[]): Attributes.Map {
-  return rejectNil(mergeAll<Attributes.Map>(attributes))
+  return rejectNil(mergeAll<Attributes.Map[]>(attributes))
 }
 
 export const getTextAttributes = omit(['$type'])

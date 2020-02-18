@@ -73,8 +73,7 @@ function propsAreEqual(
 
 const sessionBehavior = Platform.select({
   ios: iosTextChangeSessionBehavior,
-  android: androidTextChangeSessionBehavior,
-  windows: androidTextChangeSessionBehavior,
+  default: androidTextChangeSessionBehavior,
 })
 
 function _TextBlockInput(
@@ -113,15 +112,12 @@ function _TextBlockInput(
   const setCachedSelection = useCallback(function setCachedSelection(selection: SelectionShape) {
     textInputSelectionRef.current = selection
   }, [])
-  const focus = useCallback(
-    function focus(nextOverrideSelection?: SelectionShape | null) {
-      inputRef.current && inputRef.current.focus()
-      if (nextOverrideSelection) {
-        nextOverrideSelectionRef.current = nextOverrideSelection
-      }
-    },
-    [blockScopedSelection],
-  )
+  const focus = useCallback(function focus(nextOverrideSelection?: SelectionShape | null) {
+    inputRef.current && inputRef.current.focus()
+    if (nextOverrideSelection) {
+      nextOverrideSelectionRef.current = nextOverrideSelection
+    }
+  }, [])
   const handleOnKeyPressed = useCallback(
     function handleOnKeyPressed(e: NativeSyntheticEvent<TextInputKeyPressEventData>) {
       const key = e.nativeEvent.key
@@ -138,7 +134,7 @@ function _TextBlockInput(
   // Clear timeout on unmount
   useEffect(() => {
     return clearTimeoutLocal
-  }, [])
+  }, [clearTimeoutLocal])
   // On focus
   useEffect(() => {
     if (isFocused && !hasFocusRef.current) {
@@ -146,7 +142,7 @@ function _TextBlockInput(
     } else if (!isFocused) {
       hasFocusRef.current = false
     }
-  }, [isFocused, blockScopedSelection])
+  }, [isFocused, blockScopedSelection, focus])
   const handleOnFocus = useCallback(function handleOnFocus() {
     hasFocusRef.current = true
   }, [])
@@ -155,14 +151,14 @@ function _TextBlockInput(
       setCachedSelection(documentDeltaUpdate.selectionAfterChange.toShape())
       return controller.applyAtomicDeltaUpdateInBlock(documentDeltaUpdate)
     },
-    [controller],
+    [controller, setCachedSelection],
   )
   const updateSelection = useCallback(
     function updateSelection(currentSelection: SelectionShape) {
       setCachedSelection(currentSelection)
       controller.updateSelectionInBlock(currentSelection)
     },
-    [controller],
+    [controller, setCachedSelection],
   )
   const sessionChangeOwner: TextChangeSessionOwner = {
     getBlockScopedSelection,
