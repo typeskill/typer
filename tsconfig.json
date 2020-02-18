@@ -18,7 +18,8 @@
       "@core/*": ["core/*"],
       "@delta/*": ["delta/*"],
       "@model/*": ["model/*"],
-      "@test/*": ["test/*"]
+      "@test/*": ["test/*"],
+      "@hooks/*": ["hooks/*"]
     },
     "noEmit": true
   },
