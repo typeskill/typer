@@ -138,8 +138,8 @@ import {
   Toolbar,
   DocumentControlAction,
   buildVectorIconControlSpec,
-  buildBridge,
-  buildEmptyDocument,
+  useBridge,
+  useDocument,
 } from '@typeskill/typer'
 /** NON EXPO **/
 import { MaterialCommunityIcons } from 'react-native-vector-icons/MaterialCommunityIcons'
@@ -158,25 +158,19 @@ const toolbarLayout = [
 ]
 
 export function Editor() {
-  const [document, setDocument] = useState(buildEmptyDocument())
-  const bridge = useMemo(() => buildBridge(), [])
+  const [document, setDocument] = useDocument()
+  const bridge = useBridge()
   return (
     <View style={{ flex: 1 }}>
       <Typer
         document={document}
-        spacing={SPACING}
         onDocumentUpdate={setDocument}
-        textStyle={soberTheme.textStyle}
         bridge={bridge}
         maxMediaBlockHeight={300}
       />
       <Toolbar
-        iconSize={ICON_SIZE}
-        activeButtonColor={ICON_ACTIVE_COLOR}
-        inactiveButtonColor={ICON_INACTIVE_COLOR}
         document={document}
         layout={toolbarLayout}
-        contentContainerStyle={soberTheme.toolbarContainer}
         bridge={bridge}
       />
     </View>

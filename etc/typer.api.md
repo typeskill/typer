@@ -321,5 +321,11 @@ export class Typer<ImageSource = Images.StandardSource> extends Component<Typer.
     focus: () => void;
 }
 
+// @public
+export function useBridge(deps?: unknown[]): import("./core/Bridge").Bridge<unknown>;
+
+// @public
+export function useDocument(initialDocument?: Document): [Document, import("react").Dispatch<import("react").SetStateAction<Document>>];
+
 
 ```

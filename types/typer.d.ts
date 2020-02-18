@@ -35,6 +35,7 @@
  * @packageDocumentation
  */
 
+/// <reference types="react" />
 import { Component } from 'react';
 import { ComponentType } from 'react';
 import { FunctionComponent } from 'react';
@@ -918,5 +919,25 @@ export declare namespace Typer {
 export declare class Typer<ImageSource = Images.StandardSource> extends Component<Typer.Props<ImageSource>> implements FocusableInput {
     focus: () => void;
 }
+
+/**
+ * React hook which returns a bridge.
+ *
+ * @remarks One bridge instance should exist for one Typer instance.
+ *
+ * @param deps - A list of values which should trigger, on change, the creation of a new {@link (Bridge:interface)} instance.
+ *
+ * @public
+ */
+export declare function useBridge(deps?: unknown[]): import("./core/Bridge").Bridge<unknown>;
+
+/**
+ * React hook to store and update the document.
+ *
+ * @param initialDocument - The initial value.
+ * @see {@link buildEmptyDocument}
+ *
+ */
+export declare function useDocument(initialDocument?: Document): [Document, import("react").Dispatch<import("react").SetStateAction<Document>>];
 
 export { }
