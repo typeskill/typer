@@ -105,7 +105,7 @@ Document renderers and controls are **[controlled components](https://reactjs.or
 ### A domain of shared events
 
 Document renderers need an invariant `Bridge` instance prop.
-The bridge has three responsibilities:
+The bridge has two responsibilities:
 
 - To convey actions such as *insert an image at selection* or *change text attributes in selection* from external controls;
 - To notify selection attributes changes to external controls.
@@ -114,7 +114,7 @@ A `Bridge` instance must be hold by the master component, and can be shared with
 
 **Remarks**
 
-- The `Bridge` constructor **is not exposed**. You must consume the `buildBridge` function instead;
+- The `Bridge` constructor **is not exposed**. You must consume the `buildBridge` function or `useBridge` hook instead;
 - To grasp how the bridge is interfaced with the `Toolbar` component, you can [read its implementation](src/components/Toolbar.tsx).
 
 ### Robustness
@@ -131,7 +131,7 @@ Bellow is a simplified snippet [from the minimal expo example](https://github.co
 You need a linked `react-native-vector-icons` or `@expo/vector-icons` if you are on expo to make this example work.
 
 ```jsx
-import React, { useState, useMemo } from 'react'
+import React from 'react'
 import { View } from 'react-native'
 import {
   Typer,
@@ -180,7 +180,7 @@ export function Editor() {
 
 ### API Contract
 
-You need to comply with this contract to avoid resource leakage and bugs:
+You need to comply with this contract to avoid bugs:
 
 - The `Bridge` instance should be instantiated by the master component with `buildBridge`, during mount or with `useBridge` hook;
 - There should be exactly one `Bridge` instance for one document renderer.
