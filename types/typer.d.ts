@@ -232,7 +232,7 @@ export declare const Bridge: {};
  *
  * @public
  */
-export declare function buildBridge<ImageSource>(): Bridge<ImageSource>;
+export declare function buildBridge<ImageSource = Images.StandardSource>(): Bridge<ImageSource>;
 
 /**
  * Build an empty document.
@@ -927,15 +927,15 @@ export declare class Typer<ImageSource = Images.StandardSource> extends Componen
  * @param deps - A list of values which should trigger, on change, the creation of a new {@link (Bridge:interface)} instance.
  * @public
  */
-export declare function useBridge(deps?: unknown[]): import("./core/Bridge").Bridge<unknown>;
+export declare function useBridge<ImageSource = Images.StandardSource>(deps?: unknown[]): Bridge<ImageSource>;
 
 /**
  * React hook to store and update the document.
  *
- * @param initialDocument - The initial value.
- * @see {@link buildEmptyDocument}
- * @public
+ * @remarks If you just need an initial document value, use {@link buildEmptyDocument} instead.
  *
+ * @param initialDocument - The initial value.
+ * @public
  */
 export declare function useDocument(initialDocument?: Document): [Document, import("react").Dispatch<import("react").SetStateAction<Document>>];
 

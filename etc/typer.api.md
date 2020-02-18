@@ -76,7 +76,7 @@ export interface Bridge<ImageSource> {
 export const Bridge: {};
 
 // @public
-export function buildBridge<ImageSource>(): Bridge<ImageSource>;
+export function buildBridge<ImageSource = Images.StandardSource>(): Bridge<ImageSource>;
 
 // @public
 export function buildEmptyDocument(): Document;
@@ -322,7 +322,7 @@ export class Typer<ImageSource = Images.StandardSource> extends Component<Typer.
 }
 
 // @public
-export function useBridge(deps?: unknown[]): import("./core/Bridge").Bridge<unknown>;
+export function useBridge<ImageSource = Images.StandardSource>(deps?: unknown[]): Bridge<ImageSource>;
 
 // @public
 export function useDocument(initialDocument?: Document): [Document, import("react").Dispatch<import("react").SetStateAction<Document>>];
