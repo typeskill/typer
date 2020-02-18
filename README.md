@@ -132,7 +132,7 @@ You need a linked `react-native-vector-icons` or `@expo/vector-icons` if you are
 
 ```jsx
 import React, { useState, useMemo } from 'react'
-import { View, KeyboardAvoidingView, SafeAreaView, Platform } from 'react-native'
+import { View } from 'react-native'
 import {
   Typer,
   Toolbar,
@@ -178,11 +178,11 @@ export function Editor() {
 }
 ```
 
-### Lifecycle contract
+### API Contract
 
 You need to comply with this contract to avoid resource leakage and bugs:
 
-- The `Bridge` instance should be instantiated by the master component, during mount;
+- The `Bridge` instance should be instantiated by the master component with `buildBridge`, during mount or with `useBridge` hook;
 - There should be exactly one `Bridge` instance for one document renderer.
 
 ## API Reference
