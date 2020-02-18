@@ -924,9 +924,7 @@ export declare class Typer<ImageSource = Images.StandardSource> extends Componen
  * React hook which returns a bridge.
  *
  * @remarks One bridge instance should exist for one Typer instance.
- *
  * @param deps - A list of values which should trigger, on change, the creation of a new {@link (Bridge:interface)} instance.
- *
  * @public
  */
 export declare function useBridge(deps?: unknown[]): import("./core/Bridge").Bridge<unknown>;
@@ -936,6 +934,7 @@ export declare function useBridge(deps?: unknown[]): import("./core/Bridge").Bri
  *
  * @param initialDocument - The initial value.
  * @see {@link buildEmptyDocument}
+ * @public
  *
  */
 export declare function useDocument(initialDocument?: Document): [Document, import("react").Dispatch<import("react").SetStateAction<Document>>];
