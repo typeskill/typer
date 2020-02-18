@@ -44,6 +44,8 @@ export {
   buildVectorIconControlSpec,
   GenericControlAction,
 } from '@components/Toolbar'
+export { useBridge } from '@hooks/use-bridge'
+export { useDocument } from '@hooks/use-document'
 export { Attributes } from '@delta/attributes'
 export { GenericRichContent } from '@delta/generic'
 export { GenericOp, TextOp, ImageOp, BlockOp, ImageKind } from '@delta/operations'
@@ -53,4 +55,3 @@ export { SelectionShape } from '@delta/Selection'
 export { Images } from '@core/Images'
 export { DocumentRendererProps } from '@components/DocumentRenderer'
 export { FocusableInput } from '@components/GenericBlockInput'
-export { useDocument, useBridge } from './hooks'
