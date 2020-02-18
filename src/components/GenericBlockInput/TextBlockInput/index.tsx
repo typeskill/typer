@@ -73,8 +73,7 @@ function propsAreEqual(
 
 const sessionBehavior = Platform.select({
   ios: iosTextChangeSessionBehavior,
-  android: androidTextChangeSessionBehavior,
-  windows: androidTextChangeSessionBehavior,
+  default: androidTextChangeSessionBehavior,
 })
 
 function _TextBlockInput(
