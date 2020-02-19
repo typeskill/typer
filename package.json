@@ -24,8 +24,9 @@
     "semantic-release": "semantic-release"
   },
   "files": [
-    "lib/**/*",
-    "types/**/*"
+    "lib/**/*.js",
+    "types/**/*.ts",
+    "!lib/test"
   ],
   "main": "lib/index.js",
   "types": "types/typer.d.ts",
