@@ -8,7 +8,7 @@ interface ListenerDescriptor<E extends string, L extends Function> {
 export class Endpoint<InnerEventType extends string> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private owners = new WeakMap<object, ListenerDescriptor<InnerEventType, any>[]>()
-  private domain = new EventEmitter<InnerEventType>()
+  private domain = new EventEmitter()
 
   public addListener(owner: object, eventType: InnerEventType, listener: ListenerFn) {
     this.domain.addListener(eventType, listener)
