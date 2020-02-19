@@ -104,11 +104,7 @@ The library exposes two components to render documents:
 
 A document is an object describing rich content and the current selection. Its `op` field is an array of operational transforms implemented with [delta library](https://github.com/quilljs/delta). Its `schemaVersion` guarantees retro-compatibility in the future and, if needed, utilities to convert from one version to the other.
 
-To explore the structure, the easiest way is with the debugger:
-
-<a href="https://expo.io/@jsamr/typeskill-debugger">
-    <img src="https://raw.githubusercontent.com/typeskill/typeskill/HEAD/images/qr-debugger.png" alt="Expo Debugger QR code">
-</a>
+To explore the structure in seconds, the easiest way is with the debugger: [`@typeskill/debugger`](https://github.com/typeskill/debugger).
 
 ### Controlled components
 
