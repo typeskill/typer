@@ -81,8 +81,6 @@ npm install
 expo start
 ```
 
-You can also `cd examples/expo-debugger` to understand how the document is represented!
-
 ## Architecture & example
 
 ### Introduction
