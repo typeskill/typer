@@ -5,7 +5,7 @@ import { useMemo } from 'react'
 /**
  * React hook which returns a bridge.
  *
- * @remarks One bridge instance should exist for one Typer instance.
+ * @remarks One bridge instance should exist for one document renderer instance.
  * @param deps - A list of values which should trigger, on change, the creation of a new {@link (Bridge:interface)} instance.
  * @public
  */
