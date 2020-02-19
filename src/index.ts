@@ -34,22 +34,21 @@
  *
  * @packageDocumentation
  */
+
+/* Exported values */
 export { Typer } from '@components/Typer'
 export { Print } from '@components/Print'
 export { Bridge, buildBridge } from '@core/Bridge'
-export {
-  Toolbar,
-  DocumentControlAction,
-  CONTROL_SEPARATOR,
-  buildVectorIconControlSpec,
-  GenericControlAction,
-} from '@components/Toolbar'
+export { Toolbar, DocumentControlAction, CONTROL_SEPARATOR, buildVectorIconControlSpec } from '@components/Toolbar'
 export { useBridge } from '@hooks/use-bridge'
 export { useDocument } from '@hooks/use-document'
+export { Transforms, defaultTextTransforms } from '@core/Transforms'
+
+/* Exported types and interfaces */
+export { GenericControlAction } from '@components/Toolbar'
 export { Attributes } from '@delta/attributes'
 export { GenericRichContent } from '@delta/generic'
 export { GenericOp, TextOp, ImageOp, BlockOp, ImageKind } from '@delta/operations'
-export { Transforms, defaultTextTransforms } from '@core/Transforms'
 export { Document, buildEmptyDocument, cloneDocument } from '@model/document'
 export { SelectionShape } from '@delta/Selection'
 export { Images } from '@core/Images'
