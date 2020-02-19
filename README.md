@@ -47,7 +47,7 @@
     </a>
     <br/><br/>
     <a href="https://expo.io/@jsamr/typeskill-showcase">
-        <img src="https://raw.githubusercontent.com/typeskill/typeskill/HEAD/images/qr.png" alt="Expo QR code">
+        <img src="https://raw.githubusercontent.com/typeskill/typeskill/HEAD/images/qr-showcase.png" alt="Expo QR code">
     </a>
     <br/>
     <a href="#trying-locally">You can also run it locally in seconds</a>
@@ -81,6 +81,8 @@ npm install
 expo start
 ```
 
+You can also `cd examples/expo-debugger` to understand how the document is represented!
+
 ## Architecture & example
 
 ### Introduction
@@ -97,6 +99,16 @@ The library exposes two components to render documents:
 - The *master component* is referred to as the component containing and controlling the document renderer;
 - A *document control* is any controlled component owned by the master component capable of altering the document—i.e. `Typer` or `Toolbar`;
 - An *external [document] control* is any document control which is not a document renderer—i.e. `Toolbar` or any custom control.
+
+### The shape of a Document
+
+A document is an object describing rich content and the current selection. Its `op` field is an array of operational transforms implemented with [delta library](https://github.com/quilljs/delta). Its `schemaVersion` guarantees retro-compatibility in the future and, if needed, utilities to convert from one version to the other.
+
+To explore the structure, the easiest way is with the debugger:
+
+<a href="https://expo.io/@jsamr/typeskill-debugger">
+    <img src="https://raw.githubusercontent.com/typeskill/typeskill/HEAD/images/qr-debugger.png" alt="Expo Debugger QR code">
+</a>
 
 ### Controlled components
 
