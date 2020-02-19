@@ -107,7 +107,7 @@
     "semantic-release": "^17.0.4",
     "standard-version": "^7.1.0",
     "ttypescript": "^1.5.10",
-    "typescript": "^3.6.5"
+    "typescript": "3.6.5"
   },
   "peerDependencies": {
     "react": ">=16.8.0",
