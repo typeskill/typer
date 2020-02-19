@@ -139,8 +139,8 @@ Bellow is a simplified snippet [from the minimal expo example](https://github.co
 You need a linked `react-native-vector-icons` or `@expo/vector-icons` if you are on expo to make this example work.
 
 ```jsx
-import React from 'react'
-import { View } from 'react-native'
+import React from 'react';
+import { View } from 'react-native';
 import {
   Typer,
   Toolbar,
@@ -148,26 +148,38 @@ import {
   buildVectorIconControlSpec,
   useBridge,
   useDocument,
-} from '@typeskill/typer'
+} from '@typeskill/typer';
 /** NON EXPO **/
-import { MaterialCommunityIcons } from 'react-native-vector-icons/MaterialCommunityIcons'
+import { MaterialCommunityIcons } from 'react-native-vector-icons/MaterialCommunityIcons';
 /** EXPO **/
 // import { MaterialCommunityIcons } from '@expo/vector-icons'
 
 function buildMaterialControlSpec(actionType, name) {
-  return buildVectorIconControlSpec(MaterialCommunityIcons, actionType, name)
+  return buildVectorIconControlSpec(MaterialCommunityIcons, actionType, name);
 }
 
 const toolbarLayout = [
-  buildMaterialControlSpec(DocumentControlAction.SELECT_TEXT_BOLD, 'format-bold'),
-  buildMaterialControlSpec(DocumentControlAction.SELECT_TEXT_ITALIC, 'format-italic'),
-  buildMaterialControlSpec(DocumentControlAction.SELECT_TEXT_UNDERLINE, 'format-underline'),
-  buildMaterialControlSpec(DocumentControlAction.SELECT_TEXT_STRIKETHROUGH, 'format-strikethrough-variant'),
-]
+  buildMaterialControlSpec(
+    DocumentControlAction.SELECT_TEXT_BOLD,
+    'format-bold',
+  ),
+  buildMaterialControlSpec(
+    DocumentControlAction.SELECT_TEXT_ITALIC,
+    'format-italic',
+  ),
+  buildMaterialControlSpec(
+    DocumentControlAction.SELECT_TEXT_UNDERLINE,
+    'format-underline',
+  ),
+  buildMaterialControlSpec(
+    DocumentControlAction.SELECT_TEXT_STRIKETHROUGH,
+    'format-strikethrough-variant',
+  ),
+];
 
 export function Editor() {
-  const [document, setDocument] = useDocument()
-  const bridge = useBridge()
+  const [document, setDocument] = useDocument();
+  const bridge = useBridge();
   return (
     <View style={{ flex: 1 }}>
       <Typer
@@ -176,13 +188,9 @@ export function Editor() {
         bridge={bridge}
         maxMediaBlockHeight={300}
       />
-      <Toolbar
-        document={document}
-        layout={toolbarLayout}
-        bridge={bridge}
-      />
+      <Toolbar document={document} layout={toolbarLayout} bridge={bridge} />
     </View>
-  )
+  );
 }
 ```
 
