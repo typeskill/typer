@@ -63,8 +63,7 @@ export const richTextStyles = StyleSheet.create({
 // eslint-disable-next-line @typescript-eslint/class-name-casing
 class _RichText extends Component<RichText.Props> {
   private transforms: Transforms
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public static propTypes: Record<keyof RichText.Props, any> = {
+  public static propTypes: Record<keyof RichText.Props, unknown> = {
     textOps: OpsPropType.isRequired,
     textStyle: PropTypes.any,
     textTransformSpecs: TextTransformSpecsType.isRequired,

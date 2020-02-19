@@ -26,8 +26,7 @@ export function extractTextFromDelta(delta: GenericRichContent): string {
   )
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function isGenericDelta(arg: any): arg is GenericRichContent {
+export function isGenericDelta(arg: unknown): arg is GenericRichContent {
   return arg && hasPath(['ops'], arg)
 }
 
