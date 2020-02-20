@@ -44,7 +44,6 @@ const IOS_TIMEOUT_DURATION = 10
  */
 export const iosTextChangeSessionBehavior: TextChangeSessionBehavior = {
   handleOnSelectionChanged(owner, { nativeEvent: { selection } }) {
-    console.info(`SELECTION CHANGE ${JSON.stringify(selection)}`)
     owner.clearTimeout()
     const textChangeSession = new TextChangeSession()
     textChangeSession.setSelectionBeforeChange(owner.getBlockScopedSelection() as SelectionShape)
