@@ -178,11 +178,19 @@ function _TextBlockInput(
   const handleOnSelectionChange = useCallback(partial(sessionBehavior.handleOnSelectionChanged, [sessionChangeOwner]), [
     sessionChangeOwner,
   ])
-  const selection = forcedSelection || undefined
+  useEffect(
+    function setNativeSelection() {
+      forcedSelection &&
+        inputRef.current &&
+        inputRef.current.setNativeProps({
+          selection: forcedSelection,
+        })
+    },
+    [forcedSelection],
+  )
   return (
     <View style={styles.grow}>
       <TextInput
-        selection={selection}
         style={[styles.grow, styles.textInput, richTextStyles.defaultText, textStyle, genericStyles.zeroSpacing]}
         onKeyPress={handleOnKeyPressed}
         onSelectionChange={handleOnSelectionChange}
